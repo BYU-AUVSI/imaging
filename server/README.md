@@ -2,6 +2,14 @@
 
 The is the code to run the server. We should fill this readme out more.
 
+![server overview](docs/img/serverFlowchart.png)
+
+The server has 3 main jobs:
+
+1. Ingest all new data from the ROS network into the database.
+2. Service requests from the manual and autonomous classification clients
+3. Submit completed data to the interop relay/server (TODO: idk if interop will be integrated with this yet)
+
 ## API
 
 **NOTE: In all your requests you need to specify the 'Manual' HTTP header as to whether this is an autonomous or manual imaging request.**
