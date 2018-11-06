@@ -11,7 +11,7 @@ class DAO:
         using the settings specified in the confg.ini file
         """
         # get the connection settings for postgres:
-        params = config('conf/config.ini', 'postgresql')
+        params = config('../conf/config.ini', 'postgresql')
 
         print("Connecting to the database...")
 
