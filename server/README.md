@@ -2,6 +2,8 @@
 
 The is the code to run the server. We should fill this readme out more.
 
+**Roadmap- ros_ingester / DAO -> REST API -> dockerize**
+
 ![server overview](docs/img/serverFlowchart.png)
 
 The server has 3 main jobs:
@@ -9,6 +11,16 @@ The server has 3 main jobs:
 1. Ingest all new data from the ROS network into the database.
 2. Service requests from the manual and autonomous classification clients
 3. Submit completed data to the interop relay/server (TODO: idk if interop will be integrated with this yet)
+
+## Structure
+
+`conf/` Holds all configurable parameters for the server. Make sure to set these up properly
+
+`docs/` Documentation stuff to help describe what the heck is happening
+
+`setup/` Contains scripts and helper files to setup the server on a fresh machine.
+
+`src/` All source code for the server
 
 ## API
 
