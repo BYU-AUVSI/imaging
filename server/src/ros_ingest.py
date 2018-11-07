@@ -19,7 +19,16 @@ class RosIngester:
 
 
     def gpsCallback(self, msg):
-	print("heyyyy")
+        if msg.fix_type == GPS.GPS_STATUS_FIX_TYPE_NO_FIX or msg.num_sat == 0:
+            print("No GPS fix, cant add to db")
+            return
+	    
+        time = msg.header.stamp.to_sec()
+        lat  = msg.latitude
+        lon  = msg.longitude
+        alt  = msg.altitude 
+
+        print("{} :: {} {} {}".format(time, lat, lon, alt))
 
 def main():
     print("Heyyyy")

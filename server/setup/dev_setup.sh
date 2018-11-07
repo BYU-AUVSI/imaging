@@ -27,3 +27,7 @@ fi
 # (this may not be the case if you're using conda or venv)
 echo "Install postgres python connector"
 pip install psycopg2-binary
+pip install configparser
+
+sudo -i -u postgres
+psql -f setup_database.sql
