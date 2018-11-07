@@ -26,4 +26,4 @@ fi
 # this assumes that you're environment is currently set to the python with ros installed
 # (this may not be the case if you're using conda or venv)
 echo "Install postgres python connector"
-# pip install psycopg2-binary
+pip install psycopg2-binary

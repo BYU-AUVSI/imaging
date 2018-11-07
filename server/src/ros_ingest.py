@@ -1,8 +1,8 @@
 import rospy
 from dao import DAO
+# from inertial_sense.msg import GPS
 
-
-class RosIngester():
+class RosIngester:
     """
     Subscribes to the given topics and saves their information in 
     a postgresql database
@@ -23,5 +23,16 @@ class RosIngester():
     # def gpsCallback(self, msg):
     #     print("heyyyy")
 
+def main():
+    # initialize the node
+    rospy.init_node('imaging_ingester')
+
+    subscriber = RosIngeter()
+    # spin
+    try:
+        rospy.spin()
+    except KeyBoardInterrupt:
+        print("Shutting down")
+
 if __name__ == '__main__':
-    ingester = RosIngester()
+    main()

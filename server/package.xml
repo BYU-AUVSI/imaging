@@ -1,0 +1,20 @@
+<package format="2">
+    <name>imaging_ros_ingester</name>
+    <version>0.0.1</version>
+    <description>
+    Simple Node that subscribes to rostopics and passes their data to a postgres database
+    </description>
+    <maintainer email="tm15@byu.edu">len0rd</maintainer>
+    <maintainer email="connordo@github.com">connordo</maintainer>
+    <license>BSD</license>
+
+    <buildtool_depend>catkin</buildtool_depend>
+
+    <depend>rospy</depend>
+    <!-- To properly subscribe to the image topic: -->
+    <depend>image_transport</depend>
+    <!-- To subscribe to gps data: -->
+    <depend>inertial_sense</depend>
+    <depend>message_generation</depend>
+
+</package>
