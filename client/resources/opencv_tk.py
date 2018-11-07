@@ -1,7 +1,7 @@
 from tkinter import *
 from PIL import Image
 from PIL import ImageTk
-import tkFileDialog
+from tkinter import filedialog
 import cv2
 
 def select_image():
@@ -10,7 +10,7 @@ def select_image():
 
 	# open a file chooser dialog and allow the user to select an input
 	# image
-	path = tkFileDialog.askopenfilename()
+	path = filedialog.askopenfilename()
 
 	if len(path) > 0:
 		# load the image from disk, convert it to grayscale, and detect

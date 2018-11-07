@@ -15,7 +15,7 @@ class GuiClass():
     def __init__(self):
         self.root = Tk()
         self.root.title("Tab Example")
-        self.root.attributes('-zoomed', True)
+        self.root.attributes('-zoomed', True) # maximizes screen
         n = ttk.Notebook(self.root)
         n.pack(fill=BOTH, padx=6,pady=9)
         f1 = ttk.Frame(n)   # first page, which would get widgets gridded into it
