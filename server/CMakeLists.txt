@@ -14,6 +14,9 @@ catkin_package(
 #  DEPENDS system_lib
 )
 
+
+catkin_python_setup()
+
 include_directories(include)
 include_directories(
    ${catkin_INCLUDE_DIRS}
