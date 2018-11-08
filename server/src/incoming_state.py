@@ -12,12 +12,6 @@ class incoming_state:
     def setTimeStamp(self, time_stamp):
         self.time_stamp = time_stamp
 
-    def getNanoseconds(self):
-        return self.nanoseconds
-
-    def setNanoseconds(self, nanoseconds):
-        self.nanoseconds = nanoseconds
-
     def getRoll(self):
         return self.roll
 
@@ -38,7 +32,6 @@ class incoming_state:
 
     id = property(getId, setId)
     time_stamp = property(getTimeStamp, setTimeStamp)
-    nanoseconds = property(getNanoseconds, setNanoseconds)
     roll = property(getRoll, setRoll)
     pitch = property(getPitch, setPitch)
     yaw = property(getYaw, setYaw)

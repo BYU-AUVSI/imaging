@@ -12,12 +12,6 @@ class incoming_image:
     def setTimeStamp(self, time_stamp):
         self.time_stamp = time_stamp
 
-    def getNanoseconds(self):
-        return self.nanoseconds
-
-    def setNanoseconds(self, nanoseconds):
-        self.nanoseconds = nanoseconds
-
     def getImagePath(self):
         return self.image_path
 
@@ -26,5 +20,4 @@ class incoming_image:
 
     id = property(getId, setId)
     time_stamp = property(getTimeStamp, setTimeStamp)
-    nanoseconds = property(getNanoseconds, setNanoseconds)
     image_path = property(getImagePath, setImagePath)

@@ -20,7 +20,7 @@ class GpsMsg:
 
     def getLon(self):
         return self.lon
-    
+
     def setLon(self, lon):
         self.lon = lon
 
@@ -28,7 +28,7 @@ class GpsMsg:
         return self.alt
 
     def setAlt(self, alt):
-        self.alt = alt 
+        self.alt = alt
 
     id = property(getId, setId)
     time = property(getTime, setTime)

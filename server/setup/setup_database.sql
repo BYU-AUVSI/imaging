@@ -20,7 +20,6 @@ GRANT USAGE ON SCHEMA public TO imaging_server;
 CREATE TABLE "public"."incoming_image" (
   id serial NOT NULL,
   time_stamp timestamp NOT NULL,
-  nanoseconds int,
   image_path text NOT NULL,
   PRIMARY KEY ("id")
 );
@@ -28,7 +27,6 @@ CREATE TABLE "public"."incoming_image" (
 CREATE TABLE "public"."incoming_gps" (
   id serial NOT NULL,
   time_stamp timestamp NOT NULL,
-  nanoseconds int,
   latitude real NOT NULL,
   longitude real NOT NULL,
   altitude real NOT NULL,
@@ -38,7 +36,6 @@ CREATE TABLE "public"."incoming_gps" (
 CREATE TABLE "public"."incoming_state" (
   id serial NOT NULL,
   time_stamp timestamp NOT NULL,
-  nanoseconds int,
   roll real NOT NULL,
   pitch real NOT NULL,
   yaw real NOT NULL,
