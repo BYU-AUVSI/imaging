@@ -22,8 +22,9 @@ class RosIngester:
         self.subscriber = rospy.Subscriber("/other_camera/image_raw/compressed", CompressedImage, self.imgCallback,  queue_size = 10)
         
         # TODO: Remove me and use config file path
-        self.pathTmp="/home/len0rd/bags/img/raw"
-        os.mkdir(self.pathTmp)
+        self.pathTmp="/home/len0rd/bags/img/raw/"
+        if not os.path.exists(self.pathTmp):
+            os.makedirs(self.pathTmp)
         print("Ingester is all setup!")
         # gps type == inertial_sense/GPS
         # image == sensor_msgs/CompressedImage
@@ -61,8 +62,8 @@ class RosIngester:
         rawData = np.fromstring(msg.data, np.uint8)
         ts = msg.header.stamp.to_nsec()
         print("img callback: {}".format(ts))
-        filename = ts + ".jpg"
-        cv2.imwrite(self.pathTmp + filename, rawData)
+        filename = str(ts) + ".jpg"
+        cv2.imwrite(self.pathTmp + filename, cv2.imdecode(rawData, 1))
 
 def main():
     print("Heyyyy")
