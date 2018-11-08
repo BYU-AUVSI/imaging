@@ -13,8 +13,9 @@
     <depend>rospy</depend>
     <!-- To properly subscribe to the image topic: -->
     <depend>image_transport</depend>
+    <depend>sensor_msgs</depend>
+    <depend>cv_bridge</depend>
     <!-- To subscribe to gps data: -->
     <depend>inertial_sense</depend>
-    <depend>message_generation</depend>
 
 </package>
