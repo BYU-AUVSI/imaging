@@ -1,4 +1,4 @@
-class incoming_image:
+class incoming_state:
 
     def getId(self):
         return self.id
@@ -18,13 +18,27 @@ class incoming_image:
     def setNanoseconds(self, nanoseconds):
         self.nanoseconds = nanoseconds
 
-    def getImagePath(self):
-        return self.image_path
+    def getRoll(self):
+        return self.roll
 
-    def setImagePath(self, image_path):
-        self.image_path = image_path
+    def.setRoll(self, roll):
+        self.roll = roll
+
+    def getPitch(self):
+        return self.pitch
+
+    def.setPitch(self, pitch):
+        self.pitch = pitch
+
+    def getYaw(self):
+        return self.yaw
+
+    def.setYaw(self, yaw):
+        self.yaw = yaw
 
     id = property(getId, setId)
     time_stamp = property(getTimeStamp, setTimeStamp)
     nanoseconds = property(getNanoseconds, setNanoseconds)
-    image_path = property(getImagePath, setImagePath)
+    roll = property(getRoll, setRoll)
+    pitch = property(getPitch, setPitch)
+    yaw = property(getYaw, setYaw)
