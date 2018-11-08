@@ -5,7 +5,7 @@ const ROTATE_STEP_ = 45; //degrees to rotate the letter for each image
 const BLUR_LEVELS_ = 3; // how many blurs to apply 
 const BLUR_STEP_ = 2; // amount of blur to apply at each level
 //const BASE_SAVE_DIR_ = '~/Desktop/Generated/'; //base directory to save into
-const BASE_SAVE_DIR_ = 'C:\\Users\\Brandon\\Documents\\Photoshop Script\\Pics\\' // base directory to save into
+const BASE_SAVE_DIR_ = 'C:\\Users\\Brandon\\Documents\\imaging\\autonomous\\generate_dataset\\pics\\' // base directory to save into
 
 // var alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 var alphabet = "AB".split(""); // test size alphabet
@@ -29,12 +29,32 @@ BGcolor.rgb.green = 0;
 BGcolor.rgb.blue = 255;
 
 // set your color as background color
-backgroundColor.rgb.hexValue = BGcolor.rgb.hexValue;
-var bgLayer = baseDoc.layers[baseDoc.layers.length - 1]
-if (bgLayer.isBackgroundLayer)
+backgroundColor.rgb.hexValue = "FF0000";
+baseDoc.activeLayer = baseDoc.layers[baseDoc.layers.length - 1]
+var aLayer = baseDoc.activeLayer;
+if (aLayer.isBackgroundLayer)
 {
     baseDoc.selection.fill(backgroundColor, ColorBlendMode.NORMAL, 100, false);
 }
+
+// create a color of your choice
+var textColor = new SolidColor();
+textColor.rgb.red = 255;
+textColor.rgb.green = 255;
+textColor.rgb.blue = 0;
+textColor.rgb.hexValue = "FFFF00";
+
+textLayer.textItem.color = textColor;
+
+var whiteArray = ["ffffff", "f7f7f7", "f0f0f0", "eaeaea"];
+var blackArray = [];
+var grayArray = [];
+var redArray = [];
+var blueArray = [];
+var greenArray = [];
+var yellowArray = [];
+var brownArray = [];
+var orangeArray = [];
 
 
 // for (var j = 0; j < BLUR_LEVELS_; j++) {
@@ -55,11 +75,11 @@ for (var i = 0; i < alphabet.length; i++)
     var xTranslate = (-bounds[0] + dimHalf) - ((bounds[2] - bounds[0]) / 2);
     var yTranslate = (-bounds[1] + dimHalf) - ((bounds[3] - bounds[1]) / 2);
     textLayer.translate(xTranslate, yTranslate);
-    
+
     var jpegOpts = new JPEGSaveOptions;
     jpegOpts.FormatOptions = FormatOptions.STANDARDBASELINE;
     jpegOpts.quality = 7;
-    
+
     // rotate around
     var angle = 0; //keeps track of how far we're rotated
     do
