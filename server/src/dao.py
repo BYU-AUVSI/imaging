@@ -5,13 +5,13 @@ class DAO:
 
     conn_ = None # the db connection object. Use this for queries
 
-    def __init__(self):
+    def __init__(self, configFilePath='../conf/config.ini'):
         """
         Startup the DAO. Attempts to connect to the postgresql database 
         using the settings specified in the confg.ini file
         """
         # get the connection settings for postgres:
-        params = config('../conf/config.ini', 'postgresql')
+        params = config(configFilePath, 'postgresql')
 
         print("Connecting to the database...")
 

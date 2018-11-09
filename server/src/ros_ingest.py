@@ -9,6 +9,7 @@ from dao import DAO
 from inertial_sense.msg import GPS
 from sensor_msgs.msg import CompressedImage
 from gps_msg import GpsMsg
+from config import config
 
 class RosIngester:
 
@@ -16,18 +17,25 @@ class RosIngester:
 
     def __init__(self):
         print("Startup ros ingester...")
-        self.dao_ = DAO()
+        configPath = rospy.get_param('~config_path', '../conf/config.ini')
+        self.dao_ = DAO(configPath)
         self.gps_subscriber_ = rospy.Subscriber('/gps', GPS, self.gpsCallback, queue_size=10)
         self.gps_msg_ = GpsMsg()
-        self.subscriber = rospy.Subscriber("/other_camera/image_raw/compressed", CompressedImage, self.imgCallback,  queue_size = 10)
+        self.img_subscriber_ = rospy.Subscriber("/other_camera/image_raw/compressed", CompressedImage, self.imgCallback,  queue_size = 10)
         
-        # TODO: Remove me and use config file path
-        self.pathTmp="/home/len0rd/bags/img/raw/"
-        if not os.path.exists(self.pathTmp):
-            os.makedirs(self.pathTmp)
+        params = config(configPath, 'Images')
+        print("params:: {}".format(params))
+        basePath = params['basedir']
+        print("baseDir:: {}".format(basePath))
+
+        self.raw_path_  = basePath + "/raw/"
+        self.crop_path_ = basePath + "/crop/"
+        # create paths for where images will be dumped
+        if not os.path.exists(self.raw_path_):
+            os.makedirs(self.raw_path_)
+        if not os.path.exists(self.crop_path_):
+            os.makedirs(self.crop_path_)
         print("Ingester is all setup!")
-        # gps type == inertial_sense/GPS
-        # image == sensor_msgs/CompressedImage
 
 
     def gpsCallback(self, msg):
@@ -63,10 +71,9 @@ class RosIngester:
         ts = msg.header.stamp.to_nsec()
         print("img callback: {}".format(ts))
         filename = str(ts) + ".jpg"
-        cv2.imwrite(self.pathTmp + filename, cv2.imdecode(rawData, 1))
+        cv2.imwrite(self.raw_path_ + filename, cv2.imdecode(rawData, 1))
 
 def main():
-    print("Heyyyy")
     # initialize the node
     rospy.init_node('imaging_ingester')
 
