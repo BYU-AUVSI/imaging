@@ -4,8 +4,9 @@ Date: 11/6/18
 Description: Testing out TK gui options
 
 Prereqs:
+python 3
 sudo apt install python3-tk
-pip3 install Pillow
+pip3 install Pillow, opencv-python
 '''
 from tkinter import *
 from tkinter import ttk
@@ -13,17 +14,25 @@ from PIL import Image,ImageTk
 import cv2
 
 class GuiClass(Frame):
-    """This is the classification Gui"""
+    """Classification Gui for AUVSi 2019"""
     def __init__(self,master=None):
         Frame.__init__(self,master=None)
-        self.master = master
-        self.master.title("Tab Example")
+        self.master = master # gui master handle
+        self.master.title("AUVSI COMPETITION 2019: CLASSIFICATION")
         #self.master.attributes('-zoomed', True) # maximizes screen
+        n = ttk.Notebook(self.master) # create tabs
+        n.pack(fill=BOTH, expand=1) # expand across space
+        self.master.bind("<Escape>",self.close_window) # press ESC to exit
+
+
+        # itialize variables
         self.target_number = 0
+        self.get_image()
 
 
-        n = ttk.Notebook(self.master)
-        n.pack(fill=BOTH, expand=1)
+
+
+        # TAB 1: CROPPING
         tab1 = ttk.Frame(n)   # first page, which would get widgets gridded into it
         n.add(tab1, text='Cropping')
         self.lbl1 = Label(tab1, text='Target Number')
@@ -32,23 +41,23 @@ class GuiClass(Frame):
         self.lbl2.grid(row=1,column=2,sticky='E',padx=5,pady=5,ipadx=5,ipady=5)
         but1 = Button(tab1, text="Advance Target",command=self.bt1_clicked)
         but1.grid(row=2,column=1,sticky='E',padx=5,pady=5,ipadx=5,ipady=5)
-        self.image_np = cv2.imread('example.jpg')
-        self.image_np = cv2.cvtColor(self.image_np,cv2.COLOR_BGR2RGB)
-        self.image = self.img_np2tk(self.image_np)
         self.lbl3 = Label(tab1,image=self.image)
         self.lbl3.image = self.image
         self.lbl3.grid(row=3,column=3,sticky='E',padx=5,pady=5,ipadx=5,ipady=5)
         self.lbl4 = Label(tab1,text="initial")
         self.lbl4.grid(row=3,column=1,sticky='E',padx=5,pady=5,ipadx=5,ipady=5)
         self.lbl3.bind("<Button-1>",self.mouse_click)
+        #tab1.bind("<space>",self.get_image())
 
-
+        # TAB 2: CLASSIFICATION
         tab2 = ttk.Frame(n)   # second page
         n.add(tab2, text='Classification')
+
+        # TAB 3: AUTONOMOUS TENDER
         tab3 = ttk.Frame(n)
         n.add(tab3, text='Autonomous Tender')
 
-        self.master.bind("<Escape>",self.close_window)
+
         '''
         def opencv_click(event,x,y,flags,param):
             if event == cv2.EVENT_LBUTTONDOWN:
@@ -57,6 +66,11 @@ class GuiClass(Frame):
         cv2.namedWindow('tab1')
         cv2.setMouseCallback('tab1',opencv_click)
         '''
+    def get_image(self):
+        self.image_np = cv2.imread('example.jpg')
+        self.image_np = cv2.cvtColor(self.image_np,cv2.COLOR_BGR2RGB)
+        self.image = self.img_np2tk(self.image_np)
+        print("ran this")
     def img_np2tk(self,image):
         new_image = Image.fromarray(image)
         new_image = ImageTk.PhotoImage(new_image)
