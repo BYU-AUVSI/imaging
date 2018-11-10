@@ -1,4 +1,4 @@
-class incoming_image:
+class IncomingImage:
 
     def getId(self):
         return self.id
@@ -6,17 +6,11 @@ class incoming_image:
     def setId(self, id):
         self.id = id
 
-    def getTimeStamp(self):
+    def getTime(self):
         return self.time_stamp
 
-    def setTimeStamp(self, time_stamp):
+    def setTime(self, time_stamp):
         self.time_stamp = time_stamp
-
-    def getNanoseconds(self):
-        return self.nanoseconds
-
-    def setNanoseconds(self, nanoseconds):
-        self.nanoseconds = nanoseconds
 
     def getImagePath(self):
         return self.image_path
@@ -24,7 +18,20 @@ class incoming_image:
     def setImagePath(self, image_path):
         self.image_path = image_path
 
+    def getClaimedManual(self):
+        return self.claimed_manual
+
+    def setClaimedManual(self, claimed_manual):
+        self.claimed_manual = claimed_manual
+
+    def getClaimedAutonomous(self):
+        return self.claimed_autonomous
+
+    def setClaimedAutonomous(self, claimed_autonomous):
+        self.claimed_autonomous = claimed_autonomous
+
 id = property(getId, setId)
-time_stamp = property(getTimeStamp, setTimeStamp)
-nanoseconds = property(getNanoseconds, setNanoseconds)
+time = property(getTime, setTime)
 image_path = property(getImagePath, setImagePath)
+claimed_manual = property(getClaimedManual, setClaimedManual)
+claimed_autonomous = property(getClaimedAutonomous, setClaimedAutonomous)

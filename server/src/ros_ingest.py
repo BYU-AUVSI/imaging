@@ -4,11 +4,12 @@ import rospy
 import cv2
 import numpy as np
 import os, sys # for img saving
-from dao import DAO
+from base_dao import BaseDAO
 # ROS messages:
 from inertial_sense.msg import GPS
 from sensor_msgs.msg import CompressedImage
 from gps_msg import GpsMsg
+from incoming_image import IncomingImage
 from config import config
 
 class RosIngester:
@@ -17,11 +18,13 @@ class RosIngester:
 
     def __init__(self):
         print("Startup ros ingester...")
-        configPath = rospy.get_param('~config_path', '../conf/config.ini')
-        self.dao_ = DAO(configPath)
+        defConfigPath = os.path.dirname(os.path.realpath(__file__)) + '/../conf/config.ini'
+        configPath = rospy.get_param('~config_path', defConfigPath)
+        self.dao_ = BaseDAO(configPath)
         self.gps_subscriber_ = rospy.Subscriber('/gps', GPS, self.gpsCallback, queue_size=10)
         self.gps_msg_ = GpsMsg()
         self.img_subscriber_ = rospy.Subscriber("/other_camera/image_raw/compressed", CompressedImage, self.imgCallback,  queue_size = 10)
+        self.img_msg_ = IncomingImage()
         
         params = config(configPath, 'Images')
         print("params:: {}".format(params))
@@ -68,10 +71,17 @@ class RosIngester:
         """
         #get raw img data:
         rawData = np.fromstring(msg.data, np.uint8)
-        ts = msg.header.stamp.to_nsec()
+        ts = msg.header.stamp.to_sec()
         print("img callback: {}".format(ts))
-        filename = str(ts) + ".jpg"
-        cv2.imwrite(self.raw_path_ + filename, cv2.imdecode(rawData, 1))
+        fullPath = self.raw_path_ + str(ts) + ".jpg"
+        cv2.imwrite(fullPath, cv2.imdecode(rawData, 1))
+
+        self.img_msg_.time = ts 
+        self.img_msg_.image_path = fullPath
+        self.img_msg_.claimed_manual = False
+        self.img_msg_.claimed_autonomous = False
+
+        # call dao with img msg
 
 def main():
     # initialize the node

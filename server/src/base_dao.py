@@ -1,7 +1,7 @@
 import psycopg2 # postgres db connector
 from config import config # to read config file
 
-class DAO:
+class BaseDAO:
 
     conn_ = None # the db connection object. Use this for queries
 
