@@ -3,14 +3,13 @@
 import rospy
 import cv2
 import numpy as np
-import os, sys # for img saving
+import os, time # for img saving
 from base_dao import BaseDAO
 # ROS messages:
 from inertial_sense.msg import GPS
 from sensor_msgs.msg import CompressedImage
 from gps_msg import GpsMsg
 from incoming_image import IncomingImage
-from config import config
 
 class RosIngester:
 
@@ -18,18 +17,18 @@ class RosIngester:
 
     def __init__(self):
         print("Startup ros ingester...")
-        defConfigPath = os.path.dirname(os.path.realpath(__file__)) + '/../conf/config.ini'
-        configPath = rospy.get_param('~config_path', defConfigPath)
+        currentPath = os.path.dirname(os.path.realpath(__file__)) 
+        configPath = rospy.get_param('~config_path', currentPath + '/../conf/config.ini')
+        startTs = str(int(time.time()))
+
         self.dao_ = BaseDAO(configPath)
         self.gps_subscriber_ = rospy.Subscriber('/gps', GPS, self.gpsCallback, queue_size=10)
         self.gps_msg_ = GpsMsg()
         self.img_subscriber_ = rospy.Subscriber("/other_camera/image_raw/compressed", CompressedImage, self.imgCallback,  queue_size = 10)
         self.img_msg_ = IncomingImage()
         
-        params = config(configPath, 'Images')
-        print("params:: {}".format(params))
-        basePath = params['basedir']
-        print("baseDir:: {}".format(basePath))
+        basePath = currentPath + '/../images/' + startTs
+        print("Base dir for images:: {}".format(basePath))
 
         self.raw_path_  = basePath + "/raw/"
         self.crop_path_ = basePath + "/crop/"

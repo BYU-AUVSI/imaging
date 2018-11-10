@@ -30,8 +30,8 @@ class IncomingImage:
     def setClaimedAutonomous(self, claimed_autonomous):
         self.claimed_autonomous = claimed_autonomous
 
-id = property(getId, setId)
-time = property(getTime, setTime)
-image_path = property(getImagePath, setImagePath)
-claimed_manual = property(getClaimedManual, setClaimedManual)
-claimed_autonomous = property(getClaimedAutonomous, setClaimedAutonomous)
+    id = property(getId, setId)
+    time = property(getTime, setTime)
+    image_path = property(getImagePath, setImagePath)
+    claimed_manual = property(getClaimedManual, setClaimedManual)
+    claimed_autonomous = property(getClaimedAutonomous, setClaimedAutonomous)
