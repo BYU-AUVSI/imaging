@@ -4,12 +4,12 @@ import rospy
 import cv2
 import numpy as np
 import os, time # for img saving
-from base_dao import BaseDAO
+from dao.base_dao import BaseDAO
 # ROS messages:
 from inertial_sense.msg import GPS
 from sensor_msgs.msg import CompressedImage
-from gps_msg import GpsMsg
-from incoming_image import IncomingImage
+from dao.model.gps_msg import GpsMsg
+from dao.model.incoming_image import IncomingImage
 
 class RosIngester:
 
