@@ -64,6 +64,7 @@ CREATE TABLE "public"."outgoing_data" (
 
 ALTER DATABASE auvsi OWNER TO imaging_server;
 GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO imaging_server;
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO imaging_server;
 ALTER DEFAULT PRIVILEGES FOR USER imaging_server IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO imaging_server;
 
 /* If you want to destroy the auvsi_imaging user here's how you do it: */
