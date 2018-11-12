@@ -19,11 +19,11 @@ class GuiClass(Frame):
         Frame.__init__(self,master=None)
         self.master = master # gui master handle
         self.master.title("AUVSI COMPETITION 2019: CLASSIFICATION")
-        #self.master.attributes('-zoomed', True) # maximizes screen
+        self.master.attributes('-zoomed', True) # maximizes screen
         n = ttk.Notebook(self.master) # create tabs
         n.pack(fill=BOTH, expand=1) # expand across space
         self.master.bind("<Escape>",self.close_window) # press ESC to exit
-
+        self.master.bind("<Configure>",self.resizeEvent)
 
         # itialize variables
         self.target_number = 0
@@ -35,19 +35,50 @@ class GuiClass(Frame):
         # TAB 1: CROPPING
         tab1 = ttk.Frame(n)   # first page, which would get widgets gridded into it
         n.add(tab1, text='Cropping')
-        self.lbl1 = Label(tab1, text='Target Number')
-        self.lbl1.grid(row=1,column=1,sticky='E',padx=5,pady=5,ipadx=5,ipady=5)
+        Grid.rowconfigure(self.master,0,weight=1)
+        Grid.columnconfigure(self.master,0,weight=1)
+        grid=Frame(tab1)
+        grid.grid(sticky=N+S+E+W,column=0,row=7,columnspan=2)
+        Grid.rowconfigure(tab1,0,weight=1)
+        Grid.columnconfigure(tab1,0,weight=1)
+        for x in range(19):
+            Grid.columnconfigure(tab1,x,weight=1)
+        for y in range(13):
+            Grid.rowconfigure(tab1,y,weight=1)
         self.lbl2 = Label(tab1, text=self.target_number)
-        self.lbl2.grid(row=1,column=2,sticky='E',padx=5,pady=5,ipadx=5,ipady=5)
+        self.lbl2.grid(row=12,column=0,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
         but1 = Button(tab1, text="Advance Target",command=self.bt1_clicked)
-        but1.grid(row=2,column=1,sticky='E',padx=5,pady=5,ipadx=5,ipady=5)
+        but1.grid(row=12,column=1,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
         self.lbl3 = Label(tab1,image=self.image)
         self.lbl3.image = self.image
-        self.lbl3.grid(row=3,column=3,sticky='E',padx=5,pady=5,ipadx=5,ipady=5)
+        self.lbl3.grid(row=0,column=0,rowspan=12,columnspan=12,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
         self.lbl4 = Label(tab1,text="initial")
-        self.lbl4.grid(row=3,column=1,sticky='E',padx=5,pady=5,ipadx=5,ipady=5)
+        self.lbl4.grid(row=12,column=2,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
         self.lbl3.bind("<Button-1>",self.mouse_click)
         #tab1.bind("<space>",self.get_image())
+        self.master.update()
+        self.lbl10 = Label(tab1,text=self.lbl3.winfo_height())
+        self.lbl10.grid(row=12,column=3,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.lbl1 = Label(tab1, text='Target Number')
+        self.lbl1.grid(row=0,column=13,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.lbl5 = Label(tab1, text='Target Pic')
+        self.lbl5.grid(row=0,column=14,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.lbl6 = Label(tab1, text='Pic Quantity')
+        self.lbl6.grid(row=0,column=15,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.lbl7 = Label(tab1, text='Target Number')
+        self.lbl7.grid(row=0,column=16,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.lbl8 = Label(tab1, text='Target Pic')
+        self.lbl8.grid(row=0,column=17,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.lbl9 = Label(tab1, text='Pic Quantity')
+        self.lbl9.grid(row=0,column=18,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
+
+        for ii in range(12):
+            new_label1 = Label(tab1,text=ii+1)
+            new_label1.grid(row=ii+1,column=13,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
+            new_label1 = Label(tab1,text=ii+13)
+            new_label1.grid(row=ii+1,column=16,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
+
+
 
         # TAB 2: CLASSIFICATION
         tab2 = ttk.Frame(n)   # second page
@@ -96,7 +127,10 @@ class GuiClass(Frame):
         cv2.rectangle(self.image_np,(self.x0,self.y0),(event.x,event.y),(0,255,0),2)
         self.image = self.img_np2tk(self.image_np)
         self.lbl3.configure(image=self.image)
-
+    def resizeEvent(self,event):
+        print("Resized")
+        self.master.update()
+        self.lbl10.configure(text=self.lbl3.winfo_height())
 
 
 
