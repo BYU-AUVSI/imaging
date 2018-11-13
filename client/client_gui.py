@@ -12,6 +12,7 @@ from tkinter import *
 from tkinter import ttk
 from PIL import Image,ImageTk
 import cv2
+import numpy as np
 
 class GuiClass(Frame):
     """Classification Gui for AUVSi 2019"""
@@ -20,6 +21,7 @@ class GuiClass(Frame):
         self.master = master # gui master handle
         self.master.title("AUVSI COMPETITION 2019: CLASSIFICATION")
         self.master.attributes('-zoomed', True) # maximizes screen
+        self.initialized = False
         n = ttk.Notebook(self.master) # create tabs
         n.pack(fill=BOTH, expand=1) # expand across space
         self.master.bind("<Escape>",self.close_window) # press ESC to exit
@@ -27,7 +29,7 @@ class GuiClass(Frame):
 
         # itialize variables
         self.target_number = 0
-        self.get_image()
+        self.get_image('frame0400.jpg')
 
 
 
@@ -55,6 +57,7 @@ class GuiClass(Frame):
         self.lbl4 = Label(tab1,text="initial")
         self.lbl4.grid(row=12,column=2,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
         self.lbl3.bind("<Button-1>",self.mouse_click)
+        self.resizeImage()
         #tab1.bind("<space>",self.get_image())
         self.master.update()
         self.lbl10 = Label(tab1,text=self.lbl3.winfo_height())
@@ -88,23 +91,20 @@ class GuiClass(Frame):
         tab3 = ttk.Frame(n)
         n.add(tab3, text='Autonomous Tender')
 
+        # Done with initialization
+        self.initialized = True
 
-        '''
-        def opencv_click(event,x,y,flags,param):
-            if event == cv2.EVENT_LBUTTONDOWN:
-                print('Hello!')
-                self.lbl4.configure(text=(x,y))
-        cv2.namedWindow('tab1')
-        cv2.setMouseCallback('tab1',opencv_click)
-        '''
-    def get_image(self):
-        self.image_np = cv2.imread('example.jpg')
+
+    def get_image(self,path):
+        self.image_np = cv2.imread(path)
         self.image_np = cv2.cvtColor(self.image_np,cv2.COLOR_BGR2RGB)
-        self.image = self.img_np2tk(self.image_np)
-        print("ran this")
-    def img_np2tk(self,image):
-        new_image = Image.fromarray(image)
-        new_image = ImageTk.PhotoImage(new_image)
+        self.image = self.img_np2Im(self.image_np)
+        self.image = self.img_Im2Tk(self.image)
+    def img_np2Im(self,image):
+        self.new_image_Im = Image.fromarray(image)
+        return self.new_image_Im
+    def img_Im2Tk(self,image):
+        new_image = ImageTk.PhotoImage(image)
         return new_image
     def bt1_clicked(self):
         self.target_number += 1
@@ -124,13 +124,36 @@ class GuiClass(Frame):
         self.lbl3.unbind("<Motion>")
         self.lbl4.configure(text=(event.x,event.y))
         self.lbl3.unbind("<ButtonRelease-1")
-        cv2.rectangle(self.image_np,(self.x0,self.y0),(event.x,event.y),(0,255,0),2)
-        self.image = self.img_np2tk(self.image_np)
+        offset_x = int((self.label_width - self.pic_width)/2.)
+        offset_y = int((self.label_height - self.pic_height)/2.)
+        cv2.rectangle(self.image_np,(self.x0-offset_x,self.y0-offset_y),(event.x-offset_x,event.y-offset_y),(0,255,0),1)
+        self.image = self.img_np2Im(self.image_np)
+        self.image = self.img_Im2Tk(self.image)
         self.lbl3.configure(image=self.image)
+        #self.get_image('frame0400.jpg')
+        #self.lbl3.configure(image=self.image)
     def resizeEvent(self,event):
-        print("Resized")
+        if self.initialized == True:
+            self.master.update()
+            self.resizeImage()
+            self.lbl10.configure(text=self.lbl3.winfo_height())
+    def resizeImage(self):
         self.master.update()
-        self.lbl10.configure(text=self.lbl3.winfo_height())
+        self.label_width = self.lbl3.winfo_width()
+        self.label_height = self.lbl3.winfo_height()
+        self.pic_width,self.pic_height = self.new_image_Im.size
+        ratio_h = self.pic_height/float(self.label_height)
+        ratio_w = self.pic_width/float(self.label_width)
+        if ratio_h >= ratio_w:
+            self.new_image_Im = self.new_image_Im.resize((int(self.pic_width/ratio_h), int(self.pic_height/ratio_h)), Image.ANTIALIAS)
+        else:
+            self.new_image_Im = self.new_image_Im.resize((int(self.pic_width/ratio_w), int(self.pic_height/ratio_w)), Image.ANTIALIAS)
+        self.image_np = np.asarray(self.new_image_Im)
+        self.image = self.img_Im2Tk(self.new_image_Im)
+        self.lbl3.configure(image=self.image)
+
+
+
 
 
 
