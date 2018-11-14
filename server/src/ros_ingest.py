@@ -31,12 +31,9 @@ class RosIngester:
         print("Base dir for images:: {}".format(basePath))
 
         self.raw_path_  = basePath + "/raw/"
-        self.crop_path_ = basePath + "/crop/"
-        # create paths for where images will be dumped
+        # create paths for where raw images will be dumped
         if not os.path.exists(self.raw_path_):
             os.makedirs(self.raw_path_)
-        if not os.path.exists(self.crop_path_):
-            os.makedirs(self.crop_path_)
         print("Ingester is all setup!")
 
 
