@@ -26,8 +26,14 @@ fi
 # this assumes that you're environment is currently set to the python with ros installed
 # (this may not be the case if you're using conda or venv)
 echo "Install postgres python connector"
+# postgres connector
 pip install psycopg2-binary
+# for reading the config ini
 pip install configparser
+# for the rest api
+pip install flask-restplus
 
-sudo -i -u postgres
+if [ ${machine} = "Linux" ]; then
+    sudo -i -u postgres
+fi
 psql -f setup_database.sql
