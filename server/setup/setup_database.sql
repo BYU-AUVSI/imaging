@@ -45,9 +45,9 @@ CREATE TABLE "public"."incoming_state" (
 );
 
 CREATE TABLE "public"."manual_cropped" (
-  id serial NOT NULL
+  id serial NOT NULL,
   raw_id int,
-  time_stamp timestamp NOT NULL
+  time_stamp timestamp NOT NULL,
   cropped_path text NOT NULL,
   crop_coordinate_tl int NOT NULL,
   crop_coordinate_br int NOT NULL,
@@ -58,6 +58,22 @@ CREATE TABLE "public"."manual_cropped" (
 CREATE TABLE "public"."outgoing_manual" (
   id serial NOT NULL,
   cropped_id int NOT NULL,
+  type text NOT NULL CHECK(type = 'Standard' OR type = 'off_axis' OR type = 'emergent'),
+  latitude real NOT NULL,
+  longitude real NOT NULL,
+  orientation text NOT NULL CHECK(orientation = 'N' OR orientation = 'NE' OR orientation = 'E' OR orientation = 'SE' OR orientation = 'S' OR orientation = 'SW' OR orientation = 'W' OR orientation = 'NW'),
+  shape text NOT NULL CHECK(shape = 'circle' OR shape = 'semicircle' OR shape = 'quarter_circle' OR shape = 'triangle' OR shape = 'square' OR shape = 'rectangle' OR shape = 'trapezoid' OR shape = 'pentagon' OR shape = 'hexagon' OR shape = 'heptagon' OR shape = 'octagon' OR shape = 'star' OR shape = 'cross'),
+  background_color text NOT NULL CHECK(background_color = 'white' OR background_color = 'black' OR background_color = 'gray' OR background_color = 'red' OR background_color = 'blue' OR background_color = 'green' OR background_color = 'yellow' OR background_color = 'purple' OR background_color = 'brown' OR background_color = 'orange'),
+  alphanumeric text NOT NULL,
+  alphanumeric_color text NOT NULL CHECK(alphanumeric_color = 'white' OR alphanumeric_color = 'black' OR alphanumeric_color = 'gray' OR alphanumeric_color = 'red' OR alphanumeric_color = 'blue' OR alphanumeric_color = 'green' OR alphanumeric_color = 'yellow' OR alphanumeric_color = 'purple' OR alphanumeric_color = 'brown' OR alphanumeric_color = 'orange'),
+  description text default '',
+  cropped_path text NOT NULL,
+  submitted boolean NOT NULL default FALSE,
+  PRIMARY KEY ("id")
+);
+
+CREATE TABLE "public"."outgoing_autonomous" (
+  id serial NOT NULL,
   type text NOT NULL CHECK(type = 'Standard' OR type = 'off_axis' OR type = 'emergent'),
   latitude real NOT NULL,
   longitude real NOT NULL,
