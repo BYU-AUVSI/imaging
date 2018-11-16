@@ -1,4 +1,4 @@
-class ManualCropped:
+class manual_cropped:
 
     def getId(self):    
         return self.id
