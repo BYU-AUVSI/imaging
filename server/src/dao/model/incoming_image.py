@@ -1,4 +1,4 @@
-class IncomingImage:
+class incoming_image:
 
     def getId(self):
         return self.id
