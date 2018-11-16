@@ -6,11 +6,11 @@ class incoming_gps:
     def setId(self, id):
         self.id = id
 
-    def getTime(self):
-        return self.time
+    def getTimeStamp(self):
+        return self.time_stamp
 
-    def setTime(self, time):
-        self.time = time
+    def setTimeStamp(self, time_stamp):
+        self.time_stamp = time_stamp
 
     def getLat(self):
         return self.lat
@@ -31,7 +31,7 @@ class incoming_gps:
         self.alt = alt
 
     id = property(getId, setId)
-    time = property(getTime, setTime)
+    time_stamp = property(getTimeStamp, setTimeStamp)
     lat = property(getLat, setLat)
     lon = property(getLon, setLon)
     alt = property(getAlt, setAlt)

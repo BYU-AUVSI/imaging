@@ -1,9 +1,7 @@
 import psycopg2 # postgres db connector
 from config import config # to read config file
 
-class BaseDAO:
-
-    conn_ = None # the db connection object. Use this for queries
+class BaseDAO(object):
 
     def __init__(self, configFilePath='../conf/config.ini'):
         """
@@ -16,10 +14,11 @@ class BaseDAO:
         print("Connecting to the database...")
 
         try:
-            self.conn_ = psycopg2.connect(**params)
+            self.conn = psycopg2.connect(**params)
+            self.conn.autocommit = True # automatically commit statements to table
 
             # run something simple to make sure we're really connected
-            cur = self.conn_.cursor()
+            cur = self.conn.cursor()
             cur.execute('SELECT version()')
             db_version = cur.fetchone()
             print('Connected! Version :: {}'.format(db_version))
@@ -28,5 +27,35 @@ class BaseDAO:
             print("Something went wrong while trying to connect to the db!")
             print(error)
         finally:
-            if self.conn_ is None:
+            if self.conn is None:
                 raise Exception("Something went wrong trying to connect!")
+
+
+
+    @property
+    def conn(self):
+        return self._conn
+    
+    @conn.setter
+    def conn(self, conn):
+        self._conn = conn
+
+    def basicInsert(self, stmt, values):
+        """
+        Performs a basic insert given the statement
+
+        @type stmt: string
+        @param stmt: The sql statement string to execute
+        
+        @type values: list
+        @param values: Ordered list of values to place in the statement
+        """
+
+        if self.conn is None:
+            print("wtf")
+
+        cur = self.conn.cursor()
+        cur.execute(stmt, values)
+        ret = cur.fetchone()[0]
+        cur.close()
+        return ret
