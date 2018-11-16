@@ -6,10 +6,10 @@ class incoming_image:
     def setId(self, id):
         self.id = id
 
-    def getTime(self):
+    def getTimeStamp(self):
         return self.time_stamp
 
-    def setTime(self, time_stamp):
+    def setTimeStamp(self, time_stamp):
         self.time_stamp = time_stamp
 
     def getImagePath(self):
@@ -18,20 +18,20 @@ class incoming_image:
     def setImagePath(self, image_path):
         self.image_path = image_path
 
-    def getClaimedManual(self):
-        return self.claimed_manual
+    def getManualTapped(self):
+        return self.manual_tapped
 
-    def setClaimedManual(self, claimed_manual):
-        self.claimed_manual = claimed_manual
+    def setManualTapped(self, manual_tapped):
+        self.manual_tapped = manual_tapped
 
-    def getClaimedAutonomous(self):
-        return self.claimed_autonomous
+    def getAutonomousTapped(self):
+        return self.autonomous_tapped
 
-    def setClaimedAutonomous(self, claimed_autonomous):
-        self.claimed_autonomous = claimed_autonomous
+    def setAutonomousTapped(self, autonomous_tapped):
+        self.autonomous_tapped = autonomous_tapped
 
     id = property(getId, setId)
-    time = property(getTime, setTime)
+    time_stamp = property(getTimeStamp, setTimeStamp)
     image_path = property(getImagePath, setImagePath)
-    claimed_manual = property(getClaimedManual, setClaimedManual)
-    claimed_autonomous = property(getClaimedAutonomous, setClaimedAutonomous)
+    manual_tapped = property(getManualTapped, setManualTapped)
+    autonomous_tapped = property(getAutonomousTapped, setAutonomousTapped)
