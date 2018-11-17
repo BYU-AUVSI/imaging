@@ -1,37 +1,44 @@
-class IncomingImage:
+class incoming_image:
 
-    def getId(self):
-        return self.id
+    @property
+    def id(self):
+        return self._id
 
-    def setId(self, id):
-        self.id = id
+    @id.setter
+    def id(self, id):
+        self._id = id
 
-    def getTime(self):
-        return self.time_stamp
+    @property
+    def time_stamp(self):
+        return self._time_stamp
 
-    def setTime(self, time_stamp):
-        self.time_stamp = time_stamp
+    @time_stamp.setter
+    def time_stamp(self, time_stamp):
+        self._time_stamp = time_stamp
 
-    def getImagePath(self):
-        return self.image_path
+    @property
+    def image_path(self):
+        return self._image_path
 
-    def setImagePath(self, image_path):
-        self.image_path = image_path
+    @image_path.setter
+    def image_path(self, image_path):
+        self._image_path = image_path
 
-    def getClaimedManual(self):
-        return self.claimed_manual
+    @property
+    def manual_tap(self):
+        return self._manual_tap
 
-    def setClaimedManual(self, claimed_manual):
-        self.claimed_manual = claimed_manual
+    @manual_tap.setter
+    def manual_tap(self, manual_tap):
+        self._manual_tap = manual_tap
 
-    def getClaimedAutonomous(self):
-        return self.claimed_autonomous
+    @property
+    def autonomous_tap(self):
+        return self._autonomous_tap
 
-    def setClaimedAutonomous(self, claimed_autonomous):
-        self.claimed_autonomous = claimed_autonomous
+    @autonomous_tap.setter
+    def autonomous_tap(self, autonomous_tap):
+        self._autonomous_tap = autonomous_tap
 
-    id = property(getId, setId)
-    time = property(getTime, setTime)
-    image_path = property(getImagePath, setImagePath)
-    claimed_manual = property(getClaimedManual, setClaimedManual)
-    claimed_autonomous = property(getClaimedAutonomous, setClaimedAutonomous)
+    def insertValues(self):
+        return [self.time_stamp, self.image_path, self.manual_tap, self.autonomous_tap]

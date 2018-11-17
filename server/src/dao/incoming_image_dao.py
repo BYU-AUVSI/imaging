@@ -1,9 +1,19 @@
-class incoming_image_dao(DAO):
+from base_dao import BaseDAO
+from model.incoming_image import incoming_image
 
-    def __init__(self, id, time_stamp, nanoseconds, image_path):
-        self.id = id
-        self.time_stamp = time_stamp
-        self.nanoseconds = nanoseconds
-        self.image_path = image_path
-    def add_imcoming_image_to_db(self):
-        
+class IncomingImageDAO(BaseDAO):
+
+    def __init__(self, configFilePath):
+        super(IncomingImageDAO, self).__init__(configFilePath)
+    
+    def addImage(self, incomingImage):
+        """
+        Adds the specified image to the incoming_image table
+        @type incomingImage: incoming_image
+        @param incomingImage: The image to add to the database
+
+        @rtype: int
+        @return: Id of image if successfully inserted, otherwise -1
+        """
+        insertStmt = "INSERT INTO incoming_image (time_stamp, image_path, manual_tap, autonomous_tap) VALUES(to_timestamp(%s), %s, %s, %s) RETURNING id;"
+        return super(IncomingImageDAO, self).basicInsert(insertStmt, incomingImage.insertValues())

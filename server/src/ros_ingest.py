@@ -4,16 +4,15 @@ import rospy
 import cv2
 import numpy as np
 import os, time # for img saving
-from dao.base_dao import BaseDAO
+from dao.incoming_image_dao import IncomingImageDAO
+from dao.incoming_gps_dao import IncomingGpsDAO
 # ROS messages:
 from inertial_sense.msg import GPS
 from sensor_msgs.msg import CompressedImage
-from dao.model.gps_msg import GpsMsg
-from dao.model.incoming_image import IncomingImage
+from dao.model.incoming_gps import incoming_gps
+from dao.model.incoming_image import incoming_image
 
 class RosIngester:
-
-    dao_ = None
 
     def __init__(self):
         print("Startup ros ingester...")
@@ -21,11 +20,14 @@ class RosIngester:
         configPath = rospy.get_param('~config_path', currentPath + '/../conf/config.ini')
         startTs = str(int(time.time()))
 
-        self.dao_ = BaseDAO(configPath)
+        self.img_dao_ = IncomingImageDAO(configPath)
+        self.gps_dao_ = IncomingGpsDAO(configPath)
         self.gps_subscriber_ = rospy.Subscriber('/gps', GPS, self.gpsCallback, queue_size=10)
-        self.gps_msg_ = GpsMsg()
+        self.gps_msg_ = incoming_gps()
         self.img_subscriber_ = rospy.Subscriber("/other_camera/image_raw/compressed", CompressedImage, self.imgCallback,  queue_size = 10)
-        self.img_msg_ = IncomingImage()
+        self.img_msg_ = incoming_image()
+        self.img_msg_.manual_tap = False
+        self.img_msg_.autonomous_tap = False
         
         basePath = currentPath + '/../images/' + startTs
         print("Base dir for images:: {}".format(basePath))
@@ -36,7 +38,6 @@ class RosIngester:
             os.makedirs(self.raw_path_)
         print("Ingester is all setup!")
 
-
     def gpsCallback(self, msg):
         """
         Ros subscriber callback. Subscribes to the inertial_sense GPS msg.
@@ -44,17 +45,18 @@ class RosIngester:
         they can be inserted into the database
         """
         if msg.fix_type == GPS.GPS_STATUS_FIX_TYPE_NO_FIX or msg.num_sat == 0:
-            print("No GPS fix, cant add to db")
             return
 	    
-        self.gps_msg_.time = msg.header.stamp.to_sec()
+        self.gps_msg_.time_stamp = msg.header.stamp.to_sec()
         self.gps_msg_.lat  = msg.latitude
         self.gps_msg_.lon  = msg.longitude
         self.gps_msg_.alt  = msg.altitude 
 
-        print("{} :: {} {} {}".format(self.gps_msg_.time, self.gps_msg_.lat, self.gps_msg_.lon, self.gps_msg_.alt))
-
-        # call dao with gps msg
+        # insert into db:
+        resultingId = self.gps_dao_.addGps(self.gps_msg_)
+        if resultingId == -1:
+            print("FAILED to insert gps measurement:")
+            print("ts: {}, lat: {}, lon: {}, alt: {}".format(*self.gps_msg_.insertValues()))
 
     def stateCallback(self, msg):
         print("state callback")
@@ -68,16 +70,17 @@ class RosIngester:
         #get raw img data:
         rawData = np.fromstring(msg.data, np.uint8)
         ts = msg.header.stamp.to_sec()
-        print("img callback: {}".format(ts))
         fullPath = self.raw_path_ + str(ts) + ".jpg"
         cv2.imwrite(fullPath, cv2.imdecode(rawData, 1))
 
-        self.img_msg_.time = ts 
+        self.img_msg_.time_stamp = ts 
         self.img_msg_.image_path = fullPath
-        self.img_msg_.claimed_manual = False
-        self.img_msg_.claimed_autonomous = False
 
-        # call dao with img msg
+        # insert into the db - returns db id of inserted image
+        resultingId = self.img_dao_.addImage(self.img_msg_)
+        if resultingId == -1:
+            print("FAILED to insert image:")
+            print("ts: {}, path: {}, manual_tap: {}, autonomous_tap: {}".format(*self.img_msg_.insertValues()))
 
 def main():
     # initialize the node
