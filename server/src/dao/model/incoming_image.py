@@ -52,4 +52,9 @@ class incoming_image:
         return [self.time_stamp, self.image_path, self.manual_tap, self.autonomous_tap]
 
     def __str__(self):
-        return "IncomingImage:\n\tid: {}\n\ttime_Stamp: {}\n\timage_path: {}\n\tmanual_tap: {}\n\tautonomous_tap: {}".format(self.id, self.time_stamp, self.image_path, self.manual_tap, self.autonomous_tap)
+        return """IncomingImage:\n
+            \tid: {}\n
+            \ttime_stamp: {}\n
+            \timage_path: {}\n
+            \tmanual_tap: {}\n
+            \tautonomous_tap: {}""".format(self.id, self.time_stamp, self.image_path, self.manual_tap, self.autonomous_tap)

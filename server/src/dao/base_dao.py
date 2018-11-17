@@ -51,9 +51,24 @@ class BaseDAO(object):
         try:
             cur = self.conn.cursor()
             cur.execute(stmt, values)
-            ret = cur.fetchone()[0]
+            ret = cur.fetchone()[0] # assumes stmt has 'RETURNING id' in it
             cur.close()
             return ret
         except (Exception) as error:
             print(error)
             return -1
+
+    def basicTopSelect(self, stmt, values):
+        """
+        Gets the first (top) row of the given select statement. Returns as list
+        """
+        try:
+            cur = self.conn.cursor()
+            cur.execute(stmt, values)
+            ret = cur.fetchone()
+            cur.close()
+            return ret
+        except (Exception) as error:
+            print(error)
+            return None
+

@@ -3,6 +3,7 @@ from flask_restplus import Api
 # aggregate the different namespaces / files here
 from .raw_image_handler import api as rawImage
 from .crop_image_handler import api as cropImage
+from .gps_handler import api as gps
 
 api = Api(
     # Api metadata
@@ -11,5 +12,6 @@ api = Api(
     description='REST API for BYU AUVSI Imaging',
 )
 
+api.add_namespace(gps)
 api.add_namespace(rawImage)
 api.add_namespace(cropImage)

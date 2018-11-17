@@ -29,16 +29,14 @@ class IncomingImageDAO(BaseDAO):
         @rtype: incoming_image
         @return: An incoming_image with the info for that image if successfully found, otherwise None
         """
-
-        selectStmt = "SELECT id, time_stamp, image_path, manual_tap, autonomous_tap FROM incoming_image WHERE id = %s"
-        cur = self.conn.cursor()
-        cur.execute(selectStmt, (id,))
-        ret = cur.fetchone()
-        cur.close()
-        if ret is None:
+        selectImgById = """SELECT id, time_stamp, image_path, manual_tap, autonomous_tap 
+            FROM incoming_image 
+            WHERE id = %s"""
+        selectedImage = super(IncomingImageDAO, self).basicTopSelect(selectImgById, (id,))
+        
+        if selectedImage is None:
             return None
-        else:
-            return incoming_image(ret)
+        return incoming_image(selectedImage)
 
     def getNextImage(self, manual):
         """

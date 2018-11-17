@@ -1,4 +1,4 @@
-from flask import jsonify, send_file, make_response, Response, request, abort
+from flask import send_file, make_response, Response, request, abort
 import os
 from flask_restplus import Namespace, Resource, inputs
 from dao.incoming_image_dao import IncomingImageDAO
@@ -11,34 +11,30 @@ rawParser.add_argument('X-Manual', location='headers', type=inputs.boolean, requ
 
 @api.route('/')
 @api.expect(rawParser)
-@api.doc()
 class RawImageHandler(Resource):
     @api.doc('Gets the next un-tapped raw image')
     @api.doc(responses={200:'OK', 404:'No image found'})
     @api.header('X-Raw-Id', 'Raw Id of the image returned. Will match id parameter if one was specified')
     def get(self):
-        # if no id was sent then we need to get the next non-tapped image for this type:
+        # Input Validation::
         if 'X-Manual' not in request.headers:
             abort(400, 'Need to specify X-Manual header!')
-
         manual = request.headers.get('X-Manual')
         try:
             manual = bool(manual)
         except:
             abort(400, 'Failed to interpret X-Manual header as boolean!')
 
+        # Get Content
         dao = IncomingImageDAO(defaultSqlConfigPath())
         image = dao.getNextImage(manual)
 
+        # response validation
         if image is None:
-            if manual:
-                return {'message': 'Failed to locate unclaimed manual image'}, 404
-            else:
-                return {'message': 'Failed to locate unclaimed autonomous image'}, 404
+            return {'message': 'Failed to locate unclaimed image'}, 404
         
         return rawImageSender(image.id, image.image_path)
         
-
 @api.route('/<int:id>')
 @api.doc(params={'id': 'ID of the raw image to retrieve'}, required=True)
 class SpecificRawImageHandler(Resource):
