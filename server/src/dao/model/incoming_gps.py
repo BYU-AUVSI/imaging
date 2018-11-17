@@ -39,3 +39,6 @@ class incoming_gps:
     @alt.setter
     def alt(self, alt):
         self._alt = alt
+
+    def insertValues(self):
+        return [self.time_stamp, self.lat, self.lon, self.alt]

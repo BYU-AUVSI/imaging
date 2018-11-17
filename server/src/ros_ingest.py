@@ -5,6 +5,7 @@ import cv2
 import numpy as np
 import os, time # for img saving
 from dao.incoming_image_dao import IncomingImageDAO
+from dao.incoming_gps_dao import IncomingGpsDAO
 # ROS messages:
 from inertial_sense.msg import GPS
 from sensor_msgs.msg import CompressedImage
@@ -13,15 +14,14 @@ from dao.model.incoming_image import incoming_image
 
 class RosIngester:
 
-    dao_ = None
-
     def __init__(self):
         print("Startup ros ingester...")
         currentPath = os.path.dirname(os.path.realpath(__file__)) 
         configPath = rospy.get_param('~config_path', currentPath + '/../conf/config.ini')
         startTs = str(int(time.time()))
 
-        self.dao_ = IncomingImageDAO(configPath)
+        self.img_dao_ = IncomingImageDAO(configPath)
+        self.gps_dao_ = IncomingGpsDAO(configPath)
         self.gps_subscriber_ = rospy.Subscriber('/gps', GPS, self.gpsCallback, queue_size=10)
         self.gps_msg_ = incoming_gps()
         self.img_subscriber_ = rospy.Subscriber("/other_camera/image_raw/compressed", CompressedImage, self.imgCallback,  queue_size = 10)
@@ -53,9 +53,12 @@ class RosIngester:
         self.gps_msg_.lon  = msg.longitude
         self.gps_msg_.alt  = msg.altitude 
 
-        print("{} :: {} {} {}".format(self.gps_msg_.time, self.gps_msg_.lat, self.gps_msg_.lon, self.gps_msg_.alt))
+        # insert into db:
+        resultingId = self.gps_dao_.addGps(self.gps_msg_)
+        if resultingId == -1:
+            print("FAILED to insert gps measurement:")
+            print("ts: {}, lat: {}, lon: {}, alt: {}".format(*self.gps_msg_.insertValues()))
 
-        # call dao with gps msg
 
     def stateCallback(self, msg):
         print("state callback")
@@ -69,15 +72,17 @@ class RosIngester:
         #get raw img data:
         rawData = np.fromstring(msg.data, np.uint8)
         ts = msg.header.stamp.to_sec()
-        print("img callback: {}".format(ts))
         fullPath = self.raw_path_ + str(ts) + ".jpg"
         cv2.imwrite(fullPath, cv2.imdecode(rawData, 1))
 
         self.img_msg_.time_stamp = ts 
         self.img_msg_.image_path = fullPath
 
-        # insert into the db::
-        self.dao_.addImage(self.img_msg_)
+        # insert into the db - returns db id of inserted image
+        resultingId = self.img_dao_.addImage(self.img_msg_)
+        if resultingId == -1:
+            print("FAILED to insert image:")
+            print("ts: {}, path: {}, manual_tap: {}, autonomous_tap: {}".format(*self.img_msg_.insertValues()))
 
 def main():
     # initialize the node

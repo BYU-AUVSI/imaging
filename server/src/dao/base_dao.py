@@ -30,8 +30,6 @@ class BaseDAO(object):
             if self.conn is None:
                 raise Exception("Something went wrong trying to connect!")
 
-
-
     @property
     def conn(self):
         return self._conn
@@ -50,12 +48,12 @@ class BaseDAO(object):
         @type values: list
         @param values: Ordered list of values to place in the statement
         """
-
-        if self.conn is None:
-            print("wtf")
-
-        cur = self.conn.cursor()
-        cur.execute(stmt, values)
-        ret = cur.fetchone()[0]
-        cur.close()
-        return ret
+        try:
+            cur = self.conn.cursor()
+            cur.execute(stmt, values)
+            ret = cur.fetchone()[0]
+            cur.close()
+            return ret
+        except (Exception) as error:
+            print(error)
+            return -1

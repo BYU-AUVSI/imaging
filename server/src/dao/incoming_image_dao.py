@@ -15,7 +15,6 @@ class IncomingImageDAO(BaseDAO):
         @rtype: int
         @return: Id of image if successfully inserted, otherwise -1
         """
-
         insertStmt = "INSERT INTO incoming_image (time_stamp, image_path, manual_tap, autonomous_tap) VALUES(to_timestamp(%s), %s, %s, %s) RETURNING id;"
         return super(IncomingImageDAO, self).basicInsert(insertStmt, incomingImage.insertValues())
 
