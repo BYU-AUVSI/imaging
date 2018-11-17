@@ -17,7 +17,7 @@ class IncomingGpsDAO(BaseDAO):
         @return: Id of gps measurement if successfully inserted, otherwise -1
         """
         insertStmt = "INSERT INTO incoming_gps (time_stamp, latitude, longitude, altitude) VALUES(to_timestamp(%s), %s, %s, %s) RETURNING id;"
-        return super(IncomingGpsDAO, self).basicInsert(insertStmt, incomingGps.insertValues())
+        return super(IncomingGpsDAO, self).getResultingId(insertStmt, incomingGps.insertValues())
 
     def getGpsById(self, id):
         # note we need the date_part to convert the time_stamp back to unix epoch time

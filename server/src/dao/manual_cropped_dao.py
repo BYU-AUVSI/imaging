@@ -17,9 +17,8 @@ class ManualCroppedDAO(BaseDAO):
             VALUES(%s, to_timestamp(%s), %s, %s) 
             RETURNING id;"""
 
-        return super(ManualCroppedDAO, self).basicInsert(insertImg, manualCropped.insertValues())
+        return super(ManualCroppedDAO, self).getResultingId(insertImg, manualCropped.insertValues())
     
-
     def getImage(self, id):
         """
         Attempts to get the image with the specified id
@@ -63,3 +62,24 @@ class ManualCroppedDAO(BaseDAO):
         # failed to reserve an image (none available)
         cur.close()
         return None
+
+    def updateImage(self, id, updateContent):
+        # push json into the manual_cropped model. this will
+        # extract any relevant attributes
+        img = manual_cropped(json=updateContent)
+        updateStr = "UPDATE manual_cropped SET "
+
+        # compose the update string:
+        values = []
+        for clmn, value in img.toDict().items():
+            updateStr += clmn + "= %s, "
+            values.append(value.__str__())
+
+        updateStr = updateStr[:-2] # remove last space/comma
+        updateStr += " WHERE id = %s RETURNING id;"
+        values.append(id)
+        resultId = super(ManualCroppedDAO, self).getResultingId(updateStr, values)
+        if resultId != -1:
+            return self.getImage(resultId)
+        else:
+            return -1

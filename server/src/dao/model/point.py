@@ -42,10 +42,12 @@ class point:
         return None
 
     def toDict(self):
-        dict = {}
-        dict['x'] = self.x
-        dict['y'] = self.y
-        return dict
+        if hasattr(self, '_x') and hasattr(self, '_y'):
+            dict = {}
+            dict['x'] = self.x
+            dict['y'] = self.y
+            return dict
+        return None
 
     def __str__(self):
         str = self.toSql()

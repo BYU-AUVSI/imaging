@@ -38,9 +38,11 @@ class BaseDAO(object):
     def conn(self, conn):
         self._conn = conn
 
-    def basicInsert(self, stmt, values):
+    def getResultingId(self, stmt, values):
         """
-        Performs a basic insert given the statement
+        Get the first id returned from a statement.
+        Basically this assumes you have a 'RETURNING id;' at the end
+        of the query you are executing (insert or update)
 
         @type stmt: string
         @param stmt: The sql statement string to execute
@@ -51,7 +53,11 @@ class BaseDAO(object):
         try:
             cur = self.conn.cursor()
             cur.execute(stmt, values)
-            ret = cur.fetchone()[0] # assumes stmt has 'RETURNING id' in it
+            ret = cur.fetchone()
+            if ret is not None:
+                ret = ret[0]
+            else:
+                ret = -1
             cur.close()
             return ret
         except (Exception) as error:

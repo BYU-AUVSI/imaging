@@ -98,7 +98,21 @@ class SpecificCroppedImageInfoHandler(Resource):
 
         if image is None:
             return {'message': 'Failed to locate cropped id {}'.format(id)}, 404
-        return jsonify(image.toDict())
+        return jsonify(image.toJsonResponse())
+
+    @api.doc(description='Update information on the specified cropped image')
+    @api.doc()
+    def put(self, id):
+        content = request.get_json()
+        if content is None:
+            abort(400, 'Must specify values to update')
+
+        dao = ManualCroppedDAO(defaultSqlConfigPath())
+        result = dao.updateImage(id, content)
+        if result == -1:
+            return {'message': 'No image with id {} found to update'.format(id)}, 404
+        else:
+            return jsonify(result.toJsonResponse())
 
 
 def cropImageSender(id, filename):

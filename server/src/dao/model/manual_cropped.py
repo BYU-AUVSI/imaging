@@ -2,7 +2,7 @@ from dao.model.point import point
 
 class manual_cropped:
 
-    def __init__(self, tableValues=None):
+    def __init__(self, tableValues=None, json=None):
         if tableValues is not None:
             self.id = tableValues[0]
             self.raw_id = tableValues[1]
@@ -11,6 +11,20 @@ class manual_cropped:
             self.crop_coordinate_tl = point(ptStr=tableValues[4])
             self.crop_coordinate_br = point(ptStr=tableValues[5])
             self.tapped = tableValues[6]
+        elif json is not None:
+            for prop in self.allProps():
+                if prop in json and 'coordinate' not in prop:
+                    setattr(self, prop, json[prop])
+            # special handle coordinates
+            if 'crop_coordinate_tl' in json:
+                self.crop_coordinate_tl = point(ptStr=json['crop_coordinate_tl'])
+            elif 'crop_coordinate_tl.x' in json:
+                self.crop_coordinate_tl = point(x=json['crop_coordinate_tl.x'], y=json['crop_coordinate_tl.y'])
+
+            if 'crop_coordinate_br' in json:
+                self.crop_coordinate_br = point(json['crop_coordinate_br'])
+            elif 'crop_coordinate_br.x' in json:
+                self.crop_coordinate_br = point(x=json['crop_coordinate_br.x'], y=json['crop_coordinate_br.y'])
         else:
             # defaults:
             self.id = -1
@@ -73,11 +87,30 @@ class manual_cropped:
     def tapped(self, tapped):
         self._tapped = tapped
 
+    def allProps(self):
+        return ['id', 'raw_id', 'time_stamp', 'cropped_path', 'crop_coordinate_tl', 'crop_coordinate_br', 'tapped']
+
     def toDict(self):
         dict = {}
         for attr, value in self.__dict__.items():
             corrected_name = attr[1:] # remove first underscore
             dict[corrected_name] = value.__str__()
+        return dict
+
+    def toJsonResponse(self):
+        dict = self.toDict()
+        
+        # add crop point values independently:
+        if hasattr(self, '_crop_coordinate_tl'):
+            cropTl = self.crop_coordinate_tl.toDict()
+            if cropTl is not None:
+                dict['crop_coordinate_tl.x'] = cropTl['x']
+                dict['crop_coordinate_tl.y'] = cropTl['y']
+        if hasattr(self, '_crop_coordinate_br'):
+            cropBr = self.crop_coordinate_br.toDict()
+            if cropBr is not None:
+                dict['crop_coordinate_br.x'] = cropBr['x']
+                dict['crop_coordinate_br.y'] = cropBr['y']
 
         return dict
 
