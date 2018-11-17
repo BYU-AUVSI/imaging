@@ -1,6 +1,8 @@
-from flask import jsonify, send_file
+from flask import jsonify, send_file, make_response, Response, request, abort
 import os
 from flask_restplus import Namespace, Resource, inputs
+from dao.incoming_image_dao import IncomingImageDAO
+from config import defaultSqlConfigPath
 
 api  = Namespace('image/raw', description="All imaging related calls route through here")
 
@@ -15,15 +17,44 @@ class RawImageHandler(Resource):
     @api.doc(responses={200:'OK', 404:'No image found'})
     @api.header('X-Raw-Id', 'Raw Id of the image returned. Will match id parameter if one was specified')
     def get(self):
-        # if no idea was sent then we need to get the next non-tapped image for this type:
-        filename = os.path.dirname(os.path.realpath(__file__)) + '/../../images/raw/frame0571.jpg'
-        return send_file(filename, as_attachment=False, attachment_filename=filename, mimetype='image/jpeg')
+        # if no id was sent then we need to get the next non-tapped image for this type:
+        if 'X-Manual' not in request.headers:
+            abort(400, 'Need to specify X-Manual header!')
+
+        manual = request.headers.get('X-Manual')
+        try:
+            manual = bool(manual)
+        except:
+            abort(400, 'Failed to interpret X-Manual header as boolean!')
+
+        dao = IncomingImageDAO(defaultSqlConfigPath())
+        image = dao.getNextImage(manual)
+
+        if image is None:
+            if manual:
+                return {'message': 'Failed to locate unclaimed manual image'}, 404
+            else:
+                return {'message': 'Failed to locate unclaimed autonomous image'}, 404
+        
+        return rawImageSender(image.id, image.image_path)
+        
 
 @api.route('/<int:id>')
-@api.expect(rawParser)
 @api.doc(params={'id': 'ID of the raw image to retrieve'}, required=True)
 class SpecificRawImageHandler(Resource):
     @api.doc('Attempts to retrieve a raw image with the given id.')
     @api.doc(responses={200:'OK', 404:'Id not found'})
+    @api.header('X-Raw-Id', 'Raw Id of the image returned. Will match id parameter if one was specified')
     def get(self, id):
-        return jsonify({'yousent': id})
+        dao = IncomingImageDAO(defaultSqlConfigPath())
+        image  = dao.getImage(id)
+        if image is None:
+            return {'message': 'Failed to locate id {}'.format(id)}, 404
+
+        # otherwise lets send the image::
+        return rawImageSender(image.id, image.image_path)
+        
+def rawImageSender(id, filename):
+    response = make_response(send_file(filename, as_attachment=False, attachment_filename=filename, mimetype='image/jpeg'))        
+    response.headers['X-Raw-Id'] = id
+    return response

@@ -11,8 +11,6 @@ class BaseDAO(object):
         # get the connection settings for postgres:
         params = config(configFilePath, 'postgresql')
 
-        print("Connecting to the database...")
-
         try:
             self.conn = psycopg2.connect(**params)
             self.conn.autocommit = True # automatically commit statements to table
@@ -21,7 +19,6 @@ class BaseDAO(object):
             cur = self.conn.cursor()
             cur.execute('SELECT version()')
             db_version = cur.fetchone()
-            print('Connected! Version :: {}'.format(db_version))
             cur.close()
         except (Exception, psycopg2.DatabaseError) as error:
             print("Something went wrong while trying to connect to the db!")

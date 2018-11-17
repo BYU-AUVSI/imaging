@@ -1,6 +1,6 @@
 import psycopg2
-from base_dao import BaseDAO
-from model.incoming_image import incoming_image
+from dao.base_dao import BaseDAO
+from dao.model.incoming_image import incoming_image
 
 class IncomingImageDAO(BaseDAO):
 
@@ -75,9 +75,10 @@ class IncomingImageDAO(BaseDAO):
         cur = self.conn.cursor()
         cur.execute(updateStmt)
 
-        if cur.fetchone() is not None:
+        row = cur.fetchone()
+        if row is not None:
             # step 2: get the claimed image
-            claimedId = cur.fetchone()[0]
+            claimedId = row[0]
             cur.close()
             return self.getImage(claimedId)
 

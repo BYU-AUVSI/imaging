@@ -1,5 +1,8 @@
+import os
 from configparser import ConfigParser
- 
+
+def defaultSqlConfigPath():
+    return os.path.dirname(os.path.realpath(__file__))  + '/../conf/config.ini'
  
 def config(filename='config.ini', section='postgresql'):
     parser = ConfigParser() # create parser
