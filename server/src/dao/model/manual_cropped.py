@@ -1,4 +1,16 @@
+from dao.model.point import point
+
 class manual_cropped:
+
+    def __init__(self, tableValues=None):
+        if tableValues is not None:
+            self.id = tableValues[0]
+            self.raw_id = tableValues[1]
+            self.time_stamp = tableValues[2]
+            self.cropped_path = tableValues[3]
+            self.crop_coordinate_tl = point(ptStr=tableValues[4])
+            self.crop_coordinate_br = point(ptStr=tableValues[5])
+            self.tapped = tableValues[6]
 
     @property
     def id(self):    

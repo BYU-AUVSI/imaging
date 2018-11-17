@@ -1,4 +1,4 @@
-from flask import send_file, make_response, Response, request, abort
+from flask import send_file, make_response, request, abort
 import os
 from flask_restplus import Namespace, Resource, inputs
 from dao.incoming_image_dao import IncomingImageDAO
@@ -14,7 +14,7 @@ rawParser.add_argument('X-Manual', location='headers', type=inputs.boolean, requ
 class RawImageHandler(Resource):
     @api.doc('Gets the next un-tapped raw image')
     @api.doc(responses={200:'OK', 404:'No image found'})
-    @api.header('X-Raw-Id', 'Raw Id of the image returned. Will match id parameter if one was specified')
+    @api.header('X-Raw-Id', 'Raw Id of the image returned.')
     def get(self):
         # Input Validation::
         if 'X-Manual' not in request.headers:
@@ -40,7 +40,7 @@ class RawImageHandler(Resource):
 class SpecificRawImageHandler(Resource):
     @api.doc('Attempts to retrieve a raw image with the given id.')
     @api.doc(responses={200:'OK', 404:'Id not found'})
-    @api.header('X-Raw-Id', 'Raw Id of the image returned. Will match id parameter if one was specified')
+    @api.header('X-Raw-Id', 'Raw Id of the image returned. Will match id parameter if image was found')
     def get(self, id):
         dao = IncomingImageDAO(defaultSqlConfigPath())
         image  = dao.getImage(id)
@@ -51,6 +51,6 @@ class SpecificRawImageHandler(Resource):
         return rawImageSender(image.id, image.image_path)
         
 def rawImageSender(id, filename):
-    response = make_response(send_file(filename, as_attachment=False, attachment_filename=filename, mimetype='image/jpeg'))        
+    response = make_response(send_file(filename, as_attachment=False, attachment_filename=filename, mimetype='image/jpeg'))
     response.headers['X-Raw-Id'] = id
     return response

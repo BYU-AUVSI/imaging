@@ -29,9 +29,10 @@ class IncomingImageDAO(BaseDAO):
         @rtype: incoming_image
         @return: An incoming_image with the info for that image if successfully found, otherwise None
         """
-        selectImgById = """SELECT id, time_stamp, image_path, manual_tap, autonomous_tap 
+        selectImgById = """SELECT id, date_part('epoch', time_stamp), image_path, manual_tap, autonomous_tap 
             FROM incoming_image 
-            WHERE id = %s"""
+            WHERE id = %s 
+            LIMIT 1;"""
         selectedImage = super(IncomingImageDAO, self).basicTopSelect(selectImgById, (id,))
         
         if selectedImage is None:

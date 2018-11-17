@@ -6,7 +6,7 @@ from flask_restplus import Namespace, Resource
 
 api = Namespace('gps', description='Retrieve gps information')
 
-@api.route('/id/<int:id>')
+@api.route('/<int:id>')
 class GpsIdHandler(Resource):
     def get(self, id):
         dao = IncomingGpsDAO(defaultSqlConfigPath())
