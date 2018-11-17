@@ -34,10 +34,12 @@ class IncomingGpsDAO(BaseDAO):
         """
         Get the gps row that has a time_stamp closest to the one specified
         """
-        # test val:: 1541063324
+        # test val:: 1541063324.1
+        # get gps as <= to the desired value. just easier todo that then get the absolute closest
         selectGpsByTs = """SELECT id, date_part('epoch', time_stamp), latitude, longitude, altitude
             FROM incoming_gps
-            ORDER BY abs(extract(epoch from time_stamp - to_timestamp(%s)))
+            WHERE incoming_gps.time_stamp <= to_timestamp(%s) AT TIME ZONE 'UTC'
+            ORDER BY incoming_gps.time_stamp DESC
             LIMIT 1;"""
 
         selectedGps = super(IncomingGpsDAO, self).basicTopSelect(selectGpsByTs, (ts,))
