@@ -30,6 +30,9 @@ class BaseDAO(object):
             if self.conn is None:
                 raise Exception("Something went wrong trying to connect!")
 
+    def close(self):
+        self.conn.close()
+
     @property
     def conn(self):
         return self._conn

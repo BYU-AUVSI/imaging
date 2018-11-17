@@ -1,5 +1,13 @@
 class incoming_image:
 
+    def __init__(self, tableValues=None):
+        if tableValues is not None:
+            self.id = tableValues[0]
+            self.time_stamp = tableValues[1]
+            self.image_path = tableValues[2]
+            self.manual_tap = tableValues[3]
+            self.autonomous_tap = tableValues[4]
+
     @property
     def id(self):
         return self._id
@@ -42,3 +50,6 @@ class incoming_image:
 
     def insertValues(self):
         return [self.time_stamp, self.image_path, self.manual_tap, self.autonomous_tap]
+
+    def __str__(self):
+        return "IncomingImage:\n\tid: {}\n\ttime_Stamp: {}\n\timage_path: {}\n\tmanual_tap: {}\n\tautonomous_tap: {}".format(self.id, self.time_stamp, self.image_path, self.manual_tap, self.autonomous_tap)
