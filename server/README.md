@@ -25,3 +25,11 @@ The server has 3 main jobs:
 ## REST API
 
 All API documentation can be found on the root of the website. (ie: http://localhost:5000 if running on your machine)
+
+## Installation
+
+TODO: easy installation with docker, or the dev_setup.sh script
+
+## Motivation
+
+The above setup minimizes imaging's dependence on ROS, thus increasing transferability. Want to use something other than ROS in the future? Then all you need to do is change the < 100 line ros_ingest.py script, which describes how to pull data in and you're good to go!

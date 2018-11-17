@@ -13,7 +13,7 @@ newCroppedParser.add_argument('X-Raw-Id', location='headers', type=int, required
 
 @api.route('/')
 class CroppedImageHandler(Resource):
-    @api.doc('Gets the next un-tapped cropped image')
+    @api.doc(description='Gets the next un-tapped cropped image')
     @api.doc(responses={200:'OK', 404:'No available images found'})
     @api.header('X-Crop-Id', 'Crop Id of the image returned.')
     def get(self):
@@ -28,7 +28,7 @@ class CroppedImageHandler(Resource):
         # success!
         return cropImageSender(image.id, image.cropped_path)
     
-    @api.doc('Adds a new cropped image to the server')
+    @api.doc(description='Adds a new cropped image to the server')
     @api.expect(newCroppedParser)
     @api.doc(responses={200:'OK', 400:'Improper image post'})
     @api.header('X-Crop-Id', 'Crop Id of the image returned.')
@@ -72,7 +72,7 @@ class CroppedImageHandler(Resource):
 @api.route('/<int:id>')
 @api.doc(params={'id': 'ID of the cropped image to retrieve'}, required=True)
 class SpecificCroppedImageHandler(Resource):
-    @api.doc('Attempts to retrieve the cropped image with the given id')
+    @api.doc(description='Attempts to retrieve the cropped image with the given id')
     @api.doc(responses={200:'OK', 404:'Cropped image with this id not found'})
     @api.header('X-Crop-Id', 'Crop Id of the image returned. Will match id parameter image was found')
     def get(self, id):
@@ -89,11 +89,16 @@ class SpecificCroppedImageHandler(Resource):
 
 
 @api.route('/<int:id>/info')
-@api.doc(params={'id': 'ID of the cropped image to update'}, required=True)
+@api.doc(params={'id': 'ID of the cropped image to update or get info on'}, required=True)
 class SpecificCroppedImageInfoHandler(Resource):
-    @api.doc('Put information about a cropped image into the database. Normally used to update cropped coordinates')
-    def put(self, id):
-        return None
+    @api.doc(description='Get information about a cropped image from the database.')
+    def get(self, id):
+        dao = ManualCroppedDAO(defaultSqlConfigPath())
+        image = dao.getImage(id)
+
+        if image is None:
+            return {'message': 'Failed to locate cropped id {}'.format(id)}, 404
+        return jsonify(image.toDict())
 
 
 def cropImageSender(id, filename):
