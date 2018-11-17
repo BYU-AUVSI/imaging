@@ -38,7 +38,6 @@ class RosIngester:
             os.makedirs(self.raw_path_)
         print("Ingester is all setup!")
 
-
     def gpsCallback(self, msg):
         """
         Ros subscriber callback. Subscribes to the inertial_sense GPS msg.
@@ -58,7 +57,6 @@ class RosIngester:
         if resultingId == -1:
             print("FAILED to insert gps measurement:")
             print("ts: {}, lat: {}, lon: {}, alt: {}".format(*self.gps_msg_.insertValues()))
-
 
     def stateCallback(self, msg):
         print("state callback")
