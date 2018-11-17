@@ -1,93 +1,105 @@
 class outgoing_manual:
-    def getId(self):
-        return self.id
 
-    def setId(self, id):
-        self.id = id
+    @property
+    def id(self):
+        return self._id
 
-    def getCropped_id(self):
-        return self.cropped_id
+    @id.setter
+    def id(self, id):
+        self._id = id
 
-    def setCropped_id(self, cropped_id):
-        self.cropped_id = cropped_id
+    @property
+    def cropped_id(self):
+        return self._cropped_id
 
-    def getType(self):
-        return self.type
+    @cropped_id.setter
+    def cropped_id(self, cropped_id):
+        self._cropped_id = cropped_id
 
-    def setType(self, type):
-        self.type = type
+    @property
+    def type(self):
+        return self._type
 
-    def getLatitude(self):
-        return self.latitude
+    @type.setter
+    def type(self, type):
+        self._type = type
 
-    def setLatitude(self, latitude):
-        self.latitude = latitude
+    @property
+    def latitude(self):
+        return self._latitude
 
-    def getLongitude(self):
-        return self.longitude
+    @latitude.setter
+    def latitude(self, latitude):
+        self._latitude = latitude
 
-    def setLongitude(self, longitude):
-        self.longitude = longitude
+    @property
+    def longitude(self):
+        return self._longitude
 
-    def getOrientation(self):
-        return self.orientation
+    @longitude.setter
+    def longitude(self, longitude):
+        self._longitude = longitude
 
-    def setOrientation(self, orientation):
-        self.orientation = orientation
+    @property
+    def orientation(self):
+        return self._orientation
 
-    def getShape(self):
-        return self.shape
+    @orientation.setter
+    def orientation(self, orientation):
+        self._orientation = orientation
 
-    def setShape(self, shape):
-        self.shape = shape
+    @property
+    def shape(self):
+        return self._shape
 
-    def getBackground_color(self):
-        return self.background_color
+    @shape.setter
+    def shape(self, shape):
+        self._shape = shape
 
-    def setBackground_color(self, background_color):
-        self.background_color = background_color
+    @property
+    def background_color(self):
+        return self._background_color
 
-    def getAlphanumeric(self):
-        return self.alphanumeric
+    @background_color.setter
+    def background_color(self, background_color):
+        self._background_color = background_color
 
-    def setAlphanumeric(self, alphanumeric):
-        self.alphanumeric = alphanumeric
+    @property
+    def alphanumeric(self):
+        return self._alphanumeric
 
-    def getAutonomous_color(self):
-        return self.alphanumeric_color
+    @alphanumeric.setter
+    def alphanumeric(self, alphanumeric):
+        self._alphanumeric = alphanumeric
 
-    def setAutonomous_color(self, alphanumeric_color):
-        self.alphanumeric_color = alphanumeric_color
+    @property
+    def alphanumeric_color(self):
+        return self._alphanumeric_color
 
-    def getDescription(self):
-        return self.description
+    @alphanumeric_color.setter
+    def alphanumeric_color(self, alphanumeric_color):
+        self._alphanumeric_color = alphanumeric_color
 
-    def setDescription(self, description):
-        self.description = description
+    @property
+    def description(self):
+        return self._description
 
-    def getCropped_path(self):
-        return self.cropped_path
+    @description.setter
+    def description(self, description):
+        self._description = description
 
-    def setCropped_path(self, cropped_path):
-        self.cropped_path = cropped_path
+    @property
+    def cropped_path(self):
+        return self._cropped_path
 
-    def getSubmitted(self):
-        return self.Submitted
+    @cropped_path.setter
+    def cropped_path(self, cropped_path):
+        self._cropped_path = cropped_path
 
-    def setSubmitted(self, Submitted):
-        self.Submitted = Submitted
+    @property
+    def submitted(self):
+        return self._Submitted
 
-
-    id = property(getId, setId)
-    cropped_id = property(getCropped_id, setCropped_id)
-    type = property(getType, setType)
-    latitude = property(getLatitude, setLatitude)
-    longitude = property(getLongitude, setLongitude)
-    orientation = property(getOrientation, setOrientation)
-    shape = property(getShape, setShape)
-    background_color = property(getBackground_color, setBackground_color)
-    alphanumeric = property(getAlphanumeric, setAlphanumeric)
-    alphanumeric_color = property(getAutonomous_color, setAutonomous_color)
-    description = property(getDescription, setDescription)
-    cropped_path = property(getCropped_path, setCropped_path)
-    Submitted = property(getSubmitted, setSubmitted)
+    @submitted.setter
+    def submitted(self, Submitted):
+        self._Submitted = Submitted

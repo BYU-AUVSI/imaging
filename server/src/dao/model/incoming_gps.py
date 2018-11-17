@@ -1,37 +1,41 @@
 class incoming_gps:
 
-    def getId(self):
-        return self.id
+    @property
+    def id(self):
+        return self._id
 
-    def setId(self, id):
-        self.id = id
+    @id.setter
+    def Id(self, id):
+        self._id = id
 
-    def getTimeStamp(self):
-        return self.time_stamp
+    @property
+    def time_stamp(self):
+        return self._time_stamp
 
-    def setTimeStamp(self, time_stamp):
-        self.time_stamp = time_stamp
+    @time_stamp.setter
+    def time_stamp(self, time_stamp):
+        self._time_stamp = time_stamp
 
-    def getLat(self):
-        return self.lat
+    @property
+    def lat(self):
+        return self._lat
 
-    def setLat(self, lat):
-        self.lat = lat
+    @lat.setter
+    def lat(self, lat):
+        self._lat = lat
 
-    def getLon(self):
-        return self.lon
+    @property
+    def lon(self):
+        return self._lon
 
-    def setLon(self, lon):
-        self.lon = lon
+    @lon.setter
+    def lon(self, lon):
+        self._lon = lon
 
-    def getAlt(self):
-        return self.alt
+    @property
+    def alt(self):
+        return self._alt
 
-    def setAlt(self, alt):
-        self.alt = alt
-
-    id = property(getId, setId)
-    time_stamp = property(getTimeStamp, setTimeStamp)
-    lat = property(getLat, setLat)
-    lon = property(getLon, setLon)
-    alt = property(getAlt, setAlt)
+    @alt.setter
+    def alt(self, alt):
+        self._alt = alt

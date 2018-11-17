@@ -1,36 +1,41 @@
 class incoming_state:
-    def getId(self):
-        return self.id
 
-    def setId(self, id):
-        self.id = id
+    @property
+    def id(self):
+        return self._id
 
-    def getTime(self):
-        return self.time_stamp
+    @id.setter
+    def id(self, id):
+        self._id = id
 
-    def setTime(self, time_stamp):
-        self.time_stamp = time_stamp
+    @property
+    def time_stamp(self):
+        return self._time_stamp
 
-    def getRoll(self):
-        return self.roll
+    @time_stamp.setter
+    def time_stamp(self, time_stamp):
+        self._time_stamp = time_stamp
 
-    def setRoll(self, roll):
-        self.roll = roll
+    @property
+    def roll(self):
+        return self._roll
 
-    def getPitch(self):
-        return self.pitch
+    @roll.setter
+    def roll(self, roll):
+        self._roll = roll
 
-    def setPitch(self, pitch):
-        self.pitch = pitch
+    @property
+    def pitch(self):
+        return self._pitch
 
-    def getYaw(self):
-        return self.yaw
+    @pitch.setter
+    def pitch(self, pitch):
+        self._pitch = pitch
 
-    def setYaw(self, yaw):
-        self.yaw = yaw
+    @property
+    def yaw(self):
+        return self._yaw
 
-    id = property(getId, setId)
-    time = property(getTime, setTime)
-    roll = property(getRoll, setRoll)
-    pitch = property(getPitch, setPitch)
-    yaw = property(getYaw, setYaw)
+    @yaw.setter
+    def yaw(self, yaw):
+        self._yaw = yaw
