@@ -11,6 +11,11 @@ class manual_cropped:
             self.crop_coordinate_tl = point(ptStr=tableValues[4])
             self.crop_coordinate_br = point(ptStr=tableValues[5])
             self.tapped = tableValues[6]
+        else:
+            # defaults:
+            self.id = -1
+            self.raw_id = -1
+            self.tapped = False
 
     @property
     def id(self):    
@@ -67,3 +72,6 @@ class manual_cropped:
     @tapped.setter
     def tapped(self, tapped):
         self._tapped = tapped
+
+    def insertValues(self):
+        return [self.raw_id, self.time_stamp, self.cropped_path, self.tapped]

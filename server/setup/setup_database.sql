@@ -49,8 +49,8 @@ CREATE TABLE "public"."manual_cropped" (
   raw_id int,
   time_stamp timestamp NOT NULL,
   cropped_path text NOT NULL,
-  crop_coordinate_tl point NOT NULL,
-  crop_coordinate_br point NOT NULL,
+  crop_coordinate_tl point,
+  crop_coordinate_br point,
   tapped boolean NOT NULL default FALSE,
   PRIMARY KEY ("id")
 );

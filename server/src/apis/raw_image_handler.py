@@ -31,7 +31,7 @@ class RawImageHandler(Resource):
 
         # response validation
         if image is None:
-            return {'message': 'Failed to locate unclaimed image'}, 404
+            return {'message': 'Failed to locate untapped image'}, 404
         
         return rawImageSender(image.id, image.image_path)
         
