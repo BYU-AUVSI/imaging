@@ -1,4 +1,4 @@
-from flask import send_file, make_response, request, abort
+from flask import send_file, make_response, request, abort, jsonify
 import os
 from flask_restplus import Namespace, Resource, inputs
 from dao.incoming_image_dao import IncomingImageDAO
@@ -12,7 +12,7 @@ rawParser.add_argument('X-Manual', location='headers', type=inputs.boolean, requ
 @api.route('/')
 @api.expect(rawParser)
 class RawImageHandler(Resource):
-    @api.doc('Gets the next un-tapped raw image')
+    @api.doc(description='Gets the next un-tapped raw image')
     @api.doc(responses={200:'OK', 404:'No image found'})
     @api.header('X-Raw-Id', 'Raw Id of the image returned.')
     def get(self):
@@ -38,18 +38,33 @@ class RawImageHandler(Resource):
 @api.route('/<int:id>')
 @api.doc(params={'id': 'ID of the raw image to retrieve'}, required=True)
 class SpecificRawImageHandler(Resource):
-    @api.doc('Attempts to retrieve a raw image with the given id.')
+    @api.doc(description='Attempts to retrieve a raw image with the given id.')
     @api.doc(responses={200:'OK', 404:'Id not found'})
     @api.header('X-Raw-Id', 'Raw Id of the image returned. Will match id parameter if image was found')
     def get(self, id):
         dao = IncomingImageDAO(defaultSqlConfigPath())
         image  = dao.getImage(id)
         if image is None:
-            return {'message': 'Failed to locate id {}'.format(id)}, 404
+            return {'message': 'Failed to locate raw id {}'.format(id)}, 404
 
         # otherwise lets send the image::
         return rawImageSender(image.id, image.image_path)
         
+
+@api.route('/<int:id>/info')
+@api.doc(params={'id': 'ID of the raw image to update or get info on'}, required=True)
+class SpecificRawImageInfoHandler(Resource):
+    @api.doc(description='Get information about a raw image from the database')
+    @api.doc(responses={200:'OK', 404:'Id not found'})
+    def get(self, id):
+        dao = IncomingImageDAO(defaultSqlConfigPath())
+        image = dao.getImage(id)
+
+        if image is None:
+            return {'message': 'Failed to locate raw id {}'.format(id)}, 404
+        return jsonify(image.toDict())
+
+
 def rawImageSender(id, filename):
     response = make_response(send_file(filename, as_attachment=False, attachment_filename=filename, mimetype='image/jpeg'))
     response.headers['X-Raw-Id'] = id

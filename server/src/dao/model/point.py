@@ -37,7 +37,9 @@ class point:
         self._y = y
 
     def toSql(self):
-        return "({},{})".format(self.x, self.y)
+        if hasattr(self, '_x') and hasattr(self, '_y'):
+            return "({},{})".format(self.x, self.y)
+        return None
 
     def toDict(self):
         dict = {}
@@ -46,4 +48,5 @@ class point:
         return dict
 
     def __str__(self):
-        return self.toSql
+        str = self.toSql()
+        return '' if str is None else str 

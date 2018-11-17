@@ -73,5 +73,13 @@ class manual_cropped:
     def tapped(self, tapped):
         self._tapped = tapped
 
+    def toDict(self):
+        dict = {}
+        for attr, value in self.__dict__.items():
+            corrected_name = attr[1:] # remove first underscore
+            dict[corrected_name] = value.__str__()
+
+        return dict
+
     def insertValues(self):
         return [self.raw_id, self.time_stamp, self.cropped_path, self.tapped]

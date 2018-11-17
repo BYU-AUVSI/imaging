@@ -51,6 +51,13 @@ class incoming_image:
     def insertValues(self):
         return [self.time_stamp, self.image_path, self.manual_tap, self.autonomous_tap]
 
+    def toDict(self):
+        dict = {}
+        for attr, value in self.__dict__.items():
+            corrected_name = attr[1:] # remove first underscore
+            dict[corrected_name] = value.__str__()
+        return dict
+
     def __str__(self):
         return """IncomingImage:\n
             \tid: {}\n
