@@ -110,7 +110,7 @@ class SpecificCroppedImageInfoHandler(Resource):
         dao = ManualCroppedDAO(defaultSqlConfigPath())
         result = dao.updateImage(id, content)
         if result == -1:
-            return {'message': 'No image with id {} found to update'.format(id)}, 404
+            return {'message': 'No image with id {} found to update (or was there a server error?)'.format(id)}, 404
         else:
             return jsonify(result.toJsonResponse())
 
