@@ -11,8 +11,6 @@ class BaseDAO(object):
         # get the connection settings for postgres:
         params = config(configFilePath, 'postgresql')
 
-        print("Connecting to the database...")
-
         try:
             self.conn = psycopg2.connect(**params)
             self.conn.autocommit = True # automatically commit statements to table
@@ -21,7 +19,6 @@ class BaseDAO(object):
             cur = self.conn.cursor()
             cur.execute('SELECT version()')
             db_version = cur.fetchone()
-            print('Connected! Version :: {}'.format(db_version))
             cur.close()
         except (Exception, psycopg2.DatabaseError) as error:
             print("Something went wrong while trying to connect to the db!")
@@ -29,6 +26,9 @@ class BaseDAO(object):
         finally:
             if self.conn is None:
                 raise Exception("Something went wrong trying to connect!")
+
+    def close(self):
+        self.conn.close()
 
     @property
     def conn(self):
@@ -38,9 +38,11 @@ class BaseDAO(object):
     def conn(self, conn):
         self._conn = conn
 
-    def basicInsert(self, stmt, values):
+    def getResultingId(self, stmt, values):
         """
-        Performs a basic insert given the statement
+        Get the first id returned from a statement.
+        Basically this assumes you have a 'RETURNING id;' at the end
+        of the query you are executing (insert or update)
 
         @type stmt: string
         @param stmt: The sql statement string to execute
@@ -51,9 +53,28 @@ class BaseDAO(object):
         try:
             cur = self.conn.cursor()
             cur.execute(stmt, values)
-            ret = cur.fetchone()[0]
+            ret = cur.fetchone()
+            if ret is not None:
+                ret = ret[0]
+            else:
+                ret = -1
             cur.close()
             return ret
         except (Exception) as error:
             print(error)
             return -1
+
+    def basicTopSelect(self, stmt, values):
+        """
+        Gets the first (top) row of the given select statement. Returns as list
+        """
+        try:
+            cur = self.conn.cursor()
+            cur.execute(stmt, values)
+            ret = cur.fetchone()
+            cur.close()
+            return ret
+        except (Exception) as error:
+            print(error)
+            return None
+

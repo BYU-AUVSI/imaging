@@ -1,4 +1,12 @@
 #! /usr/bin/env python
+"""
+This script is the bridge between ROS and the rest of the imaging system. It's only objective
+is listen to the ros network and save relevant information to the server. 
+
+
+@author len0rd
+@since 2018-11-01
+"""
 
 import rospy
 import cv2

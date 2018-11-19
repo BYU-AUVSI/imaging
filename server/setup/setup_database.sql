@@ -18,12 +18,12 @@ GRANT USAGE ON SCHEMA public TO imaging_server;
 /* Step 2: create all the tables */
 
 CREATE TABLE "public"."incoming_image" (
-  id serial NOT NULL,
+  image_id serial NOT NULL,
   time_stamp timestamp NOT NULL,
   image_path text NOT NULL,
   manual_tap boolean NOT NULL default FALSE,
   autonomous_tap boolean NOT NULL default FALSE,
-  PRIMARY KEY ("id")
+  PRIMARY KEY ("image_id")
 );
 
 CREATE TABLE "public"."incoming_gps" (
@@ -46,18 +46,19 @@ CREATE TABLE "public"."incoming_state" (
 
 CREATE TABLE "public"."manual_cropped" (
   id serial NOT NULL,
-  raw_id int,
+  image_id int NOT NULL,
   time_stamp timestamp NOT NULL,
   cropped_path text NOT NULL,
-  crop_coordinate_tl point NOT NULL,
-  crop_coordinate_br point NOT NULL,
+  crop_coordinate_tl point,
+  crop_coordinate_br point,
   tapped boolean NOT NULL default FALSE,
-  PRIMARY KEY ("id")
+  PRIMARY KEY ("id"),
+  UNIQUE ("image_id")
 );
 
 CREATE TABLE "public"."outgoing_manual" (
   id serial NOT NULL,
-  cropped_id int NOT NULL,
+  image_id int NOT NULL,
   type text NOT NULL CHECK(type = 'Standard' OR type = 'off_axis' OR type = 'emergent'),
   latitude real NOT NULL,
   longitude real NOT NULL,
@@ -69,11 +70,13 @@ CREATE TABLE "public"."outgoing_manual" (
   description text default '',
   cropped_path text NOT NULL,
   submitted boolean NOT NULL default FALSE,
-  PRIMARY KEY ("id")
+  PRIMARY KEY ("id"),
+  UNIQUE ("image_id")
 );
 
 CREATE TABLE "public"."outgoing_autonomous" (
   id serial NOT NULL,
+  image_id int NOT NULL,
   type text NOT NULL CHECK(type = 'Standard' OR type = 'off_axis' OR type = 'emergent'),
   latitude real NOT NULL,
   longitude real NOT NULL,
