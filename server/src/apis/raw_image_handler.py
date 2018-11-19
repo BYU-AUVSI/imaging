@@ -4,7 +4,7 @@ from flask_restplus import Namespace, Resource, inputs
 from dao.incoming_image_dao import IncomingImageDAO
 from config import defaultSqlConfigPath
 
-api  = Namespace('image/raw', description="All imaging related calls route through here")
+api  = Namespace('image/raw', description="All raw image functions route through here")
 
 rawParser = api.parser()
 rawParser.add_argument('X-Manual', location='headers', type=inputs.boolean, required=True, help='Specify whether this is a manual request (True) or autonomous (False)') 
@@ -14,14 +14,14 @@ rawParser.add_argument('X-Manual', location='headers', type=inputs.boolean, requ
 class RawImageHandler(Resource):
     @api.doc(description='Gets the next un-tapped raw image')
     @api.doc(responses={200:'OK', 404:'No image found'})
-    @api.header('X-Raw-Id', 'Raw Id of the image returned.')
+    @api.header('X-Image-Id', 'Raw Id of the image returned.')
     def get(self):
         # Input Validation::
         if 'X-Manual' not in request.headers:
             abort(400, 'Need to specify X-Manual header!')
         manual = request.headers.get('X-Manual')
         try:
-            manual = bool(manual)
+            manual = manual.lower() == 'true'
         except:
             abort(400, 'Failed to interpret X-Manual header as boolean!')
 
@@ -33,32 +33,32 @@ class RawImageHandler(Resource):
         if image is None:
             return {'message': 'Failed to locate untapped image'}, 404
         
-        return rawImageSender(image.id, image.image_path)
+        return rawImageSender(image.image_id, image.image_path)
         
-@api.route('/<int:id>')
-@api.doc(params={'id': 'ID of the raw image to retrieve'}, required=True)
+@api.route('/<int:image_id>')
+@api.doc(params={'image_id': 'ID of the raw image to retrieve'}, required=True)
 class SpecificRawImageHandler(Resource):
     @api.doc(description='Attempts to retrieve a raw image with the given id.')
     @api.doc(responses={200:'OK', 404:'Id not found'})
-    @api.header('X-Raw-Id', 'Raw Id of the image returned. Will match id parameter if image was found')
-    def get(self, id):
+    @api.header('X-Image-Id', 'Id of the image returned. Will match id parameter if image was found')
+    def get(self, image_id):
         dao = IncomingImageDAO(defaultSqlConfigPath())
-        image  = dao.getImage(id)
+        image  = dao.getImage(image_id)
         if image is None:
             return {'message': 'Failed to locate raw id {}'.format(id)}, 404
 
         # otherwise lets send the image::
-        return rawImageSender(image.id, image.image_path)
+        return rawImageSender(image.image_id, image.image_path)
         
 
-@api.route('/<int:id>/info')
-@api.doc(params={'id': 'ID of the raw image to update or get info on'}, required=True)
+@api.route('/<int:image_id>/info')
+@api.doc(params={'image_id': 'ID of the image to update or get the raw info on'}, required=True)
 class SpecificRawImageInfoHandler(Resource):
     @api.doc(description='Get information about a raw image from the database')
     @api.doc(responses={200:'OK', 404:'Id not found'})
-    def get(self, id):
+    def get(self, image_id):
         dao = IncomingImageDAO(defaultSqlConfigPath())
-        image = dao.getImage(id)
+        image = dao.getImage(image_id)
 
         if image is None:
             return {'message': 'Failed to locate raw id {}'.format(id)}, 404
@@ -67,5 +67,5 @@ class SpecificRawImageInfoHandler(Resource):
 
 def rawImageSender(id, filename):
     response = make_response(send_file(filename, as_attachment=False, attachment_filename=filename, mimetype='image/jpeg'))
-    response.headers['X-Raw-Id'] = id
+    response.headers['X-Image-Id'] = id
     return response
