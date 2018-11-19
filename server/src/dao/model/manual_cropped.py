@@ -5,7 +5,7 @@ class manual_cropped:
     def __init__(self, tableValues=None, json=None):
         if tableValues is not None:
             self.id = tableValues[0]
-            self.raw_id = tableValues[1]
+            self.image_id = tableValues[1]
             self.time_stamp = tableValues[2]
             self.cropped_path = tableValues[3]
             self.crop_coordinate_tl = point(ptStr=tableValues[4])
@@ -28,7 +28,7 @@ class manual_cropped:
         else:
             # defaults:
             self.id = -1
-            self.raw_id = -1
+            self.image_id = -1
             self.tapped = False
 
     @property
@@ -40,12 +40,12 @@ class manual_cropped:
         self._id = id
 
     @property
-    def raw_id(self):
-        return self._raw_id
+    def image_id(self):
+        return self._image_id
 
-    @raw_id.setter
-    def raw_id(self, raw_id):
-        self._raw_id = raw_id
+    @image_id.setter
+    def image_id(self, image_id):
+        self._image_id = image_id
     
     @property
     def time_stamp(self):    
@@ -88,7 +88,7 @@ class manual_cropped:
         self._tapped = tapped
 
     def allProps(self):
-        return ['id', 'raw_id', 'time_stamp', 'cropped_path', 'crop_coordinate_tl', 'crop_coordinate_br', 'tapped']
+        return ['id', 'image_id', 'time_stamp', 'cropped_path', 'crop_coordinate_tl', 'crop_coordinate_br', 'tapped']
 
     def toDict(self):
         dict = {}
@@ -115,4 +115,4 @@ class manual_cropped:
         return dict
 
     def insertValues(self):
-        return [self.raw_id, self.time_stamp, self.cropped_path, self.tapped]
+        return [self.image_id, self.time_stamp, self.cropped_path, self.tapped]

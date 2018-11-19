@@ -34,7 +34,7 @@ def defaultCroppedImgPath():
 def defaultRawImgPath():
     latestSubDir = getLatestBaseImgDir()
     latestSubDir += '/raw/'
-    if not os.path.exists(latestSubDir)
+    if not os.path.exists(latestSubDir):
         os.makedirs(latestSubDir)
     return latestSubDir
  

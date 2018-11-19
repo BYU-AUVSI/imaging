@@ -16,7 +16,10 @@ class IncomingImageDAO(BaseDAO):
         @rtype: int
         @return: Id of image if successfully inserted, otherwise -1
         """
-        insertStmt = "INSERT INTO incoming_image (time_stamp, image_path, manual_tap, autonomous_tap) VALUES(to_timestamp(%s), %s, %s, %s) RETURNING id;"
+        insertStmt = """INSERT INTO incoming_image 
+            (time_stamp, image_path, manual_tap, autonomous_tap) 
+            VALUES(to_timestamp(%s), %s, %s, %s) 
+            RETURNING image_id;"""
         return super(IncomingImageDAO, self).getResultingId(insertStmt, incomingImage.insertValues())
 
     def getImage(self, id):
@@ -29,9 +32,9 @@ class IncomingImageDAO(BaseDAO):
         @rtype: incoming_image
         @return: An incoming_image with the info for that image if successfully found, otherwise None
         """
-        selectImgById = """SELECT id, date_part('epoch', time_stamp), image_path, manual_tap, autonomous_tap 
+        selectImgById = """SELECT image_id, date_part('epoch', time_stamp), image_path, manual_tap, autonomous_tap 
             FROM incoming_image 
-            WHERE id = %s 
+            WHERE image_id = %s 
             LIMIT 1;"""
         selectedImage = super(IncomingImageDAO, self).basicTopSelect(selectImgById, (id,))
         
@@ -55,21 +58,21 @@ class IncomingImageDAO(BaseDAO):
         if manual:
             updateStmt = """UPDATE incoming_image 
                 SET manual_tap = TRUE 
-                WHERE id = (
-                    SELECT id 
+                WHERE image_id = (
+                    SELECT image_id 
                     FROM incoming_image 
                     WHERE manual_tap = FALSE 
-                    ORDER BY id LIMIT 1
-                ) RETURNING id;"""
+                    ORDER BY image_id LIMIT 1
+                ) RETURNING image_id;"""
         else:
             updateStmt = """UPDATE incoming_image 
                 SET autonomous_tap = TRUE 
-                WHERE id = (
-                    SELECT id 
+                WHERE image_id = (
+                    SELECT image_id 
                     FROM incoming_image 
                     WHERE autonomous_tap = FALSE 
-                    ORDER BY id LIMIT 1
-                ) RETURNING id;"""
+                    ORDER BY image_id LIMIT 1
+                ) RETURNING image_id;"""
 
         cur = self.conn.cursor()
         cur.execute(updateStmt)
