@@ -64,7 +64,7 @@ class CroppedImageHandler(Resource):
         resultingId = dao.addImage(cropped)
         
         if resultingId == -1:
-            return {'message': 'Failed to insert image into manual_cropped!'}, 500
+            return {'message': 'Failed to insert image into manual_cropped! (If youre trying to update information on an image_id that already exists, you should use PUT)'}, 500
         
         # done!
         response = make_response(jsonify({'message': 'success!', 'id': cropped.image_id}))
@@ -122,8 +122,18 @@ class SpecificCroppedImageInfoHandler(Resource):
 
 @api.route('/all')
 class AllCroppedImagesHandler(Resource):
+    @api.doc(description='Get info on all the cropped images currently in the queue')
+    # support getting only tapped, and getting from list
     def get(self):
-        return 404
+        dao = ManualCroppedDAO(defaultSqlConfigPath())
+        manualCroppedList = dao.getAll()
+
+        if manualCroppedList == None or not manualCroppedList:
+            return {'message': 'Cropped table is empty!'}, 404
+
+        exportable = [ img.toJsonResponse(exclude=('id',)) for img in manualCroppedList ]
+        return jsonify(exportable)
+        
 
 def cropImageSender(id, filename):
     response = make_response(send_file(filename, as_attachment=False, attachment_filename=filename, mimetype='image/jpeg'))

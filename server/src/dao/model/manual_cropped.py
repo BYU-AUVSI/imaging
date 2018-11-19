@@ -90,15 +90,17 @@ class manual_cropped:
     def allProps(self):
         return ['id', 'image_id', 'time_stamp', 'cropped_path', 'crop_coordinate_tl', 'crop_coordinate_br', 'tapped']
 
-    def toDict(self):
+    def toDict(self, exclude=None):
         dict = {}
         for attr, value in self.__dict__.items():
             corrected_name = attr[1:] # remove first underscore
-            dict[corrected_name] = value.__str__()
+            # add everything we weren't explicitly told to exclude
+            if exclude is None or corrected_name not in exclude:
+                dict[corrected_name] = value.__str__()
         return dict
 
-    def toJsonResponse(self):
-        dict = self.toDict()
+    def toJsonResponse(self, exclude=None):
+        dict = self.toDict(exclude)
         
         # add crop point values independently:
         if hasattr(self, '_crop_coordinate_tl'):
