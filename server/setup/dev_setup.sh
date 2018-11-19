@@ -12,6 +12,10 @@ esac
 
 if [ ${machine} = "Mac" ]; then
     echo "Running mac installer"
+    brew update
+    brew install postgresql
+    postgres -D /usr/local/var/postgres
+    createdb `whoami`
 elif [ ${machine} = "Linux" ]; then
     echo "Running linux installer"
     echo "I'm going to ask for your su password to install postgres..."
@@ -25,13 +29,9 @@ fi
 # Python connector for postgres
 # this assumes that you're environment is currently set to the python with ros installed
 # (this may not be the case if you're using conda or venv)
-echo "Install postgres python connector"
-# postgres connector
-pip install psycopg2-binary
-# for reading the config ini
-pip install configparser
-# for the rest api
-pip install flask-restplus
+echo "Install pip modules"
+# intall postgres connector (psycopg) and rest server-side (flask-restplus)
+pip install -r pip-requirements.txt
 
 if [ ${machine} = "Linux" ]; then
     sudo -i -u postgres
