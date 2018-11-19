@@ -14,12 +14,6 @@ TODO:
 Add zooming feature
 Add preview of cropped image
 Add dynamic movement of rectangle
-Add logic that if you make another crop rectangle it automatically undoes the crop
-
-#fix bug where it initializes the label as a 1x1 pixel and screws up resizing
-#limit the number of resize events by time
-#fix the math of drawing the green rectangle
-
 '''
 from tkinter import *
 from tkinter import ttk
@@ -116,7 +110,6 @@ class GuiClass(Frame):
         # TAB 3: AUTONOMOUS TENDER
         tab3 = ttk.Frame(n)
         n.add(tab3, text='Autonomous Tender')
-        self.ii = 0
         # Done with initialization
         self.initialized = True
 
@@ -144,6 +137,16 @@ class GuiClass(Frame):
     def mouse_move(self,event):
         self.lbl4.configure(text=(event.x,event.y))
         self.lbl3.bind("<ButtonRelease-1>",self.mouse_release)
+        self.x1 = event.x - self.offset_x
+        self.y1 = event.y - self.offset_y
+        disp_width,disp_height = self.resized_im.size
+        sr = (self.org_width/disp_width + self.org_height/disp_height)/2.0
+        self.draw_np = np.copy(self.org_np)
+        cv2.rectangle(self.draw_np,(int(sr*self.x0),int(sr*self.y0)),(int(sr*self.x1),int(sr*self.y1)),(255,0,0),2)
+        self.img_im = self.np2im(self.draw_np)
+        self.resized_im = self.resizeIm(self.img_im,self.t1l1_width,self.t1l1_height)
+        self.img_tk = self.im2tk(self.resized_im)
+        self.lbl3.configure(image=self.img_tk)
     def close_window(self,event):
         self.master.withdraw()
         sys.exit()
@@ -157,12 +160,13 @@ class GuiClass(Frame):
         self.y1 = event.y - self.offset_y
         disp_width,disp_height = self.resized_im.size
         sr = (self.org_width/disp_width + self.org_height/disp_height)/2.0
-        print(disp_width,disp_height,self.org_width,self.org_height,sr)
-        cv2.rectangle(self.draw_np,(int(sr*self.x0),int(sr*self.y0)),(int(sr*self.x1),int(sr*self.y1)),(0,255,0),1)
+        self.draw_np = np.copy(self.org_np)
+        cv2.rectangle(self.draw_np,(int(sr*self.x0),int(sr*self.y0)),(int(sr*self.x1),int(sr*self.y1)),(255,0,0),2)
         self.img_im = self.np2im(self.draw_np)
         self.resized_im = self.resizeIm(self.img_im,self.t1l1_width,self.t1l1_height)
         self.img_tk = self.im2tk(self.resized_im)
         self.lbl3.configure(image=self.img_tk)
+        # Crop Image
         self.cropImage(int(sr*self.x0),int(sr*self.y0),int(sr*self.x1),int(sr*self.y1))
         self.cropped = True
 
@@ -175,16 +179,13 @@ class GuiClass(Frame):
         if self.initialized == True and (time.time()-self.resize_counter) > 0.050:
             if self.lbl3.winfo_width() > 1:
                 self.resize_counter = time.time()
-                self.ii += 1
-                if self.ii%1 == 0:
-                    print(self.ii)
-                    self.master.update()
-                    self.t1l1_width = self.lbl3.winfo_width()
-                    self.t1l1_height = self.lbl3.winfo_height()
-                    self.resized_im = self.resizeIm(self.img_im,self.t1l1_width,self.t1l1_height)
-                    self.t1i1_width,self.t1i1_height = self.resized_im.size
-                    self.img_tk = self.im2tk(self.resized_im)
-                    self.lbl3.configure(image=self.img_tk)
+                self.master.update()
+                self.t1l1_width = self.lbl3.winfo_width()
+                self.t1l1_height = self.lbl3.winfo_height()
+                self.resized_im = self.resizeIm(self.img_im,self.t1l1_width,self.t1l1_height)
+                self.t1i1_width,self.t1i1_height = self.resized_im.size
+                self.img_tk = self.im2tk(self.resized_im)
+                self.lbl3.configure(image=self.img_tk)
 
     def resizeIm(self,image,width_restrict,height_restrict):
         ratio_h = height_restrict/self.org_height
@@ -211,7 +212,6 @@ class GuiClass(Frame):
         self.crop_tk = self.im2tk(self.crop_im)
         self.t1l1.configure(image=self.crop_tk)
     def undoCrop(self,event=None):
-        print("undo crop function!")
         self.draw_np = np.copy(self.org_np)
         self.img_im = self.np2im(self.draw_np)
         self.resized_im = self.resizeIm(self.img_im,self.t1l1_width,self.t1l1_height)
