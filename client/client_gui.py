@@ -11,9 +11,13 @@ pip3 install Pillow, opencv-python
 
 '''
 TODO:
+Add keyinterrupt "Ctrl-c" shutting down the tkinter window
+Add Enter key "submitting" the cropped image
 Add zooming feature
 Add preview of cropped image
-Add dynamic movement of rectangle
+Add key bindings for moving targets numbers
+Add sample pic of targets
+Add quantity of each target pictures
 '''
 from tkinter import *
 from tkinter import ttk
