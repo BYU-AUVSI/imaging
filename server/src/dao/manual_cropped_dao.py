@@ -55,7 +55,6 @@ class ManualCroppedDAO(BaseDAO):
             return None
         return manual_cropped(selectedImage)
 
-
     def getNextImage(self):
         # step 1: claim an image if possible
         # this gets the oldest (aka lowest) id with tapped = False
@@ -80,6 +79,23 @@ class ManualCroppedDAO(BaseDAO):
         # failed to reserve an image (none available)
         cur.close()
         return None
+
+    def getAll(self):
+        """
+        get all the images currently in this table
+        """
+        selectAllSql = """SELECT id, image_id, date_part('epoch', time_stamp), cropped_path, crop_coordinate_tl, crop_coordinate_br, tapped
+            FROM manual_cropped
+            ORDER BY id;"""
+        
+        cur = self.conn.cursor()
+        cur.execute(selectAllSql)
+        results = []
+        for row in cur:
+            manualCroppedRow = manual_cropped(row)
+            results.append(manualCroppedRow)
+
+        return results
 
     def updateImageByUID(self, id, updateContent):
         # push json into the manual_cropped model. this will
