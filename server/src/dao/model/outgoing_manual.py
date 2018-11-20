@@ -1,5 +1,20 @@
 class outgoing_manual:
 
+    def __init__(self, tableValues=None):
+        if tableValues is not None:
+            self.id = tableValues[0]
+            self.type = tableValues[1]
+            self.latitude = tableValues[2]
+            self.longitude = tableValues[3]
+            self.orientation = tableValues[4]
+            self.shape = tableValues[5]
+            self.background_color = tableValues[6]
+            self.alphanumeric = tableValues[7]
+            self.alphanumeric_color = tableValues[8]
+            self.description = tableValues[9]
+            self.cropped_path = tableValues[10]
+            self.submitted = tableValues[11]
+
     @property
     def id(self):
         return self._id
