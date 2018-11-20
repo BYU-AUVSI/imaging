@@ -6,10 +6,10 @@ echo "======================================="
 read -p "Install using conda? (Y/N): " confirm
 
 if [ $confirm = "Y" -o $confirm = "y" ]; then
-    conda install --yes --file pip-requirements.txt
+    conda env create -f conda-requirements.yaml
     while read requirement; do conda install --yes $requirement; done < pip-requirements.txt
 elif [ $confirm = "N" -o $confirm = "n" ]; then
-    pip install -r pip-requirements.txt
+    pip3 install -r pip-requirements.txt
 else
     echo "Sorry, Im a stupid script who doesn't understand anything beyond exactly 'Y' or 'N'"
 fi
