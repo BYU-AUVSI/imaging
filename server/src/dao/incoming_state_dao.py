@@ -7,7 +7,7 @@ class IncomingStateDAO(BaseDAO):
     def __init__(self, configFilePath):
         super(IncomingStateDAO, self).__init__(configFilePath)
 
-    def addGps(self, incomingState):
+    def addState(self, incomingState):
         """
         Adds the specified image to the incoming_image table
         @type incomingState: incoming_state
@@ -21,7 +21,7 @@ class IncomingStateDAO(BaseDAO):
 
     def getStateById(self, id):
         # note we need the date_part to convert the time_stamp back to unix epoch time
-        selectGpsById = """SELECT id, date_part('epoch', time_stamp), roll, pitch, yaw
+        selectStateById = """SELECT id, date_part('epoch', time_stamp), roll, pitch, yaw
             FROM incoming_State
             WHERE id = %s LIMIT 1;"""
         selectedState = super(IncomingStateDAO, self).basicTopSelect(selectStateById, (id,))
