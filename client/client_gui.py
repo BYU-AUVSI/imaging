@@ -25,7 +25,7 @@ from PIL import Image,ImageTk
 import cv2
 import numpy as np
 import time
-
+from client_rest import getNextRawImage
 
 
 class GuiClass(Frame):
@@ -33,7 +33,11 @@ class GuiClass(Frame):
     def __init__(self,master=None):
         Frame.__init__(self,master=None)
         self.master = master # gui master handle
-        self.master.attributes('-zoomed', True) # maximizes screen
+        try:
+            self.master.attributes('-zoomed', True) # maximizes screen
+        except (Exception) as e:
+            w = Toplevel(root)
+            w.state('zoomed')
         self.master.title("AUVSI COMPETITION 2019: CLASSIFICATION")
 
         n = ttk.Notebook(self.master) # create tabs
@@ -45,7 +49,7 @@ class GuiClass(Frame):
         # itialize variables
         self.initialized = False
         self.target_number = 0
-        self.org_np = self.get_image('frame0744.jpg')
+        self.org_np = getNextRawImage() #self.get_image('frame0744.jpg')
         self.draw_np = np.copy(self.org_np)
         self.img_im = self.np2im(self.draw_np)
         self.crop_im = self.img_im.copy()
