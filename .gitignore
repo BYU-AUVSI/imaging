@@ -1,1 +1,3 @@
 .DS_Store
+autonomous/generate_dataset/.idea/*
+autonomous/generate_dataset/pics/*
