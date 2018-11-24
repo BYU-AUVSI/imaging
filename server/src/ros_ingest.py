@@ -12,6 +12,8 @@ import rospy
 import cv2
 import numpy as np
 import os, time # for img saving
+import subprocess, sys # for starting roscore
+from config import defaultConfigPath, config
 from dao.incoming_image_dao import IncomingImageDAO
 from dao.incoming_gps_dao import IncomingGpsDAO
 from dao.incoming_state_dao import IncomingStateDAO
@@ -25,12 +27,12 @@ from dao.model.incoming_state import incoming_state
 
 class RosIngester:
 
-    STATE_SAVE_EVERY = 10 # save every 10 state messages (otherwise we get wayyy to many)
+    STATE_SAVE_EVERY = 10 # save every 10th state messages (otherwise we get wayyy to many)
 
     def __init__(self):
         print("Startup ros ingester...")
-        currentPath = os.path.dirname(os.path.realpath(__file__)) 
-        configPath = rospy.get_param('~config_path', currentPath + '/../conf/config.ini')
+        currentPath = os.path.dirname(os.path.realpath(__file__))
+        configPath = rospy.get_param('~config_path', defaultConfigPath())
         startTs = str(int(time.time()))
 
         # gps ingestion setup:
@@ -122,6 +124,12 @@ class RosIngester:
             print("ts: {}, path: {}, manual_tap: {}, autonomous_tap: {}".format(*self.img_msg_.insertValues()))
 
 def main():
+    # attempt to start the roscore
+    # print('Start roscore...')
+    # rosConf = config(defaultConfigPath(), 'ros')
+    # os.environ['ROS_MASTER_URI'] = rosConf['master']
+    # subprocess.check_call(['roscore'])
+
     # initialize the node
     rospy.init_node('imaging_ingester')
 

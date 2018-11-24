@@ -12,7 +12,7 @@ def allowedFileType(filename):
     #   2) stuff the the right of the furthest . (rsplit) is one of our allowed extensions
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-def defaultSqlConfigPath():
+def defaultConfigPath():
     return os.path.dirname(os.path.realpath(__file__))  + '/../conf/config.ini'
 
 def getLatestBaseImgDir():

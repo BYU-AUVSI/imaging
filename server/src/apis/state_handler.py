@@ -1,4 +1,4 @@
-from config import defaultSqlConfigPath
+from config import defaultConfigPath
 from dao.incoming_state_dao import IncomingStateDAO
 from flask import jsonify
 from flask_restplus import Namespace, Resource
@@ -11,7 +11,7 @@ class StateIdHandler(Resource):
     @api.doc(description='Get the state measurement with the given id')
     @api.doc(responses={200:'OK', 404:'Id not found'})
     def get(self, id):
-        dao = IncomingStateDAO(defaultSqlConfigPath())
+        dao = IncomingStateDAO(defaultConfigPath())
         state = dao.getStateById(id)
 
         if state is None:
@@ -25,7 +25,7 @@ class StateTsHandler(Resource):
     @api.doc(description='Get the state measurement in the database closest to the provided time_stamp')
     @api.doc(responses={200:'OK', 404:'No state measurement found'})
     def get(self, ts):
-        dao = IncomingStateDAO(defaultSqlConfigPath())
+        dao = IncomingStateDAO(defaultConfigPath())
         state = dao.getStateByClosestTS(ts)
 
         if state is None:

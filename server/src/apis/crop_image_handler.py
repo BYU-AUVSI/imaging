@@ -2,7 +2,7 @@ from flask import jsonify, make_response, send_file, abort, request
 from flask_restplus import Namespace, Resource, fields
 from dao.manual_cropped_dao import ManualCroppedDAO
 from dao.model.manual_cropped import manual_cropped
-from config import defaultSqlConfigPath, defaultCroppedImgPath, allowedFileType
+from config import defaultConfigPath, defaultCroppedImgPath, allowedFileType
 from werkzeug.utils import secure_filename
 import os, time
 
@@ -18,7 +18,7 @@ class CroppedImageHandler(Resource):
     @api.header('X-Image-Id', 'Id of the image returned')
     def get(self):
         # Get content:
-        dao = ManualCroppedDAO(defaultSqlConfigPath())
+        dao = ManualCroppedDAO(defaultConfigPath())
         image  = dao.getNextImage()
 
         # response validation
@@ -59,7 +59,7 @@ class CroppedImageHandler(Resource):
         cropped.time_stamp = int(time.time())
         cropped.cropped_path = full_path
 
-        dao = ManualCroppedDAO(defaultSqlConfigPath())
+        dao = ManualCroppedDAO(defaultConfigPath())
         # resultingId is the manual_cropped.id value given to this image (abstracted from client)
         resultingId = dao.addImage(cropped)
         
@@ -80,7 +80,7 @@ class SpecificCroppedImageHandler(Resource):
     @api.header('X-Crop-Id', 'Crop Id of the image returned. Will match id parameter image was found')
     def get(self, image_id):
         # Get content:
-        dao = ManualCroppedDAO(defaultSqlConfigPath())
+        dao = ManualCroppedDAO(defaultConfigPath())
         image = dao.getImageByUID(image_id)
 
         # response validation:
@@ -96,7 +96,7 @@ class SpecificCroppedImageHandler(Resource):
 class SpecificCroppedImageInfoHandler(Resource):
     @api.doc(description='Get information about a cropped image from the database.')
     def get(self, image_id):
-        dao = ManualCroppedDAO(defaultSqlConfigPath())
+        dao = ManualCroppedDAO(defaultConfigPath())
         image = dao.getImageByUID(image_id)
 
         if image is None:
@@ -112,7 +112,7 @@ class SpecificCroppedImageInfoHandler(Resource):
         if 'image_id' in content:
             abort(400, 'Updating image_id is forbidden!')
 
-        dao = ManualCroppedDAO(defaultSqlConfigPath())
+        dao = ManualCroppedDAO(defaultConfigPath())
         result = dao.updateImageByUID(image_id, content)
         if result == -1:
             return {'message': 'No image with id {} found to update (or was there a server error?)'.format(image_id)}, 404
@@ -125,7 +125,7 @@ class AllCroppedImagesHandler(Resource):
     @api.doc(description='Get info on all the cropped images currently in the queue')
     # support getting only tapped, and getting from list
     def get(self):
-        dao = ManualCroppedDAO(defaultSqlConfigPath())
+        dao = ManualCroppedDAO(defaultConfigPath())
         manualCroppedList = dao.getAll()
 
         if manualCroppedList == None or not manualCroppedList:
