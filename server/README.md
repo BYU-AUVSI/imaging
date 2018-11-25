@@ -2,56 +2,34 @@
 
 The is the code to run the server. We should fill this readme out more.
 
-## API
+**Roadmap- ros_ingester / DAO -> REST API -> dockerize**
 
-**NOTE: In all your requests you need to specify the 'Manual' HTTP header as to whether this is an autonomous or manual imaging request.**
+![server overview](docs/img/serverFlowchart.png)
 
-The HTTP REST API is used by manual and autonomous imaging to communicate with the central imaging database. Here are a list of available methods:
+The server has 3 main jobs:
 
-### Get Image
+1. Ingest all new data from the ROS network into the database.
+2. Service requests from the manual and autonomous classification clients
+3. Submit completed data to the interop relay/server (TODO: idk if interop will be integrated with this yet)
 
-GET /api/image/(int:id)
+## Structure
 
-Example request:
+`conf/` Holds all configurable parameters for the server. Make sure to set these up properly
 
-```http
-GET /api/image/42 HTTP/1.1
-Host: 192.168.1.10:8000
-Manual: true
-```
+`docs/` Documentation stuff to help describe what the heck is happening
 
-### Get Next Uncropped Image
+`setup/` Contains scripts and helper files to setup the server on a fresh machine.
 
-Retrieves the next raw image that has not yet been cropped or skipped.
+`src/` All source code for the server
 
-GET /api/image
+## REST API
 
-*TODO: response needs to have image id in header*
+All API documentation can be found on the root of the website. (ie: http://localhost:5000 if running on your machine)
 
-### Submit Cropped Image
+## Installation
 
-Once an image is cropped, you can post it back to the server.
+TODO: easy installation with docker, or the dev_setup.sh script
 
-POST /api/image/cropped/(int:id)
+## Motivation
 
-### Get Cropped Image
-
-GET /api/image/cropped/(int:id)
-
-### Get Next Cropped Image
-
-Retrieves the next cropped image that has not yet been classified
-
-GET /api/image/cropped
-
-### Submit Classified Image
-
-Once an image has been classified, post it back to the server.
-
-POST /api/image/classify/(int:id)
-
-### Get All Raw Images
-
-Returns the **ids** of all raw images that have not been cropped
-
-GET /api/image/all
+The above setup minimizes imaging's dependence on ROS, thus increasing transferability. Want to use something other than ROS in the future? Then all you need to do is change the < 100 line ros_ingest.py script, (which describes how to pull data in from the plane) and you're good to go!
