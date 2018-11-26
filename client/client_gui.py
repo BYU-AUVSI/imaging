@@ -41,7 +41,6 @@ class GuiClass(Frame):
         self.master.bind("<Escape>",self.close_window) # press ESC to exit
         self.master.bind("<Configure>",self.resizeEvent)
 
-
         # itialize variables
         self.initialized = False
         self.target_number = 0
@@ -152,7 +151,7 @@ class GuiClass(Frame):
         self.img_tk = self.im2tk(self.resized_im)
         self.lbl3.configure(image=self.img_tk)
     def close_window(self,event):
-        self.master.withdraw()
+        self.master.destroy()
         sys.exit()
     def mouse_release(self,event):
         if self.cropped == True:
@@ -239,5 +238,9 @@ class GuiClass(Frame):
 
 if __name__ == "__main__":
     root = Tk()
-    example = GuiClass(root)
-    example.mainloop()
+    gui = GuiClass(root)
+    try:
+        gui.mainloop()
+    except KeyboardInterrupt:
+        root.destroy()
+        sys.exit()
