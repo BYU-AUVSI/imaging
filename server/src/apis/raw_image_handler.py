@@ -2,7 +2,7 @@ from flask import send_file, make_response, request, abort, jsonify
 import os
 from flask_restplus import Namespace, Resource, inputs
 from dao.incoming_image_dao import IncomingImageDAO
-from config import defaultSqlConfigPath
+from config import defaultConfigPath
 
 api  = Namespace('image/raw', description="All raw image functions route through here")
 
@@ -26,7 +26,7 @@ class RawImageHandler(Resource):
             abort(400, 'Failed to interpret X-Manual header as boolean!')
 
         # Get Content
-        dao = IncomingImageDAO(defaultSqlConfigPath())
+        dao = IncomingImageDAO(defaultConfigPath())
         image = dao.getNextImage(manual)
 
         # response validation
@@ -42,7 +42,7 @@ class SpecificRawImageHandler(Resource):
     @api.doc(responses={200:'OK', 404:'Id not found'})
     @api.header('X-Image-Id', 'Id of the image returned. Will match id parameter if image was found')
     def get(self, image_id):
-        dao = IncomingImageDAO(defaultSqlConfigPath())
+        dao = IncomingImageDAO(defaultConfigPath())
         image  = dao.getImage(image_id)
         if image is None:
             return {'message': 'Failed to locate raw id {}'.format(id)}, 404
@@ -57,7 +57,7 @@ class SpecificRawImageInfoHandler(Resource):
     @api.doc(description='Get information about a raw image from the database')
     @api.doc(responses={200:'OK', 404:'Id not found'})
     def get(self, image_id):
-        dao = IncomingImageDAO(defaultSqlConfigPath())
+        dao = IncomingImageDAO(defaultConfigPath())
         image = dao.getImage(image_id)
 
         if image is None:

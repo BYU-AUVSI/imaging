@@ -1,5 +1,24 @@
 class outgoing_manual:
 
+    def __init__(self, tableValues=None, json=None):
+        if tableValues is not None:
+            self.id = tableValues[0]
+            self.image_id = tableValues[1]
+            self.type = tableValues[2]
+            self.latitude = tableValues[3]
+            self.longitude = tableValues[4]
+            self.orientation = tableValues[5]
+            self.shape = tableValues[6]
+            self.background_color = tableValues[7]
+            self.alphanumeric = tableValues[8]
+            self.alphanumeric_color = tableValues[9]
+            self.description = tableValues[10]
+            self.submitted = tableValues[11]
+        elif json is not None:
+            for prop in self.allProps():
+                if prop in json:
+                    setattr(self, prop, json[prop])
+
     @property
     def id(self):
         return self._id
@@ -7,6 +26,14 @@ class outgoing_manual:
     @id.setter
     def id(self, id):
         self._id = id
+
+    @property
+    def image_id(self):
+        return self._image_id
+
+    @image_id.setter
+    def image_id(self, image_id):
+        self._image_id = image_id
 
     @property
     def cropped_id(self):
@@ -89,17 +116,22 @@ class outgoing_manual:
         self._description = description
 
     @property
-    def cropped_path(self):
-        return self._cropped_path
-
-    @cropped_path.setter
-    def cropped_path(self, cropped_path):
-        self._cropped_path = cropped_path
-
-    @property
     def submitted(self):
         return self._Submitted
 
     @submitted.setter
     def submitted(self, Submitted):
         self._Submitted = Submitted
+
+    # TODO: this is hacky and i hate it
+    def allProps(self):
+        return ['id', 'image_id', 'type', 'latitude', 'longitude', 'orientation', 'shape', 'background_color', 'alphanumeric', 'alphanumeric_color', 'description', 'submitted']
+
+    def toDict(self, exclude=None):
+        dict = {}
+        for attr, value in self.__dict__.items():
+            corrected_name = attr[1:] # remove first underscore
+
+            if exclude is None or corrected_name not in exclude:
+                dict[corrected_name] = value.__str__()
+        return dict

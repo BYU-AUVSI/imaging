@@ -12,30 +12,45 @@ import rospy
 import cv2
 import numpy as np
 import os, time # for img saving
+import subprocess, sys # for starting roscore
+from config import defaultConfigPath, config
 from dao.incoming_image_dao import IncomingImageDAO
 from dao.incoming_gps_dao import IncomingGpsDAO
+from dao.incoming_state_dao import IncomingStateDAO
 # ROS messages:
 from inertial_sense.msg import GPS
+from rosplane_msgs.msg import State
 from sensor_msgs.msg import CompressedImage
 from dao.model.incoming_gps import incoming_gps
 from dao.model.incoming_image import incoming_image
+from dao.model.incoming_state import incoming_state
 
 class RosIngester:
 
+    STATE_SAVE_EVERY = 10 # save every 10th state messages (otherwise we get wayyy to many)
+
     def __init__(self):
         print("Startup ros ingester...")
-        currentPath = os.path.dirname(os.path.realpath(__file__)) 
-        configPath = rospy.get_param('~config_path', currentPath + '/../conf/config.ini')
+        currentPath = os.path.dirname(os.path.realpath(__file__))
+        configPath = rospy.get_param('~config_path', defaultConfigPath())
         startTs = str(int(time.time()))
 
-        self.img_dao_ = IncomingImageDAO(configPath)
+        # gps ingestion setup:
         self.gps_dao_ = IncomingGpsDAO(configPath)
         self.gps_subscriber_ = rospy.Subscriber('/gps', GPS, self.gpsCallback, queue_size=10)
         self.gps_msg_ = incoming_gps()
+        # imageing ingestion setup:
+        self.img_dao_ = IncomingImageDAO(configPath)
         self.img_subscriber_ = rospy.Subscriber("/other_camera/image_raw/compressed", CompressedImage, self.imgCallback,  queue_size = 10)
         self.img_msg_ = incoming_image()
         self.img_msg_.manual_tap = False
         self.img_msg_.autonomous_tap = False
+
+        # state ingestion setup:
+        self.state_dao_ = IncomingStateDAO(configPath)
+        self.state_subscriber_ = rospy.Subscriber('/state', State, self.stateCallback, queue_size=10)
+        self.state_msg_ = incoming_state()
+        self.state_interval_ = 0
         
         basePath = currentPath + '/../images/' + startTs
         print("Base dir for images:: {}".format(basePath))
@@ -67,7 +82,25 @@ class RosIngester:
             print("ts: {}, lat: {}, lon: {}, alt: {}".format(*self.gps_msg_.insertValues()))
 
     def stateCallback(self, msg):
-        print("state callback")
+        """
+        Ros subscriber callback. Subscribes to the /state rosplane topic. Passes the roll,
+        pitch and yaw angle to be saved by the DAO.
+        """
+        self.state_interval_ = (self.state_interval_ + 1) % self.STATE_SAVE_EVERY
+        if self.state_interval_ != 0:
+            return
+
+        ts = msg.header.stamp.to_sec()
+        self.state_msg_.time_stamp = ts
+        # get rpy ANGLES
+        self.state_msg_.roll = msg.phi
+        self.state_msg_.pitch = msg.theta
+        self.state_msg_.yaw = msg.psi
+
+        resultingId = self.state_dao_.addState(self.state_msg_)
+        if resultingId == -1:
+            print("FAILED to insert state measurement:")
+            print("ts: {}, roll: {}, pitch: {}, yaw: {}".format(*self.state_msg_.insertValues()))
 
     def imgCallback(self, msg):
         """
@@ -91,6 +124,12 @@ class RosIngester:
             print("ts: {}, path: {}, manual_tap: {}, autonomous_tap: {}".format(*self.img_msg_.insertValues()))
 
 def main():
+    # attempt to start the roscore
+    # print('Start roscore...')
+    # rosConf = config(defaultConfigPath(), 'ros')
+    # os.environ['ROS_MASTER_URI'] = rosConf['master']
+    # subprocess.check_call(['roscore'])
+
     # initialize the node
     rospy.init_node('imaging_ingester')
 

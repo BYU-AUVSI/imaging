@@ -248,13 +248,13 @@ function getStar(x, y, w)
 function getQuarterCircle(x, y, r)
 {
     var a = [];
-    var r2 = (4*r)/(3*Math.PI); // Center of quarter circle
-    a.push([x-r2, y-r2]); // Corner
-    var numSides = 5*DIM_; // How defined the curve is
+    var r2 = (4 * r) / (3 * Math.PI); // Center of quarter circle
+    a.push([x - r2, y - r2]); // Corner
+    var numSides = 5 * DIM_; // How defined the curve is
     for (var i = 0; i < numSides; i++)
     {
-        var x_coor = r * Math.cos(Math.PI/2.0 * i / numSides) + x - r2;
-        var y_coor = r * Math.sin(Math.PI/2.0 * i / numSides) + y - r2;
+        var x_coor = r * Math.cos(Math.PI / 2.0 * i / numSides) + x - r2;
+        var y_coor = r * Math.sin(Math.PI / 2.0 * i / numSides) + y - r2;
         a.push([x_coor, y_coor]);
     }
     return a;
@@ -263,8 +263,8 @@ function getQuarterCircle(x, y, r)
 function getSemiCircle(x, y, r)
 {
     var a = [];
-    var r2 = (4*r)/(3*Math.PI); // Center of semi circle
-    var numSides = 10*DIM_; // How defined the curve is
+    var r2 = (4 * r) / (3 * Math.PI); // Center of semi circle
+    var numSides = 10 * DIM_; // How defined the curve is
     for (var i = 0; i < numSides; i++)
     {
         var x_coor = r * Math.cos(Math.PI * i / numSides) + x;
@@ -283,20 +283,22 @@ const BLUR_STEP_ = 2; // amount of blur to apply at each level
 //const BASE_SAVE_DIR_ = '~/Desktop/Generated/'; //base directory to save into
 const BASE_SAVE_DIR_ = 'C:\\Users\\Brandon\\Documents\\imaging\\autonomous\\generate_dataset\\pics\\' // base directory to save into
 
-// var alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
-var alphabet = "A".split(""); // test size alphabet
+var isTesting = true;
+
+var alphabet = [];
+if (isTesting)
+{
+    alphabet = "A".split(""); // test size alphabet
+}
+else
+{
+    alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+}
 var dimHalf = DIM_ / 2;
 
 // set script units to pixels:
 preferences.rulerUnits = Units.PIXELS;
 var baseDoc = app.documents.add(DIM_, DIM_); // create new document
-
-// setup the text layer
-var textLayer = baseDoc.artLayers.add();
-textLayer.kind = LayerKind.TEXT;
-var text = textLayer.textItem;
-text.size = 28;
-var textColor = new SolidColor(); // create text color
 
 
 var whiteArrayVerbose = ["white",
@@ -375,59 +377,86 @@ var brownArrayVerbose = ["brown",
 
 var brownArray = ["brown", "8b4513", "a0522d"];
 
-var colorArrays = [whiteArray, blackArray, grayArray, redArray, blueArray,
-                   greenArray, yellowArray, purpleArray, orangeArray, brownArray];
+var colorArrays = [];
+if (isTesting)
+{
+    colorArrays = [[whiteArray[0], whiteArray[1]], [blackArray[0], blackArray[1]]]; // test size color
 
-// var colorArrays = [[whiteArray[0], whiteArray[1]], [blackArray[0], blackArray[1]]]; // test size color
+}
+else
+{
+    colorArrays = [whiteArray, blackArray, grayArray, redArray, blueArray,
+        greenArray, yellowArray, purpleArray, orangeArray, brownArray];
+}
 
-var triangleB = DIM_*0.75;      // base of triangle
+
+var triangleB = DIM_ * 0.75;      // base of triangle
 var triangleH = triangleB;      // height of triangle
-var squareR   = DIM_ * 0.45;    // radius of square
+var squareR = DIM_ * 0.45;    // radius of square
 var pentagonR = DIM_ * 0.45;    // radius of pentagon
-var hexagonR  = DIM_ * 0.45;    // radius of hexagon
+var hexagonR = DIM_ * 0.45;    // radius of hexagon
 var heptagonR = DIM_ * 0.45;    // radius of heptagon
-var octagonR  = DIM_ * 0.45;    // radius of octagon
-var crossW    = DIM_ * 0.9;     // width of cross
-var starW     = DIM_ * 0.9;     // width of star
-var quarterCircleR = DIM_*0.75; // radius of quarter circle
-var semiCircleR = DIM_*0.45;    // radius of semi circle
-var shapesArray =
-    [
-        ["triangle-0", getTriangle(X_CENTER_, Y_CENTER_, triangleB, triangleH)], // Triangle pointing up
-        // ["triangle-90", rotateShape(X_CENTER_, Y_CENTER_, getTriangle(X_CENTER_, Y_CENTER_, triangleB, triangleH), 90)],  // Triangle pointing left
-        // ["triangle-180", rotateShape(X_CENTER_, Y_CENTER_, getTriangle(X_CENTER_, Y_CENTER_, triangleB, triangleH), 180)],// Triangle pointing down
-        // ["triangle-270", rotateShape(X_CENTER_, Y_CENTER_, getTriangle(X_CENTER_, Y_CENTER_, triangleB, triangleH), 270)],// Triangle pointing right
-        ["square", getPolygon(X_CENTER_, Y_CENTER_, 4, squareR, 45)],    // Flat side up and down
-        ["square-45", getPolygon(X_CENTER_, Y_CENTER_, 4, squareR, 0)]   // Diamond shape
-        ["rectangle-long", getRectangle(X_CENTER_, Y_CENTER_, DIM_*0.5, DIM_)],             // Long rectangle
-        ["rectangle-wide", getRectangle(X_CENTER_, Y_CENTER_, DIM_, DIM_*0.5)],             // Wide rectangle
-        ["trapezoid-up", getTrapezoid(X_CENTER_, Y_CENTER_, DIM_*0.5, DIM_, DIM_*0.5)],     // Short side up
-        ["trapezoid-down", getTrapezoid(X_CENTER_, Y_CENTER_, DIM_, DIM_*0.5, DIM_*0.5)],   // Short side down
-        ["pentagon-0", getPolygon(X_CENTER_, Y_CENTER_, 5, pentagonR, 90)],        // Pointing up
-        // ["pentagon-90", getPolygon(X_CENTER_, Y_CENTER_, 5, pentagonR, 0)],        // Pointing right
-        // ["pentagon-180", getPolygon(X_CENTER_, Y_CENTER_, 5, pentagonR, -90)],     // Pointing down
-        // ["pentagon-270", getPolygon(X_CENTER_, Y_CENTER_, 5, pentagonR, 180)],     // Pointing left
-        ["hexagon-0", getPolygon(X_CENTER_, Y_CENTER_, 6, hexagonR, 0)],    // Flat side up and down
-        // ["hexagon-90", getPolygon(X_CENTER_, Y_CENTER_, 6, hexagonR, 90)],  // Flat side left and right
-        // ["heptagon-0", getPolygon(X_CENTER_, Y_CENTER_, 7, heptagonR, 90)],        // Pointing up
-        // ["heptagon-180", getPolygon(X_CENTER_, Y_CENTER_, 7, heptagonR, -90)],     // Pointing down
-        ["octagon-0", getPolygon(X_CENTER_, Y_CENTER_, 8, octagonR, 22.5)],       // Flat side up and down
-        // ["octagon-23", getPolygon(X_CENTER_, Y_CENTER_, 8, octagonR, 0)],         // Flat side left and right
-        ["cross-0", getCross(X_CENTER_, Y_CENTER_, crossW)],            // Regular cross
-        ["cross-45", rotateShape(X_CENTER_, Y_CENTER_, getCross(X_CENTER_, Y_CENTER_, crossW), 45)],    // Cross rotated like an X
-        ["star-0", getStar(X_CENTER_, Y_CENTER_, starW)],                                               // Star pointing up
-        // ["star-90", rotateShape(X_CENTER_, Y_CENTER_, getStar(X_CENTER_, Y_CENTER_, starW), -90)],     // Star pointing right
-        // ["star-180", rotateShape(X_CENTER_, Y_CENTER_, getStar(X_CENTER_, Y_CENTER_, starW), 180)],     // Star pointing down
-        // ["star-270", rotateShape(X_CENTER_, Y_CENTER_, getStar(X_CENTER_, Y_CENTER_, starW), 90)],     // Star pointing left
-        ["quarterCircle-0", getQuarterCircle(X_CENTER_, Y_CENTER_, quarterCircleR)],
-        // ["quarterCircle-90",rotateShape(X_CENTER_, Y_CENTER_, getQuarterCircle(X_CENTER_, Y_CENTER_, quarterCircleR), 90)],
-        // ["quarterCircle-180",rotateShape(X_CENTER_, Y_CENTER_, getQuarterCircle(X_CENTER_, Y_CENTER_, quarterCircleR), 180)],
-        // ["quarterCircle-270",rotateShape(X_CENTER_, Y_CENTER_, getQuarterCircle(X_CENTER_, Y_CENTER_, quarterCircleR), 270)],
-        ["semiCircle-0", getSemiCircle(X_CENTER_, Y_CENTER_, semiCircleR)],
-        // ["semiCircle-90",rotateShape(X_CENTER_, Y_CENTER_, getSemiCircle(X_CENTER_, Y_CENTER_, semiCircleR), 90)],
-        // ["semiCircle-180",rotateShape(X_CENTER_, Y_CENTER_, getSemiCircle(X_CENTER_, Y_CENTER_, semiCircleR), 180)],
-        // ["semiCircle-270",rotateShape(X_CENTER_, Y_CENTER_, getSemiCircle(X_CENTER_, Y_CENTER_, semiCircleR), 270)],
-    ];
+var octagonR = DIM_ * 0.45;    // radius of octagon
+var crossW = DIM_ * 0.9;     // width of cross
+var starW = DIM_ * 0.9;     // width of star
+var quarterCircleR = DIM_ * 0.75; // radius of quarter circle
+var semiCircleR = DIM_ * 0.45;    // radius of semi circle
+
+var shapesArray = [];
+if (isTesting)
+{
+    shapesArray = [["triangle-0", getTriangle(X_CENTER_, Y_CENTER_, triangleB, triangleH)]]; // Triangle pointing up
+}
+else
+{
+    shapesArray =
+        [
+            ["triangle-0", getTriangle(X_CENTER_, Y_CENTER_, triangleB, triangleH)], // Triangle pointing up
+            // ["triangle-90", rotateShape(X_CENTER_, Y_CENTER_, getTriangle(X_CENTER_, Y_CENTER_, triangleB, triangleH), 90)],  // Triangle pointing left
+            // ["triangle-180", rotateShape(X_CENTER_, Y_CENTER_, getTriangle(X_CENTER_, Y_CENTER_, triangleB, triangleH), 180)],// Triangle pointing down
+            // ["triangle-270", rotateShape(X_CENTER_, Y_CENTER_, getTriangle(X_CENTER_, Y_CENTER_, triangleB, triangleH), 270)],// Triangle pointing right
+            ["square", getPolygon(X_CENTER_, Y_CENTER_, 4, squareR, 45)],    // Flat side up and down
+            ["square-45", getPolygon(X_CENTER_, Y_CENTER_, 4, squareR, 0)]   // Diamond shape
+                ["rectangle-long", getRectangle(X_CENTER_, Y_CENTER_, DIM_ * 0.5, DIM_)],             // Long rectangle
+            ["rectangle-wide", getRectangle(X_CENTER_, Y_CENTER_, DIM_, DIM_ * 0.5)],             // Wide rectangle
+            ["trapezoid-up", getTrapezoid(X_CENTER_, Y_CENTER_, DIM_ * 0.5, DIM_, DIM_ * 0.5)],     // Short side up
+            ["trapezoid-down", getTrapezoid(X_CENTER_, Y_CENTER_, DIM_, DIM_ * 0.5, DIM_ * 0.5)],   // Short side down
+            ["pentagon-0", getPolygon(X_CENTER_, Y_CENTER_, 5, pentagonR, 90)],        // Pointing up
+            // ["pentagon-90", getPolygon(X_CENTER_, Y_CENTER_, 5, pentagonR, 0)],        // Pointing right
+            // ["pentagon-180", getPolygon(X_CENTER_, Y_CENTER_, 5, pentagonR, -90)],     // Pointing down
+            // ["pentagon-270", getPolygon(X_CENTER_, Y_CENTER_, 5, pentagonR, 180)],     // Pointing left
+            ["hexagon-0", getPolygon(X_CENTER_, Y_CENTER_, 6, hexagonR, 0)],    // Flat side up and down
+            // ["hexagon-90", getPolygon(X_CENTER_, Y_CENTER_, 6, hexagonR, 90)],  // Flat side left and right
+            // ["heptagon-0", getPolygon(X_CENTER_, Y_CENTER_, 7, heptagonR, 90)],        // Pointing up
+            // ["heptagon-180", getPolygon(X_CENTER_, Y_CENTER_, 7, heptagonR, -90)],     // Pointing down
+            ["octagon-0", getPolygon(X_CENTER_, Y_CENTER_, 8, octagonR, 22.5)],       // Flat side up and down
+            // ["octagon-23", getPolygon(X_CENTER_, Y_CENTER_, 8, octagonR, 0)],         // Flat side left and right
+            ["cross-0", getCross(X_CENTER_, Y_CENTER_, crossW)],            // Regular cross
+            ["cross-45", rotateShape(X_CENTER_, Y_CENTER_, getCross(X_CENTER_, Y_CENTER_, crossW), 45)],    // Cross rotated like an X
+            ["star-0", getStar(X_CENTER_, Y_CENTER_, starW)],                                               // Star pointing up
+            // ["star-90", rotateShape(X_CENTER_, Y_CENTER_, getStar(X_CENTER_, Y_CENTER_, starW), -90)],     // Star pointing right
+            // ["star-180", rotateShape(X_CENTER_, Y_CENTER_, getStar(X_CENTER_, Y_CENTER_, starW), 180)],     // Star pointing down
+            // ["star-270", rotateShape(X_CENTER_, Y_CENTER_, getStar(X_CENTER_, Y_CENTER_, starW), 90)],     // Star pointing left
+            ["quarterCircle-0", getQuarterCircle(X_CENTER_, Y_CENTER_, quarterCircleR)],
+            // ["quarterCircle-90",rotateShape(X_CENTER_, Y_CENTER_, getQuarterCircle(X_CENTER_, Y_CENTER_, quarterCircleR), 90)],
+            // ["quarterCircle-180",rotateShape(X_CENTER_, Y_CENTER_, getQuarterCircle(X_CENTER_, Y_CENTER_, quarterCircleR), 180)],
+            // ["quarterCircle-270",rotateShape(X_CENTER_, Y_CENTER_, getQuarterCircle(X_CENTER_, Y_CENTER_, quarterCircleR), 270)],
+            ["semiCircle-0", getSemiCircle(X_CENTER_, Y_CENTER_, semiCircleR)],
+            // ["semiCircle-90",rotateShape(X_CENTER_, Y_CENTER_, getSemiCircle(X_CENTER_, Y_CENTER_, semiCircleR), 90)],
+            // ["semiCircle-180",rotateShape(X_CENTER_, Y_CENTER_, getSemiCircle(X_CENTER_, Y_CENTER_, semiCircleR), 180)],
+            // ["semiCircle-270",rotateShape(X_CENTER_, Y_CENTER_, getSemiCircle(X_CENTER_, Y_CENTER_, semiCircleR), 270)],
+        ];
+}
+
+var maxAngle;
+if (isTesting)
+{
+    maxAngle = 90;
+}
+else
+{
+    maxAngle = 360;
+}
 
 var jpegOpts = new JPEGSaveOptions;
 jpegOpts.FormatOptions = FormatOptions.STANDARDBASELINE;
@@ -439,19 +468,6 @@ jpegOpts.quality = 7;
 
 for (var i = 0; i < alphabet.length; i++)
 {
-    text.contents = alphabet[i]; // write letter
-
-    // center text
-    var bounds = textLayer.bounds; //If the font isn't monospaced, our bounds will change with each letter
-    // bound[0], bound[1] is the top left corner
-    // -bounds resets image to top left corner
-    // -bounds[0] + DIM_/2 places left edge in center
-    // (bounds[2] - bounds[0]) / 2 figures out the center of the content in the layer (ie: the letter)
-    //      and subtracts that so the center of the layer content is in the center of the document
-    var xTranslate = (-bounds[0] + dimHalf) - ((bounds[2] - bounds[0]) / 2);
-    var yTranslate = (-bounds[1] + dimHalf) - ((bounds[3] - bounds[1]) / 2);
-    textLayer.translate(xTranslate, yTranslate);
-
     for (var shapeI = 0; shapeI < colorArrays.length; shapeI++)
     {
         var shapeColorName = colorArrays[shapeI][0]; // name of color for naming the file
@@ -473,8 +489,6 @@ for (var i = 0; i < alphabet.length; i++)
             {
                 var shapeName = shapesArray[shapeK][0]; // Name of shape for saving file
                 drawShape(shapesArray[shapeK][1], colorArrays[shapeI][shapeJ]);
-
-                textLayer.move(baseDoc, ElementPlacement.PLACEATBEGINNING); // Place text in the front
                 for (var textI = 0; textI < colorArrays.length; textI++)
                 {
                     var textColorName = colorArrays[textI][0]; // name of color for naming the file
@@ -490,19 +504,48 @@ for (var i = 0; i < alphabet.length; i++)
                             break;
                         }
 
+                        // setup the text layer
+                        var textLayer = baseDoc.artLayers.add();
+                        textLayer.kind = LayerKind.TEXT;
+                        var text = textLayer.textItem;
+                        text.size = 28;
+                        var textColor = new SolidColor(); // create text color
+
+                        text.contents = alphabet[i]; // write letter
+                        textLayer.move(baseDoc, ElementPlacement.PLACEATBEGINNING); // Place text in the front
+
+                        // center text
+                        var bounds = textLayer.bounds; //If the font isn't monospaced, our bounds will change with each letter
+                        // bound[0], bound[1] is the top left corner
+                        // -bounds resets image to top left corner
+                        // -bounds[0] + DIM_/2 places left edge in center
+                        // (bounds[2] - bounds[0]) / 2 figures out the center of the content in the layer (ie: the letter)
+                        //      and subtracts that so the center of the layer content is in the center of the document
+                        var xTranslate = (-bounds[0] + dimHalf) - ((bounds[2] - bounds[0]) / 2);
+                        var yTranslate = (-bounds[1] + dimHalf) - ((bounds[3] - bounds[1]) / 2);
+                        textLayer.translate(xTranslate, yTranslate);
+
                         // Set text color
                         textColor.rgb.hexValue = colorArrays[textI][textJ];
                         textLayer.textItem.color = textColor;
 
-                        // rotate around
-                        var angle = 0; //keeps track of how far we're rotated
-                        do
+                        textLayer.rasterize(RasterizeType.TEXTCONTENTS);
+
+                        for (var j = 0; j < BLUR_LEVELS_; j++)
                         {
-                            // true saves the jpeg as a copy
-                            baseDoc.saveAs(new File(BASE_SAVE_DIR_ + shapeColorName + shapeJ + "-" + shapeName + "-" + textColorName + textJ + "-" + alphabet[i] + "-" + angle + ".jpeg"), jpegOpts, true);
-                            angle += ROTATE_STEP_;
-                            textLayer.rotate(ROTATE_STEP_, AnchorPosition.MIDDLECENTER);
-                        } while (angle < 360);
+                            // rotate around
+                            var angle = 0; //keeps track of how far we're rotated
+                            do
+                            {
+                                // true saves the jpeg as a copy
+                                baseDoc.saveAs(new File(BASE_SAVE_DIR_ + shapeColorName + shapeJ + "-" + shapeName + "-" + textColorName + textJ + "-" + alphabet[i] + "-blur" + j + "-" + angle + ".jpeg"), jpegOpts, true);
+                                angle += ROTATE_STEP_;
+                                textLayer.rotate(ROTATE_STEP_, AnchorPosition.MIDDLECENTER);
+                            } while (angle < maxAngle);
+
+                            textLayer.applyMotionBlur(45, BLUR_STEP_);
+                        } // blur levels
+                        textLayer.remove();
                     } // textJ
                 }// textI
             }// shapeK
