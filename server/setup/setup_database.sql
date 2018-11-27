@@ -59,7 +59,7 @@ CREATE TABLE "public"."manual_cropped" (
 CREATE TABLE "public"."outgoing_manual" (
   id serial NOT NULL,
   image_id int NOT NULL,
-  type text CHECK(type = 'Standard' OR type = 'off_axis' OR type = 'emergent'),
+  type text CHECK(type = 'standard' OR type = 'off_axis' OR type = 'emergent'),
   latitude real,
   longitude real,
   orientation text CHECK(orientation = 'N' OR orientation = 'NE' OR orientation = 'E' OR orientation = 'SE' OR orientation = 'S' OR orientation = 'SW' OR orientation = 'W' OR orientation = 'NW'),
@@ -76,7 +76,7 @@ CREATE TABLE "public"."outgoing_manual" (
 CREATE TABLE "public"."outgoing_autonomous" (
   id serial NOT NULL,
   image_id int NOT NULL,
-  type text CHECK(type = 'Standard' OR type = 'off_axis' OR type = 'emergent'),
+  type text CHECK(type = 'standard' OR type = 'off_axis' OR type = 'emergent'),
   latitude real,
   longitude real,
   orientation text CHECK(orientation = 'N' OR orientation = 'NE' OR orientation = 'E' OR orientation = 'SE' OR orientation = 'S' OR orientation = 'SW' OR orientation = 'W' OR orientation = 'NW'),
