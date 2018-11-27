@@ -5,6 +5,7 @@ from .raw_image_handler import api as rawImage
 from .crop_image_handler import api as cropImage
 from .gps_handler import api as gps
 from .state_handler import api as state
+from .image_classification_handler import api as classification
 
 api = Api(
     # Api metadata
@@ -17,3 +18,4 @@ api.add_namespace(gps)
 api.add_namespace(state)
 api.add_namespace(rawImage)
 api.add_namespace(cropImage)
+api.add_namespace(classification)

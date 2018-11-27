@@ -1,4 +1,8 @@
+from flask import request, jsonify, abort
 from flask_restplus import Namespace, Resource, inputs
+from dao.outgoing_manual_dao import OutgoingManualDAO
+from dao.outgoing_autonomous_dao import OutgoingAutonomousDAO
+from config import defaultConfigPath
 
 api = Namespace('image/class', description='Imaging classification calls route through here')
 
@@ -11,7 +15,28 @@ class AllClassificationsHandler(Resource):
     @api.doc(description='Get all the completed classifications for the corresponding process type (Manual or Autonomous)')
     @api.expect(classificationParser)
     def get(self):
-        return 404
+        # Input Validation::
+        if 'X-Manual' not in request.headers:
+            abort(400, 'Need to specify X-Manual header!')
+        manual = request.headers.get('X-Manual')
+        try:
+            manual = manual.lower() == 'true'
+        except:
+            abort(400, 'Failed to interpret X-Manual header as boolean!')
+
+        outgoingList = []
+        if manual:
+            dao = OutgoingManualDAO(defaultConfigPath())
+            outgoingList = dao.getAll()
+        else:
+            dao = OutgoingAutonomousDAO(defaultConfigPath())
+            outgoingList = dao.getAll()
+
+        if not outgoingList:
+            return {'message': 'Outgoing table is empty!'}, 404
+
+        exportable = [ classification.toDict(exclude=('id',)) for classification in outgoingList ]
+        return jsonify(exportable)
 
 
 @api.route('/<int:image_id>')

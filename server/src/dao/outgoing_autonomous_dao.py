@@ -1,25 +1,25 @@
 import psycopg2
 from dao.classification_dao import ClassificationDAO
-from dao.model.outgoing_manual import outgoing_manual
+from dao.model.outgoing_autonomous import outgoing_autonomous
 
-class OutgoingManualDAO(ClassificationDAO):
+class OutgoingAutonomousDAO(ClassificationDAO):
 
     def __init__(self, configFilePath):
-        super(OutgoingManualDAO, self).__init__(configFilePath, 'outgoing_manual')
+        super(OutgoingAutonomousDAO, self).__init__(configFilePath, 'outgoing_autonomous')
 
 
     def checkedReturn(self, rawResponse):
         if rawResponse is None:
             return None
 
-        return outgoing_manual(rawResponse)
+        return outgoing_autonomous(rawResponse)
 
     def getClassificationByUID(self, id):
         """
         See classification_dao docs. Here we're just making sure we cast the final object 
         to the proper outgoing classification model type
         """
-        selectedClass = super(OutgoingManualDAO, self).getClassificationByUID(id)
+        selectedClass = super(OutgoingAutonomousDAO, self).getClassificationByUID(id)
         return self.checkedReturn(selectedClass)
 
     def getAll(self):
@@ -27,12 +27,12 @@ class OutgoingManualDAO(ClassificationDAO):
         See classification_dao docs. Here we're just making sure we cast the final object 
         to the proper outgoing classification model type
         """
-        cur = super(OutgoingManualDAO, self).getAll()
+        cur = super(OutgoingAutonomousDAO, self).getAll()
 
         results = []
         if cur is not None:
             for row in cur:
-                outManualRow = outgoing_manual(row)
+                outManualRow = outgoing_autonomous(row)
                 results.append(outManualRow)
 
             cur.close() # dont forget to close the cursor
@@ -44,7 +44,7 @@ class OutgoingManualDAO(ClassificationDAO):
         See classification_dao docs. Here we're just making sure we cast the final object 
         to the proper outgoing classification model type
         """
-        selectedClass = super(OutgoingManualDAO, self).getClassification(id)
+        selectedClass = super(OutgoingAutonomousDAO, self).getClassification(id)
         return self.checkedReturn(selectedClass)
 
     def updateClassificationByUID(self, id, updateClass):
@@ -54,9 +54,9 @@ class OutgoingManualDAO(ClassificationDAO):
         initial model of stuff to update before passing it to super
         """
 
-        updateModel = outgoing_manual(json=updateClass)
-        selectedClass = super(OutgoingManualDAO, self).updateClassificationByUID(id, updateModel)
+        updateModel = outgoing_autonomous(json=updateClass)
+        selectedClass = super(OutgoingAutonomousDAO, self).updateClassificationByUID(id, updateModel)
         if selectedClass == -1:
             return selectedClass
         else:
-            return outgoing_manual(selectedClass)
+            return outgoing_autonomous(selectedClass)
