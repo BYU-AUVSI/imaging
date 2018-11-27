@@ -1,6 +1,6 @@
 class outgoing_autonomous:
 
-    def __init__(self, tableValues=None):
+    def __init__(self, tableValues=None, json=None):
         if tableValues is not None:
             self.id = tableValues[0]
             self.image_id = tableValues[1]
@@ -14,6 +14,10 @@ class outgoing_autonomous:
             self.alphanumeric_color = tableValues[9]
             self.description = tableValues[10]
             self.submitted = tableValues[11]
+        elif json is not None:
+            for prop in self.allProps():
+                if prop in json:
+                    setattr(self, prop, json[prop])
 
     @property
     def id(self):
@@ -28,7 +32,7 @@ class outgoing_autonomous:
         return self._image_id
 
     @image_id.setter
-    def image_id(self, image_id)
+    def image_id(self, image_id):
         self._image_id = image_id
 
     @property
@@ -110,3 +114,16 @@ class outgoing_autonomous:
     @submitted.setter
     def submitted(self, Submitted):
         self._Submitted = Submitted
+
+    # TODO: this is hacky and i hate it
+    def allProps(self):
+        return ['id', 'image_id', 'type', 'latitude', 'longitude', 'orientation', 'shape', 'background_color', 'alphanumeric', 'alphanumeric_color', 'description', 'submitted']
+
+    def toDict(self, exclude=None):
+        dict = {}
+        for attr, value in self.__dict__.items():
+            corrected_name = attr[1:] # remove first underscore
+
+            if exclude is None or corrected_name not in exclude:
+                dict[corrected_name] = value.__str__()
+        return dict

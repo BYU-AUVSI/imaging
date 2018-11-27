@@ -87,6 +87,7 @@ class manual_cropped:
     def tapped(self, tapped):
         self._tapped = tapped
 
+    # TODO: this is hacky and i hate it
     def allProps(self):
         return ['id', 'image_id', 'time_stamp', 'cropped_path', 'crop_coordinate_tl', 'crop_coordinate_br', 'tapped']
 
