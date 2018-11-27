@@ -112,10 +112,8 @@ class ManualCroppedDAO(BaseDAO):
         updateStr = updateStr[:-2] # remove last space/comma
         updateStr += " WHERE image_id = %s RETURNING id;"
         values.append(id)
-        print(updateStr)
         # this result id is a manual_cropped.id not image_id
         resultId = super(ManualCroppedDAO, self).getResultingId(updateStr, values)
-        print("==========>> {}".format(resultId))
         if resultId != -1:
             return self.getImage(resultId)
         else:

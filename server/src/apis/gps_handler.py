@@ -1,4 +1,4 @@
-from config import defaultSqlConfigPath
+from config import defaultConfigPath
 from dao.incoming_gps_dao import IncomingGpsDAO
 from flask import jsonify
 from flask_restplus import Namespace, Resource
@@ -11,7 +11,7 @@ class GpsIdHandler(Resource):
     @api.doc(description='Get the gps measurement with the given id')
     @api.doc(responses={200:'OK', 404:'Id not found'})
     def get(self, id):
-        dao = IncomingGpsDAO(defaultSqlConfigPath())
+        dao = IncomingGpsDAO(defaultConfigPath())
         gps = dao.getGpsById(id)
 
         # response validation
@@ -27,7 +27,7 @@ class GpsTsHandler(Resource):
     @api.doc(description='Get the gps measurement in the database closest to the provided time_stamp')
     @api.doc(responses={200:'OK', 404:'No Gps measurement found'})
     def get(self, ts):
-        dao = IncomingGpsDAO(defaultSqlConfigPath())
+        dao = IncomingGpsDAO(defaultConfigPath())
         gps = dao.getGpsByClosestTS(ts)
 
         # response validation:
