@@ -56,7 +56,4 @@ class OutgoingAutonomousDAO(ClassificationDAO):
 
         updateModel = outgoing_autonomous(json=updateClass)
         selectedClass = super(OutgoingAutonomousDAO, self).updateClassificationByUID(id, updateModel)
-        if selectedClass == -1:
-            return selectedClass
-        else:
-            return outgoing_autonomous(selectedClass)
+        return selectedClass

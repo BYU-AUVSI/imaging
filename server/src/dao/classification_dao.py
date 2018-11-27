@@ -9,6 +9,36 @@ class ClassificationDAO(BaseDAO):
         super(ClassificationDAO, self).__init__(configFilePath)
         self.outgoingTableName = outgoingTableName # 0 for autonomous. 1 for manual
 
+    def upsertClassification(self, classification):
+        """
+        Upserts a classification record.
+        If the image_id given in the classification object already exists within the table, the corresponding record
+        is updated. If it doesn't exist, then we Insert a new record.
+        """
+        insertCls = "INSERT INTO " + self.outgoingTableName
+        updateCls = "UPDATE SET "
+
+        # only inserting the values that were provided to us
+        insertValues = []
+        insertClmnNames = '('
+        insertClmnValues = ' VALUES('
+        for clmn, value in classification.toDict(exclude=('id',)).items():
+            insertClmnNames += clmn + ', '
+            insertClmnValues += '%s, '
+            updateCls += clmn + '= %s, '
+            insertValues.append(value.__str__())
+
+        # if there were no values to insert...
+        if not insertValues:
+            return -1
+        else: 
+            insertClmnNames = insertClmnNames[:-2] + ')' # remove last comma/space
+            insertClmnValues = insertClmnValues[:-2] + ') ON CONFLICT (image_id) DO '
+            updateCls = updateCls[:-2] + 'RETURNING id;'
+
+        insertCls += insertClmnNames + insertClmnValues + updateCls
+        return super(ClassificationDAO, self).getResultingId(insertCls, insertValues + insertValues)
+
     def addClassification(self, classification):
         """
         Adds the specified classification information to one of the outgoing tables
@@ -39,7 +69,6 @@ class ClassificationDAO(BaseDAO):
 
         insertCls += insertClmnNames + insertClmnValues
         return super(ClassificationDAO, self).getResultingId(insertCls, insertValues)
-
 
     def getClassificationByUID(self, id):
         """

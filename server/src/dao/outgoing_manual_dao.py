@@ -56,7 +56,4 @@ class OutgoingManualDAO(ClassificationDAO):
 
         updateModel = outgoing_manual(json=updateClass)
         selectedClass = super(OutgoingManualDAO, self).updateClassificationByUID(id, updateModel)
-        if selectedClass == -1:
-            return selectedClass
-        else:
-            return outgoing_manual(selectedClass)
+        return selectedClass # the above getClassification handle putting this into the proper object
