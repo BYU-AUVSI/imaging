@@ -19,8 +19,10 @@ Tab1:
     Add quantity of each target pictures
     Add lines
 Tab2:
-    Make everything
-    Add vertical lines
+    Disable description unless emergent
+    Rotate image according to heading
+    Resize main image
+    Submit classifications
 Tab3:
     Make everything
     Add vertical lines
@@ -32,6 +34,7 @@ When you click on the 2nd tab right at the beginning, and then use the left/intr
     buttons, it moves one tab, then unbinds like it's supposed to.
 '''
 from tkinter import *
+from tkinter import scrolledtext
 from tkinter import ttk
 from PIL import Image,ImageTk
 import cv2
@@ -146,18 +149,46 @@ class GuiClass(Frame):
         self.t2c2i1.grid(row=2,column=4,rowspan=38,columnspan=8,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
         self.t2c2l1 = Label(self.tab2, text='Shape')
         self.t2c2l1.grid(row=40,column=4,columnspan=2,rowspan=2,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
+        shape_options = ('circle','semicircle','quarter_circle','triangle','square','rectangle','trapezoid','pentagon','hexagon','heptagon','octagon','star','cross')
+        self.t2c2l2_var = StringVar(self.master)
+        self.t2c2l2_var.set('circle')
+        self.t2c2l2 = OptionMenu(self.tab2,self.t2c2l2_var,*shape_options)
+        self.t2c2l2.grid(row=42,column=4,columnspan=2,rowspan=2,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
         self.t2c2l3 = Label(self.tab2, text='Alphanumeric')
         self.t2c2l3.grid(row=40,column=6,columnspan=2,rowspan=2,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t2c2l4 = Entry(self.tab2)
+        self.t2c2l4.grid(row=42,column=6,columnspan=2,rowspan=2,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
         self.t2c2l5 = Label(self.tab2, text='Rotate')
         self.t2c2l5.grid(row=40,column=8,columnspan=4,rowspan=2,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
+        orientation_options = ('N','NE','E','SE','S','SW','W','NW')
+        self.t2c2l6_var = StringVar(self.master)
+        self.t2c2l6_var.set('N')
+        self.t2c2l6 = OptionMenu(self.tab2,self.t2c2l6_var,*orientation_options)
+        self.t2c2l6.grid(row=42,column=8,columnspan=4,rowspan=2,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
         self.t2c2l9 = Label(self.tab2, text='Background Color')
         self.t2c2l9.grid(row=44,column=4,columnspan=2,rowspan=2,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
+        color_options = ('white','black','gray','red','blue','green','yellow','purple','brown','orange')
+        self.t2c2l10_var = StringVar(self.master)
+        self.t2c2l10_var.set('white')
+        self.t2c2l10 = OptionMenu(self.tab2,self.t2c2l10_var,*color_options)
+        self.t2c2l10.grid(row=46,column=4,columnspan=2,rowspan=2,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
         self.t2c2l11 = Label(self.tab2, text='Alphanumeric Color')
         self.t2c2l11.grid(row=44,column=6,columnspan=2,rowspan=2,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t2c2l12_var = StringVar(self.master)
+        self.t2c2l12_var.set('white')
+        self.t2c2l12 = OptionMenu(self.tab2,self.t2c2l12_var,*color_options)
+        self.t2c2l12.grid(row=46,column=6,columnspan=2,rowspan=2,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
         self.t2c2l13 = Label(self.tab2, text='Target Type')
         self.t2c2l13.grid(row=44,column=8,columnspan=2,rowspan=2,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t2c2l14_var = StringVar(self.master)
+        target_options = ('standard','emergent','off-axis')
+        self.t2c2l14_var.set('standard')
+        self.t2c2l14 = OptionMenu(self.tab2,self.t2c2l14_var,*target_options)
+        self.t2c2l14.grid(row=46,column=8,columnspan=2,rowspan=2,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
         self.t2c2l15 = Label(self.tab2, text='Emergent Description')
         self.t2c2l15.grid(row=44,column=10,columnspan=2,rowspan=2,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t2c2l16 = Entry(self.tab2)
+        self.t2c2l16.grid(row=46,column=10,columnspan=2,rowspan=2,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
         self.t2c2l17 = Button(self.tab2, text="Submit Classification",command=self.submitClassification)
         self.t2c2l17.grid(row=48,column=4,columnspan=8,rowspan=2,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
 
