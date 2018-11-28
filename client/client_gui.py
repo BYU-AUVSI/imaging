@@ -11,17 +11,19 @@ pip3 install Pillow, opencv-python
 
 '''
 TODO:
+Integration:
+    Next Raw
+    Submit Cropped
+    Next Cropped
+    Submit classification
 Tab1:
-    Add Enter key "submitting" the cropped image
     Add zooming feature
     Add preview of cropped image
     Add sample pic of targets
     Add quantity of each target pictures
-    Add lines
 Tab2:
     Disable description unless emergent
     Rotate image according to heading
-    Resize main image
 Tab3:
     Make everything
     Add vertical lines
@@ -66,7 +68,9 @@ class GuiClass(Frame):
         self.crop_tk = self.im2tk(self.crop_im)
         self.img_tk = self.im2tk(self.img_im)
         self.org_width,self.org_height = self.img_im.size
-        self.resize_counter = time.time()
+        self.crop_width,self.crop_height = self.img_im.size
+        self.resize_counter_tab1 = time.time()
+        self.resize_counter_tab2 = time.time()
         self.cropped = False
 
 
@@ -239,7 +243,7 @@ class GuiClass(Frame):
         self.draw_np = np.copy(self.org_np)
         cv2.rectangle(self.draw_np,(int(sr*self.x0),int(sr*self.y0)),(int(sr*self.x1),int(sr*self.y1)),(255,0,0),2)
         self.img_im = self.np2im(self.draw_np)
-        self.resized_im = self.resizeIm(self.img_im,self.t1l1_width,self.t1l1_height)
+        self.resized_im = self.resizeIm(self.img_im,self.org_width,self.org_height,self.t1l1_width,self.t1l1_height)
         self.img_tk = self.im2tk(self.resized_im)
         self.lbl3.configure(image=self.img_tk)
     def close_window(self,event):
@@ -258,41 +262,40 @@ class GuiClass(Frame):
         self.draw_np = np.copy(self.org_np)
         cv2.rectangle(self.draw_np,(int(sr*self.x0),int(sr*self.y0)),(int(sr*self.x1),int(sr*self.y1)),(255,0,0),2)
         self.img_im = self.np2im(self.draw_np)
-        self.resized_im = self.resizeIm(self.img_im,self.t1l1_width,self.t1l1_height)
+        self.resized_im = self.resizeIm(self.img_im,self.org_width,self.org_height,self.t1l1_width,self.t1l1_height)
         self.img_tk = self.im2tk(self.resized_im)
         self.lbl3.configure(image=self.img_tk)
         # Crop Image
         self.cropImage(int(sr*self.x0),int(sr*self.y0),int(sr*self.x1),int(sr*self.y1))
         self.cropped = True
     def resizeEventTab1(self,event=None):
-        if self.initialized == True and (time.time()-self.resize_counter) > 0.050:
+        if self.initialized == True and (time.time()-self.resize_counter_tab1) > 0.050:
             if self.lbl3.winfo_width() > 1:
-                self.resize_counter = time.time()
+                self.resize_counter_tab1 = time.time()
                 self.master.update()
                 self.t1l1_width = self.lbl3.winfo_width()
                 self.t1l1_height = self.lbl3.winfo_height()
-                self.resized_im = self.resizeIm(self.img_im,self.t1l1_width,self.t1l1_height)
+                self.resized_im = self.resizeIm(self.img_im,self.org_width,self.org_height,self.t1l1_width,self.t1l1_height)
                 self.t1i1_width,self.t1i1_height = self.resized_im.size
                 self.img_tk = self.im2tk(self.resized_im)
                 self.lbl3.configure(image=self.img_tk)
     def resizeEventTab2(self,event=None):
-        if self.initialized == True and (time.time()-self.resize_counter) > 0.050:
-            if self.lbl3.winfo_width() > 1:
-                self.resize_counter = time.time()
+        if self.initialized == True and (time.time()-self.resize_counter_tab2) > 0.050:
+            if self.t2c2i1.winfo_width() > 1:
+                self.resize_counter_tab2 = time.time()
                 self.master.update()
-                self.t1l1_width = self.lbl3.winfo_width()
-                self.t1l1_height = self.lbl3.winfo_height()
-                self.resized_im = self.resizeIm(self.img_im,self.t1l1_width,self.t1l1_height)
-                self.t1i1_width,self.t1i1_height = self.resized_im.size
-                self.img_tk = self.im2tk(self.resized_im)
-                self.lbl3.configure(image=self.img_tk)
-    def resizeIm(self,image,width_restrict,height_restrict):
-        ratio_h = height_restrict/self.org_height
-        ratio_w = width_restrict/self.org_width
+                self.t2c2i1_width = self.t2c2i1.winfo_width()
+                self.t2c2i1_height = self.t2c2i1.winfo_height()
+                self.crop_resized_im = self.resizeIm(self.crop_im,self.crop_width,self.crop_height,self.t2c2i1_width,self.t2c2i1_height)
+                self.crop_tk = self.im2tk(self.crop_resized_im)
+                self.t2c2i1.configure(image=self.crop_tk)
+    def resizeIm(self,image,image_width,image_height,width_restrict,height_restrict):
+        ratio_h = height_restrict/image_height
+        ratio_w = width_restrict/image_width
         if ratio_h <= ratio_w:
-            resized_im = self.img_im.resize((int(self.org_width*ratio_h), int(self.org_height*ratio_h)), Image.ANTIALIAS)
+            resized_im = image.resize((int(image_width*ratio_h), int(image_height*ratio_h)), Image.ANTIALIAS)
         else:
-            resized_im = self.img_im.resize((int(self.org_width*ratio_w), int(self.org_height*ratio_w)), Image.ANTIALIAS)
+            resized_im = image.resize((int(image_width*ratio_w), int(image_height*ratio_w)), Image.ANTIALIAS)
         return(resized_im)
     def cropImage(self,x0,y0,x1,y1):
         if x0 < x1:
@@ -308,15 +311,17 @@ class GuiClass(Frame):
             cy0 = y1
             cy1 = y0
         self.crop_im = self.crop_im.crop((cx0,cy0,cx1,cy1))
+        self.crop_width,self.crop_height = self.crop_im.size
         self.crop_tk = self.im2tk(self.crop_im)
         self.t2c2i1.configure(image=self.crop_tk)
     def undoCrop(self,event=None):
         self.draw_np = np.copy(self.org_np)
         self.img_im = self.np2im(self.draw_np)
-        self.resized_im = self.resizeIm(self.img_im,self.t1l1_width,self.t1l1_height)
+        self.resized_im = self.resizeIm(self.img_im,self.org_width,self.org_height,self.t1l1_width,self.t1l1_height)
         self.img_tk = self.im2tk(self.resized_im)
         self.lbl3.configure(image=self.img_tk)
         self.crop_im = self.img_im.copy()
+        self.crop_width,self.crop_height = self.crop_im.size
         self.crop_tk = self.im2tk(self.crop_im)
         self.t2c2i1.configure(image=self.crop_tk)
     def advanceTarget(self,event=None):
@@ -387,11 +392,12 @@ class GuiClass(Frame):
             self.master.bind("<Control-z>",self.undoCrop)
             self.master.bind("<Return>",self.submitCropped)
         elif active_tab == 1:
+            self.resizeEventTab2()
             self.master.unbind("<Right>")
             self.master.unbind("<Left>")
             self.master.unbind("<d>")
             self.master.unbind("<a>")
-            self.master.unbind("<Configure>")
+            self.master.bind("<Configure>",self.resizeEventTab2)
             self.master.unbind("<Control-z>")
             self.master.bind("<Return>",self.submitClassification)
         elif active_tab == 2:
