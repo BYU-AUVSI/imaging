@@ -22,7 +22,6 @@ Tab2:
     Disable description unless emergent
     Rotate image according to heading
     Resize main image
-    Submit classifications
 Tab3:
     Make everything
     Add vertical lines
@@ -158,7 +157,7 @@ class GuiClass(Frame):
         self.t2c2l3.grid(row=40,column=6,columnspan=2,rowspan=2,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
         self.t2c2l4 = Entry(self.tab2)
         self.t2c2l4.grid(row=42,column=6,columnspan=2,rowspan=2,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t2c2l5 = Label(self.tab2, text='Rotate')
+        self.t2c2l5 = Label(self.tab2, text='Orientation')
         self.t2c2l5.grid(row=40,column=8,columnspan=4,rowspan=2,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
         orientation_options = ('N','NE','E','SE','S','SW','W','NW')
         self.t2c2l6_var = StringVar(self.master)
@@ -197,16 +196,6 @@ class GuiClass(Frame):
         self.t2sep23.grid(row=0, column=12, rowspan=50,sticky=N+S+E+W, pady=5)
         self.t2c2title = Label(self.tab2, text='Classified Targets')
         self.t2c2title.grid(row=0,column=12,columnspan=4,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
-
-
-
-
-        '''
-        self.t1l1 = Label(self.tab2,image=self.crop_tk)
-        self.t1l1.image = self.crop_tk
-        self.t1l1.grid(row=0,column=0,rowspan=12,columnspan=12,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
-        '''
-
 
 
 
@@ -275,7 +264,18 @@ class GuiClass(Frame):
         # Crop Image
         self.cropImage(int(sr*self.x0),int(sr*self.y0),int(sr*self.x1),int(sr*self.y1))
         self.cropped = True
-    def resizeEvent(self,event):
+    def resizeEventTab1(self,event=None):
+        if self.initialized == True and (time.time()-self.resize_counter) > 0.050:
+            if self.lbl3.winfo_width() > 1:
+                self.resize_counter = time.time()
+                self.master.update()
+                self.t1l1_width = self.lbl3.winfo_width()
+                self.t1l1_height = self.lbl3.winfo_height()
+                self.resized_im = self.resizeIm(self.img_im,self.t1l1_width,self.t1l1_height)
+                self.t1i1_width,self.t1i1_height = self.resized_im.size
+                self.img_tk = self.im2tk(self.resized_im)
+                self.lbl3.configure(image=self.img_tk)
+    def resizeEventTab2(self,event=None):
         if self.initialized == True and (time.time()-self.resize_counter) > 0.050:
             if self.lbl3.winfo_width() > 1:
                 self.resize_counter = time.time()
@@ -336,7 +336,16 @@ class GuiClass(Frame):
     def submitCropped(self,event=None):
         print("submit Crop")
     def submitClassification(self,event=None):
+        shape = self.t2c2l2_var.get()
+        alphanumeric = self.t2c2l4.get()
+        orientation = self.t2c2l6_var.get()
+        background_color = self.t2c2l10_var.get()
+        alpha_color = self.t2c2l12_var.get()
+        type = self.t2c2l14_var.get()
+        description = self.t2c2l16.get()
         print("submit classification")
+        print(shape,alphanumeric,orientation)
+        print(background_color,alpha_color,type,description)
     '''
     def pressD(self,event):
         active_tab = self.n.index(self.n.select())
@@ -369,12 +378,13 @@ class GuiClass(Frame):
         active_tab = self.n.index(self.n.select())
         print(active_tab)
         if active_tab == 0:
-            self.master.bind("<Configure>",self.resizeEvent)
-            self.master.bind("<d>",self.advanceTarget)
-            self.master.bind("<a>",self.decrementTarget)
-            self.master.bind("<Control-z>",self.undoCrop)
+            self.resizeEventTab1()
             self.master.bind("<Right>",self.nextRaw)
             self.master.bind("<Left>",self.previousRaw)
+            self.master.bind("<d>",self.advanceTarget)
+            self.master.bind("<a>",self.decrementTarget)
+            self.master.bind("<Configure>",self.resizeEventTab1)
+            self.master.bind("<Control-z>",self.undoCrop)
             self.master.bind("<Return>",self.submitCropped)
         elif active_tab == 1:
             self.master.unbind("<Right>")
