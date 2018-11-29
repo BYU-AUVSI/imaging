@@ -42,6 +42,7 @@ import cv2
 import numpy as np
 import time
 import client_rest
+import time
 
 
 class GuiClass(Frame):
@@ -65,7 +66,6 @@ class GuiClass(Frame):
         # itialize variables
         self.initialized = False
         self.target_number = 0
-        print(self.interface.getNextRawImage(True))
         self.org_np = np.array(self.interface.getNextRawImage(True)) #self.get_image('frame0744.jpg')
         self.draw_np = np.copy(self.org_np)
         self.img_im = self.np2im(self.draw_np)
@@ -340,6 +340,26 @@ class GuiClass(Frame):
         self.lbl2.configure(text=self.target_number)
     def nextRaw(self,event):
         print("next Raw")
+        time0 = time.time()
+        self.org_np = np.array(self.interface.getNextRawImage(True)) #self.get_image('frame0744.jpg')
+        time1 = time.time()
+        self.draw_np = np.copy(self.org_np)
+        self.img_im = self.np2im(self.draw_np)
+        self.crop_im = self.img_im.copy()
+        self.crop_tk = self.im2tk(self.crop_im)
+        self.img_tk = self.im2tk(self.img_im)
+        self.org_width,self.org_height = self.img_im.size
+        self.crop_width,self.crop_height = self.img_im.size
+        self.resize_counter_tab1 = time.time()
+        self.resize_counter_tab2 = time.time()
+        self.cropped = False
+        self.resized_im = self.resizeIm(self.img_im,self.org_width,self.org_height,self.t1l1_width,self.t1l1_height)
+        self.t1i1_width,self.t1i1_height = self.resized_im.size
+        self.img_tk = self.im2tk(self.resized_im)
+        self.lbl3.configure(image=self.img_tk)
+        self.t2c2i1.configure(image=self.crop_tk)
+        time2 = time.time()
+        print("server request = ",time1-time0,"gui = ",time2-time1)
     def previousRaw(self,event):
         print("previous Raw")
     def nextCropped(self,event):
