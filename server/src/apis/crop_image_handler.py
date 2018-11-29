@@ -2,6 +2,7 @@ from flask import jsonify, make_response, send_file, abort, request
 from flask_restplus import Namespace, Resource, fields
 from dao.manual_cropped_dao import ManualCroppedDAO
 from dao.model.manual_cropped import manual_cropped
+from dao.model.point import point
 from config import defaultConfigPath, defaultCroppedImgPath, allowedFileType
 from werkzeug.utils import secure_filename
 import os, time
@@ -39,21 +40,28 @@ class CroppedImageHandler(Resource):
         if 'cropped_image' not in request.files:
             abort(400, "Need to pass an image with the key 'cropped_image'")
         imageFile = request.files.get('cropped_image', '')
-
-        # make sure the filename wont make our computer explode:
-        if imageFile.filename == '' or not allowedFileType(imageFile.filename):
-            abort(400, "Filename invalid!")
-        filename = secure_filename(imageFile.filename)
         
         cropped = manual_cropped()
         if 'X-Image-Id' in request.headers:
             cropped.image_id = request.headers.get('X-Image-Id')
         else:
             abort(400, "Need to specify header 'X-Image-Id'!")
+
+        # make sure the filename wont make our computer explode:
+        if imageFile.filename == '' or imageFile.filename == 'cropped_image':
+            imageFile.filename = str(int(time.time())) + '.jpg'
+        elif not allowedFileType(imageFile.filename):
+            abort(400, "Filename invalid!")
+        filename = secure_filename(imageFile.filename)
         
         # save image
         full_path = os.path.join(defaultCroppedImgPath(), filename)
         imageFile.save(full_path)
+
+        if 'crop_coordinate_tl' in request.form:
+            cropped.crop_coordinate_tl = point(ptStr=request.form['crop_coordinate_tl'])
+        if 'crop_coordinate_br' in request.form:
+            cropped.crop_coordinate_br = point(ptStr=request.form['crop_coordinate_br'])
 
         # add to db
         cropped.time_stamp = int(time.time())
