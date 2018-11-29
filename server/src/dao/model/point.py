@@ -7,7 +7,7 @@ class point:
 
     # regex for extracting integer numbers from std point string
     # input string looks like: (42,22)
-    INT_REGEX = r"[^\d]?(\d+)[^\d]?"
+    INT_REGEX = r"[^\d]*(\d+)[^\d]*"
 
     def __init__(self, ptStr = None, x=None, y=None):
         if x is not None and y is not None:
