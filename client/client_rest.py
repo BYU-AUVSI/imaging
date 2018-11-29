@@ -54,11 +54,25 @@ class ImagingInterface:
         return Image.open(BytesIO(img.content))
 
     def getNextRawImage(self, isManual):
+        """
+        Retrieve the next available raw image.
+
+        @:type isManual: boolean
+        @:param isManual: Specify whether this is a manual imaging request (True) or an autonomous one (False)
+
+        @:rtype Image
+        @:return A pillow Image if there are any images available for processing, otherwise None
+        """
         self.debug("getNextRawImage(isManual={})".format(isManual))
         if self.idIndex >= -1:
             self.idIndex = -1
             img = requests.get(self.url + "/image/raw", headers={'X-Manual': str(isManual)})
             self.debug("response code:: {}".format(img.status_code))
+            if (img.status_code != 200):
+                # if we didnt get a good status code
+                print("Server returned status code {}".format(img.status_code))
+                return None
+
             imageId = int(img.headers['X-Image-Id'])
             if len(self.ids) >= self.numIdsStored:
                 self.ids.pop(0)
@@ -71,6 +85,13 @@ class ImagingInterface:
             return self.getRawImage(self.ids[self.idIndex])
 
     def getPrevRawImage(self):
+        """
+        Re-retrive a raw image that you were previously viewing. This interface maintains an ordered list
+        (of up to numIdsStored) of ids you've previously received and will traverse it backwards.
+
+        @:rtype Image
+        @:return A pillow Image if there are any previous images to process, and the server is able to find the given id, otherwise None.
+        """
         self.debug("getPrevRawImage()")
         if len(self.ids) > 0:
             # if there is no more previous images, get the last image
