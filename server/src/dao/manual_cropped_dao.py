@@ -7,6 +7,38 @@ class ManualCroppedDAO(BaseDAO):
     def __init__(self, configFilePath):
         super(ManualCroppedDAO, self).__init__(configFilePath)
 
+    def upsertCropped(self, manualCropped):
+        """
+        Upserts a cropped image record
+        """
+
+        insertImg = "INSERT INTO manual_cropped "
+        updateCls = "UPDATE SET "
+
+        insertValues = []
+        insertClmnNames = '('
+        insertClmnValues = ' VALUES('
+        for clmn, value in manualCropped.toDict(exclude=('id',)).items():
+            insertClmnNames += clmn + ', '
+            if clmn != 'time_stamp':
+                insertClmnValues += '%s, '
+                updateCls += clmn + '= %s, '
+            else:
+                insertClmnValues += 'to_timestamp(%s), '
+                updateCls += clmn + '= to_timestamp(%s), '
+            insertValues.append(value.__str__())
+
+        if not insertValues:
+            return -1
+        else:
+            insertClmnNames = insertClmnNames[:-2] + ')' # remove last comma/space
+            insertClmnValues = insertClmnValues[:-2] + ') ON CONFLICT (image_id) DO '
+            updateCls = updateCls[:-2] + 'RETURNING id;'
+
+        insertImg += insertClmnNames + insertClmnValues + updateCls
+
+        return super(ManualCroppedDAO, self).getResultingId(insertImg, insertValues + insertValues)
+
     def addImage(self, manualCropped):
         """
         Adds the manually cropped image to the manual_cropped table

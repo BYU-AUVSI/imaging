@@ -69,7 +69,7 @@ class CroppedImageHandler(Resource):
 
         dao = ManualCroppedDAO(defaultConfigPath())
         # resultingId is the manual_cropped.id value given to this image (abstracted from client)
-        resultingId = dao.addImage(cropped)
+        resultingId = dao.upsertCropped(cropped)
         
         if resultingId == -1:
             return {'message': 'Failed to insert image into manual_cropped! (If youre trying to update information on an image_id that already exists, you should use PUT)'}, 500
