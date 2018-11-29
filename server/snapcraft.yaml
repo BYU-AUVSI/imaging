@@ -9,6 +9,21 @@ grade: devel
 confinement: devmode
 
 parts:
+  imaging-server-base:
+    plugin: python
+    python-version: python3.7
+    source: src/
+    source-type: git
+    requirements: setup/pip-requirements.txt
+
+  imaging-ingest:
+    source: https://github.com/BYU-AUVSI/imaging.git
+    source-branch: master
+    plugin: catkin
+    rosdistro: kinetic
+    source-space: server/
+    catkin-packages: [imaging_ros_ingester]
+
   ros-tutorials:
     source: https://github.com/ros/ros_tutorials.git
     source-branch: kinetic-devel
