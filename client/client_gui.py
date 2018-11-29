@@ -19,6 +19,7 @@ Integration:
 Tab1:
     Add zooming feature
     Add preview of cropped image
+    Add submit crop button
     Add sample pic of targets
     Add quantity of each target pictures
 Tab2:
@@ -210,8 +211,9 @@ class GuiClass(Frame):
         self.initialized = True
 
         # KEY BINDINGS
-        self.master.bind("<Escape>",self.close_window) # press ESC to exit
         self.master.bind("<<NotebookTabChanged>>",self.tabChanged)
+        self.master.bind("<Escape>",self.close_window) # press ESC to exit
+
 
     def get_image(self,path):
         image_np = cv2.imread(path)
