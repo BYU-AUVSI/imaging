@@ -34,7 +34,7 @@ class ImagingInterface:
                  host="127.0.0.1",
                  port="5000",
                  numIdsStored=50,
-                 isDebug=True):
+                 isDebug=False):
         self.host = host
         self.port = port
         self.url = "http://" + self.host + ":" + self.port

@@ -36,13 +36,12 @@ When you click on the 2nd tab right at the beginning, and then use the left/intr
     buttons, it moves one tab, then unbinds like it's supposed to.
 '''
 from tkinter import *
-from tkinter import scrolledtext
 from tkinter import ttk
 from PIL import Image,ImageTk
 import cv2
 import numpy as np
 import time
-from client_rest import getNextRawImage
+import client_rest
 
 
 class GuiClass(Frame):
@@ -56,7 +55,7 @@ class GuiClass(Frame):
             w = Toplevel(root)
             w.state('zoomed')
         self.master.title("AUVSI COMPETITION 2019: CLASSIFICATION")
-
+        self.interface = client_rest.ImagingInterface(host="192.168.1.48")
         self.n = ttk.Notebook(self.master) # create tabs
         self.n.pack(fill=BOTH, expand=1) # expand across space
         Grid.rowconfigure(self.master,0,weight=1)
@@ -66,7 +65,8 @@ class GuiClass(Frame):
         # itialize variables
         self.initialized = False
         self.target_number = 0
-        self.org_np = getNextRawImage() #self.get_image('frame0744.jpg')
+        print(self.interface.getNextRawImage(True))
+        self.org_np = np.array(self.interface.getNextRawImage(True)) #self.get_image('frame0744.jpg')
         self.draw_np = np.copy(self.org_np)
         self.img_im = self.np2im(self.draw_np)
         self.crop_im = self.img_im.copy()
