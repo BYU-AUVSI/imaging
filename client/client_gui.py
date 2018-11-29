@@ -12,10 +12,12 @@ pip3 install Pillow, opencv-python
 '''
 TODO:
 Integration:
-    Next Raw
     Submit Cropped
     Next Cropped
     Submit classification
+Tab0:
+    Add settings tab
+    Rename tabs
 Tab1:
     Add zooming feature
     Add preview of cropped image
@@ -78,11 +80,38 @@ class GuiClass(Frame):
         self.resize_counter_tab2 = time.time()
         self.cropped = False
 
+        # Tab 0: SETTINGS
+        self.tab0 = ttk.Frame(self.n)
+        self.n.add(self.tab0, text='Settings')
+        for x in range(6):
+            Grid.columnconfigure(self.tab0,x,weight=1)
+        for y in range(10):
+            Grid.rowconfigure(self.tab0,y,weight=1)
 
-
+        '''
+        self.t0c2i1 = Label(self.tab1,image=self.img_tk)
+        self.t0c2i1.image = self.img_tk
+        self.t0c2i1.grid(row=0,column=0,rowspan=12,columnspan=12,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
+        '''
+        self.t0c2l1 = Label(self.tab0, text='Host:')
+        self.t0c2l1.grid(row=5,column=2,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t0c2l2 = Entry(self.tab0)
+        self.t0c2l2.grid(row=5,column=3,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t0c2l3 = Label(self.tab0, text='Port:')
+        self.t0c2l3.grid(row=6,column=2,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t0c2l4 = Entry(self.tab0)
+        self.t0c2l4.grid(row=6,column=3,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t0c2l5 = Label(self.tab0, text='Number of IDs Stored:')
+        self.t0c2l5.grid(row=7,column=2,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t0c2l6 = Entry(self.tab0)
+        self.t0c2l6.grid(row=7,column=3,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t0c2l7 = Label(self.tab0, text='Debug Mode:')
+        self.t0c2l7.grid(row=8,column=2,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t0c2l8 = Entry(self.tab0)
+        self.t0c2l8.grid(row=8,column=3,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
 
         # TAB 1: CROPPING
-        self.tab1 = ttk.Frame(self.n)   # first page, which would get widgets gridded into it
+        self.tab1 = ttk.Frame(self.n)
         self.n.add(self.tab1, text='Cropping')
 
 
@@ -96,6 +125,7 @@ class GuiClass(Frame):
             Grid.columnconfigure(self.tab1,x,weight=1)
         for y in range(13):
             Grid.rowconfigure(self.tab1,y,weight=1)
+
 
 
         self.lbl2 = Label(self.tab1, text=self.target_number)
@@ -347,11 +377,8 @@ class GuiClass(Frame):
         self.img_im = self.np2im(self.draw_np)
         self.crop_im = self.img_im.copy()
         self.crop_tk = self.im2tk(self.crop_im)
-        self.img_tk = self.im2tk(self.img_im)
         self.org_width,self.org_height = self.img_im.size
         self.crop_width,self.crop_height = self.img_im.size
-        self.resize_counter_tab1 = time.time()
-        self.resize_counter_tab2 = time.time()
         self.cropped = False
         self.resized_im = self.resizeIm(self.img_im,self.org_width,self.org_height,self.t1l1_width,self.t1l1_height)
         self.t1i1_width,self.t1i1_height = self.resized_im.size
@@ -409,6 +436,14 @@ class GuiClass(Frame):
         active_tab = self.n.index(self.n.select())
         print(active_tab)
         if active_tab == 0:
+            self.master.unbind("<Right>")
+            self.master.unbind("<Left>")
+            self.master.unbind("<d>")
+            self.master.unbind("<a>")
+            self.master.unbind("<Configure>")
+            self.master.unbind("<Control-z>")
+            self.master.unbind("<Return>")
+        if active_tab == 1:
             self.resizeEventTab1()
             self.master.bind("<Right>",self.nextRaw)
             self.master.bind("<Left>",self.previousRaw)
@@ -417,7 +452,7 @@ class GuiClass(Frame):
             self.master.bind("<Configure>",self.resizeEventTab1)
             self.master.bind("<Control-z>",self.undoCrop)
             self.master.bind("<Return>",self.submitCropped)
-        elif active_tab == 1:
+        elif active_tab == 2:
             self.resizeEventTab2()
             self.master.unbind("<Right>")
             self.master.unbind("<Left>")
@@ -426,7 +461,7 @@ class GuiClass(Frame):
             self.master.bind("<Configure>",self.resizeEventTab2)
             self.master.unbind("<Control-z>")
             self.master.bind("<Return>",self.submitClassification)
-        elif active_tab == 2:
+        elif active_tab == 3:
             self.master.unbind("<Right>")
             self.master.unbind("<Left>")
             self.master.unbind("<d>")
