@@ -71,8 +71,8 @@ class GuiClass(tk.Frame):
         # itialize variables
         self.initialized = False
         self.target_number = 0
-        #self.org_np = np.array(self.interface.getNextRawImage(True))
-        self.org_np = self.get_image('frame0744.jpg')
+        self.org_np = np.array(self.interface.getNextRawImage(True))
+        #self.org_np = self.get_image('frame0744.jpg')
         self.draw_np = np.copy(self.org_np)
         self.img_im = self.np2im(self.draw_np)
         self.crop_im = self.img_im.copy()
