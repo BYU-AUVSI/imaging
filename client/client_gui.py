@@ -1,12 +1,10 @@
 '''
-Author: D. Knowles
-Date: 11/6/18
-Description: Testing out TK gui options
+Authors: D. Knowles, B. McBride, T. Miller
 
 Prereqs:
 python 3
 sudo apt install python3-tk
-pip3 install Pillow, opencv-python
+pip3 install Pillow, opencv-python, ttkthemes
 '''
 
 '''
