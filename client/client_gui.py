@@ -61,7 +61,8 @@ class GuiClass(tk.Frame):
             w = Toplevel(root)
             w.state('zoomed')
         self.master.title("BYU AUVSI COMPETITION 2019")
-        self.interface = client_rest.ImagingInterface(host="192.168.1.48")
+
+
         self.n = ttk.Notebook(self.master) # create tabs
         self.n.pack(fill=tk.BOTH, expand=1) # expand across space
         tk.Grid.rowconfigure(self.master,0,weight=1)
@@ -69,6 +70,12 @@ class GuiClass(tk.Frame):
 
 
         # itialize variables
+        self.default_host = '192.168.1.48'
+        #self.default_host = '127.0.0.1'
+        self.default_port = '5000'
+        self.default_idnum = 50
+        self.default_debug = False
+        self.interface = client_rest.ImagingInterface(host=self.default_host,port=self.default_port,numIdsStored=self.default_idnum,isDebug=self.default_debug)
         self.initialized = False
         self.target_number = 0
         self.org_np = np.array(self.interface.getNextRawImage(True))
@@ -85,7 +92,7 @@ class GuiClass(tk.Frame):
         self.resize_counter_tab2 = time.time()
         self.cropped = False
 
-        # Tab 0: SETTINGS
+        # Tab 0: SETTINGS ------------------------------------------------------
         self.tab0 = ttk.Frame(self.n)
         self.n.add(self.tab0, text='Settings')
         for x in range(6):
@@ -94,14 +101,14 @@ class GuiClass(tk.Frame):
             tk.Grid.rowconfigure(self.tab0,y,weight=1)
 
         # Column One
-        self.t0c1l1 = ttk.Label(self.tab0, anchor=tk.CENTER, text='          ')
+        self.t0c1l1 = ttk.Label(self.tab0, anchor=tk.CENTER, text='                               ')
         self.t0c1l1.grid(row=0,column=0,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t0c1l2 = ttk.Label(self.tab0, anchor=tk.CENTER, text='          ')
+        self.t0c1l2 = ttk.Label(self.tab0, anchor=tk.CENTER, text='                               ')
         self.t0c1l2.grid(row=0,column=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
 
         # Column Two
-        self.t0sep12 = ttk.Separator(self.tab0, orient=tk.VERTICAL)
-        self.t0sep12.grid(row=0, column=2, rowspan=10,sticky=tk.N+tk.S+tk.E+tk.W, pady=5)
+        #self.t0sep12 = ttk.Separator(self.tab0, orient=tk.VERTICAL)
+        #self.t0sep12.grid(row=0, column=2, rowspan=10,sticky=tk.N+tk.S+tk.E+tk.W, pady=5)
         self.logo_np = self.get_image('logo.png')
         self.logo_im = self.np2im(self.logo_np)
         self.logo_width,self.logo_height = self.logo_im.size
@@ -109,34 +116,46 @@ class GuiClass(tk.Frame):
         self.t0c2i1 = ttk.Label(self.tab0, anchor=tk.CENTER,image=self.logo_tk)
         self.t0c2i1.image = self.logo_tk
         self.t0c2i1.grid(row=0,column=2,rowspan=5,columnspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t0c2l1 = ttk.Label(self.tab0, anchor=tk.CENTER, text='Host:')
+        self.t0c2l1 = ttk.Label(self.tab0, anchor=tk.E, text='Host:')
         self.t0c2l1.grid(row=5,column=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t0c2l2 = ttk.Entry(self.tab0)
-        self.t0c2l2.grid(row=5,column=3,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t0c2l3 = ttk.Label(self.tab0, anchor=tk.CENTER, text='Port:')
-        self.t0c2l3.grid(row=6,column=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t0c2l4 = ttk.Entry(self.tab0)
-        self.t0c2l4.grid(row=6,column=3,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t0c2l5 = ttk.Label(self.tab0, anchor=tk.CENTER, text='Number of IDs Stored:')
+        self.t0c2host = tk.StringVar()
+        self.t0c2host.set(self.default_host)
+        self.t0c2l2 = ttk.Entry(self.tab0,textvariable=self.t0c2host)
+        self.t0c2l2.grid(row=5,column=3,sticky=tk.N+tk.S+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t0c2l3 = ttk.Label(self.tab0, anchor=tk.E, text='Port:')
+        self.t0c2l3.grid(row=6,column=2,sticky=tk.N+tk.E+tk.S+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t0c2port = tk.StringVar()
+        self.t0c2port.set(self.default_port)
+        self.t0c2l4 = ttk.Entry(self.tab0,textvariable=self.t0c2port)
+        self.t0c2l4.grid(row=6,column=3,sticky=tk.N+tk.S+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t0c2l5 = ttk.Label(self.tab0, anchor=tk.E, text='Number of IDs Stored:')
         self.t0c2l5.grid(row=7,column=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t0c2l6 = ttk.Entry(self.tab0)
-        self.t0c2l6.grid(row=7,column=3,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t0c2l7 = ttk.Label(self.tab0, anchor=tk.CENTER, text='Debug Mode:')
+        self.t0c2ids = tk.StringVar()
+        self.t0c2ids.set(self.default_idnum)
+        self.t0c2l6 = ttk.Entry(self.tab0,textvariable=self.t0c2ids)
+        self.t0c2l6.grid(row=7,column=3,sticky=tk.N+tk.S+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t0c2l7 = ttk.Label(self.tab0, anchor=tk.E, text='Debug Mode:')
         self.t0c2l7.grid(row=8,column=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t0c2l8 = ttk.Entry(self.tab0)
-        self.t0c2l8.grid(row=8,column=3,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t0c2debug = tk.IntVar()
+        self.t0c2l8 = ttk.Radiobutton(self.tab0,text='True',value=0,variable=self.t0c2debug)
+        self.t0c2l8.grid(row=8,column=3,sticky=tk.N+tk.S+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t0c2l8b = ttk.Radiobutton(self.tab0,text='False',value=1,variable=self.t0c2debug)
+        self.t0c2l8b.grid(row=8,column=3,sticky=tk.N+tk.S,padx=5,pady=5,ipadx=5,ipady=5)
+        if self.default_debug == False:
+            self.t0c2debug.set(1)
+        self.t0c2l9 = ttk.Button(self.tab0, text="Apply Settings",command=self.updateSettings)
+        self.t0c2l9.grid(row=9,column=2,columnspan=2,sticky=tk.N+tk.S,padx=5,pady=5,ipadx=5,ipady=5)
         # Column Three
-        self.t0sep23 = ttk.Separator(self.tab0, orient=tk.VERTICAL)
-        self.t0sep23.grid(row=0, column=4, rowspan=10,sticky=tk.N+tk.S+tk.E+tk.W, pady=5)
-        self.t0c3l1 = ttk.Label(self.tab0, anchor=tk.CENTER, text='          ')
+        #self.t0sep23 = ttk.Separator(self.tab0, orient=tk.VERTICAL)
+        #self.t0sep23.grid(row=0, column=4, rowspan=10,sticky=tk.N+tk.S+tk.E+tk.W, pady=5)
+        self.t0c3l1 = ttk.Label(self.tab0, anchor=tk.CENTER, text='                                   ')
         self.t0c3l1.grid(row=0,column=4,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t0c3l2 = ttk.Label(self.tab0, anchor=tk.CENTER, text='          ')
+        self.t0c3l2 = ttk.Label(self.tab0, anchor=tk.CENTER, text='                                   ')
         self.t0c3l2.grid(row=0,column=5,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-        # TAB 1: CROPPING
+
+        # TAB 1: CROPPING ------------------------------------------------------
         self.tab1 = ttk.Frame(self.n)
         self.n.add(self.tab1, text='Cropping')
-
-
         # Allows everthing to be resized
         #grid=Frame(self.tab1)
         #grid.grid(sticky=tk.N+tk.S+tk.E+tk.W,column=0,row=7,columnspan=2)
@@ -185,7 +204,7 @@ class GuiClass(tk.Frame):
 
 
 
-        # TAB 2: CLASSIFICATION
+        # TAB 2: CLASSIFICATION ------------------------------------------------
         self.tab2 = ttk.Frame(self.n)   # second page
         self.n.add(self.tab2, text='Classification')
 
@@ -260,13 +279,13 @@ class GuiClass(tk.Frame):
 
 
 
-        # TAB 3: AUTONOMOUS TENDER
+        # TAB 3: AUTONOMOUS TENDER ------------------------------------------------
         self.tab3 = ttk.Frame(self.n)
         self.n.add(self.tab3, text='Autonomous Tender')
         # Done with initialization
         self.initialized = True
 
-        # KEY BINDINGS
+        # KEY BINDINGS ------------------------------------------------------------
         self.master.bind("<<NotebookTabChanged>>",self.tabChanged)
         self.master.bind("<Escape>",self.close_window) # press ESC to exit
 
@@ -402,7 +421,6 @@ class GuiClass(tk.Frame):
             self.target_number = 0
         self.lbl2.configure(text=self.target_number)
     def nextRaw(self,event):
-        print("next Raw")
         time0 = time.time()
         self.org_np = np.array(self.interface.getNextRawImage(True)) #self.get_image('frame0744.jpg')
         time1 = time.time()
@@ -440,13 +458,14 @@ class GuiClass(tk.Frame):
     def tabChanged(self,event):
         active_tab = self.n.index(self.n.select())
         if active_tab == 0:
+            self.resizeEventTab0()
             self.master.unbind("<Right>")
             self.master.unbind("<Left>")
             self.master.unbind("<d>")
             self.master.unbind("<a>")
             self.master.bind("<Configure>",self.resizeEventTab0)
             self.master.unbind("<Control-z>")
-            self.master.unbind("<Return>")
+            self.master.bind("<Return>",self.updateSettings)
         if active_tab == 1:
             self.resizeEventTab1()
             self.master.bind("<Right>",self.nextRaw)
@@ -474,6 +493,12 @@ class GuiClass(tk.Frame):
             self.master.unbind("<Control-z>")
             self.master.unbind("<Return>")
         self.master.focus_set()
+    def updateSettings(self,event=None):
+        host_new = self.t0c2host.get()
+        port_new = self.t0c2port.get()
+        ids_new = int(self.t0c2ids.get())
+        debug_new = not(self.t0c2debug.get())
+        self.interface = client_rest.ImagingInterface(host=host_new,port=port_new,numIdsStored=ids_new,isDebug=debug_new)
 
 
 
