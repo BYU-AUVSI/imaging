@@ -57,7 +57,7 @@ class GuiClass(Frame):
         except (Exception) as e:
             w = Toplevel(root)
             w.state('zoomed')
-        self.master.title("AUVSI COMPETITION 2019: CLASSIFICATION")
+        self.master.title("BYU AUVSI COMPETITION 2019")
         self.interface = client_rest.ImagingInterface(host="192.168.1.48")
         self.n = ttk.Notebook(self.master) # create tabs
         self.n.pack(fill=BOTH, expand=1) # expand across space
@@ -68,7 +68,8 @@ class GuiClass(Frame):
         # itialize variables
         self.initialized = False
         self.target_number = 0
-        self.org_np = np.array(self.interface.getNextRawImage(True)) #self.get_image('frame0744.jpg')
+        #self.org_np = np.array(self.interface.getNextRawImage(True))
+        self.org_np = self.get_image('frame0744.jpg')
         self.draw_np = np.copy(self.org_np)
         self.img_im = self.np2im(self.draw_np)
         self.crop_im = self.img_im.copy()
@@ -76,6 +77,7 @@ class GuiClass(Frame):
         self.img_tk = self.im2tk(self.img_im)
         self.org_width,self.org_height = self.img_im.size
         self.crop_width,self.crop_height = self.img_im.size
+        self.resize_counter_tab0 = time.time()
         self.resize_counter_tab1 = time.time()
         self.resize_counter_tab2 = time.time()
         self.cropped = False
@@ -88,11 +90,22 @@ class GuiClass(Frame):
         for y in range(10):
             Grid.rowconfigure(self.tab0,y,weight=1)
 
-        '''
-        self.t0c2i1 = Label(self.tab1,image=self.img_tk)
-        self.t0c2i1.image = self.img_tk
-        self.t0c2i1.grid(row=0,column=0,rowspan=12,columnspan=12,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
-        '''
+        # Column One
+        self.t0c1l1 = Label(self.tab0, text='          ')
+        self.t0c1l1.grid(row=0,column=0,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t0c1l2 = Label(self.tab0, text='          ')
+        self.t0c1l2.grid(row=0,column=1,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
+
+        # Column Two
+        self.t0sep12 = ttk.Separator(self.tab0, orient=VERTICAL)
+        self.t0sep12.grid(row=0, column=2, rowspan=10,sticky=N+S+E+W, pady=5)
+        self.logo_np = self.get_image('logo.png')
+        self.logo_im = self.np2im(self.logo_np)
+        self.logo_width,self.logo_height = self.logo_im.size
+        self.logo_tk = self.im2tk(self.logo_im)
+        self.t0c2i1 = Label(self.tab0,image=self.logo_tk)
+        self.t0c2i1.image = self.logo_tk
+        self.t0c2i1.grid(row=0,column=2,rowspan=5,columnspan=2,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
         self.t0c2l1 = Label(self.tab0, text='Host:')
         self.t0c2l1.grid(row=5,column=2,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
         self.t0c2l2 = Entry(self.tab0)
@@ -109,7 +122,13 @@ class GuiClass(Frame):
         self.t0c2l7.grid(row=8,column=2,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
         self.t0c2l8 = Entry(self.tab0)
         self.t0c2l8.grid(row=8,column=3,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
-
+        # Column Three
+        self.t0sep23 = ttk.Separator(self.tab0, orient=VERTICAL)
+        self.t0sep23.grid(row=0, column=4, rowspan=10,sticky=N+S+E+W, pady=5)
+        self.t0c3l1 = Label(self.tab0, text='          ')
+        self.t0c3l1.grid(row=0,column=4,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t0c3l2 = Label(self.tab0, text='          ')
+        self.t0c3l2.grid(row=0,column=5,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
         # TAB 1: CROPPING
         self.tab1 = ttk.Frame(self.n)
         self.n.add(self.tab1, text='Cropping')
@@ -304,6 +323,17 @@ class GuiClass(Frame):
         # Crop Image
         self.cropImage(int(sr*self.x0),int(sr*self.y0),int(sr*self.x1),int(sr*self.y1))
         self.cropped = True
+    def resizeEventTab0(self,event=None):
+        if self.initialized == True and (time.time()-self.resize_counter_tab0) > 0.050:
+            if self.t0c2i1.winfo_width() > 1:
+                self.resize_counter_tab0 = time.time()
+                self.master.update()
+                self.t0c2i1_width = self.t0c2i1.winfo_width()
+                self.t0c2i1_height = self.t0c2i1.winfo_height()
+                self.logo_resized_im = self.resizeIm(self.logo_im,self.logo_width,self.logo_height,self.t0c2i1_width,self.t0c2i1_height)
+                self.t0c2i1_width,self.t0c2i1_height = self.logo_resized_im.size
+                self.logo_tk = self.im2tk(self.logo_resized_im)
+                self.t0c2i1.configure(image=self.logo_tk)
     def resizeEventTab1(self,event=None):
         if self.initialized == True and (time.time()-self.resize_counter_tab1) > 0.050:
             if self.lbl3.winfo_width() > 1:
@@ -404,43 +434,14 @@ class GuiClass(Frame):
         print("submit classification")
         print(shape,alphanumeric,orientation)
         print(background_color,alpha_color,type,description)
-    '''
-    def pressD(self,event):
-        active_tab = self.n.index(self.n.select())
-        if active_tab == 0:
-            self.advanceTarget(event)
-    def pressA(self,event):
-        active_tab = self.n.index(self.n.select())
-        if active_tab == 0:
-            self.decrementTarget(event)
-    def pressZ(self,event):
-        active_tab = self.n.index(self.n.select())
-        if active_tab == 0:
-            self.undoCrop(event)
-    def pressEnter(self,event):
-        active_tab = self.n.index(self.n.select())
-        if active_tab == 0:
-            self.submitCropped(event)
-        if active_tab == 1:
-            self.submitClassification(event)
-    def pressRight(self,event):
-        active_tab = self.n.index(self.n.select())
-        if active_tab == 0:
-            self.nextRaw(event)
-    def pressLeft(self,event):
-        active_tab = self.n.index(self.n.select())
-        if active_tab == 0:
-            self.previousRaw(event)
-    '''
     def tabChanged(self,event):
         active_tab = self.n.index(self.n.select())
-        print(active_tab)
         if active_tab == 0:
             self.master.unbind("<Right>")
             self.master.unbind("<Left>")
             self.master.unbind("<d>")
             self.master.unbind("<a>")
-            self.master.unbind("<Configure>")
+            self.master.bind("<Configure>",self.resizeEventTab0)
             self.master.unbind("<Control-z>")
             self.master.unbind("<Return>")
         if active_tab == 1:
