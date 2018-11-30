@@ -15,6 +15,9 @@ Integration:
     Submit Cropped
     Next Cropped
     Submit classification
+    Geolocation
+All:
+    *possible threading behind the scenese to autosize other tabs
 Tab0:
     Add settings tab
     Rename tabs
@@ -29,7 +32,7 @@ Tab2:
     Rotate image according to heading
 Tab3:
     Make everything
-    Add vertical lines
+    Add tk.VERTICAL lines
 
 KNOWN BUGS:
 Weird exit is bound to an event (doesn't do anything)
@@ -37,20 +40,22 @@ If you click, but don't drag on the crop screen, you still see rectangle
 When you click on the 2nd tab right at the beginning, and then use the left/intruder_height
     buttons, it moves one tab, then unbinds like it's supposed to.
 '''
-from tkinter import *
+import tkinter as tk
 from tkinter import ttk
+from ttkthemes import ThemedStyle
 from PIL import Image,ImageTk
 import cv2
 import numpy as np
 import time
 import client_rest
 import time
+import sys
 
 
-class GuiClass(Frame):
+class GuiClass(tk.Frame):
     """Classification Gui for AUVSi 2019"""
     def __init__(self,master=None):
-        Frame.__init__(self,master=None)
+        tk.Frame.__init__(self,master=None)
         self.master = master # gui master handle
         try:
             self.master.attributes('-zoomed', True) # maximizes screen
@@ -60,9 +65,9 @@ class GuiClass(Frame):
         self.master.title("BYU AUVSI COMPETITION 2019")
         self.interface = client_rest.ImagingInterface(host="192.168.1.48")
         self.n = ttk.Notebook(self.master) # create tabs
-        self.n.pack(fill=BOTH, expand=1) # expand across space
-        Grid.rowconfigure(self.master,0,weight=1)
-        Grid.columnconfigure(self.master,0,weight=1)
+        self.n.pack(fill=tk.BOTH, expand=1) # expand across space
+        tk.Grid.rowconfigure(self.master,0,weight=1)
+        tk.Grid.columnconfigure(self.master,0,weight=1)
 
 
         # itialize variables
@@ -86,49 +91,49 @@ class GuiClass(Frame):
         self.tab0 = ttk.Frame(self.n)
         self.n.add(self.tab0, text='Settings')
         for x in range(6):
-            Grid.columnconfigure(self.tab0,x,weight=1)
+            tk.Grid.columnconfigure(self.tab0,x,weight=1)
         for y in range(10):
-            Grid.rowconfigure(self.tab0,y,weight=1)
+            tk.Grid.rowconfigure(self.tab0,y,weight=1)
 
         # Column One
-        self.t0c1l1 = Label(self.tab0, text='          ')
-        self.t0c1l1.grid(row=0,column=0,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t0c1l2 = Label(self.tab0, text='          ')
-        self.t0c1l2.grid(row=0,column=1,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t0c1l1 = ttk.Label(self.tab0, anchor=tk.CENTER, text='          ')
+        self.t0c1l1.grid(row=0,column=0,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t0c1l2 = ttk.Label(self.tab0, anchor=tk.CENTER, text='          ')
+        self.t0c1l2.grid(row=0,column=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
 
         # Column Two
-        self.t0sep12 = ttk.Separator(self.tab0, orient=VERTICAL)
-        self.t0sep12.grid(row=0, column=2, rowspan=10,sticky=N+S+E+W, pady=5)
+        self.t0sep12 = ttk.Separator(self.tab0, orient=tk.VERTICAL)
+        self.t0sep12.grid(row=0, column=2, rowspan=10,sticky=tk.N+tk.S+tk.E+tk.W, pady=5)
         self.logo_np = self.get_image('logo.png')
         self.logo_im = self.np2im(self.logo_np)
         self.logo_width,self.logo_height = self.logo_im.size
         self.logo_tk = self.im2tk(self.logo_im)
-        self.t0c2i1 = Label(self.tab0,image=self.logo_tk)
+        self.t0c2i1 = ttk.Label(self.tab0, anchor=tk.CENTER,image=self.logo_tk)
         self.t0c2i1.image = self.logo_tk
-        self.t0c2i1.grid(row=0,column=2,rowspan=5,columnspan=2,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t0c2l1 = Label(self.tab0, text='Host:')
-        self.t0c2l1.grid(row=5,column=2,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t0c2l2 = Entry(self.tab0)
-        self.t0c2l2.grid(row=5,column=3,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t0c2l3 = Label(self.tab0, text='Port:')
-        self.t0c2l3.grid(row=6,column=2,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t0c2l4 = Entry(self.tab0)
-        self.t0c2l4.grid(row=6,column=3,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t0c2l5 = Label(self.tab0, text='Number of IDs Stored:')
-        self.t0c2l5.grid(row=7,column=2,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t0c2l6 = Entry(self.tab0)
-        self.t0c2l6.grid(row=7,column=3,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t0c2l7 = Label(self.tab0, text='Debug Mode:')
-        self.t0c2l7.grid(row=8,column=2,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t0c2l8 = Entry(self.tab0)
-        self.t0c2l8.grid(row=8,column=3,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t0c2i1.grid(row=0,column=2,rowspan=5,columnspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t0c2l1 = ttk.Label(self.tab0, anchor=tk.CENTER, text='Host:')
+        self.t0c2l1.grid(row=5,column=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t0c2l2 = ttk.Entry(self.tab0)
+        self.t0c2l2.grid(row=5,column=3,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t0c2l3 = ttk.Label(self.tab0, anchor=tk.CENTER, text='Port:')
+        self.t0c2l3.grid(row=6,column=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t0c2l4 = ttk.Entry(self.tab0)
+        self.t0c2l4.grid(row=6,column=3,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t0c2l5 = ttk.Label(self.tab0, anchor=tk.CENTER, text='Number of IDs Stored:')
+        self.t0c2l5.grid(row=7,column=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t0c2l6 = ttk.Entry(self.tab0)
+        self.t0c2l6.grid(row=7,column=3,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t0c2l7 = ttk.Label(self.tab0, anchor=tk.CENTER, text='Debug Mode:')
+        self.t0c2l7.grid(row=8,column=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t0c2l8 = ttk.Entry(self.tab0)
+        self.t0c2l8.grid(row=8,column=3,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
         # Column Three
-        self.t0sep23 = ttk.Separator(self.tab0, orient=VERTICAL)
-        self.t0sep23.grid(row=0, column=4, rowspan=10,sticky=N+S+E+W, pady=5)
-        self.t0c3l1 = Label(self.tab0, text='          ')
-        self.t0c3l1.grid(row=0,column=4,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t0c3l2 = Label(self.tab0, text='          ')
-        self.t0c3l2.grid(row=0,column=5,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t0sep23 = ttk.Separator(self.tab0, orient=tk.VERTICAL)
+        self.t0sep23.grid(row=0, column=4, rowspan=10,sticky=tk.N+tk.S+tk.E+tk.W, pady=5)
+        self.t0c3l1 = ttk.Label(self.tab0, anchor=tk.CENTER, text='          ')
+        self.t0c3l1.grid(row=0,column=4,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t0c3l2 = ttk.Label(self.tab0, anchor=tk.CENTER, text='          ')
+        self.t0c3l2.grid(row=0,column=5,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
         # TAB 1: CROPPING
         self.tab1 = ttk.Frame(self.n)
         self.n.add(self.tab1, text='Cropping')
@@ -136,49 +141,49 @@ class GuiClass(Frame):
 
         # Allows everthing to be resized
         #grid=Frame(self.tab1)
-        #grid.grid(sticky=N+S+E+W,column=0,row=7,columnspan=2)
+        #grid.grid(sticky=tk.N+tk.S+tk.E+tk.W,column=0,row=7,columnspan=2)
         #Grid.rowconfigure(self.tab1,0,weight=1)
         #Grid.columnconfigure(self.tab1,0,weight=1)
 
         for x in range(19):
-            Grid.columnconfigure(self.tab1,x,weight=1)
+            tk.Grid.columnconfigure(self.tab1,x,weight=1)
         for y in range(13):
-            Grid.rowconfigure(self.tab1,y,weight=1)
+            tk.Grid.rowconfigure(self.tab1,y,weight=1)
 
 
 
-        self.lbl2 = Label(self.tab1, text=self.target_number)
-        self.lbl2.grid(row=12,column=0,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
-        but1 = Button(self.tab1, text="Advance Target",command=self.advanceTarget)
-        but1.grid(row=12,column=1,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.lbl3 = Label(self.tab1,image=self.img_tk)
+        self.lbl2 = ttk.Label(self.tab1, anchor=tk.CENTER, text=self.target_number)
+        self.lbl2.grid(row=12,column=0,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        but1 = ttk.Button(self.tab1, text="Advance Target",command=self.advanceTarget)
+        but1.grid(row=12,column=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.lbl3 = ttk.Label(self.tab1, anchor=tk.CENTER,image=self.img_tk)
         self.lbl3.image = self.img_tk
-        self.lbl3.grid(row=0,column=0,rowspan=12,columnspan=12,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.lbl3.grid(row=0,column=0,rowspan=12,columnspan=12,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
         self.lbl3.bind("<Button-1>",self.mouse_click)
-        self.lbl4 = Label(self.tab1,text="initial")
-        self.lbl4.grid(row=12,column=2,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t1sep12 = ttk.Separator(self.tab1, orient=VERTICAL)
-        self.t1sep12.grid(row=0, column=13, rowspan=13,sticky=N+S+E+W, pady=5)
-        self.lbl1 = Label(self.tab1, text='Target Number')
-        self.lbl1.grid(row=0,column=13,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.lbl5 = Label(self.tab1, text='Target Pic')
-        self.lbl5.grid(row=0,column=14,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.lbl6 = Label(self.tab1, text='Pic Quantity')
-        self.lbl6.grid(row=0,column=15,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t1sep23 = ttk.Separator(self.tab1, orient=VERTICAL)
-        self.t1sep23.grid(row=0, column=16, rowspan=13,sticky=N+S+E+W, pady=5)
-        self.lbl7 = Label(self.tab1, text='Target Number')
-        self.lbl7.grid(row=0,column=16,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.lbl8 = Label(self.tab1, text='Target Pic')
-        self.lbl8.grid(row=0,column=17,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.lbl9 = Label(self.tab1, text='Pic Quantity')
-        self.lbl9.grid(row=0,column=18,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.lbl4 = ttk.Label(self.tab1, anchor=tk.CENTER,text="initial")
+        self.lbl4.grid(row=12,column=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t1sep12 = ttk.Separator(self.tab1, orient=tk.VERTICAL)
+        self.t1sep12.grid(row=0, column=13, rowspan=13,sticky=tk.N+tk.S+tk.E+tk.W, pady=5)
+        self.lbl1 = ttk.Label(self.tab1, anchor=tk.CENTER, text='Target Number')
+        self.lbl1.grid(row=0,column=13,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.lbl5 = ttk.Label(self.tab1, anchor=tk.CENTER, text='Target Pic')
+        self.lbl5.grid(row=0,column=14,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.lbl6 = ttk.Label(self.tab1, anchor=tk.CENTER, text='Pic Quantity')
+        self.lbl6.grid(row=0,column=15,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t1sep23 = ttk.Separator(self.tab1, orient=tk.VERTICAL)
+        self.t1sep23.grid(row=0, column=16, rowspan=13,sticky=tk.N+tk.S+tk.E+tk.W, pady=5)
+        self.lbl7 = ttk.Label(self.tab1, anchor=tk.CENTER, text='Target Number')
+        self.lbl7.grid(row=0,column=16,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.lbl8 = ttk.Label(self.tab1, anchor=tk.CENTER, text='Target Pic')
+        self.lbl8.grid(row=0,column=17,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.lbl9 = ttk.Label(self.tab1, anchor=tk.CENTER, text='Pic Quantity')
+        self.lbl9.grid(row=0,column=18,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
 
         for ii in range(12):
-            new_label1 = Label(self.tab1,text=ii+1)
-            new_label1.grid(row=ii+1,column=13,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
-            new_label1 = Label(self.tab1,text=ii+13)
-            new_label1.grid(row=ii+1,column=16,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
+            new_label1 = ttk.Label(self.tab1, anchor=tk.CENTER,text=ii+1)
+            new_label1.grid(row=ii+1,column=13,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+            new_label1 = ttk.Label(self.tab1, anchor=tk.CENTER,text=ii+13)
+            new_label1.grid(row=ii+1,column=16,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
 
 
 
@@ -187,73 +192,73 @@ class GuiClass(Frame):
         self.n.add(self.tab2, text='Classification')
 
         for x in range(16):
-            Grid.columnconfigure(self.tab2,x,weight=1)
+            tk.Grid.columnconfigure(self.tab2,x,weight=1)
         for y in range(50):
-            Grid.rowconfigure(self.tab2,y,weight=1)
+            tk.Grid.rowconfigure(self.tab2,y,weight=1)
 
         # Column One
-        self.t2c1title = Label(self.tab2, text='Classification Queue')
-        self.t2c1title.grid(row=0,column=0,columnspan=4,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t2c1title = ttk.Label(self.tab2, anchor=tk.CENTER, text='Classification Queue')
+        self.t2c1title.grid(row=0,column=0,columnspan=4,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
 
         # Column Two
-        self.t2sep12 = ttk.Separator(self.tab2, orient=VERTICAL)
-        self.t2sep12.grid(row=0, column=4, rowspan=50,sticky=N+S+E+W, pady=5)
-        self.t2c2title = Label(self.tab2, text='Classification')
-        self.t2c2title.grid(row=0,column=4,columnspan=8,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t2sep12 = ttk.Separator(self.tab2, orient=tk.VERTICAL)
+        self.t2sep12.grid(row=0, column=4, rowspan=50,sticky=tk.N+tk.S+tk.E+tk.W, pady=5)
+        self.t2c2title = ttk.Label(self.tab2, anchor=tk.CENTER, text='Classification')
+        self.t2c2title.grid(row=0,column=4,columnspan=8,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
 
-        self.t2c2i1 = Label(self.tab2,image=self.crop_tk)
+        self.t2c2i1 = ttk.Label(self.tab2, anchor=tk.CENTER,image=self.crop_tk)
         self.t2c2i1.image = self.crop_tk
-        self.t2c2i1.grid(row=2,column=4,rowspan=38,columnspan=8,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t2c2l1 = Label(self.tab2, text='Shape')
-        self.t2c2l1.grid(row=40,column=4,columnspan=2,rowspan=2,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t2c2i1.grid(row=2,column=4,rowspan=38,columnspan=8,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t2c2l1 = ttk.Label(self.tab2, anchor=tk.CENTER, text='Shape')
+        self.t2c2l1.grid(row=40,column=4,columnspan=2,rowspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
         shape_options = ('circle','semicircle','quarter_circle','triangle','square','rectangle','trapezoid','pentagon','hexagon','heptagon','octagon','star','cross')
-        self.t2c2l2_var = StringVar(self.master)
+        self.t2c2l2_var = tk.StringVar(self.master)
         self.t2c2l2_var.set('circle')
-        self.t2c2l2 = OptionMenu(self.tab2,self.t2c2l2_var,*shape_options)
-        self.t2c2l2.grid(row=42,column=4,columnspan=2,rowspan=2,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t2c2l3 = Label(self.tab2, text='Alphanumeric')
-        self.t2c2l3.grid(row=40,column=6,columnspan=2,rowspan=2,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t2c2l4 = Entry(self.tab2)
-        self.t2c2l4.grid(row=42,column=6,columnspan=2,rowspan=2,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t2c2l5 = Label(self.tab2, text='Orientation')
-        self.t2c2l5.grid(row=40,column=8,columnspan=4,rowspan=2,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t2c2l2 = ttk.OptionMenu(self.tab2,self.t2c2l2_var,*shape_options)
+        self.t2c2l2.grid(row=42,column=4,columnspan=2,rowspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t2c2l3 = ttk.Label(self.tab2, anchor=tk.CENTER, text='Alphanumeric')
+        self.t2c2l3.grid(row=40,column=6,columnspan=2,rowspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t2c2l4 = ttk.Entry(self.tab2)
+        self.t2c2l4.grid(row=42,column=6,columnspan=2,rowspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t2c2l5 = ttk.Label(self.tab2, anchor=tk.CENTER, text='Orientation')
+        self.t2c2l5.grid(row=40,column=8,columnspan=4,rowspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
         orientation_options = ('N','NE','E','SE','S','SW','W','NW')
-        self.t2c2l6_var = StringVar(self.master)
+        self.t2c2l6_var = tk.StringVar(self.master)
         self.t2c2l6_var.set('N')
-        self.t2c2l6 = OptionMenu(self.tab2,self.t2c2l6_var,*orientation_options)
-        self.t2c2l6.grid(row=42,column=8,columnspan=4,rowspan=2,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t2c2l9 = Label(self.tab2, text='Background Color')
-        self.t2c2l9.grid(row=44,column=4,columnspan=2,rowspan=2,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t2c2l6 = ttk.OptionMenu(self.tab2,self.t2c2l6_var,*orientation_options)
+        self.t2c2l6.grid(row=42,column=8,columnspan=4,rowspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t2c2l9 = ttk.Label(self.tab2, anchor=tk.CENTER, text='Background Color')
+        self.t2c2l9.grid(row=44,column=4,columnspan=2,rowspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
         color_options = ('white','black','gray','red','blue','green','yellow','purple','brown','orange')
-        self.t2c2l10_var = StringVar(self.master)
+        self.t2c2l10_var = tk.StringVar(self.master)
         self.t2c2l10_var.set('white')
-        self.t2c2l10 = OptionMenu(self.tab2,self.t2c2l10_var,*color_options)
-        self.t2c2l10.grid(row=46,column=4,columnspan=2,rowspan=2,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t2c2l11 = Label(self.tab2, text='Alphanumeric Color')
-        self.t2c2l11.grid(row=44,column=6,columnspan=2,rowspan=2,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t2c2l12_var = StringVar(self.master)
+        self.t2c2l10 = ttk.OptionMenu(self.tab2,self.t2c2l10_var,*color_options)
+        self.t2c2l10.grid(row=46,column=4,columnspan=2,rowspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t2c2l11 = ttk.Label(self.tab2, anchor=tk.CENTER, text='Alphanumeric Color')
+        self.t2c2l11.grid(row=44,column=6,columnspan=2,rowspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t2c2l12_var = tk.StringVar(self.master)
         self.t2c2l12_var.set('white')
-        self.t2c2l12 = OptionMenu(self.tab2,self.t2c2l12_var,*color_options)
-        self.t2c2l12.grid(row=46,column=6,columnspan=2,rowspan=2,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t2c2l13 = Label(self.tab2, text='Target Type')
-        self.t2c2l13.grid(row=44,column=8,columnspan=2,rowspan=2,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t2c2l14_var = StringVar(self.master)
+        self.t2c2l12 = ttk.OptionMenu(self.tab2,self.t2c2l12_var,*color_options)
+        self.t2c2l12.grid(row=46,column=6,columnspan=2,rowspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t2c2l13 = ttk.Label(self.tab2, anchor=tk.CENTER, text='Target Type')
+        self.t2c2l13.grid(row=44,column=8,columnspan=2,rowspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t2c2l14_var = tk.StringVar(self.master)
         target_options = ('standard','emergent','off-axis')
         self.t2c2l14_var.set('standard')
-        self.t2c2l14 = OptionMenu(self.tab2,self.t2c2l14_var,*target_options)
-        self.t2c2l14.grid(row=46,column=8,columnspan=2,rowspan=2,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t2c2l15 = Label(self.tab2, text='Emergent Description')
-        self.t2c2l15.grid(row=44,column=10,columnspan=2,rowspan=2,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t2c2l16 = Entry(self.tab2)
-        self.t2c2l16.grid(row=46,column=10,columnspan=2,rowspan=2,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t2c2l17 = Button(self.tab2, text="Submit Classification",command=self.submitClassification)
-        self.t2c2l17.grid(row=48,column=4,columnspan=8,rowspan=2,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t2c2l14 = ttk.OptionMenu(self.tab2,self.t2c2l14_var,*target_options)
+        self.t2c2l14.grid(row=46,column=8,columnspan=2,rowspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t2c2l15 = ttk.Label(self.tab2, anchor=tk.CENTER, text='Emergent Description')
+        self.t2c2l15.grid(row=44,column=10,columnspan=2,rowspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t2c2l16 = ttk.Entry(self.tab2)
+        self.t2c2l16.grid(row=46,column=10,columnspan=2,rowspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t2c2l17 = ttk.Button(self.tab2, text="Submit Classification",command=self.submitClassification)
+        self.t2c2l17.grid(row=48,column=4,columnspan=8,rowspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
 
         # Column Three
-        self.t2sep23 = ttk.Separator(self.tab2, orient=VERTICAL)
-        self.t2sep23.grid(row=0, column=12, rowspan=50,sticky=N+S+E+W, pady=5)
-        self.t2c2title = Label(self.tab2, text='Classified Targets')
-        self.t2c2title.grid(row=0,column=12,columnspan=4,sticky=N+S+E+W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t2sep23 = ttk.Separator(self.tab2, orient=tk.VERTICAL)
+        self.t2sep23.grid(row=0, column=12, rowspan=50,sticky=tk.N+tk.S+tk.E+tk.W, pady=5)
+        self.t2c2title = ttk.Label(self.tab2, anchor=tk.CENTER, text='Classified Targets')
+        self.t2c2title.grid(row=0,column=12,columnspan=4,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
 
 
 
@@ -480,7 +485,9 @@ class GuiClass(Frame):
 
 
 if __name__ == "__main__":
-    root = Tk()
+    root = tk.Tk()
+    style = ThemedStyle(root)
+    style.set_theme("arc")
     gui = GuiClass(root)
     try:
         gui.mainloop()
