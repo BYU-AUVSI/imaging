@@ -23,7 +23,8 @@ if [ $confirm = "Y" -o $confirm = "y" ]; then
         echo "Sorry, I dont know how to properly install the dev stuff on your type of machine"
         exit 1
     fi
-    conda env create -f conda-requirements.yaml
+    source activate image_gui
+    $(which pip) install ttkthemes
 elif [ $confirm = "N" -o $confirm = "n" ]; then
     pip3 install -r pip-requirements.txt
 else
