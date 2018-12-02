@@ -7,23 +7,52 @@ FROM ros:kinetic-ros-core-xenial
 #   If you wanna upgrade to melodic, you
 #   need to change the core container
 #   (in the above FROM) and the base
-#   package retrieval in the below RUN
+#   package retrieval (in the below RUN)
+#   Moving up to ubuntu 18.04 could
+#   also potentially simplify the rest 
+#   of the image. Currently have to do a
+#   bunch of extra stuff in order to 
+#   install postgres11 and python3.7.
+#   16.04 has older version of both of
+#   these by default
 #########################################
 
 # install ros kinetic base packages (core is handled above)
 # this is pulled from osrf/docker_images
 RUN apt-get update && apt-get install -y \
     ros-kinetic-ros-base=1.3.2-0* \
+    ros-kinetic-image-transport \
+    ros-kinetic-cv-bridge \
     && rm -rf /var/lib/apt/lists/*
 
 # install database and python3 for the server
 RUN apt-get update -y && \
     apt-get install -y \
-    postgresql \
-    postgresql-contrib \
-    python3 \
-    python3-pip \
+    python3-dev \
+    # wholllle ton of lib dependencies for python3.7
+    python3-setuptools zlib1g-dev libbz2-dev libc6-dev libgdbm-dev tk-dev libsqlite3-dev libssl-dev libncursesw5-dev libreadline-gplv2-dev openssl libffi-dev \
+    # for python3.7 and postgres11
+    wget ca-certificates \
     && rm -rf /var/lib/apt/lists/*
+
+# setup postgres repository. By default ubuntu 16 apt has
+# postgres 9.5, but we are using 11 - the latest version.
+RUN wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add - \
+    && /bin/sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt/ `lsb_release -cs`-pgdg main" >> /etc/apt/sources.list.d/pgdg.list' \
+    && apt-get update \
+    && apt-get install -y postgresql postgresql-contrib
+
+
+# installing python3.7 on ubuntu 16.04
+# a bit of a pain:
+RUN mkdir -p /tmp/python37
+WORKDIR /tmp/python37
+RUN wget https://www.python.org/ftp/python/3.7.0/Python-3.7.0.tar.xz && \
+    tar xvf Python-3.7.0.tar.xz && \
+    cd Python-3.7.0 && \
+    ./configure && \
+    make altinstall && \
+    pip3.7 install -U pip
 
 #===============================
 # SECTION 2: ROS DEPENDENCIES
@@ -46,10 +75,28 @@ RUN git clone https://github.com/BYU-AUVSI/inertial_sense_ros.git ins && \
     cd ins && \
     git submodule update --init --recursive
 
+# copy over our actual server code
+COPY server /opt/catkin_ws/src/server
+
+# build all the ROS stuff
+WORKDIR /opt/catkin_ws
+RUN /bin/bash -c "source /opt/ros/kinetic/setup.bash && catkin_make"
 
 #===============================
-# SECTION 3: PYTHON3 DEPENDENCIES
+# SECTION 3: SERVER SETUP
 #===============================
+# get python3 dependencies
+WORKDIR /opt/catkin_ws/src/server/setup
+RUN pip3.7 install -r pip-requirements.txt
+
+# run our postgres setup script
+USER postgres
+RUN /etc/init.d/postgresql start \
+    && psql -f /opt/catkin_ws/src/server/setup/setup_database.sql
+# expose the postgres database port if you want to allow external connections to it
+# EXPOSE 5432
+
+USER root
 
 
 #===============================
