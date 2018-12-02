@@ -1,5 +1,6 @@
 from flask import send_file, make_response, request, abort, jsonify
 import os
+import time
 from flask_restplus import Namespace, Resource, inputs
 from dao.incoming_image_dao import IncomingImageDAO
 from config import defaultConfigPath
@@ -16,6 +17,7 @@ class RawImageHandler(Resource):
     @api.doc(responses={200:'OK', 404:'No image found'})
     @api.header('X-Image-Id', 'Raw Id of the image returned.')
     def get(self):
+        startTime = time.time()
         # Input Validation::
         if 'X-Manual' not in request.headers:
             abort(400, 'Need to specify X-Manual header!')
@@ -33,6 +35,7 @@ class RawImageHandler(Resource):
         if image is None:
             return {'message': 'Failed to locate untapped image'}, 404
         
+        print("Request fulfillment: {}".format(time.time()-startTime))
         return rawImageSender(image.image_id, image.image_path)
         
 @api.route('/<int:image_id>')
