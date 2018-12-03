@@ -28,10 +28,13 @@ RUN apt-get update && apt-get install -y \
 # install database and python3 for the server
 RUN apt-get update -y && \
     apt-get install -y \
-    python3-dev \
-    # wholllle ton of lib dependencies for python3.7
-    python3-setuptools zlib1g-dev libbz2-dev libc6-dev libgdbm-dev tk-dev libsqlite3-dev libssl-dev libncursesw5-dev libreadline-gplv2-dev openssl libffi-dev \
-    # for python3.7 and postgres11
+    # pip 2 for ros
+    python-pip \
+    python3 \
+    python3-pip \
+    # supervisor allows us to start multiple services in the background with single docker run command
+    supervisor \
+    # for postgres11
     wget ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
@@ -43,15 +46,19 @@ RUN wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-k
     && apt-get install -y postgresql postgresql-contrib
 
 # installing python3.7 on ubuntu 16.04
-# a bit of a pain:
-RUN mkdir -p /tmp/python37
-WORKDIR /tmp/python37
-RUN wget https://www.python.org/ftp/python/3.7.0/Python-3.7.0.tar.xz && \
-    tar xvf Python-3.7.0.tar.xz && \
-    cd Python-3.7.0 && \
-    ./configure && \
-    make altinstall && \
-    pip3.7 install -U pip
+# is a bit of a pain, but can be done with this stuff:
+# wholllle ton of lib dependencies for python3.7
+# RUN apt-get install -y \
+#     python3-dev \
+#     python3-setuptools zlib1g-dev libbz2-dev libc6-dev libgdbm-dev tk-dev libsqlite3-dev libssl-dev libncursesw5-dev libreadline-gplv2-dev openssl libffi-dev
+# RUN mkdir -p /tmp/python37
+# WORKDIR /tmp/python37
+# RUN wget https://www.python.org/ftp/python/3.7.0/Python-3.7.0.tar.xz && \
+#     tar xvf Python-3.7.0.tar.xz && \
+#     cd Python-3.7.0 && \
+#     ./configure && \
+#     make altinstall && \
+#     pip3.7 install -U pip
 
 #===============================
 # SECTION 2: ROS DEPENDENCIES
@@ -79,14 +86,18 @@ COPY server /opt/catkin_ws/src/server
 
 # build all the ROS stuff
 WORKDIR /opt/catkin_ws
-RUN /bin/bash -c "source /opt/ros/kinetic/setup.bash && catkin_make"
+SHELL [ "/bin/bash", "-c" ]
+RUN source /opt/ros/kinetic/setup.bash && \
+    catkin_make
 
 #===============================
 # SECTION 3: SERVER SETUP
 #===============================
 # get python3 dependencies
 WORKDIR /opt/catkin_ws/src/server/setup
-RUN pip3.7 install -r pip-requirements.txt
+# RUN pip3.7 install -r pip-requirements.txt
+RUN pip3 install -r pip-requirements.txt
+RUN pip install -r pip-requirements.txt
 
 # run our postgres setup script
 USER postgres
@@ -99,4 +110,4 @@ RUN /etc/init.d/postgresql start \
 # TODO: need to source catkin_ws and start ros_ingestor
 USER root
 WORKDIR /opt/catkin_ws/src/server/src
-CMD [ "python3.7", "/opt/catkin_ws/src/server/src/server.py", "--host", "0.0.0.0" ]
+CMD [ "python3", "/opt/catkin_ws/src/server/src/server.py", "--host", "0.0.0.0" ]
