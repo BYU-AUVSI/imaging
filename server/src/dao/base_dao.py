@@ -14,12 +14,6 @@ class BaseDAO(object):
         try:
             self.conn = psycopg2.connect(**params)
             self.conn.autocommit = True # automatically commit statements to table
-
-            # run something simple to make sure we're really connected
-            cur = self.conn.cursor()
-            cur.execute('SELECT version()')
-            db_version = cur.fetchone()
-            cur.close()
         except (Exception, psycopg2.DatabaseError) as error:
             print("Something went wrong while trying to connect to the db!")
             print(error)

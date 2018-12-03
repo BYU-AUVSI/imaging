@@ -61,7 +61,7 @@ class GuiClass(tk.Frame):
         try:
             self.master.attributes('-zoomed', True) # maximizes screen
         except (Exception) as e:
-            w = Toplevel(root)
+            w = tk.Toplevel(root)
             w.state('zoomed')
         self.master.title("BYU AUVSI COMPETITION 2019")
 

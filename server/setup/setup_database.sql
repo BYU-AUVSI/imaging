@@ -90,6 +90,12 @@ CREATE TABLE "public"."outgoing_autonomous" (
 );
 
 ALTER DATABASE auvsi OWNER TO imaging_server;
+ALTER TABLE incoming_image OWNER TO imaging_server;
+ALTER TABLE incoming_gps OWNER TO imaging_server;
+ALTER TABLE incoming_state OWNER TO imaging_server;
+ALTER TABLE manual_cropped OWNER TO imaging_server;
+ALTER TABLE outgoing_autonomous OWNER TO imaging_server;
+ALTER TABLE outgoing_manual OWNER TO imaging_server;
 GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO imaging_server;
 GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO imaging_server;
 ALTER DEFAULT PRIVILEGES FOR USER imaging_server IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO imaging_server;
