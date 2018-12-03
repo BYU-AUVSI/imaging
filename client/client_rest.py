@@ -6,9 +6,19 @@ from io import BytesIO
 class ImageInfo:
     def __init__(self, auto_tap, imageId, path, man_tap, ts):
         self.autonomous_tap = auto_tap
-        self.id
+        self.id = imageId
         self.image_path = path
         self.manual_tap = man_tap
+        self.time_stamp = ts
+
+class CropInfo:
+    def __init__(self, cropId, imgId, tl, br, path, isTapped, ts):
+        self.cropId = cropId
+        self.imgId = imgId
+        self.tl = tl
+        self.br = br
+        self.path = path
+        self.isTapped = isTapped
         self.time_stamp = ts
 
 class GPSMeasurement:
@@ -38,8 +48,10 @@ class ImagingInterface:
         self.host = host
         self.port = port
         self.url = "http://" + self.host + ":" + self.port
-        self.ids = []
-        self.idIndex = 0
+        self.rawIds = []
+        self.cropIds = []
+        self.rawIdIndex = 0
+        self.cropIdIndex = 0
         self.numIdsStored = numIdsStored
         self.isDebug = isDebug
 
@@ -64,25 +76,25 @@ class ImagingInterface:
         @:return A pillow Image if there are any images available for processing, otherwise None
         """
         self.debug("getNextRawImage(isManual={})".format(isManual))
-        if self.idIndex >= -1:
-            self.idIndex = -1
-            img = requests.get(self.url + "/image/raw", headers={'X-Manual': str(isManual)})
+        if self.rawIdIndex >= -1:
+            self.rawIdIndex = -1
+            img = requests.get(self.url + "/image/raw/", headers={'X-Manual': str(isManual)})
             self.debug("response code:: {}".format(img.status_code))
-            if (img.status_code != 200):
+            if img.status_code != 200:
                 # if we didnt get a good status code
                 print("Server returned status code {}".format(img.status_code))
                 return None
 
             imageId = int(img.headers['X-Image-Id'])
-            if len(self.ids) >= self.numIdsStored:
-                self.ids.pop(0)
+            if len(self.rawIds) >= self.numIdsStored:
+                self.rawIds.pop(0)
 
-            self.ids.append(imageId)
+            self.rawIds.append(imageId)
             self.debug("Image ID:: {}".format(imageId))
             return Image.open(BytesIO(img.content))
         else:
-            self.idIndex += 1
-            return self.getRawImage(self.ids[self.idIndex])
+            self.rawIdIndex += 1
+            return self.getRawImage(self.rawIds[self.rawIdIndex])
 
     def getPrevRawImage(self):
         """
@@ -93,14 +105,14 @@ class ImagingInterface:
         @:return A pillow Image if there are any previous images to process, and the server is able to find the given id, otherwise None.
         """
         self.debug("getPrevRawImage()")
-        if len(self.ids) > 0:
+        if len(self.rawIds) > 0:
             # if there is no more previous images, get the last image
-            if abs(self.idIndex) >= len(self.ids):
-                self.idIndex = -1 * len(self.ids)
+            if abs(self.rawIdIndex) >= len(self.rawIds):
+                self.rawIdIndex = -1 * len(self.rawIds)
             else: # else get the previous
-                self.idIndex -= 1
+                self.rawIdIndex -= 1
 
-            imageId = self.ids[self.idIndex]
+            imageId = self.rawIds[self.rawIdIndex]
             return self.getRawImage(imageId)
         else:
             self.debug("We haven't gotten any images yet")
@@ -108,9 +120,9 @@ class ImagingInterface:
 
     def getImageInfo(self, imageId):
         self.debug("getImageInfo(id={})".format(imageId))
-        img = requests.get(self.url + "/image/raw/" + str(imageId) + "/info")
-        self.debug("response code:: {}".format(img.status_code))
-        info_j = json.loads(img.content.decode('utf-8'))
+        imgInfoResp = requests.get(self.url + "/image/raw/" + str(imageId) + "/info")
+        self.debug("response code:: {}".format(imgInfoResp.status_code))
+        info_j = json.loads(imgInfoResp.content.decode('utf-8'))
         return ImageInfo(info_j['autonomous_tap'].lower() == 'true',
                          imageId,
                          info_j['image_path'],
@@ -118,28 +130,136 @@ class ImagingInterface:
                          float(info_j['time_stamp']))
 
 
-    def getNextCroppedImage(self):
-        return 0
-
     def getCroppedImage(self, imageId):
-        return 0
+        self.debug("getCroppedImage(id={})".format(imageId))
+        img = requests.get(self.url + "/image/crop/" + str(imageId), headers={'X-Manual': 'True'})
+        self.debug("response code:: {}".format(img.status_code))
+        if img.status_code != 200:
+            # if we didnt get a good status code
+            print("Server returned status code {}".format(img.status_code))
+            return None
+        return Image.open(BytesIO(img.content))
+
+    def getNextCroppedImage(self):
+        self.debug("getNextCroppedImage()")
+        if self.cropIdIndex >= -1:
+            self.cropIdIndex = -1
+            img = requests.get(self.url + "/image/crop/")
+            self.debug("response code:: {}".format(img.status_code))
+            if img.status_code != 200:
+                # if we didnt get a good status code
+                print("Server returned status code {}".format(img.status_code))
+                return None
+
+            imageId = int(img.headers['X-Image-Id'])
+            if len(self.cropIds) >= self.numIdsStored:
+                self.cropIds.pop(0)
+
+            self.cropIds.append(imageId)
+            self.debug("Image ID:: {}".format(imageId))
+            return Image.open(BytesIO(img.content))
+        else:
+            self.cropIdIndex += 1
+            return self.getCroppedImage(self.cropIds[self.cropIdIndex])
+
+    def getPrevCroppedImage(self):
+        """
+        Re-retrive a cropped image that you were previously viewing. This interface maintains an ordered list
+        (of up to numIdsStored) of ids you've previously received and will traverse it backwards.
+
+        @:rtype Image
+        @:return A pillow Image if there are any previous images to process, and the server is able to find the given id, otherwise None.
+        """
+        self.debug("getPrevCroppedImage()")
+        if len(self.cropIds) > 0:
+            # if there is no more previous images, get the last image
+            if abs(self.cropIdIndex) >= len(self.cropIds):
+                self.cropIdIndex = -1 * len(self.cropIds)
+            else: # else get the previous
+                self.cropIdIndex -= 1
+
+            imageId = self.cropIds[self.cropIdIndex]
+            return self.getCroppedImage(imageId)
+        else:
+            self.debug("We haven't gotten any images yet")
+            return None
 
     def getCroppedImageInfo(self, imageId):
-        return 0
+        self.debug("getCroppedImageInfo(id={})".format(imageId))
+        cropInfoResp = requests.get(self.url + "/image/crop/" + str(imageId) + "/info")
+        self.debug("response code:: {}".format(cropInfoResp.status_code))
+        info_j = json.loads(cropInfoResp.content.decode('utf-8'))
+        # tl = info_j['crop_coordinate_tl']
+        # br = info_j['crop_coordinate_br']
+        return CropInfo(int(info_j['id']),
+                        imageId,
+                        [info_j['crop_coordinate_tl.x'], info_j['crop_coordinate_tl.y']],
+                        [info_j['crop_coordinate_br.x'], info_j['crop_coordinate_br.y']],
+                        info_j['cropped_path'],
+                        info_j['tapped'].lower() == 'true',
+                        float(info_j['time_stamp']))
 
     def getAllCroppedInfo(self):
-        return 0
+        self.debug("getAllCroppedInfo")
+        resp = requests.get(self.url + "/image/crop/all")
+        if resp.status_code != 200:
+            # if we didnt get a good status code
+            print("Server returned status code {}".format(resp.status_code))
+            return None
+        cropInfoList = []
+        cropInfoList_j = json.loads(resp.content.decode('utf-8'))
+        for i in range(len(cropInfoList_j)):
+            # cropInfoList.append(self.getCroppedImageInfo(int(cropInfoList_j[i]['image_id'])))
+            cropInfoList.append(CropInfo(None,
+                                         int(cropInfoList_j[i]['image_id']),
+                                         [cropInfoList_j[i]['crop_coordinate_tl.x'],
+                                          cropInfoList_j[i]['crop_coordinate_tl.y']],
+                                         [cropInfoList_j[i]['crop_coordinate_br.x'],
+                                          cropInfoList_j[i]['crop_coordinate_br.y']],
+                                         cropInfoList_j[i]['cropped_path'],
+                                         cropInfoList_j[i]['tapped'].lower() == 'true',
+                                         float(cropInfoList_j[i]['time_stamp'])))
+        return cropInfoList
 
-    def postCroppedImage(self, imageId, image, tl, br):
 
+    def imageToBytes(self, img):
+        imgByteArr = BytesIO()
+        img.save(imgByteArr, format='JPEG')
+        imgByteArr = imgByteArr.getvalue()
+        return imgByteArr
+
+
+    def postCroppedImage(self, imageId, crop, tl, br):
+        """
+            Description: Posts a cropped image to the server
+
+            @:type  imageId: integer
+            @:param imageId: The id to the original image being cropped
+
+            @:type  crop: PIL Image
+            @:param crop: The image file of the cropped image
+
+            @:type  tl: Integer array of length 2
+            @:param tl: The x and y coordinate of the location of the cropped image
+                        in the top left corner relative to the original image
+
+            @:type  br: Integer array of length 2
+            @:param br: The x and y coordinate of the location of the cropped image
+                        in the bottom right corner relative to the original image
+
+            @:rtype Response
+            @:return The response of the http request
+        """
+        self.debug("postCroppedImage(imageId={})".format(imageId))
         url = self.url + "/image/crop/"
         headers = {'X-Image_Id': str(imageId)}
-        payload = {'crop_coordinate_tl': 'tl', 'crop_coordinate_br': 'br'}
-        r = requests.post(url, data=json.dumps(), headers=headers)
-        # image object
-        # crop_coordinate_tl "(x, y)"
-        # crop_coordinate_br "(x, y)"
-        return 0
+        tlStr = "(" + str(tl[0]) + ", " + str(tl[1]) + ")"
+        brStr = "(" + str(br[0]) + ", " + str(br[1]) + ")"
+
+        data = {'crop_coordinate_tl': tlStr, 'crop_coordinate_br': brStr}
+        files = {'cropped_image': self.imageToBytes(crop)}
+        resp = requests.post(url, data=data, headers=headers, files=files)
+        return resp
 
     def getGPSByTs(self, ts):
         self.debug("getGPSByTs(ts={})".format(ts))
@@ -186,10 +306,8 @@ class ImagingInterface:
                                 info_j['yaw'],
                                 info_j['time_stamp'])
 
-def testNextAndPrevImage():
-    # interface = ImagingInterface(numIdsStored=4)
-    interface = ImagingInterface(numIdsStored=4)
-
+def testNextAndPrevRawImage(interface):
+    interface.numIdsStored = 4
 
     interface.getNextRawImage(True)
     interface.getNextRawImage(True)
@@ -197,7 +315,7 @@ def testNextAndPrevImage():
     interface.getNextRawImage(True)
     interface.getNextRawImage(True)
 
-    print(interface.ids) # Check if it's popping the correct id
+    print(interface.rawIds) # Check if it's popping the correct id
 
     interface.getPrevRawImage()
     interface.getPrevRawImage()
@@ -206,7 +324,7 @@ def testNextAndPrevImage():
     interface.getPrevRawImage()
     interface.getPrevRawImage()
 
-    print(interface.ids) # Check if it's continually getting the last id
+    print(interface.rawIds) # Check if it's continually getting the last id
 
     interface.getNextRawImage(True) # Check if it gets old ids then new ones as well
     interface.getNextRawImage(True)
@@ -215,14 +333,55 @@ def testNextAndPrevImage():
     interface.getNextRawImage(True)
     interface.getNextRawImage(True)
 
-    print(interface.ids)
-    print(interface.idIndex)
-    print(interface.ids[interface.idIndex])
+    print(interface.rawIds)
+    print(interface.rawIdIndex)
+    print(interface.rawIds[interface.rawIdIndex])
+
+
+def testNextAndPrevCroppedImage(interface):
+    interface.numIdsStored = 4
+
+    interface.getNextCroppedImage()
+    interface.getNextCroppedImage()
+    interface.getNextCroppedImage()
+    interface.getNextCroppedImage()
+    interface.getNextCroppedImage()
+
+    print(interface.cropIds)  # Check if it's popping the correct id
+
+    interface.getPrevCroppedImage()
+    interface.getPrevCroppedImage()
+    interface.getPrevCroppedImage()
+    interface.getPrevCroppedImage()
+    interface.getPrevCroppedImage()
+    interface.getPrevCroppedImage()
+
+    print(interface.cropIds)  # Check if it's continually getting the last id
+
+    interface.getNextCroppedImage()  # Check if it gets old ids then new ones as well
+    interface.getNextCroppedImage()
+    interface.getNextCroppedImage()
+    interface.getNextCroppedImage()
+    interface.getNextCroppedImage()
+    interface.getNextCroppedImage()
+
+    print(interface.cropIds)
+    print(interface.cropIdIndex)
+    print(interface.cropIds[interface.cropIdIndex])
+
+
+def testCropPost(interface, imgId):
+    img = interface.getRawImage(imgId)
+    resp = interface.postCroppedImage(imgId, img, [0, 0], [236, 236])
+    print(resp.status_code)
+    print(resp.text)
+    return resp
 
 
 if __name__ == "__main__":
-    # testNextAndPrevImage()
-    interface = ImagingInterface()
+    interface = ImagingInterface(host="127.0.0.1", isDebug=True)
+    # interface = ImagingInterface(host="192.168.1.48", isDebug=True)
+    # imgId = 2
+    infoList = interface.getAllCroppedInfo()
 
-    info = interface.getImageInfo(2)
-    print(info.image_path)
+    print("Done")
