@@ -73,16 +73,18 @@ class GuiClass(tk.Frame):
 
 
         # itialize variables
-        self.default_host = '192.168.1.48'
-        #self.default_host = '127.0.0.1'
+        #self.default_host = '192.168.1.48'
+        self.default_host = '127.0.0.5'
         self.default_port = '5000'
         self.default_idnum = 50
         self.default_debug = False
         self.interface = client_rest.ImagingInterface(host=self.default_host,port=self.default_port,numIdsStored=self.default_idnum,isDebug=self.default_debug)
         self.initialized = False
         self.target_number = 0
-        self.org_np = np.array(self.interface.getNextRawImage(True))
-        #self.org_np = self.get_image('frame0744.jpg')
+        try:
+            self.org_np = np.array(self.interface.getNextRawImage(True))
+        except (Exception) as e:
+            self.org_np = self.get_image('server_error.jpg')
         self.draw_np = np.copy(self.org_np)
         self.img_im = self.np2im(self.draw_np)
         self.crop_im = self.img_im.copy()
@@ -290,7 +292,7 @@ class GuiClass(tk.Frame):
 
         # KEY BINDINGS ------------------------------------------------------------
         self.master.bind("<<NotebookTabChanged>>",self.tabChanged)
-        self.master.bind("<Escape>",self.close_window) # press ESC to exit
+
 
 
     def get_image(self,path):
@@ -469,6 +471,7 @@ class GuiClass(tk.Frame):
             self.master.bind("<Configure>",self.resizeEventTab0)
             self.master.unbind("<Control-z>")
             self.master.bind("<Return>",self.updateSettings)
+            self.master.bind("<Escape>",self.close_window)
         if active_tab == 1:
             self.resizeEventTab1()
             self.master.bind("<Right>",self.nextRaw)
@@ -478,6 +481,7 @@ class GuiClass(tk.Frame):
             self.master.bind("<Configure>",self.resizeEventTab1)
             self.master.bind("<Control-z>",self.undoCrop)
             self.master.bind("<Return>",self.submitCropped)
+            self.master.bind("<Escape>",self.close_window)
         elif active_tab == 2:
             self.resizeEventTab2()
             self.master.unbind("<Right>")
@@ -487,6 +491,7 @@ class GuiClass(tk.Frame):
             self.master.bind("<Configure>",self.resizeEventTab2)
             self.master.unbind("<Control-z>")
             self.master.bind("<Return>",self.submitClassification)
+            self.master.bind("<Escape>",self.close_window)
         elif active_tab == 3:
             self.master.unbind("<Right>")
             self.master.unbind("<Left>")
@@ -495,6 +500,7 @@ class GuiClass(tk.Frame):
             self.master.unbind("<Configure>")
             self.master.unbind("<Control-z>")
             self.master.unbind("<Return>")
+            self.master.bind("<Escape>",self.close_window)
         self.master.focus_set()
     def updateSettings(self,event=None):
         host_new = self.t0c2host.get()
