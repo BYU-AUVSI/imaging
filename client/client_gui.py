@@ -17,26 +17,29 @@ Integration:
 All:
     *possible threading behind the scenese to autosize other tabs
 Tab0:
-    Add settings tab
-    Rename tabs
+    add error handling if entries aren't in the right format
+    add error handling if not connected to correct wifi
 Tab1:
     Add zooming feature
+    Add panning feature
     Add preview of cropped image
     Add submit crop button
     Add sample pic of targets
     Add quantity of each target pictures
 Tab2:
+    Fix bug where misssing first value
     Disable description unless emergent
     Rotate image according to heading
+    Add classified Targets
+    Add classification queue
 Tab3:
     Make everything
-    Add tk.VERTICAL lines
 
 KNOWN BUGS:
-Weird exit is bound to an event (doesn't do anything)
-If you click, but don't drag on the crop screen, you still see rectangle
-When you click on the 2nd tab right at the beginning, and then use the left/intruder_height
-    buttons, it moves one tab, then unbinds like it's supposed to.
+    Weird exit is bound to an event (doesn't do anything)
+    If you click, but don't drag on the crop screen, you still see rectangle
+    When you click on the 2nd tab right at the beginning, and then use the left/intruder_height
+        buttons, it moves one tab, then unbinds like it's supposed to.
 '''
 import tkinter as tk
 from tkinter import ttk
