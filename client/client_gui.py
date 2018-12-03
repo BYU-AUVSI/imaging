@@ -10,6 +10,7 @@ pip3 install Pillow, opencv-python, ttkthemes
 '''
 TODO:
 Integration:
+    Figure out a good try: function and move to a function in the beginning
     Submit Cropped
     Next Cropped
     Submit classification
@@ -83,6 +84,7 @@ class GuiClass(tk.Frame):
         self.target_number = 0
         try:
             self.org_np = np.array(self.interface.getNextRawImage(True))
+            self.org_np = self.get_image('instructions.jpg')
         except (Exception) as e:
             self.org_np = self.get_image('server_error.jpg')
         self.draw_np = np.copy(self.org_np)
@@ -508,6 +510,18 @@ class GuiClass(tk.Frame):
         ids_new = int(self.t0c2ids.get())
         debug_new = not(self.t0c2debug.get())
         self.interface = client_rest.ImagingInterface(host=host_new,port=port_new,numIdsStored=ids_new,isDebug=debug_new)
+        self.org_np = self.org_np = self.get_image('instructions.jpg')
+        self.draw_np = np.copy(self.org_np)
+        self.img_im = self.np2im(self.draw_np)
+        self.crop_im = self.img_im.copy()
+        self.crop_tk = self.im2tk(self.crop_im)
+        self.org_width,self.org_height = self.img_im.size
+        self.crop_width,self.crop_height = self.img_im.size
+        self.resized_im = self.resizeIm(self.img_im,self.org_width,self.org_height,self.t1l1_width,self.t1l1_height)
+        self.t1i1_width,self.t1i1_height = self.resized_im.size
+        self.img_tk = self.im2tk(self.resized_im)
+        self.lbl3.configure(image=self.img_tk)
+        self.t2c2i1.configure(image=self.crop_tk)
 
 
 
