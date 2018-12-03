@@ -42,7 +42,6 @@ RUN wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-k
     && apt-get update \
     && apt-get install -y postgresql postgresql-contrib
 
-
 # installing python3.7 on ubuntu 16.04
 # a bit of a pain:
 RUN mkdir -p /tmp/python37
@@ -93,15 +92,11 @@ RUN pip3.7 install -r pip-requirements.txt
 USER postgres
 RUN /etc/init.d/postgresql start \
     && psql -f /opt/catkin_ws/src/server/setup/setup_database.sql
-# expose the postgres database port if you want to allow external connections to it
-# EXPOSE 5432
-
-USER root
-
 
 #===============================
 # SECTION 4: STARTUP
 #===============================
-ENTRYPOINT [ "bash" ]
-# ENTRYPOINT [ "python3" ]
-# CMD [ "--version" ]
+# TODO: need to source catkin_ws and start ros_ingestor
+USER root
+WORKDIR /opt/catkin_ws/src/server/src
+CMD [ "python3.7", "/opt/catkin_ws/src/server/src/server.py", "--host", "0.0.0.0" ]
