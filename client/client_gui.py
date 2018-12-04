@@ -60,16 +60,14 @@ class GuiClass(tk.Frame):
         try:
             self.master.attributes('-zoomed', True) # maximizes screen
         except (Exception) as e:
-            w = tk.Toplevel(root)
-            w.state('zoomed')
+            w, h = root.winfo_screenwidth(), root.winfo_screenheight()
+            root.geometry("%dx%d+0+0" % (w, h))
         self.master.title("BYU AUVSI COMPETITION 2019")
-
 
         self.n = ttk.Notebook(self.master) # create tabs
         self.n.pack(fill=tk.BOTH, expand=1) # expand across space
         tk.Grid.rowconfigure(self.master,0,weight=1)
         tk.Grid.columnconfigure(self.master,0,weight=1)
-
 
         # itialize variables
         #self.default_host = '192.168.1.48'
@@ -80,7 +78,6 @@ class GuiClass(tk.Frame):
         self.interface = client_rest.ImagingInterface(host=self.default_host,port=self.default_port,numIdsStored=self.default_idnum,isDebug=self.default_debug)
         self.initialized = False
         self.target_number = 0
-        self.serverConnected = False
         self.pingServer()
         self.draw_np = np.copy(self.org_np)
         self.img_im = self.np2im(self.draw_np)
@@ -102,7 +99,7 @@ class GuiClass(tk.Frame):
             tk.Grid.columnconfigure(self.tab0,x,weight=1)
         for y in range(10):
             tk.Grid.rowconfigure(self.tab0,y,weight=1)
-
+        print("starting tab0 config")
         # Column One
         self.t0c1l1 = ttk.Label(self.tab0, anchor=tk.CENTER, text='                               ')
         self.t0c1l1.grid(row=0,column=0,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
@@ -116,6 +113,7 @@ class GuiClass(tk.Frame):
         self.logo_im = self.np2im(self.logo_np)
         self.logo_width,self.logo_height = self.logo_im.size
         self.logo_tk = self.im2tk(self.logo_im)
+
         self.t0c2i1 = ttk.Label(self.tab0, anchor=tk.CENTER,image=self.logo_tk)
         self.t0c2i1.image = self.logo_tk
         self.t0c2i1.grid(row=0,column=2,rowspan=5,columnspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
@@ -144,7 +142,7 @@ class GuiClass(tk.Frame):
         self.t0c2l8.grid(row=8,column=3,sticky=tk.N+tk.S+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
         self.t0c2l8b = ttk.Radiobutton(self.tab0,text='False',value=1,variable=self.t0c2debug)
         self.t0c2l8b.grid(row=8,column=3,sticky=tk.N+tk.S,padx=5,pady=5,ipadx=5,ipady=5)
-        if self.default_debug == False:
+        if not self.default_debug:
             self.t0c2debug.set(1)
         self.t0c2l9 = ttk.Button(self.tab0, text="Apply Settings",command=self.updateSettings)
         self.t0c2l9.grid(row=9,column=2,columnspan=2,sticky=tk.N+tk.S,padx=5,pady=5,ipadx=5,ipady=5)
@@ -302,15 +300,19 @@ class GuiClass(tk.Frame):
         image_np = cv2.imread(path)
         image_np = cv2.cvtColor(image_np,cv2.COLOR_BGR2RGB)
         return image_np
+    
     def np2im(self,image):
         image_im = Image.fromarray(image)
         return image_im
+    
     def im2tk(self,image):
         image_tk = ImageTk.PhotoImage(image)
         return image_tk
+    
     def bt1_clicked(self):
         self.target_number += 1
         self.lbl2.configure(text=self.target_number)
+    
     def mouse_click(self,event):
         self.lbl4.configure(text=(event.x,event.y))
         self.lbl3.bind("<Motion>",self.mouse_move)
@@ -318,6 +320,7 @@ class GuiClass(tk.Frame):
         self.offset_y = int((self.t1l1_height - self.t1i1_height)/2.0)
         self.x0 = event.x - self.offset_x
         self.y0 = event.y - self.offset_y
+    
     def mouse_move(self,event):
         self.lbl4.configure(text=(event.x,event.y))
         self.lbl3.bind("<ButtonRelease-1>",self.mouse_release)
@@ -331,11 +334,13 @@ class GuiClass(tk.Frame):
         self.resized_im = self.resizeIm(self.img_im,self.org_width,self.org_height,self.t1l1_width,self.t1l1_height)
         self.img_tk = self.im2tk(self.resized_im)
         self.lbl3.configure(image=self.img_tk)
+    
     def close_window(self,event):
         self.master.destroy()
         sys.exit()
+    
     def mouse_release(self,event):
-        if self.cropped == True:
+        if self.cropped:
             self.undoCrop()
         self.lbl3.unbind("<Motion>")
         self.lbl4.configure(text=(event.x,event.y))
@@ -353,19 +358,21 @@ class GuiClass(tk.Frame):
         # Crop Image
         self.cropImage(int(sr*self.x0),int(sr*self.y0),int(sr*self.x1),int(sr*self.y1))
         self.cropped = True
+    
     def resizeEventTab0(self,event=None):
-        if self.initialized == True and (time.time()-self.resize_counter_tab0) > 0.050:
+        if self.initialized and (time.time()-self.resize_counter_tab0) > 0.050:
             if self.t0c2i1.winfo_width() > 1:
                 self.resize_counter_tab0 = time.time()
                 self.master.update()
-                self.t0c2i1_width = self.t0c2i1.winfo_width()
-                self.t0c2i1_height = self.t0c2i1.winfo_height()
-                self.logo_resized_im = self.resizeIm(self.logo_im,self.logo_width,self.logo_height,self.t0c2i1_width,self.t0c2i1_height)
-                self.t0c2i1_width,self.t0c2i1_height = self.logo_resized_im.size
+                t0c2i1_width = self.t0c2i1.winfo_width()
+                t0c2i1_height = self.t0c2i1.winfo_height()
+                logoW, logoH = self.logo_im.size
+                self.logo_resized_im = self.resizeIm(self.logo_im, logoW, logoH, t0c2i1_width, t0c2i1_height)
                 self.logo_tk = self.im2tk(self.logo_resized_im)
                 self.t0c2i1.configure(image=self.logo_tk)
+    
     def resizeEventTab1(self,event=None):
-        if self.initialized == True and (time.time()-self.resize_counter_tab1) > 0.050:
+        if self.initialized and (time.time()-self.resize_counter_tab1) > 0.050:
             if self.lbl3.winfo_width() > 1:
                 self.resize_counter_tab1 = time.time()
                 self.master.update()
@@ -375,8 +382,9 @@ class GuiClass(tk.Frame):
                 self.t1i1_width,self.t1i1_height = self.resized_im.size
                 self.img_tk = self.im2tk(self.resized_im)
                 self.lbl3.configure(image=self.img_tk)
+    
     def resizeEventTab2(self,event=None):
-        if self.initialized == True and (time.time()-self.resize_counter_tab2) > 0.050:
+        if self.initialized and (time.time()-self.resize_counter_tab2) > 0.050:
             if self.t2c2i1.winfo_width() > 1:
                 self.resize_counter_tab2 = time.time()
                 self.master.update()
@@ -385,6 +393,7 @@ class GuiClass(tk.Frame):
                 self.crop_resized_im = self.resizeIm(self.crop_im,self.crop_width,self.crop_height,self.t2c2i1_width,self.t2c2i1_height)
                 self.crop_tk = self.im2tk(self.crop_resized_im)
                 self.t2c2i1.configure(image=self.crop_tk)
+    
     def resizeIm(self,image,image_width,image_height,width_restrict,height_restrict):
         ratio_h = height_restrict/image_height
         ratio_w = width_restrict/image_width
@@ -393,6 +402,7 @@ class GuiClass(tk.Frame):
         else:
             resized_im = image.resize((int(image_width*ratio_w), int(image_height*ratio_w)), Image.ANTIALIAS)
         return(resized_im)
+    
     def cropImage(self,x0,y0,x1,y1):
         if x0 < x1:
             cx0 = x0
@@ -410,6 +420,7 @@ class GuiClass(tk.Frame):
         self.crop_width,self.crop_height = self.crop_im.size
         self.crop_tk = self.im2tk(self.crop_im)
         self.t2c2i1.configure(image=self.crop_tk)
+    
     def undoCrop(self,event=None):
         self.draw_np = np.copy(self.org_np)
         self.img_im = self.np2im(self.draw_np)
@@ -420,16 +431,19 @@ class GuiClass(tk.Frame):
         self.crop_width,self.crop_height = self.crop_im.size
         self.crop_tk = self.im2tk(self.crop_im)
         self.t2c2i1.configure(image=self.crop_tk)
+    
     def advanceTarget(self,event=None):
         self.target_number += 1
         self.lbl2.configure(text=self.target_number)
+    
     def decrementTarget(self,event):
         self.target_number -= 1
         if self.target_number < 0:
             self.target_number = 0
         self.lbl2.configure(text=self.target_number)
+    
     def nextRaw(self,event):
-        if self.serverConnected == True:
+        if self.serverConnected:
             time0 = time.time()
             self.org_np = np.array(self.interface.getNextRawImage(True)) #self.get_image('frame0744.jpg')
             time1 = time.time()
@@ -447,12 +461,16 @@ class GuiClass(tk.Frame):
             self.t2c2i1.configure(image=self.crop_tk)
             time2 = time.time()
             print("server request = ",time1-time0,"gui = ",time2-time1)
+    
     def previousRaw(self,event):
         print("previous Raw")
+    
     def nextCropped(self,event):
         print("next Cropped")
+    
     def submitCropped(self,event=None):
         print("submit Crop")
+    
     def submitClassification(self,event=None):
         shape = self.t2c2l2_var.get()
         alphanumeric = self.t2c2l4.get()
@@ -461,9 +479,9 @@ class GuiClass(tk.Frame):
         alpha_color = self.t2c2l12_var.get()
         type = self.t2c2l14_var.get()
         description = self.t2c2l16.get()
-        print("submit classification")
         print(shape,alphanumeric,orientation)
         print(background_color,alpha_color,type,description)
+    
     def tabChanged(self,event):
         active_tab = self.n.index(self.n.select())
         if active_tab == 0:
@@ -506,6 +524,7 @@ class GuiClass(tk.Frame):
             self.master.unbind("<Return>")
             self.master.bind("<Escape>",self.close_window)
         self.master.focus_set()
+    
     def updateSettings(self,event=None):
         host_new = self.t0c2host.get()
         port_new = self.t0c2port.get()
@@ -524,13 +543,14 @@ class GuiClass(tk.Frame):
         self.img_tk = self.im2tk(self.resized_im)
         self.lbl3.configure(image=self.img_tk)
         self.t2c2i1.configure(image=self.crop_tk)
+    
     def pingServer(self):
-        if self.interface.ping() == True:
-            self.serverConnected = True
+        self.serverConnected = self.interface.ping()
+        if self.serverConnected:
             self.org_np = self.get_image('instructions.jpg')
         else:
             self.org_np = self.get_image('server_error.jpg')
-            self.serverConnected = False
+    
     def disableEmergentDescription(self,*args):
         if self.t2c2l14_var.get() == 'emergent':
             self.t2c2l16.configure(state=tk.NORMAL)

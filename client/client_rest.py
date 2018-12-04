@@ -296,7 +296,7 @@ class ImagingInterface:
 
     def getGPSById(self, gpsId):
         self.debug("getIGPSById(id={})".format(gpsId))
-        gps = requests.get(self.url + "/gps/" + str(gpsId))
+        gps = requests.get(self.url + "/gps/" + str(gpsId), timeout=5)
         self.debug("response code:: {}".format(gps.status_code))
         if gps.status_code == 200:
             info_j = json.loads(gps.content.decode('utf-8'))
