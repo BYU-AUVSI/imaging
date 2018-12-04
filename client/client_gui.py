@@ -28,6 +28,7 @@ Tab1:
     Add sample pic of targets
     Add quantity of each target pictures
 Tab2:
+    Change disable color
     Rotate image accordingex to heading
     Add classified Targets
     Add classification queue
