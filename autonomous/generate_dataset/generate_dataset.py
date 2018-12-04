@@ -1,7 +1,10 @@
 from PIL import Image, ImageFont, ImageDraw, ImageFilter
 from tqdm import tqdm
 import math
+import os
+from random import randint
 
+# srry fam, atm, there some crappy directory stuff that probably makes this incompatible with windows
 # PARAMETERS FOR YOU!!
 HEIGHT_ = 100
 WIDTH_  = 100
@@ -12,6 +15,7 @@ BLUR_MAX_ = 3 # blur upper bound. from 0 -> this
 BLUR_STEP_ = 1 # amount of blur to apply at each level
 # that's right, in our world, you define the alphabet
 ALPHABET_ = list("ABCDEFGHIJKLMNOPQRSTUVWXYZ") #DEFGHIJKLMNOPQRSTUVWXYZ
+BASE_PATH_ = 'generated/' #path to store the images in, relative to this 
 
 def drawSquare(imgDraw, fillColor):
     h80 = int(HEIGHT_ * 0.8)
@@ -47,7 +51,6 @@ SHAPES_ = {
     # "quarterCircle": drawQuarterCircle
 }
 
-
 # intermediate helper variable calculation:
 fnt = ImageFont.truetype('/Library/Fonts/Arial.ttf', 32)
 letterLayerWidthSize =  int(WIDTH_/1.5)
@@ -56,10 +59,13 @@ ttlColors = len(COLOR_NAMES_) * len(COLORS_[0])
 ttlRotateSteps = int(360 / ROTATE_STEP_)
 ttlBlurSteps = math.ceil(BLUR_MAX_ / BLUR_STEP_)
 ttlShapeOptions = len(SHAPES_) + 1 # TODO: remove me! added because currently this saves an image with no shapes
-print("blur == {}".format(ttlBlurSteps))
+currentPath = os.path.dirname(os.path.realpath(__file__))
 pbar = tqdm(total=ttlColors * len(ALPHABET_) * ttlRotateSteps * ttlBlurSteps * ttlShapeOptions)
 
 for letter in ALPHABET_:
+    savePath = BASE_PATH_ + letter + '/'
+    if not os.path.exists(currentPath + '/' + savePath):
+        os.makedirs(currentPath + '/' + savePath)
     for letterColor in range(len(COLOR_NAMES_)):
         # SHAPES_["rectangle-tall"](drawn, COLORS_[2][0])
 
@@ -81,7 +87,7 @@ for letter in ALPHABET_:
                     w, h = letterImg.size
                     
                     baseImg.paste(letterImg, (int((WIDTH_ - w)/2) ,int((HEIGHT_-h)/2)), letterImg)
-                    baseImg.save('testout/{}-noshape-{}{}-{}deg-blur{}.jpeg'.format(letter, COLOR_NAMES_[letterColor], subLetterColor, angle, blur))
+                    baseImg.save('{}{}-noshape-{}{}-{}deg-blur{}.jpeg'.format(savePath, letter, COLOR_NAMES_[letterColor], subLetterColor, angle, blur))
 
                     for shape in SHAPES_:
 
@@ -90,7 +96,15 @@ for letter in ALPHABET_:
                             baseImg = Image.new('RGB', (WIDTH_, HEIGHT_), color = (0,0,0))
 
                         baseDrawn = ImageDraw.Draw(baseImg)
-                        SHAPES_[shape](baseDrawn, "yellow") # no different colors atm
+                        # make the shape a random color that isnt the same as the current letter color
+                        randColor = randint(0, len(COLORS_)-1)
+                        while randColor == letterColor:
+                            randColor = randint(0, len(COLORS_)-1)
+
+                        randColorIndex = randint(0, 1)
+
+                        SHAPES_[shape](baseDrawn, COLORS_[randColor][randColorIndex]) 
+                        baseImg = baseImg.filter(ImageFilter.GaussianBlur(radius=blur))
 
                         letterImg = Image.new('RGBA', (letterLayerWidthSize, letterLayerHeightSize))
                         drawn = ImageDraw.Draw(letterImg)
@@ -102,7 +116,7 @@ for letter in ALPHABET_:
                         w, h = letterImg.size
                         
                         baseImg.paste(letterImg, (int((WIDTH_ - w)/2) ,int((HEIGHT_-h)/2)), letterImg)
-                        baseImg.save('testout/{}-{}-{}{}-{}deg-blur{}.jpeg'.format(letter, shape, COLOR_NAMES_[letterColor], subLetterColor, angle, blur))
+                        baseImg.save('{}{}-{}-{}{}-{}deg-blur{}.jpeg'.format(savePath, letter, shape, COLOR_NAMES_[letterColor], subLetterColor, angle, blur))
 
         
             pbar.update(ttlBlurSteps * ttlRotateSteps * ttlShapeOptions) # update progress bar
