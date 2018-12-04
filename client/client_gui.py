@@ -10,7 +10,7 @@ pip3 install Pillow, opencv-python, ttkthemes
 '''
 TODO:
 Integration:
-    Figure out a good try: function and move to a function in the beginning
+    Check if there are None images
     Submit Cropped
     Next Cropped
     Submit classification
@@ -28,7 +28,6 @@ Tab1:
     Add sample pic of targets
     Add quantity of each target pictures
 Tab2:
-    Disable description unless emergent
     Rotate image accordingex to heading
     Add classified Targets
     Add classification queue
@@ -81,11 +80,8 @@ class GuiClass(tk.Frame):
         self.interface = client_rest.ImagingInterface(host=self.default_host,port=self.default_port,numIdsStored=self.default_idnum,isDebug=self.default_debug)
         self.initialized = False
         self.target_number = 0
-        try:
-            self.org_np = np.array(self.interface.getNextRawImage(True))
-            self.org_np = self.get_image('instructions.jpg')
-        except (Exception) as e:
-            self.org_np = self.get_image('server_error.jpg')
+        self.serverConnected = False
+        self.pingServer()
         self.draw_np = np.copy(self.org_np)
         self.img_im = self.np2im(self.draw_np)
         self.crop_im = self.img_im.copy()
@@ -97,6 +93,7 @@ class GuiClass(tk.Frame):
         self.resize_counter_tab1 = time.time()
         self.resize_counter_tab2 = time.time()
         self.cropped = False
+
 
         # Tab 0: SETTINGS ------------------------------------------------------
         self.tab0 = ttk.Frame(self.n)
@@ -270,12 +267,16 @@ class GuiClass(tk.Frame):
         #self.t2c2l14_var.set('standard')
         self.t2c2l14 = ttk.OptionMenu(self.tab2,self.t2c2l14_var,target_options[0],*target_options)
         self.t2c2l14.grid(row=46,column=8,columnspan=2,rowspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+
+        self.t2c2l14_var.trace("w",self.disableEmergentDescription)
+
         self.t2c2l15 = ttk.Label(self.tab2, anchor=tk.CENTER, text='Emergent Description')
         self.t2c2l15.grid(row=44,column=10,columnspan=2,rowspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
         self.t2c2l16 = ttk.Entry(self.tab2)
         self.t2c2l16.grid(row=46,column=10,columnspan=2,rowspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
         self.t2c2l17 = ttk.Button(self.tab2, text="Submit Classification",command=self.submitClassification)
         self.t2c2l17.grid(row=48,column=4,columnspan=8,rowspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.disableEmergentDescription()
 
         # Column Three
         self.t2sep23 = ttk.Separator(self.tab2, orient=tk.VERTICAL)
@@ -288,6 +289,7 @@ class GuiClass(tk.Frame):
         # TAB 3: AUTONOMOUS TENDER ------------------------------------------------
         self.tab3 = ttk.Frame(self.n)
         self.n.add(self.tab3, text='Autonomous Tender')
+
         # Done with initialization
         self.initialized = True
 
@@ -427,23 +429,24 @@ class GuiClass(tk.Frame):
             self.target_number = 0
         self.lbl2.configure(text=self.target_number)
     def nextRaw(self,event):
-        time0 = time.time()
-        self.org_np = np.array(self.interface.getNextRawImage(True)) #self.get_image('frame0744.jpg')
-        time1 = time.time()
-        self.draw_np = np.copy(self.org_np)
-        self.img_im = self.np2im(self.draw_np)
-        self.crop_im = self.img_im.copy()
-        self.crop_tk = self.im2tk(self.crop_im)
-        self.org_width,self.org_height = self.img_im.size
-        self.crop_width,self.crop_height = self.img_im.size
-        self.cropped = False
-        self.resized_im = self.resizeIm(self.img_im,self.org_width,self.org_height,self.t1l1_width,self.t1l1_height)
-        self.t1i1_width,self.t1i1_height = self.resized_im.size
-        self.img_tk = self.im2tk(self.resized_im)
-        self.lbl3.configure(image=self.img_tk)
-        self.t2c2i1.configure(image=self.crop_tk)
-        time2 = time.time()
-        print("server request = ",time1-time0,"gui = ",time2-time1)
+        if self.serverConnected == True:
+            time0 = time.time()
+            self.org_np = np.array(self.interface.getNextRawImage(True)) #self.get_image('frame0744.jpg')
+            time1 = time.time()
+            self.draw_np = np.copy(self.org_np)
+            self.img_im = self.np2im(self.draw_np)
+            self.crop_im = self.img_im.copy()
+            self.crop_tk = self.im2tk(self.crop_im)
+            self.org_width,self.org_height = self.img_im.size
+            self.crop_width,self.crop_height = self.img_im.size
+            self.cropped = False
+            self.resized_im = self.resizeIm(self.img_im,self.org_width,self.org_height,self.t1l1_width,self.t1l1_height)
+            self.t1i1_width,self.t1i1_height = self.resized_im.size
+            self.img_tk = self.im2tk(self.resized_im)
+            self.lbl3.configure(image=self.img_tk)
+            self.t2c2i1.configure(image=self.crop_tk)
+            time2 = time.time()
+            print("server request = ",time1-time0,"gui = ",time2-time1)
     def previousRaw(self,event):
         print("previous Raw")
     def nextCropped(self,event):
@@ -509,7 +512,7 @@ class GuiClass(tk.Frame):
         ids_new = int(self.t0c2ids.get())
         debug_new = not(self.t0c2debug.get())
         self.interface = client_rest.ImagingInterface(host=host_new,port=port_new,numIdsStored=ids_new,isDebug=debug_new)
-        self.org_np = self.org_np = self.get_image('instructions.jpg')
+        self.pingServer()
         self.draw_np = np.copy(self.org_np)
         self.img_im = self.np2im(self.draw_np)
         self.crop_im = self.img_im.copy()
@@ -521,6 +524,18 @@ class GuiClass(tk.Frame):
         self.img_tk = self.im2tk(self.resized_im)
         self.lbl3.configure(image=self.img_tk)
         self.t2c2i1.configure(image=self.crop_tk)
+    def pingServer(self):
+        if self.interface.ping() == True:
+            self.serverConnected = True
+            self.org_np = self.get_image('instructions.jpg')
+        else:
+            self.org_np = self.get_image('server_error.jpg')
+            self.serverConnected = False
+    def disableEmergentDescription(self,*args):
+        if self.t2c2l14_var.get() == 'emergent':
+            self.t2c2l16.configure(state=tk.NORMAL)
+        else:
+            self.t2c2l16.configure(state=tk.DISABLED)
 
 
 
