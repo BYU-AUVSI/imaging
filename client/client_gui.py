@@ -10,7 +10,7 @@ pip3 install Pillow, opencv-python, ttkthemes
 '''
 TODO:
 Integration:
-    Figure out a good try: function and move to a function in the beginning
+    Check if there are None images
     Submit Cropped
     Next Cropped
     Submit classification
@@ -28,7 +28,6 @@ Tab1:
     Add sample pic of targets
     Add quantity of each target pictures
 Tab2:
-    Disable description unless emergent
     Rotate image accordingex to heading
     Add classified Targets
     Add classification queue
@@ -268,13 +267,16 @@ class GuiClass(tk.Frame):
         #self.t2c2l14_var.set('standard')
         self.t2c2l14 = ttk.OptionMenu(self.tab2,self.t2c2l14_var,target_options[0],*target_options)
         self.t2c2l14.grid(row=46,column=8,columnspan=2,rowspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+
         self.t2c2l14_var.trace("w",self.disableEmergentDescription)
+
         self.t2c2l15 = ttk.Label(self.tab2, anchor=tk.CENTER, text='Emergent Description')
         self.t2c2l15.grid(row=44,column=10,columnspan=2,rowspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
         self.t2c2l16 = ttk.Entry(self.tab2)
         self.t2c2l16.grid(row=46,column=10,columnspan=2,rowspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
         self.t2c2l17 = ttk.Button(self.tab2, text="Submit Classification",command=self.submitClassification)
         self.t2c2l17.grid(row=48,column=4,columnspan=8,rowspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.disableEmergentDescription()
 
         # Column Three
         self.t2sep23 = ttk.Separator(self.tab2, orient=tk.VERTICAL)
@@ -529,8 +531,11 @@ class GuiClass(tk.Frame):
         else:
             self.org_np = self.get_image('server_error.jpg')
             self.serverConnected = False
-    def disableEmergentDescription(self,event=None):
-        print('changed')
+    def disableEmergentDescription(self,*args):
+        if self.t2c2l14_var.get() == 'emergent':
+            self.t2c2l16.configure(state=tk.NORMAL)
+        else:
+            self.t2c2l16.configure(state=tk.DISABLED)
 
 
 
