@@ -71,7 +71,11 @@ class ImagingInterface:
         self.debug("getImage(id={})".format(imageId))
         img = requests.get(self.url + "/image/raw/" + str(imageId), headers={'X-Manual': 'True'})
         self.debug("response code:: {}".format(img.status_code))
-        return Image.open(BytesIO(img.content))
+        if img.status_code == 200:
+            return Image.open(BytesIO(img.content))
+        else:
+            print("Server returned status code {}".format(img.status_code))
+            return None
 
     def getNextRawImage(self, isManual):
         """
@@ -124,19 +128,22 @@ class ImagingInterface:
             return self.getRawImage(imageId)
         else:
             self.debug("We haven't gotten any images yet")
-            return 0
+            return None
 
     def getImageInfo(self, imageId):
         self.debug("getImageInfo(id={})".format(imageId))
         imgInfoResp = requests.get(self.url + "/image/raw/" + str(imageId) + "/info")
         self.debug("response code:: {}".format(imgInfoResp.status_code))
-        info_j = json.loads(imgInfoResp.content.decode('utf-8'))
-        return ImageInfo(info_j['autonomous_tap'].lower() == 'true',
-                         imageId,
-                         info_j['image_path'],
-                         info_j['manual_tap'].lower() == 'true',
-                         float(info_j['time_stamp']))
-
+        if imgInfoResp.status_code == 200:
+            info_j = json.loads(imgInfoResp.content.decode('utf-8'))
+            return ImageInfo(info_j['autonomous_tap'].lower() == 'true',
+                            imageId,
+                            info_j['image_path'],
+                            info_j['manual_tap'].lower() == 'true',
+                            float(info_j['time_stamp']))
+        else:
+            print("Server returned status code {}".format(imgInfoResp.status_code))
+            return None
 
     def getCroppedImage(self, imageId):
         self.debug("getCroppedImage(id={})".format(imageId))
@@ -195,17 +202,21 @@ class ImagingInterface:
     def getCroppedImageInfo(self, imageId):
         self.debug("getCroppedImageInfo(id={})".format(imageId))
         cropInfoResp = requests.get(self.url + "/image/crop/" + str(imageId) + "/info")
-        self.debug("response code:: {}".format(cropInfoResp.status_code))
-        info_j = json.loads(cropInfoResp.content.decode('utf-8'))
-        # tl = info_j['crop_coordinate_tl']
-        # br = info_j['crop_coordinate_br']
-        return CropInfo(int(info_j['id']),
-                        imageId,
-                        [info_j['crop_coordinate_tl.x'], info_j['crop_coordinate_tl.y']],
-                        [info_j['crop_coordinate_br.x'], info_j['crop_coordinate_br.y']],
-                        info_j['cropped_path'],
-                        info_j['tapped'].lower() == 'true',
-                        float(info_j['time_stamp']))
+        if cropInfoResp.status_code == 200:
+            self.debug("response code:: {}".format(cropInfoResp.status_code))
+            info_j = json.loads(cropInfoResp.content.decode('utf-8'))
+            # tl = info_j['crop_coordinate_tl']
+            # br = info_j['crop_coordinate_br']
+            return CropInfo(int(info_j['id']),
+                            imageId,
+                            [info_j['crop_coordinate_tl.x'], info_j['crop_coordinate_tl.y']],
+                            [info_j['crop_coordinate_br.x'], info_j['crop_coordinate_br.y']],
+                            info_j['cropped_path'],
+                            info_j['tapped'].lower() == 'true',
+                            float(info_j['time_stamp']))
+        else:
+            print("Server returned status code {}".format(cropInfoResp.status_code))
+            return None
 
     def getAllCroppedInfo(self):
         self.debug("getAllCroppedInfo")
@@ -219,14 +230,14 @@ class ImagingInterface:
         for i in range(len(cropInfoList_j)):
             # cropInfoList.append(self.getCroppedImageInfo(int(cropInfoList_j[i]['image_id'])))
             cropInfoList.append(CropInfo(None,
-                                         int(cropInfoList_j[i]['image_id']),
-                                         [cropInfoList_j[i]['crop_coordinate_tl.x'],
-                                          cropInfoList_j[i]['crop_coordinate_tl.y']],
-                                         [cropInfoList_j[i]['crop_coordinate_br.x'],
-                                          cropInfoList_j[i]['crop_coordinate_br.y']],
-                                         cropInfoList_j[i]['cropped_path'],
-                                         cropInfoList_j[i]['tapped'].lower() == 'true',
-                                         float(cropInfoList_j[i]['time_stamp'])))
+                                int(cropInfoList_j[i]['image_id']),
+                                [cropInfoList_j[i]['crop_coordinate_tl.x'],
+                                cropInfoList_j[i]['crop_coordinate_tl.y']],
+                                [cropInfoList_j[i]['crop_coordinate_br.x'],
+                                cropInfoList_j[i]['crop_coordinate_br.y']],
+                                cropInfoList_j[i]['cropped_path'],
+                                cropInfoList_j[i]['tapped'].lower() == 'true',
+                                float(cropInfoList_j[i]['time_stamp'])))
         return cropInfoList
 
 
@@ -235,7 +246,6 @@ class ImagingInterface:
         img.save(imgByteArr, format='JPEG')
         imgByteArr = imgByteArr.getvalue()
         return imgByteArr
-
 
     def postCroppedImage(self, imageId, crop, tl, br):
         """
@@ -273,12 +283,16 @@ class ImagingInterface:
         self.debug("getGPSByTs(ts={})".format(ts))
         gps = requests.get(self.url + "/gps/ts/" + str(ts))
         self.debug("response code:: {}".format(gps.status_code))
-        info_j = json.loads(gps.content.decode('utf-8'))
-        return GPSMeasurement(info_j['altitude'],
-                              info_j['id'],
-                              info_j['latitude'],
-                              info_j['longitude'],
-                              info_j['time_stamp'])
+        if gps.status_code == 200:
+            info_j = json.loads(gps.content.decode('utf-8'))
+            return GPSMeasurement(info_j['altitude'],
+                                info_j['id'],
+                                info_j['latitude'],
+                                info_j['longitude'],
+                                info_j['time_stamp'])
+        else:
+            print("Server returned status code {}".format(gps.status_code))
+            return None
 
     def getGPSById(self, gpsId):
         self.debug("getIGPSById(id={})".format(gpsId))
@@ -292,30 +306,38 @@ class ImagingInterface:
                                 info_j['longitude'],
                                 info_j['time_stamp'])
         else:
-            return gps.status_code
-
+            print("Server returned status code {}".format(gps.status_code))
+            return None
 
     def getStateByTs(self, ts):
         self.debug("getStateByTs(ts={})".format(ts))
         state = requests.get(self.url + "/state/ts/" + str(ts))
         self.debug("response code:: {}".format(state.status_code))
-        info_j = json.loads(state.content.decode('utf-8'))
-        return StateMeasurement(info_j['id'],
-                                info_j['roll'],
-                                info_j['pitch'],
-                                info_j['yaw'],
-                                info_j['time_stamp'])
+        if state.status_code == 200:            
+            info_j = json.loads(state.content.decode('utf-8'))
+            return StateMeasurement(info_j['id'],
+                                    info_j['roll'],
+                                    info_j['pitch'],
+                                    info_j['yaw'],
+                                    info_j['time_stamp'])
+        else:
+            print("Server returned status code {}".format(state.status_code))
+            return None
 
     def getStateById(self, stateId):
         self.debug("getIGPSById(id={})".format(stateId))
         state = requests.get(self.url + "/state/" + str(stateId))
         self.debug("response code:: {}".format(state.status_code))
-        info_j = json.loads(state.content.decode('utf-8'))
-        return StateMeasurement(info_j['id'],
-                                info_j['roll'],
-                                info_j['pitch'],
-                                info_j['yaw'],
-                                info_j['time_stamp'])
+        if state.status_code == 200:
+            info_j = json.loads(state.content.decode('utf-8'))
+            return StateMeasurement(info_j['id'],
+                                    info_j['roll'],
+                                    info_j['pitch'],
+                                    info_j['yaw'],
+                                    info_j['time_stamp'])
+        else:
+            print("Server returned status code {}".format(state.status_code))
+            return None
 
 def testNextAndPrevRawImage(interface):
     interface.numIdsStored = 4
