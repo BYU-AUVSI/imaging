@@ -55,6 +55,14 @@ class ImagingInterface:
         self.numIdsStored = numIdsStored
         self.isDebug = isDebug
 
+    def ping(self):
+        try:
+            self.getGPSById(1)
+        except:
+            return False
+        return True
+        
+
     def debug(self, printStr):
         if self.isDebug:
             print(printStr)
@@ -276,12 +284,15 @@ class ImagingInterface:
         self.debug("getIGPSById(id={})".format(gpsId))
         gps = requests.get(self.url + "/gps/" + str(gpsId))
         self.debug("response code:: {}".format(gps.status_code))
-        info_j = json.loads(gps.content.decode('utf-8'))
-        return GPSMeasurement(info_j['altitude'],
-                              info_j['id'],
-                              info_j['latitude'],
-                              info_j['longitude'],
-                              info_j['time_stamp'])
+        if gps.status_code == 200:
+            info_j = json.loads(gps.content.decode('utf-8'))
+            return GPSMeasurement(info_j['altitude'],
+                                info_j['id'],
+                                info_j['latitude'],
+                                info_j['longitude'],
+                                info_j['time_stamp'])
+        else:
+            return gps.status_code
 
 
     def getStateByTs(self, ts):
