@@ -28,16 +28,15 @@ Tab1:
     Add sample pic of targets
     Add quantity of each target pictures
 Tab2:
-    Fix bug where misssing first value
     Disable description unless emergent
-    Rotate image according to heading
+    Rotate image accordingex to heading
     Add classified Targets
     Add classification queue
 Tab3:
     Make everything
 
 KNOWN BUGS:
-    Weird exit is bound to an event (doesn't do anything)
+    Weird exit is bound to an event (doesn't do anything) when rerun in iPython3
     If you click, but don't drag on the crop screen, you still see rectangle
     When you click on the 2nd tab right at the beginning, and then use the left/intruder_height
         buttons, it moves one tab, then unbinds like it's supposed to.
@@ -237,8 +236,8 @@ class GuiClass(tk.Frame):
         self.t2c2l1.grid(row=40,column=4,columnspan=2,rowspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
         shape_options = ('circle','semicircle','quarter_circle','triangle','square','rectangle','trapezoid','pentagon','hexagon','heptagon','octagon','star','cross')
         self.t2c2l2_var = tk.StringVar(self.master)
-        self.t2c2l2_var.set('circle')
-        self.t2c2l2 = ttk.OptionMenu(self.tab2,self.t2c2l2_var,*shape_options)
+        #self.t2c2l2_var.set('circle')
+        self.t2c2l2 = ttk.OptionMenu(self.tab2,self.t2c2l2_var,shape_options[0],*shape_options)
         self.t2c2l2.grid(row=42,column=4,columnspan=2,rowspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
         self.t2c2l3 = ttk.Label(self.tab2, anchor=tk.CENTER, text='Alphanumeric')
         self.t2c2l3.grid(row=40,column=6,columnspan=2,rowspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
@@ -248,28 +247,28 @@ class GuiClass(tk.Frame):
         self.t2c2l5.grid(row=40,column=8,columnspan=4,rowspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
         orientation_options = ('N','NE','E','SE','S','SW','W','NW')
         self.t2c2l6_var = tk.StringVar(self.master)
-        self.t2c2l6_var.set('N')
-        self.t2c2l6 = ttk.OptionMenu(self.tab2,self.t2c2l6_var,*orientation_options)
+        #self.t2c2l6_var.set('N')
+        self.t2c2l6 = ttk.OptionMenu(self.tab2,self.t2c2l6_var,orientation_options[0],*orientation_options)
         self.t2c2l6.grid(row=42,column=8,columnspan=4,rowspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
         self.t2c2l9 = ttk.Label(self.tab2, anchor=tk.CENTER, text='Background Color')
         self.t2c2l9.grid(row=44,column=4,columnspan=2,rowspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
         color_options = ('white','black','gray','red','blue','green','yellow','purple','brown','orange')
         self.t2c2l10_var = tk.StringVar(self.master)
-        self.t2c2l10_var.set('white')
-        self.t2c2l10 = ttk.OptionMenu(self.tab2,self.t2c2l10_var,*color_options)
+        #self.t2c2l10_var.set('white')
+        self.t2c2l10 = ttk.OptionMenu(self.tab2,self.t2c2l10_var,color_options[0],*color_options)
         self.t2c2l10.grid(row=46,column=4,columnspan=2,rowspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
         self.t2c2l11 = ttk.Label(self.tab2, anchor=tk.CENTER, text='Alphanumeric Color')
         self.t2c2l11.grid(row=44,column=6,columnspan=2,rowspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
         self.t2c2l12_var = tk.StringVar(self.master)
-        self.t2c2l12_var.set('white')
-        self.t2c2l12 = ttk.OptionMenu(self.tab2,self.t2c2l12_var,*color_options)
+        #self.t2c2l12_var.set('white')
+        self.t2c2l12 = ttk.OptionMenu(self.tab2,self.t2c2l12_var,color_options[0],*color_options)
         self.t2c2l12.grid(row=46,column=6,columnspan=2,rowspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
         self.t2c2l13 = ttk.Label(self.tab2, anchor=tk.CENTER, text='Target Type')
         self.t2c2l13.grid(row=44,column=8,columnspan=2,rowspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
         self.t2c2l14_var = tk.StringVar(self.master)
         target_options = ('standard','emergent','off-axis')
-        self.t2c2l14_var.set('standard')
-        self.t2c2l14 = ttk.OptionMenu(self.tab2,self.t2c2l14_var,*target_options)
+        #self.t2c2l14_var.set('standard')
+        self.t2c2l14 = ttk.OptionMenu(self.tab2,self.t2c2l14_var,target_options[0],*target_options)
         self.t2c2l14.grid(row=46,column=8,columnspan=2,rowspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
         self.t2c2l15 = ttk.Label(self.tab2, anchor=tk.CENTER, text='Emergent Description')
         self.t2c2l15.grid(row=44,column=10,columnspan=2,rowspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
