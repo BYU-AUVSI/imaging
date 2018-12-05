@@ -58,6 +58,26 @@ class BaseDAO(object):
             print(error)
             return -1
 
+
+    def executeStatements(self, stmts):
+        """
+        Tries to execute all SQL statements in the stmts list.
+        These will be performed in a single transaciton.
+        Assumes you dont want to return anything
+
+        @type stmts: string list
+        @param stmts: List of sql statements to execute
+        """
+        cur = self.conn.cursor()
+        # we're going to do all statements in a single transaction
+        self.conn.autocommit = False 
+        for stmt in stmts:
+            cur.execute(stmt)
+
+        self.conn.commit()
+        cur.close()
+        self.conn.autocommit = True
+
     def basicTopSelect(self, stmt, values):
         """
         Gets the first (top) row of the given select statement. Returns as list
