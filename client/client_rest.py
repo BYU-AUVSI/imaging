@@ -12,8 +12,7 @@ class ImageInfo:
         self.time_stamp = ts
 
 class CropInfo:
-    def __init__(self, cropId, imgId, tl, br, path, isTapped, ts):
-        self.cropId = cropId
+    def __init__(self, imgId, tl, br, path, isTapped, ts):
         self.imgId = imgId
         self.tl = tl
         self.br = br
@@ -45,6 +44,12 @@ class ImagingInterface:
                  port="5000",
                  numIdsStored=50,
                  isDebug=False):
+        """
+
+
+            @:rtype:
+            @:return:
+        """
         self.host = host
         self.port = port
         self.url = "http://" + self.host + ":" + self.port
@@ -56,6 +61,12 @@ class ImagingInterface:
         self.isDebug = isDebug
 
     def ping(self):
+        """
+
+
+            @:rtype:
+            @:return:
+        """
         try:
             self.getGPSById(1)
         except:
@@ -64,15 +75,27 @@ class ImagingInterface:
         
 
     def debug(self, printStr):
+        """
+
+
+            @:rtype:
+            @:return:
+        """
         if self.isDebug:
             print(printStr)
 
     def getRawImage(self, imageId):
+        """
+
+
+            @:rtype:
+            @:return:
+        """
         self.debug("getImage(id={})".format(imageId))
         img = requests.get(self.url + "/image/raw/" + str(imageId), headers={'X-Manual': 'True'})
         self.debug("response code:: {}".format(img.status_code))
         if img.status_code == 200:
-            return Image.open(BytesIO(img.content))
+            return Image.open(BytesIO(img.content)), imageId
         else:
             print("Server returned status code {}".format(img.status_code))
             return None
@@ -103,7 +126,7 @@ class ImagingInterface:
 
             self.rawIds.append(imageId)
             self.debug("Image ID:: {}".format(imageId))
-            return Image.open(BytesIO(img.content))
+            return Image.open(BytesIO(img.content)), imageId
         else:
             self.rawIdIndex += 1
             return self.getRawImage(self.rawIds[self.rawIdIndex])
@@ -131,6 +154,12 @@ class ImagingInterface:
             return None
 
     def getImageInfo(self, imageId):
+        """
+
+
+            @:rtype:
+            @:return:
+        """
         self.debug("getImageInfo(id={})".format(imageId))
         imgInfoResp = requests.get(self.url + "/image/raw/" + str(imageId) + "/info")
         self.debug("response code:: {}".format(imgInfoResp.status_code))
@@ -146,6 +175,12 @@ class ImagingInterface:
             return None
 
     def getCroppedImage(self, imageId):
+        """
+
+
+            @:rtype:
+            @:return:
+        """
         self.debug("getCroppedImage(id={})".format(imageId))
         img = requests.get(self.url + "/image/crop/" + str(imageId), headers={'X-Manual': 'True'})
         self.debug("response code:: {}".format(img.status_code))
@@ -156,6 +191,12 @@ class ImagingInterface:
         return Image.open(BytesIO(img.content))
 
     def getNextCroppedImage(self):
+        """
+
+
+            @:rtype:
+            @:return:
+        """
         self.debug("getNextCroppedImage()")
         if self.cropIdIndex >= -1:
             self.cropIdIndex = -1
@@ -179,7 +220,7 @@ class ImagingInterface:
 
     def getPrevCroppedImage(self):
         """
-        Re-retrive a cropped image that you were previously viewing. This interface maintains an ordered list
+        Re-retrieve a cropped image that you were previously viewing. This interface maintains an ordered list
         (of up to numIdsStored) of ids you've previously received and will traverse it backwards.
 
         @:rtype Image
@@ -200,6 +241,12 @@ class ImagingInterface:
             return None
 
     def getCroppedImageInfo(self, imageId):
+        """
+
+
+            @:rtype:
+            @:return:
+        """
         self.debug("getCroppedImageInfo(id={})".format(imageId))
         cropInfoResp = requests.get(self.url + "/image/crop/" + str(imageId) + "/info")
         if cropInfoResp.status_code == 200:
@@ -207,8 +254,7 @@ class ImagingInterface:
             info_j = json.loads(cropInfoResp.content.decode('utf-8'))
             # tl = info_j['crop_coordinate_tl']
             # br = info_j['crop_coordinate_br']
-            return CropInfo(int(info_j['id']),
-                            imageId,
+            return CropInfo(imageId,
                             [info_j['crop_coordinate_tl.x'], info_j['crop_coordinate_tl.y']],
                             [info_j['crop_coordinate_br.x'], info_j['crop_coordinate_br.y']],
                             info_j['cropped_path'],
@@ -219,6 +265,12 @@ class ImagingInterface:
             return None
 
     def getAllCroppedInfo(self):
+        """
+        Call
+
+        @:rtype CropInfo
+        @:return: Returns a list of CropInfo objects of all of the cropped images
+        """
         self.debug("getAllCroppedInfo")
         resp = requests.get(self.url + "/image/crop/all")
         if resp.status_code != 200:
@@ -228,8 +280,7 @@ class ImagingInterface:
         cropInfoList = []
         cropInfoList_j = json.loads(resp.content.decode('utf-8'))
         for i in range(len(cropInfoList_j)):
-            # cropInfoList.append(self.getCroppedImageInfo(int(cropInfoList_j[i]['image_id'])))
-            cropInfoList.append(CropInfo(None,
+            cropInfoList.append(CropInfo(
                                 int(cropInfoList_j[i]['image_id']),
                                 [cropInfoList_j[i]['crop_coordinate_tl.x'],
                                 cropInfoList_j[i]['crop_coordinate_tl.y']],
@@ -242,6 +293,12 @@ class ImagingInterface:
 
 
     def imageToBytes(self, img):
+        """
+
+
+            @:rtype:
+            @:return:
+        """
         imgByteArr = BytesIO()
         img.save(imgByteArr, format='JPEG')
         imgByteArr = imgByteArr.getvalue()
@@ -280,6 +337,12 @@ class ImagingInterface:
         return resp
 
     def getGPSByTs(self, ts):
+        """
+
+
+            @:rtype:
+            @:return:
+        """
         self.debug("getGPSByTs(ts={})".format(ts))
         gps = requests.get(self.url + "/gps/ts/" + str(ts))
         self.debug("response code:: {}".format(gps.status_code))
@@ -295,6 +358,12 @@ class ImagingInterface:
             return None
 
     def getGPSById(self, gpsId):
+        """
+
+
+            @:rtype:
+            @:return:
+        """
         self.debug("getIGPSById(id={})".format(gpsId))
         gps = requests.get(self.url + "/gps/" + str(gpsId), timeout=5)
         self.debug("response code:: {}".format(gps.status_code))
@@ -310,6 +379,12 @@ class ImagingInterface:
             return None
 
     def getStateByTs(self, ts):
+        """
+
+
+            @:rtype:
+            @:return:
+        """
         self.debug("getStateByTs(ts={})".format(ts))
         state = requests.get(self.url + "/state/ts/" + str(ts))
         self.debug("response code:: {}".format(state.status_code))
@@ -325,6 +400,12 @@ class ImagingInterface:
             return None
 
     def getStateById(self, stateId):
+        """
+
+
+            @:rtype:
+            @:return:
+        """
         self.debug("getIGPSById(id={})".format(stateId))
         state = requests.get(self.url + "/state/" + str(stateId))
         self.debug("response code:: {}".format(state.status_code))
