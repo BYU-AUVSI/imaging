@@ -449,7 +449,7 @@ class GuiClass(tk.Frame):
             time0 = time.time()
             query = self.interface.getNextRawImage(True)
             if query == None:
-                pingServer()
+                self.pingServer()
             else:
                 self.imageID = query[1]
                 self.org_np = np.array(query[0]) #self.get_image('frame0744.jpg')
@@ -473,9 +473,9 @@ class GuiClass(tk.Frame):
         print("previous Raw")
         if self.serverConnected:
             time0 = time.time()
-            query = self.interface.getPrevRawImage(True)
+            query = self.interface.getPrevRawImage()
             if query == None:
-                pingServer()
+                self.pingServer()
             else:
                 self.imageID = query[1]
                 self.org_np = np.array(query[0]) #self.get_image('frame0744.jpg')
