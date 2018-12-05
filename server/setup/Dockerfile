@@ -105,8 +105,8 @@ RUN /etc/init.d/postgresql start \
     && psql -f /opt/catkin_ws/src/server/setup/setup_database.sql
 
 # copy supervisor configuration files over to the supervisor folder
-
-COPY server/setup/internal/server_supervisor.conf /etc/supervisor/conf.d/server_supervisor.conf
+COPY server/setup/internal/supervisor.conf /etc/supervisor/conf.d/supervisord.conf
+# COPY server/setup/internal/server_supervisor.conf /etc/supervisor/conf.d/server_supervisor.conf
 
 #===============================
 # SECTION 4: STARTUP
@@ -114,5 +114,6 @@ COPY server/setup/internal/server_supervisor.conf /etc/supervisor/conf.d/server_
 # TODO: need to source catkin_ws and start ros_ingestor
 USER root
 WORKDIR /opt/catkin_ws/src/server/src
-ENTRYPOINT [ "bash" ]
+# ENTRYPOINT [ "bash" ]
+CMD ["/usr/bin/supervisord"]
 # CMD [ "python3", "/opt/catkin_ws/src/server/src/server.py", "--host", "0.0.0.0" ]
