@@ -109,7 +109,7 @@ class SpecificCroppedImageInfoHandler(Resource):
 
         if image is None:
             return {'message': 'Failed to locate cropped id {}'.format(image_id)}, 404
-        return jsonify(image.toJsonResponse())
+        return jsonify(image.toJsonResponse(exclude=('id',)))
 
     @api.doc(description='Update information on the specified cropped image')
     @api.doc()
