@@ -8,3 +8,6 @@ docker run --interactive --tty \
   -e ROS_MASTER_URI="$ROS_MASTER_URI" \
   --publish 5000:5000 \
   --name imaging-server byuauvsi/imaging_server
+
+  # --network host 
+  #       only works on linux.. no mac or windows support. which defeats the purpose here
