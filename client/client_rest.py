@@ -4,7 +4,29 @@ from PIL import Image
 from io import BytesIO
 
 class ImageInfo:
+    """
+    An ImageInfo object holds the information concerning an image such as the image id, the image path,
+    the timestamp the image was taken, and whether or not it has been seen by the autonomous or manual system.
+    """
     def __init__(self, auto_tap, imageId, path, man_tap, ts):
+        """
+        The constructor for the ImageInfo class.
+
+        @:type  auto_tap: boolean
+        @:param auto_tap: True if the autonomous system has seen the image, False otherwise
+
+        @:type  imageId: int
+        @:param imageId: the id related to the image
+
+        @:type  path: String
+        @:param path: the file path to where the image is located
+
+        @:type  man_tap: boolean
+        @:param man_tap: True if the manual system has seen the image, False otherwise
+
+        @:type  ts: float
+        @:param ts: the timestamp that the image was taken
+        """
         self.autonomous_tap = auto_tap
         self.id = imageId
         self.image_path = path
@@ -12,7 +34,34 @@ class ImageInfo:
         self.time_stamp = ts
 
 class CropInfo:
+    """
+    A CropInfo object holds information concerning a cropped image such as the image id to the original image,
+    the top-left and bottom-right coordinates to where the crop took place on the original image,
+    the path of the cropped image, whether or not the cropped image has been seen by the imaging system,
+    and the timestamp of the original image.
+    """
     def __init__(self, imgId, tl, br, path, isTapped, ts):
+        """
+        The constructor for the CropInfo class.
+
+        @:type  imgId: int
+        @:param imgId: the id of the original image
+
+        @:type  tl: int[]
+        @:param tl: the x and y coordinates of the original image of the top left corner to where the image was cropped
+
+        @:type  br: int[]
+        @:param br: the x and y coordinates of the original image of the bottom right corner to where the image was cropped
+
+        @:type  path: String
+        @:param path: the file path to where the cropped image is located
+
+        @:type  isTapped: boolean
+        @:param isTapped: True if the manual imaging system has seen this image, False otherwise
+
+        @:type  ts: float
+        @:param ts: the timestamp that the image was taken
+        """
         self.imgId = imgId
         self.tl = tl
         self.br = br
@@ -21,7 +70,30 @@ class CropInfo:
         self.time_stamp = ts
 
 class GPSMeasurement:
+    """
+    A GPSMeasurement object holds information concerning one measurement taken from the aircraft's GPS.
+    Such information includes the id of the measurement, altitude in meters, longitude, latitude,
+    and the timestamp of when the measurement was taken.
+    """
     def __init__(self, alt, gpsId, lat, long, ts):
+        """
+        The constructor for the GPSMeasurement class.
+
+        @:type  alt: float
+        @:param alt: the altitude of the measurement
+
+        @:type  gpsId: int
+        @:param gpsId: the id of the GPS measurement
+
+        @:type  lat: float
+        @:param lat: the latitude of the measurement
+
+        @:type  long: float
+        @:param long: the longitude of the measurement
+
+        @:type  ts: float
+        @:param ts: the timestamp that the measurement was taken
+        """
         self.altitude = alt
         self.id = gpsId
         self.latitude = lat
@@ -29,7 +101,31 @@ class GPSMeasurement:
         self.time_stamp = ts
 
 class StateMeasurement:
+    """
+    A StateMeasurement object holds information concerning the state of the aircraft in one point in time.
+    Such information includes the id of the measurement, roll angle of the aircraft in radians,
+    pitch angle of the aircraft in radians, yaw angle of the aircraft in radians,
+    and the timestamp of when the measurement was taken.
+    """
     def __init__(self, stateId, roll, pitch, yaw, ts):
+        """
+        The constructor for the StateMeasurement class.
+
+        @:type  stateId: int
+        @:param stateId: the id of the state measurement
+
+        @:type  roll: float
+        @:param roll: the roll angle in radians of the aircraft at the time the measurement was taken
+
+        @:type  pitch: float
+        @:param pitch: the pitch angle in radians of the aircraft at the time the measurement was taken
+
+        @:type  yaw: float
+        @:param yaw: The yaw angle in radians of the aircraft at the time the measurement was taken
+
+        @:type  ts: float
+        @:param ts: the timestamp that the measurement was taken
+        """
         self.id = stateId
         self.roll = roll
         self. pitch = pitch
@@ -38,28 +134,32 @@ class StateMeasurement:
 
 
 class ImagingInterface:
-
+    """
+    The ImagingInterface object serves as the bridge between the imaging server and the imaging GUI.
+    It connects to the imaging server given an IP address and a port. It makes certain calls to the server
+    in order to feed the GUI what it needs such as images and measurements taken by the imaging system on the aircraft.
+    """
     def __init__(self,
                  host="127.0.0.1",
                  port="5000",
                  numIdsStored=50,
                  isDebug=False):
         """
-        Initializes properties of the interface
+        The constructor for the ImagingInterface class.
 
-        @:type host: String
-        @:param host: The host of the server that the interface connects to
+        @:type  host: String
+        @:param host: the host of the server that the interface connects to
 
-        @type port: String
-        @:param port: The port of the server that the interface connects to
+        @type  port: String
+        @:param port: the port of the server that the interface connects to
 
-        @:type numIdsStored: int
-        @:param numIdsStored: The number of ids that the interface keeps track of, used for getting previous images
+        @:type  numIdsStored: int
+        @:param numIdsStored: the number of ids that the interface keeps track of, used for getting previous images
 
-        @:type isDebug: boolean
-        @:param isDebug: If isDebug is true, the interface will print out status statements
+        @:type  isDebug: boolean
+        @:param isDebug: if isDebug is true, the interface will print out status statements
 
-        @:rtype: None
+        @:rtype:  None
         @:return: None
         """
         self.host = host
@@ -74,10 +174,10 @@ class ImagingInterface:
 
     def ping(self):
         """
-        Checks to see if the interface can contact the server
+        Checks to see if the interface can contact the server.
 
-        @:rtype: boolean
-        @:return: Returns True if it contacted the server
+        @:rtype:  boolean
+        @:return: True if the interface contacted the server, False otherwise
         """
         try:
             self.getGPSById(1)
@@ -88,12 +188,12 @@ class ImagingInterface:
 
     def debug(self, printStr):
         """
-        If interface is in debug mode, it will print the string given, else it does nothing
+        If interface is in debug mode, it will print the string given, else it does nothing.
 
-        @:type printStr: String
-        @:param printStr: The string that will be printed if in debug mode
+        @:type  printStr: String
+        @:param printStr: the string that will be printed if in debug mode
 
-        @:rtype: None
+        @:rtype:  None
         @:return: None
         """
         if self.isDebug:
@@ -101,15 +201,14 @@ class ImagingInterface:
 
     def getRawImage(self, imageId):
         """
-        Description
+        Retrieves an image with the given imageId from the server.
 
-        @:type imageId: int
-        @:param imageId: The id of the image that is going to be returned
+        @:type  imageId: int
+        @:param imageId: the id of the image that is going to be returned
 
-        @:rtype: (Image, int)
-        @:return: A tuple of the pillow Image associated with the given image id and the image id
-        if there are any images available for processing,
-        otherwise None
+        @:rtype:  (Image, int)
+        @:return: a tuple of the pillow Image associated with the given image id and the image id
+        if there are any images available for processing, otherwise None
         """
         self.debug("getImage(id={})".format(imageId))
         img = requests.get(self.url + "/image/raw/" + str(imageId), headers={'X-Manual': 'True'})
@@ -122,13 +221,13 @@ class ImagingInterface:
 
     def getNextRawImage(self, isManual):
         """
-        Retrieve the next available raw image.
+        Retrieves the next available raw image from the server.
 
-        @:type isManual: boolean
-        @:param isManual: Specify whether this is a manual imaging request (True) or an autonomous one (False)
+        @:type  isManual: boolean
+        @:param isManual: specify whether this is a manual imaging request (True) or an autonomous one (False)
 
-        @:rtype: (Image, int)
-        @:return: A tuple of a pillow Image and the image id if there are any images available for processing,
+        @:rtype:  (Image, int)
+        @:return: a tuple of a pillow Image and the image id if there are any images available for processing,
         otherwise None
         """
         self.debug("getNextRawImage(isManual={})".format(isManual))
@@ -154,11 +253,11 @@ class ImagingInterface:
 
     def getPrevRawImage(self):
         """
-        Re-retrive a raw image that you were previously viewing. This interface maintains an ordered list
-        (of up to numIdsStored) of ids you've previously received and will traverse it backwards.
+        Re-retrieves a raw image that was previously viewed. The interface maintains an ordered list
+        (of up to numIdsStored) of ids that has previously been viewed and traverses the list backwards.
 
-        @:rtype (Image, int)
-        @:return A tuple of a pillow Image and the image id if there are any previous images to process,
+        @:rtype:  (Image, int)
+        @:return: a tuple of a pillow Image and the image id if there are any previous images to process,
         and the server is able to find the given id, otherwise None.
         """
         self.debug("getPrevRawImage()")
@@ -177,13 +276,14 @@ class ImagingInterface:
 
     def getImageInfo(self, imageId):
         """
-        Desc
+        Retrieves information about an image from the server given the image id.
 
-        @:type imageId: int
-        @:param imageId: The id of the image of interest
+        @:type  imageId: int
+        @:param imageId: the id of the image of interest
 
-        @:rtype:
-        @:return:
+        @:rtype:  ImageInfo
+        @:return: an object that contains the information about the given image
+        if it exists and connects to the server, otherwise None
         """
         self.debug("getImageInfo(id={})".format(imageId))
         imgInfoResp = requests.get(self.url + "/image/raw/" + str(imageId) + "/info")
@@ -201,13 +301,13 @@ class ImagingInterface:
 
     def getCroppedImage(self, imageId):
         """
-        Desc
+        Retrieves a cropped image of the image from the server given the imageId.
 
-        @:type imageId: int
-        @:param imageId: The id of the image of
+        @:type  imageId: int
+        @:param imageId: the id of the image
 
-        @:rtype: (Image, int)
-        @:return: A tuple of a pillow Image and the image id if the image with that id is cropped, otherwise None
+        @:rtype:  (Image, int)
+        @:return: a tuple of a pillow Image and the image id if the image with that id is cropped, otherwise None
         """
         self.debug("getCroppedImage(id={})".format(imageId))
         img = requests.get(self.url + "/image/crop/" + str(imageId), headers={'X-Manual': 'True'})
@@ -220,11 +320,10 @@ class ImagingInterface:
 
     def getNextCroppedImage(self):
         """
-        Desc
+        Retrieves the next available cropped image from the server.
 
-
-        @:rtype:
-        @:return:
+        @:rtype:  (Image, int)
+        @:return: a tuple of a pillow Image and the image id if the image with that id is cropped, otherwise None
         """
         self.debug("getNextCroppedImage()")
         if self.cropIdIndex >= -1:
@@ -249,11 +348,12 @@ class ImagingInterface:
 
     def getPrevCroppedImage(self):
         """
-        Re-retrieve a cropped image that you were previously viewing. This interface maintains an ordered list
-        (of up to numIdsStored) of ids you've previously received and will traverse it backwards.
+        Re-retrieves a cropped image that was previously viewed. The interface maintains an ordered list
+        (of up to numIdsStored) of ids that has previously been viewed and traverses the list backwards.
 
-        @:rtype (Image, int)
-        @:return A pillow Image if there are any previous images to process, and the server is able to find the given id, otherwise None.
+        @:rtype:  (Image, int)
+        @:return: a pillow Image if there are any previous images to process, and the server is able to find the given id,
+        otherwise None.
         """
         self.debug("getPrevCroppedImage()")
         if len(self.cropIds) > 0:
@@ -271,14 +371,14 @@ class ImagingInterface:
 
     def getCroppedImageInfo(self, imageId):
         """
-        Desc
+        Retrieves information about a cropped image from the server given the image id.
 
-        @:type imageId: int
-        @:param imageId: The id of the image of interest
+        @:type  imageId: int
+        @:param imageId: the id of the image of interest
 
-
-        @:rtype:
-        @:return:
+        @:rtype:  CropInfo
+        @:return: an object that contains the information about the given cropped image
+        if it exists and connects to the server, otherwise None
         """
         self.debug("getCroppedImageInfo(id={})".format(imageId))
         cropInfoResp = requests.get(self.url + "/image/crop/" + str(imageId) + "/info")
@@ -299,10 +399,10 @@ class ImagingInterface:
 
     def getAllCroppedInfo(self):
         """
-        Call
+        Retrieves the information pertaining to all of the cropped images in the server.
 
-        @:rtype CropInfo
-        @:return: Returns a list of CropInfo objects of all of the cropped images
+        @:rtype:  CropInfo[]
+        @:return: a list of CropInfo objects of all of the cropped images if it connects to the server, otherwise None
         """
         self.debug("getAllCroppedInfo")
         resp = requests.get(self.url + "/image/crop/all")
@@ -327,10 +427,13 @@ class ImagingInterface:
 
     def imageToBytes(self, img):
         """
+        Takes an Image object and returns the bytes of the given image.
 
+        @:type  img: Image
+        @:param img: the image to convert into bytes
 
-        @:rtype:
-        @:return:
+        @:rtype:  bytes
+        @:return: bytes of the given image
         """
         imgByteArr = BytesIO()
         img.save(imgByteArr, format='JPEG')
@@ -339,24 +442,24 @@ class ImagingInterface:
 
     def postCroppedImage(self, imageId, crop, tl, br):
         """
-        Posts a cropped image to the server
+        Posts a cropped image to the server.
 
         @:type  imageId: integer
-        @:param imageId: The id to the original image being cropped
+        @:param imageId: the id to the original image being cropped
 
         @:type  crop: PIL Image
-        @:param crop: The image file of the cropped image
+        @:param crop: the image file of the cropped image
 
-        @:type  tl: Integer array of length 2
-        @:param tl: The x and y coordinate of the location of the cropped image
+        @:type  tl: integer array of length 2
+        @:param tl: the x and y coordinate of the location of the cropped image
                     in the top left corner relative to the original image
 
-        @:type  br: Integer array of length 2
-        @:param br: The x and y coordinate of the location of the cropped image
+        @:type  br: integer array of length 2
+        @:param br: the x and y coordinate of the location of the cropped image
                     in the bottom right corner relative to the original image
 
         @:rtype Response
-        @:return The response of the http request
+        @:return The response of the http request if it successfully posts, otherwise None
         """
         self.debug("postCroppedImage(imageId={})".format(imageId))
         url = self.url + "/image/crop/"
@@ -367,14 +470,21 @@ class ImagingInterface:
         data = {'crop_coordinate_tl': tlStr, 'crop_coordinate_br': brStr}
         files = {'cropped_image': self.imageToBytes(crop)}
         resp = requests.post(url, data=data, headers=headers, files=files)
-        return resp
+        if resp.status_code == 200:
+            return resp
+        else:
+            print("Server returned status code {}".format(resp.status_code))
+            return None
 
     def getGPSByTs(self, ts):
         """
+        Retrieves from the server the GPS measurement that is closest to the given timestamp.
 
+        @:type  ts: float
+        @:param ts: the timestamp of interest
 
-        @:rtype:
-        @:return:
+        @:rtype:  GPSMeasurement
+        @:return: GPSMeasurement object closest to the given timestamp if it connects to the server, otherwise None
         """
         self.debug("getGPSByTs(ts={})".format(ts))
         gps = requests.get(self.url + "/gps/ts/" + str(ts))
@@ -392,10 +502,13 @@ class ImagingInterface:
 
     def getGPSById(self, gpsId):
         """
+        Retrieves from the server a GPS measurement given an id.
 
+        @:type  gpsId: int
+        @:param gpsId: the id of the gps measurement of interest
 
-        @:rtype:
-        @:return:
+        @:rtype:  GPSMeasurement
+        @:return: GPSMeasurement object of the given Id if it exists and connects to the server, otherwise None
         """
         self.debug("getIGPSById(id={})".format(gpsId))
         gps = requests.get(self.url + "/gps/" + str(gpsId), timeout=5)
@@ -413,10 +526,14 @@ class ImagingInterface:
 
     def getStateByTs(self, ts):
         """
+        Retrieves from the server the state measurement that is closest to the given timestamp.
 
 
-        @:rtype:
-        @:return:
+        @:type  ts: float
+        @:param ts: the timestamp of interest
+
+        @:rtype:  StateMeasurement
+        @:return: StateMeasurement object closest to the given timestamp if it connects to the server, otherwise None
         """
         self.debug("getStateByTs(ts={})".format(ts))
         state = requests.get(self.url + "/state/ts/" + str(ts))
@@ -434,10 +551,13 @@ class ImagingInterface:
 
     def getStateById(self, stateId):
         """
+        Retrieves from the server a state measurement given an id.
 
+        @:type  stateId: int
+        @:param stateId: the id of the state measurement of interest
 
-        @:rtype:
-        @:return:
+        @:rtype:  StateMeasurement
+        @:return: StateMeasurement object of the given Id if it exists and connects to the server, otherwise None
         """
         self.debug("getIGPSById(id={})".format(stateId))
         state = requests.get(self.url + "/state/" + str(stateId))
