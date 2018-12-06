@@ -4,7 +4,7 @@ from dao.outgoing_manual_dao import OutgoingManualDAO
 from dao.outgoing_autonomous_dao import OutgoingAutonomousDAO
 from dao.model.outgoing_manual import outgoing_manual
 from dao.model.outgoing_autonomous import outgoing_autonomous
-from config import defaultConfigPath
+from apis.helper_methods import checkXManual, getClassificationDAO
 
 api = Namespace('image/class', description='Imaging classification calls route through here')
 
@@ -31,16 +31,10 @@ class AllClassificationsHandler(Resource):
     @api.expect(classificationParser)
     def get(self):
         # Input Validation::
-        if 'X-Manual' not in request.headers:
-            abort(400, 'Need to specify X-Manual header!')
-        manual = request.headers.get('X-Manual')
-        try:
-            manual = manual.lower() == 'true'
-        except:
-            abort(400, 'Failed to interpret X-Manual header as boolean!')
+        manual = checkXManual(request)
 
         outgoingList = []
-        dao = getDAO(manual)
+        dao = getClassificationDAO(manual)
         outgoingList = dao.getAll()
 
         if not outgoingList:
@@ -54,20 +48,28 @@ class AllClassificationsHandler(Resource):
 @api.doc(params={'image_id': 'Image ID of the classification entry to update or get info on'}, required=True)
 class SpecificClassificationHandler(Resource):
 
+    @api.doc(description='Get the classification for the given image id')
+    @api.expect(classificationParser)
+    def get(self, image_id):
+        # Input Validation::
+        manual = checkXManual(request)
+
+        dao = getClassificationDAO(manual)
+
+        result = dao.getClassification(image_id)
+        if result is None:
+            return {'message': 'Failed to locate classification with id {}'.format(image_id)}, 404
+
+        return jsonify(result.toDict(exclude=('id',)))
+
     @api.doc(description='Create a new classification entry. NOTE: if an entry already exists for the given Image-Id (specified in the header), then that entry will be updated with this information instead of inserted.')
     @api.expect(classificationParser)
     @api.expect(classification)
     def post(self, image_id):
         # Input Validation::
-        if 'X-Manual' not in request.headers:
-            abort(400, 'Need to specify X-Manual header!')
-        manual = request.headers.get('X-Manual')
-        try:
-            manual = manual.lower() == 'true'
-        except:
-            abort(400, 'Failed to interpret X-Manual header as boolean!')
+        manual = checkXManual(request)
 
-        dao = getDAO(manual)
+        dao = getClassificationDAO(manual)
         if manual:
             outgoingIn = outgoing_manual(json=api.payload)
         else:
@@ -88,25 +90,12 @@ class SpecificClassificationHandler(Resource):
     @api.expect(classification)
     def put(self, image_id):
         # Input Validation::
-        if 'X-Manual' not in request.headers:
-            abort(400, 'Need to specify X-Manual header!')
-        manual = request.headers.get('X-Manual')
-        try:
-            manual = manual.lower() == 'true'
-        except:
-            abort(400, 'Failed to interpret X-Manual header as boolean!')
+        manual = checkXManual(request)
 
-        dao = getDAO(manual)
+        dao = getClassificationDAO(manual)
 
         result = dao.updateClassificationByUID(image_id, api.payload)
         if result == -1:
             return {'message': 'No image with id {} found with a classification to update or your input was invalid (or was there a server error?)'.format(image_id)}, 404
         else:
             return jsonify(result.toDict())
-
-
-def getDAO(isManual):
-    if isManual:
-        return OutgoingManualDAO(defaultConfigPath())
-    else:
-        return OutgoingAutonomousDAO(defaultConfigPath())

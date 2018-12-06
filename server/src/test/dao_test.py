@@ -1,6 +1,7 @@
 #! /usr/bin/env python
 
 import os
+from flask import jsonify
 from dao.incoming_image_dao import IncomingImageDAO
 from dao.model.incoming_image import incoming_image
 from dao.model.outgoing_manual import outgoing_manual
@@ -64,9 +65,22 @@ def testClassificationInsert():
     print('done!')
 
 
+def testDistinctManualClassification():
+    print('get classification dao')
+    dao = OutgoingManualDAO(getDefaultConfigFile())
+
+    result = dao.getAllDistinct()
+
+    printable = []
+    for lst in result:
+        printable.append([ classification.toDict(exclude=('id',)) for classification in lst ])
+
+    print(jsonify(printable))
+
 def main():
     # testIncomingImageGet()
-    testClassificationInsert()
+    # testClassificationInsert()
+    testDistinctManualClassification()
 
 if __name__ == '__main__':
     print("waddup")

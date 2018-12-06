@@ -4,6 +4,7 @@ import time
 from flask_restplus import Namespace, Resource, inputs
 from dao.incoming_image_dao import IncomingImageDAO
 from config import defaultConfigPath
+from apis.helper_methods import checkXManual
 
 api  = Namespace('image/raw', description="All raw image functions route through here")
 
@@ -19,13 +20,7 @@ class RawImageHandler(Resource):
     def get(self):
         startTime = time.time()
         # Input Validation::
-        if 'X-Manual' not in request.headers:
-            abort(400, 'Need to specify X-Manual header!')
-        manual = request.headers.get('X-Manual')
-        try:
-            manual = manual.lower() == 'true'
-        except:
-            abort(400, 'Failed to interpret X-Manual header as boolean!')
+        manual = checkXManual(request)
 
         # Get Content
         dao = IncomingImageDAO(defaultConfigPath())

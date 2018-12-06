@@ -1,7 +1,5 @@
 import psycopg2
 from dao.base_dao import BaseDAO
-from dao.model.outgoing_manual import outgoing_manual
-from dao.model.outgoing_autonomous import outgoing_autonomous
 
 class ClassificationDAO(BaseDAO):
 
@@ -107,7 +105,7 @@ class ClassificationDAO(BaseDAO):
 
         selectAllSql = """SELECT id, image_id, type, latitude, longitude, orientation, shape, background_color, alphanumeric, alphanumeric_color, description, submitted
             FROM """ + self.outgoingTableName + """ 
-            ORDER BY id;"""            
+            ORDER BY id;"""
 
         cur = self.conn.cursor()
         cur.execute(selectAllSql)
@@ -140,3 +138,48 @@ class ClassificationDAO(BaseDAO):
         else:
             return -1
 
+    def getAllDistinct(self, modelGenerator, whereClause=None):
+        """
+        Get all the unique classifications in the classification queue
+        Submitted or not.
+        """
+        
+        # start by getting the distinct target types in our table
+        # a 'distinct target' is one with unique shape and character
+        getDistinctTypes = """SELECT alphanumeric, shape, type
+            FROM """ + self.outgoingTableName
+
+        selectClass = """SELECT id, image_id, type, latitude, longitude, orientation, shape, background_color, alphanumeric, alphanumeric_color, description, submitted
+            FROM """ + self.outgoingTableName + " WHERE "
+
+        if whereClause is not None:
+            getDistinctTypes += " WHERE " + whereClause + " "
+            selectClass += whereClause + " AND "
+        getDistinctTypes += "GROUP BY alphanumeric, shape, type;"
+        selectClass += " alphanumeric = %s and shape = %s and type = %s;"
+
+        print(getDistinctTypes)
+
+        distinctClassifications = []
+        cur = self.conn.cursor()
+        cur.execute(getDistinctTypes)
+
+        if cur is None:
+            return distinctClassifications
+
+        classCur = self.conn.cursor()
+                
+        # classCur.prepare(selectClass)
+        for row in cur:
+
+            classification = []
+            classCur.execute(selectClass, row)
+            for result in classCur:
+                outRow = modelGenerator.newModelFromRow(result)
+                classification.append(outRow)
+
+            distinctClassifications.append(classification)
+
+        classCur.close()
+        cur.close()
+        return distinctClassifications

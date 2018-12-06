@@ -57,3 +57,22 @@ class OutgoingManualDAO(ClassificationDAO):
         updateModel = outgoing_manual(json=updateClass)
         selectedClass = super(OutgoingManualDAO, self).updateClassificationByUID(id, updateModel)
         return selectedClass # the above getClassification handle putting this into the proper object
+
+    def getAllDistinct(self):
+        return super(OutgoingManualDAO, self).getAllDistinct(self)
+    
+    def getAllDistinctPending(self):
+        """
+        Get images grouped by distinct targets pending submission (ei: submitted = false)
+        """
+        return super(OutgoingManualDAO, self).getAllDistinct(self, whereClause=" submitted = FALSE ")
+
+    def newModelFromRow(self, row):
+        """
+        Kinda a reflective function for the classification dao. Pass self up
+        to the super ClassificationDAO, and it calls this method to create the 
+        proper model object in its response.
+
+        Not uber elegant, only used by getAllDistinct atm.
+        """
+        return outgoing_manual(row)
