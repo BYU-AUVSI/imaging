@@ -26,6 +26,9 @@ class ImageInfo:
 
         @type  ts: float
         @param ts: the timestamp that the image was taken
+
+        @rtype:  None
+        @return: None
         """
         self.autonomous_tap = auto_tap
         self.id = imageId
@@ -61,6 +64,9 @@ class CropInfo:
 
         @type  ts: float
         @param ts: the timestamp that the image was taken
+
+        @rtype:  None
+        @return: None
         """
         self.imgId = imgId
         self.tl = tl
@@ -93,6 +99,9 @@ class GPSMeasurement:
 
         @type  ts: float
         @param ts: the timestamp that the measurement was taken
+
+        @rtype:  None
+        @return: None
         """
         self.altitude = alt
         self.id = gpsId
@@ -125,6 +134,9 @@ class StateMeasurement:
 
         @type  ts: float
         @param ts: the timestamp that the measurement was taken
+
+        @rtype:  None
+        @return: None
         """
         self.id = stateId
         self.roll = roll
