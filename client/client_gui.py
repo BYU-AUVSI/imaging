@@ -22,10 +22,8 @@ Tab0:
 Tab1:
     Add zooming feature
     Add panning feature
-    Add preview of cropped image
-    Add submit crop button
-    Add sample pic of targets
-    Add quantity of each target pictures
+    Fix bug of initial sizing
+    Fix how crop sizes
 Tab2:
     Change disable color
     Rotate image accordingex to heading
@@ -33,6 +31,7 @@ Tab2:
     Add classification queue
 Tab3:
     Make everything
+    Manual tender as well
 
 KNOWN BUGS:
     Weird exit is bound to an event (doesn't do anything) when rerun in iPython3
@@ -53,8 +52,22 @@ import sys
 
 
 class GuiClass(tk.Frame):
-    """Classification Gui for AUVSi 2019"""
+    """
+    Graphical User Interface for 2019 AUVSI competition
+    Tab 0: Setting for setting up the server_error
+    Tab 1: Pull raw images and submit cropped images
+    Tab 2: Pull cropped iamges and submit classification for images
+    Tab 3: Display results for manual and autonomous classification
+    """
     def __init__(self,master=None):
+        """
+        initialization for Gui Class
+
+        @rtype:  None
+        @return: None
+        """
+
+
         tk.Frame.__init__(self,master=None)
         self.master = master # gui master handle
         try:
@@ -78,7 +91,6 @@ class GuiClass(tk.Frame):
         self.imageID = 0
         self.interface = client_rest.ImagingInterface(host=self.default_host,port=self.default_port,numIdsStored=self.default_idnum,isDebug=self.default_debug)
         self.initialized = False
-        self.target_number = 0
         self.pingServer()
         self.draw_np = np.copy(self.org_np)
         self.img_im = self.np2im(self.draw_np)
@@ -275,23 +287,52 @@ class GuiClass(tk.Frame):
 
 
     def get_image(self,path):
+        """
+        Reads in an image from folder on computer
+
+        @type  path: file path
+        @param path: the file path to where the image is located
+
+        @rtype:  Numpy image array
+        @return: Numpy array of selected image
+        """
         image_np = cv2.imread(path)
         image_np = cv2.cvtColor(image_np,cv2.COLOR_BGR2RGB)
         return image_np
 
     def np2im(self,image):
+        """
+        Converts from numpy array to PIL image
+        @type image: Numpy image array
+        @param image: Numpy array of selected image
+
+        @rtype:  PIL image
+        @return: PIL image of numpy array
+        """
         image_im = Image.fromarray(image)
         return image_im
 
     def im2tk(self,image):
+        """
+        Converts from PIL image to TK image
+        @type image: PIL image
+        @param image: PIL image of numpy array
+
+        @rtype:  TK image
+        @return: TK image of PIL image
+        """
         image_tk = ImageTk.PhotoImage(image)
         return image_tk
 
-    def bt1_clicked(self):
-        self.target_number += 1
-        self.lbl2.configure(text=self.target_number)
-
     def mouse_click(self,event):
+        """
+        Saves pixel location of where on the image the mouse clicks
+        @type  event: event
+        @param event: mouse event
+
+        @rtype:  None
+        @return: None
+        """
         self.t1c1i1.bind("<Motion>",self.mouse_move)
         self.offset_x = int((self.t1c1i1_width - self.t1c1i1_img_width )/2.0)
         self.offset_y = int((self.t1c1i1_height - self.t1c1i1_img_height)/2.0)
@@ -299,6 +340,14 @@ class GuiClass(tk.Frame):
         self.y0 = event.y - self.offset_y
 
     def mouse_move(self,event):
+        """
+        Gets pixel location of where the mouse is moving and show rectangle for crop preview
+        @type  event: event
+        @param event: mouse event
+
+        @rtype:  None
+        @return: None
+        """
         self.t1c1i1.bind("<ButtonRelease-1>",self.mouse_release)
         self.x1 = event.x - self.offset_x
         self.y1 = event.y - self.offset_y
@@ -311,11 +360,15 @@ class GuiClass(tk.Frame):
         self.img_tk = self.im2tk(self.resized_im)
         self.t1c1i1.configure(image=self.img_tk)
 
-    def close_window(self,event):
-        self.master.destroy()
-        sys.exit()
-
     def mouse_release(self,event):
+        """
+        Saves pixel location of where the mouse clicks and creates crop preview
+        @type  event: event
+        @param event: mouse event
+
+        @rtype:  None
+        @return: None
+        """
         if self.cropped:
             self.undoCrop()
         self.t1c1i1.unbind("<Motion>")
@@ -334,7 +387,27 @@ class GuiClass(tk.Frame):
         self.cropImage(int(sr*self.x0),int(sr*self.y0),int(sr*self.x1),int(sr*self.y1))
         self.cropped = True
 
+    def close_window(self,event):
+        """
+        Closes gui safely
+        @type  event: event
+        @param event: ESC event
+
+        @rtype:  None
+        @return: None
+        """
+        self.master.destroy()
+        sys.exit()
+
     def resizeEventTab0(self,event=None):
+        """
+        Resizes picture on Tab0
+        @type  event: event
+        @param event: resize window event
+
+        @rtype:  None
+        @return: None
+        """
         if self.initialized and (time.time()-self.resize_counter_tab0) > 0.050:
             if self.t0c2i1.winfo_width() > 1:
                 self.resize_counter_tab0 = time.time()
@@ -347,6 +420,14 @@ class GuiClass(tk.Frame):
                 self.t0c2i1.configure(image=self.logo_tk)
 
     def resizeEventTab1(self,event=None):
+        """
+        Resizes pictures on Tab1
+        @type  event: event
+        @param event: resize window event
+
+        @rtype:  None
+        @return: None
+        """
         if self.initialized and (time.time()-self.resize_counter_tab1) > 0.050:
             if self.t1c1i1.winfo_width() > 1:
                 self.resize_counter_tab1 = time.time()
@@ -367,6 +448,14 @@ class GuiClass(tk.Frame):
                 self.t1c2i1.configure(image=self.crop_tk)
 
     def resizeEventTab2(self,event=None):
+        """
+        Resizes picture on Tab2
+        @type  event: event
+        @param event: resize window event
+
+        @rtype:  None
+        @return: None
+        """
         if self.initialized and (time.time()-self.resize_counter_tab2) > 0.050:
             pass
             '''
@@ -381,6 +470,26 @@ class GuiClass(tk.Frame):
             '''
 
     def resizeIm(self,image,image_width,image_height,width_restrict,height_restrict):
+        """
+        Resizes PIL image according to given bounds
+        @type  image: PIL image
+        @param image: PIL image that you want to crop
+
+        @type  image_width: integer
+        @param image_width: the original image width in pixels
+
+        @type  image_height: integer
+        @param image_height: the original image height in pixels
+
+        @type  width_restrict: integer
+        @param width_restrict: the width in pixels of restricted area
+
+        @type  height_restrict: integer
+        @param height_restrict: the height in pixels of restricted area
+
+        @rtype:  PIL image
+        @return: Resized PIL image
+        """
         ratio_h = height_restrict/image_height
         ratio_w = width_restrict/image_width
         if ratio_h <= ratio_w:
@@ -390,6 +499,23 @@ class GuiClass(tk.Frame):
         return(resized_im)
 
     def cropImage(self,x0,y0,x1,y1):
+        """
+        Crops raw image
+        @type  x0: integer
+        @param x0: pixel x location of first click
+
+        @type  y0: integer
+        @param y0: pixel y location of first click
+
+        @type  x1: integer
+        @param x1: pixel x location of second click
+
+        @type  y1: integer
+        @param y1: pixel y location of second click
+
+        @rtype:  None
+        @return: None
+        """
         if x0 < x1:
             self.cx0 = x0
             self.cx1 = x1
@@ -409,6 +535,15 @@ class GuiClass(tk.Frame):
         self.t1c2i1.configure(image=self.crop_tk)
 
     def undoCrop(self,event=None):
+        """
+        Undoes crop and resets the raw image
+
+        @type  event: event
+        @param event: Ctrl + Z event
+
+        @rtype:  None
+        @return: None
+        """
         self.draw_np = np.copy(self.org_np)
         self.img_im = self.np2im(self.draw_np)
         self.resized_im = self.resizeIm(self.img_im,self.org_width,self.org_height,self.t1c1i1_width,self.t1c1i1_height)
@@ -421,17 +556,16 @@ class GuiClass(tk.Frame):
         self.t1c2i1.configure(image=self.crop_tk)
         #self.t2c2i1.configure(image=self.crop_tk)
 
-    def advanceTarget(self,event=None):
-        self.target_number += 1
-        self.lbl2.configure(text=self.target_number)
-
-    def decrementTarget(self,event):
-        self.target_number -= 1
-        if self.target_number < 0:
-            self.target_number = 0
-        self.lbl2.configure(text=self.target_number)
-
     def nextRaw(self,event):
+        """
+        Requests and displays next raw image
+
+        @type  event: event
+        @param event: Right arrow event
+
+        @rtype:  None
+        @return: None
+        """
         if self.serverConnected:
             time0 = time.time()
             query = self.interface.getNextRawImage(True)
@@ -457,6 +591,15 @@ class GuiClass(tk.Frame):
                 print("server request = ",time1-time0,"gui = ",time2-time1)
 
     def previousRaw(self,event):
+        """
+        Requests and displays previous raw image
+
+        @type  event: event
+        @param event: Left arrow event
+
+        @rtype:  None
+        @return: None
+        """
         if self.serverConnected:
             time0 = time.time()
             query = self.interface.getPrevRawImage()
@@ -482,15 +625,58 @@ class GuiClass(tk.Frame):
                 time2 = time.time()
                 print("server request = ",time1-time0,"gui = ",time2-time1)
 
-    def nextCropped(self,event):
-        print("next Cropped")
-
 
     def submitCropped(self,event=None):
+        """
+        Submits cropped image to server
+
+        @type  event: event
+        @param event: Enter press or button press event
+
+        @rtype:  None
+        @return: None
+        """
         self.interface.postCroppedImage(self.imageID,self.crop_im,[self.cx0,self.cy0],[self.cx1,self.cy1])
         (self.cx0,self.cy0,self.cx1,self.cy1)
 
+
+    def nextCropped(self,event):
+        """
+        Requests and displays next cropped image
+
+        @type  event: event
+        @param event: Right arrow event
+
+        @rtype:  None
+        @return: None
+        """
+        print("next Cropped")
+
+    def prevCropped(self,event):
+        """
+        Requests and displays previous cropped image
+
+        @type  event: event
+        @param event: Left arrow event
+
+        @rtype:  None
+        @return: None
+        """
+        print("prev Cropped")
+
+
+
+
     def submitClassification(self,event=None):
+        """
+        Submits classification of image to server
+
+        @type  event: event
+        @param event: Enter press event
+
+        @rtype:  None
+        @return: None
+        """
         shape = self.t2c2l2_var.get()
         alphanumeric = self.t2c2l4.get()
         orientation = self.t2c2l6_var.get()
@@ -502,6 +688,15 @@ class GuiClass(tk.Frame):
         print(background_color,alpha_color,type,description)
 
     def tabChanged(self,event):
+        """
+        Performs the correct keybindings when you move to a new tab of the gui
+
+        @type  event: event
+        @param event: Tab changed event
+
+        @rtype:  None
+        @return: None
+        """
         active_tab = self.n.index(self.n.select())
         if active_tab == 0:
             self.resizeEventTab0()
@@ -545,6 +740,15 @@ class GuiClass(tk.Frame):
         self.master.focus_set()
 
     def updateSettings(self,event=None):
+        """
+        Attempts to connect to server when settings are changed
+
+        @type  event: event
+        @param event: Enter press or button press event
+
+        @rtype:  None
+        @return: None
+        """
         host_new = self.t0c2host.get()
         port_new = self.t0c2port.get()
         ids_new = int(self.t0c2ids.get())
@@ -568,6 +772,12 @@ class GuiClass(tk.Frame):
         self.t1c2i1.configure(image=self.crop_tk)
 
     def pingServer(self):
+        """
+        Checks if server is correctly connected
+
+        @rtype:  None
+        @return: None
+        """
         self.serverConnected = self.interface.ping()
         if self.serverConnected:
             self.org_np = self.get_image('instructions.jpg')
@@ -575,6 +785,12 @@ class GuiClass(tk.Frame):
             self.org_np = self.get_image('server_error.jpg')
 
     def disableEmergentDescription(self,*args):
+        """
+        Disables emergent discription unless emergent target selected
+
+        @rtype:  None
+        @return: None
+        """
         if self.t2c2l14_var.get() == 'emergent':
             self.t2c2l16.configure(state=tk.NORMAL)
         else:
