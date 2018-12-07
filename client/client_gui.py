@@ -10,9 +10,8 @@ pip3 install Pillow, opencv-python, ttkthemes
 '''
 TODO:
 Integration:
-    Check if there are None images
-    Submit Cropped
     Next Cropped
+    Prev Cropped
     Submit classification
     Geolocation
 All:
@@ -101,7 +100,6 @@ class GuiClass(tk.Frame):
             tk.Grid.columnconfigure(self.tab0,x,weight=1)
         for y in range(10):
             tk.Grid.rowconfigure(self.tab0,y,weight=1)
-        print("starting tab0 config")
         # Column One
         self.t0c1l1 = ttk.Label(self.tab0, anchor=tk.CENTER, text='                               ')
         self.t0c1l1.grid(row=0,column=0,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
@@ -160,50 +158,27 @@ class GuiClass(tk.Frame):
         self.tab1 = ttk.Frame(self.n)
         self.n.add(self.tab1, text='Cropping')
         # Allows everthing to be resized
-        #grid=Frame(self.tab1)
-        #grid.grid(sticky=tk.N+tk.S+tk.E+tk.W,column=0,row=7,columnspan=2)
-        #Grid.rowconfigure(self.tab1,0,weight=1)
-        #Grid.columnconfigure(self.tab1,0,weight=1)
+        tk.Grid.rowconfigure(self.tab1,0,weight=7)
+        tk.Grid.rowconfigure(self.tab1,1,weight=1)
+        tk.Grid.columnconfigure(self.tab1,0,weight=7)
+        tk.Grid.columnconfigure(self.tab1,1,weight=1)
 
-        for x in range(19):
-            tk.Grid.columnconfigure(self.tab1,x,weight=1)
-        for y in range(13):
-            tk.Grid.rowconfigure(self.tab1,y,weight=1)
+        self.t1c1i1 = ttk.Label(self.tab1, anchor=tk.CENTER,image=self.img_tk)
+        self.t1c1i1.image = self.img_tk
+        self.t1c1i1.grid(row=0,column=0,rowspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t1c1i1.bind("<Button-1>",self.mouse_click)
+        self.t1c1i1_width = self.t1c1i1.winfo_width()
+        self.t1c1i1_height = self.t1c1i1.winfo_height()
 
+        self.crop_img_ratio = 1/7.
+        self.t1c2i1 = ttk.Label(self.tab1, anchor=tk.CENTER,image=self.crop_tk)
+        self.t1c2i1.image = self.crop_tk
+        self.t1c2i1.grid(row=0,column=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        #self.t1c2i1_width = self.t1c2i1.winfo_width()
+        #self.t1c2i1_height = self.t1c2i1.winfo_height()
 
-
-        self.lbl2 = ttk.Label(self.tab1, anchor=tk.CENTER, text=self.target_number)
-        self.lbl2.grid(row=12,column=0,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-        but1 = ttk.Button(self.tab1, text="Advance Target",command=self.advanceTarget)
-        but1.grid(row=12,column=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.lbl3 = ttk.Label(self.tab1, anchor=tk.CENTER,image=self.img_tk)
-        self.lbl3.image = self.img_tk
-        self.lbl3.grid(row=0,column=0,rowspan=12,columnspan=12,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.lbl3.bind("<Button-1>",self.mouse_click)
-        self.lbl4 = ttk.Label(self.tab1, anchor=tk.CENTER,text="initial")
-        self.lbl4.grid(row=12,column=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t1sep12 = ttk.Separator(self.tab1, orient=tk.VERTICAL)
-        self.t1sep12.grid(row=0, column=13, rowspan=13,sticky=tk.N+tk.S+tk.E+tk.W, pady=5)
-        self.lbl1 = ttk.Label(self.tab1, anchor=tk.CENTER, text='Target Number')
-        self.lbl1.grid(row=0,column=13,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.lbl5 = ttk.Label(self.tab1, anchor=tk.CENTER, text='Target Pic')
-        self.lbl5.grid(row=0,column=14,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.lbl6 = ttk.Label(self.tab1, anchor=tk.CENTER, text='Pic Quantity')
-        self.lbl6.grid(row=0,column=15,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t1sep23 = ttk.Separator(self.tab1, orient=tk.VERTICAL)
-        self.t1sep23.grid(row=0, column=16, rowspan=13,sticky=tk.N+tk.S+tk.E+tk.W, pady=5)
-        self.lbl7 = ttk.Label(self.tab1, anchor=tk.CENTER, text='Target Number')
-        self.lbl7.grid(row=0,column=16,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.lbl8 = ttk.Label(self.tab1, anchor=tk.CENTER, text='Target Pic')
-        self.lbl8.grid(row=0,column=17,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.lbl9 = ttk.Label(self.tab1, anchor=tk.CENTER, text='Pic Quantity')
-        self.lbl9.grid(row=0,column=18,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-
-        for ii in range(12):
-            new_label1 = ttk.Label(self.tab1, anchor=tk.CENTER,text=ii+1)
-            new_label1.grid(row=ii+1,column=13,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-            new_label1 = ttk.Label(self.tab1, anchor=tk.CENTER,text=ii+13)
-            new_label1.grid(row=ii+1,column=16,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t1c2b1 = ttk.Button(self.tab1, text="Submit Crop",command=self.submitCropped)
+        self.t1c2b1.grid(row=1,column=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
 
 
 
@@ -225,10 +200,11 @@ class GuiClass(tk.Frame):
         self.t2sep12.grid(row=0, column=4, rowspan=50,sticky=tk.N+tk.S+tk.E+tk.W, pady=5)
         self.t2c2title = ttk.Label(self.tab2, anchor=tk.CENTER, text='Classification')
         self.t2c2title.grid(row=0,column=4,columnspan=8,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-
+        '''
         self.t2c2i1 = ttk.Label(self.tab2, anchor=tk.CENTER,image=self.crop_tk)
         self.t2c2i1.image = self.crop_tk
         self.t2c2i1.grid(row=2,column=4,rowspan=38,columnspan=8,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        '''
         self.t2c2l1 = ttk.Label(self.tab2, anchor=tk.CENTER, text='Shape')
         self.t2c2l1.grid(row=40,column=4,columnspan=2,rowspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
         shape_options = ('circle','semicircle','quarter_circle','triangle','square','rectangle','trapezoid','pentagon','hexagon','heptagon','octagon','star','cross')
@@ -316,16 +292,14 @@ class GuiClass(tk.Frame):
         self.lbl2.configure(text=self.target_number)
 
     def mouse_click(self,event):
-        self.lbl4.configure(text=(event.x,event.y))
-        self.lbl3.bind("<Motion>",self.mouse_move)
-        self.offset_x = int((self.t1l1_width - self.t1i1_width)/2.0)
-        self.offset_y = int((self.t1l1_height - self.t1i1_height)/2.0)
+        self.t1c1i1.bind("<Motion>",self.mouse_move)
+        self.offset_x = int((self.t1c1i1_width - self.t1c1i1_img_width )/2.0)
+        self.offset_y = int((self.t1c1i1_height - self.t1c1i1_img_height)/2.0)
         self.x0 = event.x - self.offset_x
         self.y0 = event.y - self.offset_y
 
     def mouse_move(self,event):
-        self.lbl4.configure(text=(event.x,event.y))
-        self.lbl3.bind("<ButtonRelease-1>",self.mouse_release)
+        self.t1c1i1.bind("<ButtonRelease-1>",self.mouse_release)
         self.x1 = event.x - self.offset_x
         self.y1 = event.y - self.offset_y
         disp_width,disp_height = self.resized_im.size
@@ -333,9 +307,9 @@ class GuiClass(tk.Frame):
         self.draw_np = np.copy(self.org_np)
         cv2.rectangle(self.draw_np,(int(sr*self.x0),int(sr*self.y0)),(int(sr*self.x1),int(sr*self.y1)),(255,0,0),2)
         self.img_im = self.np2im(self.draw_np)
-        self.resized_im = self.resizeIm(self.img_im,self.org_width,self.org_height,self.t1l1_width,self.t1l1_height)
+        self.resized_im = self.resizeIm(self.img_im,self.org_width,self.org_height,self.t1c1i1_width,self.t1c1i1_height)
         self.img_tk = self.im2tk(self.resized_im)
-        self.lbl3.configure(image=self.img_tk)
+        self.t1c1i1.configure(image=self.img_tk)
 
     def close_window(self,event):
         self.master.destroy()
@@ -344,9 +318,8 @@ class GuiClass(tk.Frame):
     def mouse_release(self,event):
         if self.cropped:
             self.undoCrop()
-        self.lbl3.unbind("<Motion>")
-        self.lbl4.configure(text=(event.x,event.y))
-        self.lbl3.unbind("<ButtonRelease-1>")
+        self.t1c1i1.unbind("<Motion>")
+        self.t1c1i1.unbind("<ButtonRelease-1>")
         self.x1 = event.x - self.offset_x
         self.y1 = event.y - self.offset_y
         disp_width,disp_height = self.resized_im.size
@@ -354,9 +327,9 @@ class GuiClass(tk.Frame):
         self.draw_np = np.copy(self.org_np)
         cv2.rectangle(self.draw_np,(int(sr*self.x0),int(sr*self.y0)),(int(sr*self.x1),int(sr*self.y1)),(255,0,0),2)
         self.img_im = self.np2im(self.draw_np)
-        self.resized_im = self.resizeIm(self.img_im,self.org_width,self.org_height,self.t1l1_width,self.t1l1_height)
+        self.resized_im = self.resizeIm(self.img_im,self.org_width,self.org_height,self.t1c1i1_width,self.t1c1i1_height)
         self.img_tk = self.im2tk(self.resized_im)
-        self.lbl3.configure(image=self.img_tk)
+        self.t1c1i1.configure(image=self.img_tk)
         # Crop Image
         self.cropImage(int(sr*self.x0),int(sr*self.y0),int(sr*self.x1),int(sr*self.y1))
         self.cropped = True
@@ -375,18 +348,28 @@ class GuiClass(tk.Frame):
 
     def resizeEventTab1(self,event=None):
         if self.initialized and (time.time()-self.resize_counter_tab1) > 0.050:
-            if self.lbl3.winfo_width() > 1:
+            if self.t1c1i1.winfo_width() > 1:
                 self.resize_counter_tab1 = time.time()
                 self.master.update()
-                self.t1l1_width = self.lbl3.winfo_width()
-                self.t1l1_height = self.lbl3.winfo_height()
-                self.resized_im = self.resizeIm(self.img_im,self.org_width,self.org_height,self.t1l1_width,self.t1l1_height)
-                self.t1i1_width,self.t1i1_height = self.resized_im.size
+                # main image
+                self.t1c1i1_width = self.t1c1i1.winfo_width()
+                self.t1c1i1_height = self.t1c1i1.winfo_height()
+                self.resized_im = self.resizeIm(self.img_im,self.org_width,self.org_height,self.t1c1i1_width,self.t1c1i1_height)
+                self.t1c1i1_img_width,self.t1c1i1_img_height = self.resized_im.size
                 self.img_tk = self.im2tk(self.resized_im)
-                self.lbl3.configure(image=self.img_tk)
+                self.t1c1i1.configure(image=self.img_tk)
+                # cropped image
+                #self.t1c2i1_width = self.t1c2i1.winfo_width()
+                #self.t1c2i1_height = self.t1c2i1.winfo_height()
+                self.crop_resized_im = self.resizeIm(self.crop_im,self.crop_width,self.crop_height,self.t1c1i1_width*self.crop_img_ratio,self.t1c1i1_height*self.crop_img_ratio)
+                #self.t1c2i1_width,self.t1c2i1_height = self.crop_resized_im.size
+                self.crop_tk = self.im2tk(self.crop_resized_im)
+                self.t1c2i1.configure(image=self.crop_tk)
 
     def resizeEventTab2(self,event=None):
         if self.initialized and (time.time()-self.resize_counter_tab2) > 0.050:
+            pass
+            '''
             if self.t2c2i1.winfo_width() > 1:
                 self.resize_counter_tab2 = time.time()
                 self.master.update()
@@ -395,6 +378,7 @@ class GuiClass(tk.Frame):
                 self.crop_resized_im = self.resizeIm(self.crop_im,self.crop_width,self.crop_height,self.t2c2i1_width,self.t2c2i1_height)
                 self.crop_tk = self.im2tk(self.crop_resized_im)
                 self.t2c2i1.configure(image=self.crop_tk)
+            '''
 
     def resizeIm(self,image,image_width,image_height,width_restrict,height_restrict):
         ratio_h = height_restrict/image_height
@@ -420,19 +404,22 @@ class GuiClass(tk.Frame):
             self.cy1 = y0
         self.crop_im = self.crop_im.crop((self.cx0,self.cy0,self.cx1,self.cy1))
         self.crop_width,self.crop_height = self.crop_im.size
-        self.crop_tk = self.im2tk(self.crop_im)
-        self.t2c2i1.configure(image=self.crop_tk)
+        self.crop_resized_im = self.resizeIm(self.crop_im,self.crop_width,self.crop_height,self.t1c1i1_width*self.crop_img_ratio,self.t1c1i1_height*self.crop_img_ratio)
+        self.crop_tk = self.im2tk(self.crop_resized_im)
+        self.t1c2i1.configure(image=self.crop_tk)
 
     def undoCrop(self,event=None):
         self.draw_np = np.copy(self.org_np)
         self.img_im = self.np2im(self.draw_np)
-        self.resized_im = self.resizeIm(self.img_im,self.org_width,self.org_height,self.t1l1_width,self.t1l1_height)
+        self.resized_im = self.resizeIm(self.img_im,self.org_width,self.org_height,self.t1c1i1_width,self.t1c1i1_height)
         self.img_tk = self.im2tk(self.resized_im)
-        self.lbl3.configure(image=self.img_tk)
+        self.t1c1i1.configure(image=self.img_tk)
         self.crop_im = self.img_im.copy()
         self.crop_width,self.crop_height = self.crop_im.size
-        self.crop_tk = self.im2tk(self.crop_im)
-        self.t2c2i1.configure(image=self.crop_tk)
+        self.crop_resized_im = self.resizeIm(self.crop_im,self.crop_width,self.crop_height,self.t1c1i1_width*self.crop_img_ratio,self.t1c1i1_height*self.crop_img_ratio)
+        self.crop_tk = self.im2tk(self.crop_resized_im)
+        self.t1c2i1.configure(image=self.crop_tk)
+        #self.t2c2i1.configure(image=self.crop_tk)
 
     def advanceTarget(self,event=None):
         self.target_number += 1
@@ -457,20 +444,19 @@ class GuiClass(tk.Frame):
                 self.draw_np = np.copy(self.org_np)
                 self.img_im = self.np2im(self.draw_np)
                 self.crop_im = self.img_im.copy()
-                self.crop_tk = self.im2tk(self.crop_im)
                 self.org_width,self.org_height = self.img_im.size
-                self.crop_width,self.crop_height = self.img_im.size
+                self.crop_width,self.crop_height = self.crop_im.size
                 self.cropped = False
-                self.resized_im = self.resizeIm(self.img_im,self.org_width,self.org_height,self.t1l1_width,self.t1l1_height)
-                self.t1i1_width,self.t1i1_height = self.resized_im.size
+                self.resized_im = self.resizeIm(self.img_im,self.org_width,self.org_height,self.t1c1i1_width,self.t1c1i1_height)
                 self.img_tk = self.im2tk(self.resized_im)
-                self.lbl3.configure(image=self.img_tk)
-                self.t2c2i1.configure(image=self.crop_tk)
+                self.t1c1i1.configure(image=self.img_tk)
+                self.crop_resized_im = self.resizeIm(self.crop_im,self.crop_width,self.crop_height,self.t1c1i1_width*self.crop_img_ratio,self.t1c1i1_height*self.crop_img_ratio)
+                self.crop_tk = self.im2tk(self.crop_resized_im)
+                self.t1c2i1.configure(image=self.crop_tk)
                 time2 = time.time()
                 print("server request = ",time1-time0,"gui = ",time2-time1)
 
     def previousRaw(self,event):
-        print("previous Raw")
         if self.serverConnected:
             time0 = time.time()
             query = self.interface.getPrevRawImage()
@@ -487,11 +473,12 @@ class GuiClass(tk.Frame):
                 self.org_width,self.org_height = self.img_im.size
                 self.crop_width,self.crop_height = self.img_im.size
                 self.cropped = False
-                self.resized_im = self.resizeIm(self.img_im,self.org_width,self.org_height,self.t1l1_width,self.t1l1_height)
-                self.t1i1_width,self.t1i1_height = self.resized_im.size
+                self.resized_im = self.resizeIm(self.img_im,self.org_width,self.org_height,self.t1c1i1_width,self.t1c1i1_height)
                 self.img_tk = self.im2tk(self.resized_im)
-                self.lbl3.configure(image=self.img_tk)
-                self.t2c2i1.configure(image=self.crop_tk)
+                self.t1c1i1.configure(image=self.img_tk)
+                self.crop_resized_im = self.resizeIm(self.crop_im,self.crop_width,self.crop_height,self.t1c1i1_width*self.crop_img_ratio,self.t1c1i1_height*self.crop_img_ratio)
+                self.crop_tk = self.im2tk(self.crop_resized_im)
+                self.t1c2i1.configure(image=self.crop_tk)
                 time2 = time.time()
                 print("server request = ",time1-time0,"gui = ",time2-time1)
 
@@ -530,8 +517,8 @@ class GuiClass(tk.Frame):
             self.resizeEventTab1()
             self.master.bind("<Right>",self.nextRaw)
             self.master.bind("<Left>",self.previousRaw)
-            self.master.bind("<d>",self.advanceTarget)
-            self.master.bind("<a>",self.decrementTarget)
+            self.master.unbind("<d>")
+            self.master.unbind("<a>")
             self.master.bind("<Configure>",self.resizeEventTab1)
             self.master.bind("<Control-z>",self.undoCrop)
             self.master.bind("<Return>",self.submitCropped)
@@ -567,14 +554,18 @@ class GuiClass(tk.Frame):
         self.draw_np = np.copy(self.org_np)
         self.img_im = self.np2im(self.draw_np)
         self.crop_im = self.img_im.copy()
-        self.crop_tk = self.im2tk(self.crop_im)
         self.org_width,self.org_height = self.img_im.size
-        self.crop_width,self.crop_height = self.img_im.size
-        self.resized_im = self.resizeIm(self.img_im,self.org_width,self.org_height,self.t1l1_width,self.t1l1_height)
-        self.t1i1_width,self.t1i1_height = self.resized_im.size
-        self.img_tk = self.im2tk(self.resized_im)
-        self.lbl3.configure(image=self.img_tk)
-        self.t2c2i1.configure(image=self.crop_tk)
+        self.crop_width,self.crop_height = self.crop_im.size
+        if self.initialized and self.t1c1i1.winfo_width() > 1:
+            self.resized_im = self.resizeIm(self.img_im,self.org_width,self.org_height,self.t1c1i1_width,self.t1c1i1_height)
+            self.img_tk = self.im2tk(self.resized_im)
+            self.crop_resized_im = self.resizeIm(self.crop_im,self.crop_width,self.crop_height,self.t1c1i1_width*self.crop_img_ratio,self.t1c1i1_height*self.crop_img_ratio)
+            self.crop_tk = self.im2tk(self.crop_resized_im)
+        else:
+            self.img_tk = self.im2tk(self.img_im)
+            self.crop_tk = self.im2tk(self.crop_im)
+        self.t1c1i1.configure(image=self.img_tk)
+        self.t1c2i1.configure(image=self.crop_tk)
 
     def pingServer(self):
         self.serverConnected = self.interface.ping()
