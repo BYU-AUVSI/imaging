@@ -39,6 +39,7 @@ KNOWN BUGS:
     When you click on the 2nd tab right at the beginning, and then use the left/intruder_height
         buttons, it moves one tab, then unbinds like it's supposed to.
 '''
+
 import tkinter as tk
 from tkinter import ttk
 from ttkthemes import ThemedStyle
@@ -58,6 +59,9 @@ class GuiClass(tk.Frame):
     Tab 1: Pull raw images and submit cropped images
     Tab 2: Pull cropped iamges and submit classification for images
     Tab 3: Display results for manual and autonomous classification
+
+    @type tk.Frame: nothing
+    @param tk.Frame: nothing
     """
     def __init__(self,master=None):
         """
