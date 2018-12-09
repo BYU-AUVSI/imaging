@@ -2,6 +2,10 @@ import psycopg2 # postgres db connector
 from config import config # to read config file
 
 class BaseDAO(object):
+    """
+    DAO with basic methods. All other DAO's are child classes of BaseDAO.
+    Initializes and contains a postgres connection object when created.
+    """
 
     def __init__(self, configFilePath='../conf/config.ini'):
         """
@@ -62,10 +66,10 @@ class BaseDAO(object):
     def executeStatements(self, stmts):
         """
         Tries to execute all SQL statements in the stmts list.
-        These will be performed in a single transaciton.
-        Assumes you dont want to return anything
+        These will be performed in a single transaction.
+        Returns nothing, so useless if you're trying to execute a series of fetches
 
-        @type stmts: string list
+        @type stmts: [string]
         @param stmts: List of sql statements to execute
         """
         cur = self.conn.cursor()
@@ -80,7 +84,18 @@ class BaseDAO(object):
 
     def basicTopSelect(self, stmt, values):
         """
-        Gets the first (top) row of the given select statement. Returns as list
+        Gets the first (top) row of the given select statement.
+
+        @type stmt: string
+        @param stmt: Sql statement string to run
+
+        @type values: [object]
+        @param values: List of objects (generally int, float and string), to safely place in the 
+                       sql statement.
+
+        @rtype: [string]
+        @return: The first row of the select stmt's result. If the statement fails or does not retrieve
+                 any records, None is returned.
         """
         try:
             cur = self.conn.cursor()

@@ -95,7 +95,7 @@ class SpecificClassificationHandler(Resource):
         dao = getClassificationDAO(manual)
 
         result = dao.updateClassificationByUID(image_id, api.payload)
-        if result == -1:
+        if result is None:
             return {'message': 'No image with id {} found with a classification to update or your input was invalid (or was there a server error?)'.format(image_id)}, 404
         else:
             return jsonify(result.toDict())

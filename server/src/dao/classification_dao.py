@@ -2,6 +2,10 @@ import psycopg2
 from dao.base_dao import BaseDAO
 
 class ClassificationDAO(BaseDAO):
+    """
+    Does most of the heavy lifting for classification tables: outgoing_autonomous and outgoing_manual.
+    Contains general database methods which work for both types.
+    """
 
     def __init__(self, configFilePath, outgoingTableName):
         super(ClassificationDAO, self).__init__(configFilePath)
@@ -11,12 +15,24 @@ class ClassificationDAO(BaseDAO):
         """
         Upserts a classification record.
         If the image_id given in the classification object already exists within the table, the corresponding record
-        is updated. If it doesn't exist, then we Insert a new record.
+        is updated. If it doesn't exist, then we insert a new record.
+
+        @type classification: outgoing_manual
+        @type classification: outgoing_autonomous
+        @param classification: The outgoing_autonomous or manual classification to upsert. 
+                                Note that these objects do not require all classification properties to
+                                be successfully upserted. At a minimum it must have image_id.
+                                ie: upsert could work if you provided a classification object with only
+                                image_id, shape and shape_color attributes.
+
+        @rtype: int
+        @return: The resulting table id (Note: not image_id) of the classification row if successfully upserted, otherwise -1
         """
         insertCls = "INSERT INTO " + self.outgoingTableName
         updateCls = "UPDATE SET "
 
-        # only inserting the values that were provided to us
+        # this will dynamically build the upsert string based on 
+        # only the values that were provided us in classification
         insertValues = []
         insertClmnNames = '('
         insertClmnValues = ' VALUES('
@@ -40,6 +56,7 @@ class ClassificationDAO(BaseDAO):
     def addClassification(self, classification):
         """
         Adds the specified classification information to one of the outgoing tables
+
         @type classification: outgoing_autonomous or outgoing_manual
         @param classification: The classifications to add to the database
 
@@ -88,6 +105,14 @@ class ClassificationDAO(BaseDAO):
         """
         Gets a classification by the TABLE ID.
         This is opposed to getClassificationByUID, which retrieves a row based off of the unique image_id
+        This is mostly used internally, and is not used by any of the public REST API methods.
+
+        @type id: int
+        @param id: The table id of the classification to retrieve.
+
+        @rtype: [string]
+        @return: String list of values retrieved from the database. Child classes will properly place these values in model objects. If the given id
+                 doesn't exist, None is returned.
         """
 
         selectClsById = """SELECT id, image_id, type, latitude, longitude, orientation, shape, background_color, alphanumeric, alphanumeric_color, description, submitted
@@ -100,7 +125,11 @@ class ClassificationDAO(BaseDAO):
 
     def getAll(self):
         """
-        get all the images currently in this table
+        Get all the images currently in this table
+
+        @rtype: cursor
+        @return: A cursor to the query result for the specified classification type. This allows children
+                  classes to place the results in their desired object type.
         """
 
         selectAllSql = """SELECT id, image_id, type, latitude, longitude, orientation, shape, background_color, alphanumeric, alphanumeric_color, description, submitted
@@ -116,6 +145,15 @@ class ClassificationDAO(BaseDAO):
         """
         Builds an update string based on the available key-value pairs in the given classification object
         if successful, returns an classification object of the entire row that was updated
+
+        @type id: int
+        @param id: The image_id of the classification to update
+
+        @type updateClass: outgoing_autonomous or outgoing_manual
+        @param updateClass: Information to attempt to update for the classification with the provided image_id
+
+        @rtype: outgoing_autonomous or outgoing_manual
+        @return: The classification of the now updated image_id if successful. Otherwise None
         """
 
         updateStr = "UPDATE " + self.outgoingTableName + " SET "
@@ -127,7 +165,7 @@ class ClassificationDAO(BaseDAO):
 
         # if someone tried to pass an empty update
         if not values:
-            return -1
+            return None
         
         updateStr = updateStr[:-2] # remove last space/comma
         updateStr += " WHERE image_id = %s RETURNING id;"
@@ -136,7 +174,7 @@ class ClassificationDAO(BaseDAO):
         if resultId != -1:
             return self.getClassification(resultId)
         else:
-            return -1
+            return None
 
     def getAllDistinct(self, modelGenerator, whereClause=None):
         """

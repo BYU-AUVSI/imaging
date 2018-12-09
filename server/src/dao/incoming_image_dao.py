@@ -3,6 +3,11 @@ from dao.base_dao import BaseDAO
 from dao.model.incoming_image import incoming_image
 
 class IncomingImageDAO(BaseDAO):
+    """
+    Handles interaction with raw images captured by the plane. Ros_ingest interacts
+    with this DAO directly. On the REST side, most of its functionality is accessed through
+    the /image/raw endpoint and the raw_image_handler module
+    """
 
     def __init__(self, configFilePath):
         super(IncomingImageDAO, self).__init__(configFilePath)
