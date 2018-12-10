@@ -3,6 +3,10 @@ from dao.classification_dao import ClassificationDAO
 from dao.model.outgoing_manual import outgoing_manual
 
 class OutgoingManualDAO(ClassificationDAO):
+    """
+    Outgoing_manual wrapper for the ClassificationDAO. Most of the core
+    functionality here happens in the ClassificationDAO
+    """
 
     def __init__(self, configFilePath):
         super(OutgoingManualDAO, self).__init__(configFilePath, 'outgoing_manual')

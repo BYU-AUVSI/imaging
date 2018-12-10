@@ -1,6 +1,9 @@
 from dao.base_dao import BaseDAO
 
 class UtilDAO(BaseDAO):
+    """
+    Holds utility methods to help manage the database
+    """
 
     def __init__(self, configFilePath):
         super(UtilDAO, self).__init__(configFilePath)

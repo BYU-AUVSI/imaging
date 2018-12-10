@@ -9,7 +9,14 @@ class ManualCroppedDAO(BaseDAO):
 
     def upsertCropped(self, manualCropped):
         """
-        Upserts a cropped image record
+        Upserts a cropped image record. Will only insert or update
+        values persented in the parameter
+
+        @type manualCropped: manual_cropped
+        @param manualCropped: manual_cropped object to update or insert. At a minimum must contain an image_id
+
+        @rtype: int
+        @return: Internal table id of the record inserted/updated if successful. Otherwise -1
         """
 
         insertImg = "INSERT INTO manual_cropped "
@@ -42,6 +49,12 @@ class ManualCroppedDAO(BaseDAO):
     def addImage(self, manualCropped):
         """
         Adds the manually cropped image to the manual_cropped table
+
+        @type manualCropped: manual_cropped
+        @param manualCropped: manual_cropped image to insert. Should have image_id, time_stamp, cropped_path, and tapped
+
+        @rtype: int
+        @return: Internal table id of the manual_cropped entry if successfully inserted, otherwise -1
         """
         
         insertImg = """INSERT INTO manual_cropped
@@ -76,6 +89,12 @@ class ManualCroppedDAO(BaseDAO):
         Attempts to get the image with the specified manual_cropped table id.
         NOTE: the different between getImageByUID. getImageByUID selects on the image_id
         which is a universal id for an image shared across the incoming_image, manual_cropped and outgoing_manual tables
+
+        @type id: int
+        @param: The internal table id of the cropped image to retrieve.
+
+        @rtype: manual_cropped
+        @return: manual_cropped instance that was retrieved. If no image with that id exists, None
         """
         selectImgById = """SELECT id, image_id, date_part('epoch', time_stamp), cropped_path, crop_coordinate_tl, crop_coordinate_br, tapped
             FROM manual_cropped
@@ -88,6 +107,13 @@ class ManualCroppedDAO(BaseDAO):
         return manual_cropped(selectedImage)
 
     def getNextImage(self):
+        """
+        Get the next un-tapped cropped image for classification. This will retrieve the
+        oldest cropped image where 'tapped'=FALSE.
+
+        @rtype: manual_cropped
+        @return: The next available manual_cropped image if one is available, otherwise None 
+        """
         # step 1: claim an image if possible
         # this gets the oldest (aka lowest) id with tapped = False
         updateStmt = """UPDATE manual_cropped 
@@ -114,7 +140,10 @@ class ManualCroppedDAO(BaseDAO):
 
     def getAll(self):
         """
-        get all the images currently in this table
+        Get all the cropped image currently in the table
+
+        @rtype: [outgoing_manual]
+        @return: List of all cropped images in the manual_cropped table. If the table is empty, an empty list
         """
         selectAllSql = """SELECT id, image_id, date_part('epoch', time_stamp), cropped_path, crop_coordinate_tl, crop_coordinate_br, tapped
             FROM manual_cropped
@@ -130,6 +159,18 @@ class ManualCroppedDAO(BaseDAO):
         return results
 
     def updateImageByUID(self, id, updateContent):
+        """
+        Update the image with the specified image_id.
+
+        @type id: int
+        @param id: Image_id of the cropped information to update
+
+        @type updateContent: {object}
+        @param updateContent: Dictionary/JSON of attributes to update
+
+        @rtype: manual_cropped
+        @return: manual_cropped instance showing the current state of the now-updated row in the table. If the update fails, None
+        """
         # push json into the manual_cropped model. this will
         # extract any relevant attributes
         img = manual_cropped(json=updateContent)
@@ -149,4 +190,4 @@ class ManualCroppedDAO(BaseDAO):
         if resultId != -1:
             return self.getImage(resultId)
         else:
-            return -1
+            return None

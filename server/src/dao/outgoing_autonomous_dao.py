@@ -3,6 +3,10 @@ from dao.classification_dao import ClassificationDAO
 from dao.model.outgoing_autonomous import outgoing_autonomous
 
 class OutgoingAutonomousDAO(ClassificationDAO):
+    """
+    Outgoing_autonomous wrapper for the ClassificationDAO. Most of the core
+    functionality here happens in the ClassificationDAO
+    """
 
     def __init__(self, configFilePath):
         super(OutgoingAutonomousDAO, self).__init__(configFilePath, 'outgoing_autonomous')

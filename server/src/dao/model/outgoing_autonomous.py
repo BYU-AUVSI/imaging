@@ -34,6 +34,9 @@ class outgoing_autonomous:
 
     @property
     def id(self):
+        """
+        Table id. Internal to the dao, not exposed by the REST API
+        """
         return self._id
 
     @id.setter
@@ -42,6 +45,10 @@ class outgoing_autonomous:
 
     @property
     def image_id(self):
+        """
+        Unique image_id, publicly exposed by the API and used to access information on the 
+        image in various states (raw, cropped, and classified)
+        """
         return self._image_id
 
     @image_id.setter
@@ -50,6 +57,11 @@ class outgoing_autonomous:
 
     @property
     def type(self):
+        """
+        Type of classification. AUVSI currently specifies three possible types:
+        'standard', 'off_axis' or 'emergent'. Type must equal one of these to be 
+        successfully inserted or modified in the table
+        """
         return self._type
 
     @type.setter
