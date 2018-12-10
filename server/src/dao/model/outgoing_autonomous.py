@@ -1,6 +1,19 @@
 class outgoing_autonomous:
+    """
+    Model class for the autonomous classification 'outgoing_autonomous' table. This model
+    is very similar to the outgoing_manual model class.
+    """
 
     def __init__(self, tableValues=None, json=None):
+        """
+        Accepts various formats to instantiate this model object
+
+        @type tableValues: [object]
+        @param tableValues: List of table values, in table column order
+
+        @type json: {object}
+        @param json: Json dictionary of table values. Used by the REST API when receiving data
+        """
         if tableValues is not None:
             self.id = tableValues[0]
             self.image_id = tableValues[1]
@@ -45,6 +58,9 @@ class outgoing_autonomous:
 
     @property
     def latitude(self):
+        """
+        Geolocation latitude of the object 
+        """
         return self._latitude
 
     @latitude.setter
@@ -53,6 +69,9 @@ class outgoing_autonomous:
 
     @property
     def longitude(self):
+        """
+        Geolocation longitude of the object
+        """
         return self._longitude
 
     @longitude.setter
@@ -61,6 +80,11 @@ class outgoing_autonomous:
 
     @property
     def orientation(self):
+        """
+        Orientation of the character/object. AUVSI currently specifies 8 possible orientations:
+        'N', 'NE', 'E', 'SE', 'S', 'SW', 'W' or 'NW'. Orientation must equal one of these to be
+        successfully inserted or modified in the table.
+        """
         return self._orientation
 
     @orientation.setter
@@ -69,6 +93,11 @@ class outgoing_autonomous:
 
     @property
     def shape(self):
+        """
+        Shape of the object for standar/off-axis types. AUVSI currently specifies 13 possible shapes:
+        'circle', 'semicircle', 'quarter_circle', 'triangle', 'square', 'rectangle', 'trapezoid', 'pentagon', 'hexagon', 'heptagon', 'octagon', 'star' or 'cross'.
+        Shape must equal one of these to be successfully inserted or modified in the table.
+        """
         return self._shape
 
     @shape.setter
@@ -77,6 +106,11 @@ class outgoing_autonomous:
 
     @property
     def background_color(self):
+        """
+        Background color of the object for standard/off-axis types. AUVSI currently specifies 10 possible colors:
+        'white', 'black', 'gray', 'red', 'blue', 'green', 'yellow', 'purple', 'brown' or 'orange'.
+        Background_color must equal one of these to be successfully inserted or modified in the table
+        """
         return self._background_color
 
     @background_color.setter
@@ -85,6 +119,11 @@ class outgoing_autonomous:
 
     @property
     def alphanumeric(self):
+        """
+        Alphanumeric within the target for standard/off-axis target types. At present AUVSI specifies that
+        any uppercase alpha character or number may be within a target. Through in practice they have historicall
+        only done alpha characters. Checking that this property is given/contains valid values is left to the user.
+        """
         return self._alphanumeric
 
     @alphanumeric.setter
@@ -93,6 +132,10 @@ class outgoing_autonomous:
 
     @property
     def alphanumeric_color(self):
+        """
+        Color of the alphanumeric for a standard/off-axis type. Color specs are the same as background_color.
+        Alphanumeric_color must be equal to one of the specified colors to be successfully inserted or modified in the table.
+        """
         return self._alphanumeric_color
 
     @alphanumeric_color.setter
@@ -101,6 +144,9 @@ class outgoing_autonomous:
 
     @property
     def description(self):
+        """
+        Description of the emergent object.
+        """
         return self._description
 
     @description.setter
@@ -109,6 +155,9 @@ class outgoing_autonomous:
 
     @property
     def submitted(self):
+        """
+        Boolean to indicate whether the classification has been submitted to the judges yet
+        """
         return self._Submitted
 
     @submitted.setter
@@ -120,6 +169,15 @@ class outgoing_autonomous:
         return ['id', 'image_id', 'type', 'latitude', 'longitude', 'orientation', 'shape', 'background_color', 'alphanumeric', 'alphanumeric_color', 'description', 'submitted']
 
     def toDict(self, exclude=None):
+        """
+        Return attributes contained in this model as a dictionary
+
+        @type exclude: (string)
+        @param exclude: Attribute names to exclude from the generated result
+
+        @rtype: {string}
+        @return: String dictionary of classification properties
+        """
         dict = {}
         for attr, value in self.__dict__.items():
             corrected_name = attr[1:] # remove first underscore

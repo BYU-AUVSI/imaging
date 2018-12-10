@@ -68,10 +68,11 @@ class OutgoingAutonomousDAO(ClassificationDAO):
 
     def newModelFromRow(self, row):
         """
-        Kinda a reflective function for the classification dao. Pass self up
-        to the super ClassificationDAO, and it calls this method to create the 
-        proper model object in its response.
+        A reflective function for the classification dao. Pass self up
+        to the super ClassificationDAO. It calls this method to create the 
+        proper model object in its response. Not uber elegant, but presently used by getAllDistinct.
 
-        Not uber elegant, only used by getAllDistinct atm.
+        @type row: [string]
+        @param row: List of ordered string values to be placed within an outgoing_autonomous object
         """
         return outgoing_autonomous(row)
