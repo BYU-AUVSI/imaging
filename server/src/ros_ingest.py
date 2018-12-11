@@ -1,13 +1,4 @@
 #! /usr/bin/env python
-"""
-This script is the bridge between ROS and the rest of the imaging system. It's only objective
-is listen to the ros network and save relevant information to the server. 
-
-
-@author len0rd
-@since 2018-11-01
-"""
-
 import rospy
 import cv2
 import numpy as np
@@ -26,6 +17,11 @@ from dao.model.incoming_image import incoming_image
 from dao.model.incoming_state import incoming_state
 
 class RosIngester:
+    """
+    This script is the bridge between ROS and the rest of the imaging system. It's only objective
+    is listen to the ros network and save relevant information to the server's database.
+    Subscribes to the raw image, state and gps ros topics
+    """
 
     STATE_SAVE_EVERY = 10 # save every 10th state messages (otherwise we get wayyy to many)
 

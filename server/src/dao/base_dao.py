@@ -26,10 +26,17 @@ class BaseDAO(object):
                 raise Exception("Something went wrong trying to connect!")
 
     def close(self):
+        """
+        Safely close the DAO's connection. It is higly recommended you call this method
+        before finishing with a dao.
+        """
         self.conn.close()
 
     @property
     def conn(self):
+        """
+        Current postgres connection object
+        """
         return self._conn
     
     @conn.setter
