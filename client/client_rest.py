@@ -372,7 +372,8 @@ class ImagingInterface:
         if len(self.cropIds) > 0:
             # if there is no more previous images, get the last image
             if abs(self.cropIdIndex) >= len(self.cropIds):
-                self.cropIdIndex = -1 * len(self.cropIds)
+                #self.cropIdIndex = -1 * len(self.cropIds)
+                return None
             else: # else get the previous
                 self.cropIdIndex -= 1
 
