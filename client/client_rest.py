@@ -196,7 +196,7 @@ class ImagingInterface:
         except:
             return False
         return True
-        
+
 
     def debug(self, printStr):
         """
@@ -276,7 +276,8 @@ class ImagingInterface:
         if len(self.rawIds) > 0:
             # if there is no more previous images, get the last image
             if abs(self.rawIdIndex) >= len(self.rawIds):
-                self.rawIdIndex = -1 * len(self.rawIds)
+                #self.rawIdIndex = -1 * len(self.rawIds)
+                return None
             else: # else get the previous
                 self.rawIdIndex -= 1
 
@@ -550,7 +551,7 @@ class ImagingInterface:
         self.debug("getStateByTs(ts={})".format(ts))
         state = requests.get(self.url + "/state/ts/" + str(ts))
         self.debug("response code:: {}".format(state.status_code))
-        if state.status_code == 200:            
+        if state.status_code == 200:
             info_j = json.loads(state.content.decode('utf-8'))
             return StateMeasurement(info_j['id'],
                                     info_j['roll'],
