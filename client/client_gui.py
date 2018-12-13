@@ -10,8 +10,6 @@ pip3 install Pillow, opencv-python, ttkthemes
 '''
 TODO:
 Integration:
-    Next Cropped
-    Prev Cropped
     Submit classification
     Geolocation
 All:
@@ -23,12 +21,14 @@ Tab1:
     Add zooming feature
     Add panning feature
     Fix bug of initial sizing
-    Fix how crop sizes
 Tab2:
+    Change crop picture only if focus is not on the entry widget
+    Change skipping the first and last when reaching the end of the line (server issue?)
     Change disable color
-    Rotate image accordingex to heading
+    Add arrow showing N/E
     Add classified Targets
     Add classification queue
+    add error handling to fix what you enter
 Tab3:
     Make everything
     Manual tender as well
@@ -88,7 +88,7 @@ class GuiClass(tk.Frame):
 
         # itialize variables
         #self.default_host = '192.168.1.48'
-        self.default_host = '127.0.0.5'
+        self.default_host = '127.0.0.1'
         self.default_port = '5000'
         self.default_idnum = 50
         self.default_debug = False
@@ -228,41 +228,37 @@ class GuiClass(tk.Frame):
         self.t2c2l1.grid(row=40,column=4,columnspan=2,rowspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
         shape_options = ('circle','semicircle','quarter_circle','triangle','square','rectangle','trapezoid','pentagon','hexagon','heptagon','octagon','star','cross')
         self.t2c2l2_var = tk.StringVar(self.master)
-        #self.t2c2l2_var.set('circle')
         self.t2c2l2 = ttk.OptionMenu(self.tab2,self.t2c2l2_var,shape_options[0],*shape_options)
         self.t2c2l2.grid(row=42,column=4,columnspan=2,rowspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
         self.t2c2l3 = ttk.Label(self.tab2, anchor=tk.CENTER, text='Alphanumeric')
         self.t2c2l3.grid(row=40,column=6,columnspan=2,rowspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t2c2l4 = ttk.Entry(self.tab2)
+        self.t2c2l4_var = tk.StringVar(self.master)
+        alphanumericValidateCommand = self.register(self.alphanumericValidate)
+        self.t2c2l4 = ttk.Entry(self.tab2,textvariable=self.t2c2l4_var,validate=tk.ALL,validatecommand=(alphanumericValidateCommand, '%d','%P'))
         self.t2c2l4.grid(row=42,column=6,columnspan=2,rowspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
         self.t2c2l5 = ttk.Label(self.tab2, anchor=tk.CENTER, text='Orientation')
         self.t2c2l5.grid(row=40,column=8,columnspan=4,rowspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
         orientation_options = ('N','NE','E','SE','S','SW','W','NW')
         self.t2c2l6_var = tk.StringVar(self.master)
-        #self.t2c2l6_var.set('N')
         self.t2c2l6 = ttk.OptionMenu(self.tab2,self.t2c2l6_var,orientation_options[0],*orientation_options)
         self.t2c2l6.grid(row=42,column=8,columnspan=4,rowspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
         self.t2c2l9 = ttk.Label(self.tab2, anchor=tk.CENTER, text='Background Color')
         self.t2c2l9.grid(row=44,column=4,columnspan=2,rowspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
         color_options = ('white','black','gray','red','blue','green','yellow','purple','brown','orange')
         self.t2c2l10_var = tk.StringVar(self.master)
-        #self.t2c2l10_var.set('white')
         self.t2c2l10 = ttk.OptionMenu(self.tab2,self.t2c2l10_var,color_options[0],*color_options)
         self.t2c2l10.grid(row=46,column=4,columnspan=2,rowspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
         self.t2c2l11 = ttk.Label(self.tab2, anchor=tk.CENTER, text='Alphanumeric Color')
         self.t2c2l11.grid(row=44,column=6,columnspan=2,rowspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
         self.t2c2l12_var = tk.StringVar(self.master)
-        #self.t2c2l12_var.set('white')
         self.t2c2l12 = ttk.OptionMenu(self.tab2,self.t2c2l12_var,color_options[0],*color_options)
         self.t2c2l12.grid(row=46,column=6,columnspan=2,rowspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
         self.t2c2l13 = ttk.Label(self.tab2, anchor=tk.CENTER, text='Target Type')
         self.t2c2l13.grid(row=44,column=8,columnspan=2,rowspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
         self.t2c2l14_var = tk.StringVar(self.master)
         target_options = ('standard','emergent','off-axis')
-        #self.t2c2l14_var.set('standard')
         self.t2c2l14 = ttk.OptionMenu(self.tab2,self.t2c2l14_var,target_options[0],*target_options)
         self.t2c2l14.grid(row=46,column=8,columnspan=2,rowspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-
         self.t2c2l14_var.trace("w",self.disableEmergentDescription)
 
         self.t2c2l15 = ttk.Label(self.tab2, anchor=tk.CENTER, text='Emergent Description')
@@ -464,17 +460,14 @@ class GuiClass(tk.Frame):
         @return: None
         """
         if self.initialized and (time.time()-self.resize_counter_tab2) > 0.050:
-            pass
-            '''
             if self.t2c2i1.winfo_width() > 1:
                 self.resize_counter_tab2 = time.time()
                 self.master.update()
                 self.t2c2i1_width = self.t2c2i1.winfo_width()
                 self.t2c2i1_height = self.t2c2i1.winfo_height()
-                self.crop_resized_im = self.resizeIm(self.crop_im,self.crop_width,self.crop_height,self.t2c2i1_width,self.t2c2i1_height)
-                self.crop_tk = self.im2tk(self.crop_resized_im)
-                self.t2c2i1.configure(image=self.crop_tk)
-            '''
+                self.cropped_resized_im = self.resizeIm(self.cropped_im,self.cropped_width,self.cropped_height,self.t2c2i1_width,self.t2c2i1_height)
+                self.cropped_tk = self.im2tk(self.cropped_resized_im)
+                self.t2c2i1.configure(image=self.cropped_tk)
 
     def resizeIm(self,image,image_width,image_height,width_restrict,height_restrict):
         """
@@ -657,6 +650,7 @@ class GuiClass(tk.Frame):
         @rtype:  None
         @return: None
         """
+        print("focus is on: ",self.tab2.focus_get())
         if self.serverConnected:
             time0 = time.time()
             query = self.interface.getNextCroppedImage()
@@ -668,7 +662,7 @@ class GuiClass(tk.Frame):
             time1 = time.time()
             self.cropped_im = self.np2im(self.cropped_np)
             self.cropped_width,self.cropped_height = self.cropped_im.size
-            self.cropped_resized_im = self.resizeIm(self.cropped_im,self.cropped_width,self.cropped_height,self.t1c1i1_width,self.t1c1i1_height)
+            self.cropped_resized_im = self.resizeIm(self.cropped_im,self.cropped_width,self.cropped_height,self.t2c2i1_width,self.t2c2i1_height)
             self.cropped_tk = self.im2tk(self.cropped_resized_im)
             self.t2c2i1.configure(image=self.cropped_tk)
             time2 = time.time()
@@ -695,7 +689,7 @@ class GuiClass(tk.Frame):
             time1 = time.time()
             self.cropped_im = self.np2im(self.cropped_np)
             self.cropped_width,self.cropped_height = self.cropped_im.size
-            self.cropped_resized_im = self.resizeIm(self.cropped_im,self.cropped_width,self.cropped_height,self.t1c1i1_width,self.t1c1i1_height)
+            self.cropped_resized_im = self.resizeIm(self.cropped_im,self.cropped_width,self.cropped_height,self.t2c2i1_width,self.t2c2i1_height)
             self.cropped_tk = self.im2tk(self.cropped_resized_im)
             self.t2c2i1.configure(image=self.cropped_tk)
             time2 = time.time()
@@ -792,8 +786,11 @@ class GuiClass(tk.Frame):
         debug_new = not(self.t0c2debug.get())
         self.interface = client_rest.ImagingInterface(host=host_new,port=port_new,numIdsStored=ids_new,isDebug=debug_new)
         self.pingServer()
+        # Tab 1
         self.draw_np = np.copy(self.org_np)
         self.img_im = self.np2im(self.draw_np)
+        self.cropped_im = self.np2im(self.cropped_np)
+        self.cropped_width,self.cropped_height = self.cropped_im.size
         self.crop_preview_im = self.img_im.copy()
         self.org_width,self.org_height = self.img_im.size
         self.crop_preview_width,self.crop_preview_height = self.crop_preview_im.size
@@ -802,11 +799,16 @@ class GuiClass(tk.Frame):
             self.img_tk = self.im2tk(self.resized_im)
             self.crop_preview_resized_im = self.resizeIm(self.crop_preview_im,self.crop_preview_width,self.crop_preview_height,self.t1c1i1_width*self.crop_preview_img_ratio,self.t1c1i1_height*self.crop_preview_img_ratio)
             self.crop_preview_tk = self.im2tk(self.crop_preview_resized_im)
+            self.cropped_resized_im = self.resizeIm(self.cropped_im,self.cropped_width,self.cropped_height,self.t2c2i1_width,self.t2c2i1_height)
+            self.cropped_tk = self.im2tk(self.cropped_resized_im)
         else:
+            self.cropped_tk = self.im2tk(self.cropped_im)
             self.img_tk = self.im2tk(self.img_im)
             self.crop_preview_tk = self.im2tk(self.crop_preview_im)
         self.t1c1i1.configure(image=self.img_tk)
         self.t1c2i1.configure(image=self.crop_preview_tk)
+        self.t2c2i1.configure(image=self.cropped_tk)
+
 
     def pingServer(self):
         """
@@ -887,12 +889,36 @@ class GuiClass(tk.Frame):
         else:
             self.t2c2l16.configure(state=tk.DISABLED)
 
+    def alphanumericChanged(self,*args):
+        """
+        Fixes if you entered something wrong
 
+        @rtype:  None
+        @return: None
+        """
+        input = self.t2c2l4.get()
+        if len(input) != 1:
+            print("INPUT ERROR!")
 
+    def alphanumericValidate(self,type, entry):
+        """
+        Fixes alphanumeric if you entered something wrong
 
-
-
-
+        @rtype:  None
+        @return: None
+        """
+        if type == '1':
+        # runs if you try to insert something
+            if len(entry) == 1 and (entry.isdigit() or entry.isalpha()):
+                if entry.isupper():
+                    return True
+                else:
+                    self.t2c2l4_var.set(entry.upper())
+                    return True
+            else:
+                return False
+        else:
+            return True
 
 if __name__ == "__main__":
     root = tk.Tk()
