@@ -54,6 +54,29 @@ class ClassificationDAO(BaseDAO):
         insertCls += insertClmnNames + insertClmnValues + updateCls
         return super(ClassificationDAO, self).getResultingId(insertCls, insertValues + insertValues)
 
+    def insertClassification(self, classification):
+        insertCls = "INSERT INTO " + self.outgoingTableName
+
+        # this will dynamically build the upsert string based on 
+        # only the values that were provided us in classification
+        insertValues = []
+        insertClmnNames = '('
+        insertClmnValues = ' VALUES('
+        for clmn, value in classification.toDict(exclude=('id',)).items():
+            insertClmnNames += clmn + ', '
+            insertClmnValues += '%s, '
+            insertValues.append(value.__str__())
+
+        # if there were no values to insert...
+        if not insertValues:
+            return -1
+        else: 
+            insertClmnNames = insertClmnNames[:-2] + ')' # remove last comma/space
+            insertClmnValues = insertClmnValues[:-2] + ') RETURNING id;'
+
+        insertCls += insertClmnNames + insertClmnValues
+        return super(ClassificationDAO, self).getResultingId(insertCls, insertValues)
+
     def addClassification(self, classification):
         """
         Adds the specified classification information to one of the outgoing tables
