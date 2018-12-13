@@ -243,8 +243,9 @@ class ImagingInterface:
             otherwise None
         """
         self.debug("getNextRawImage(isManual={})".format(isManual))
-        if self.rawIdIndex >= -1:
-            self.rawIdIndex = -1
+        self.rawIdIndex += 1
+        if self.rawIdIndex > -1:
+            self.rawIdIndex = 0
             img = requests.get(self.url + "/image/raw/", headers={'X-Manual': str(isManual)})
             self.debug("response code:: {}".format(img.status_code))
             if img.status_code != 200:
@@ -260,7 +261,6 @@ class ImagingInterface:
             self.debug("Image ID:: {}".format(imageId))
             return Image.open(BytesIO(img.content)), imageId
         else:
-            self.rawIdIndex += 1
             return self.getRawImage(self.rawIds[self.rawIdIndex])
 
     def getPrevRawImage(self):
@@ -275,14 +275,13 @@ class ImagingInterface:
         self.debug("getPrevRawImage()")
         if len(self.rawIds) > 0:
             # if there is no more previous images, get the last image
-            if abs(self.rawIdIndex) >= len(self.rawIds):
-                #self.rawIdIndex = -1 * len(self.rawIds)
+            self.rawIdIndex -= 1
+            if abs(self.rawIdIndex) > len(self.rawIds):
+                self.rawIdIndex = -1 * (len(self.rawIds)+1)
                 return None
             else: # else get the previous
-                self.rawIdIndex -= 1
-
-            imageId = self.rawIds[self.rawIdIndex]
-            return self.getRawImage(imageId)
+                imageId = self.rawIds[self.rawIdIndex]
+                return self.getRawImage(imageId)
         else:
             self.debug("We haven't gotten any images yet")
             return None
@@ -339,8 +338,9 @@ class ImagingInterface:
         @return: a tuple of a pillow Image and the image id if the image with that id is cropped, otherwise None
         """
         self.debug("getNextCroppedImage()")
-        if self.cropIdIndex >= -1:
-            self.cropIdIndex = -1
+        self.cropIdIndex += 1
+        if self.cropIdIndex > -1:
+            self.cropIdIndex = 0
             img = requests.get(self.url + "/image/crop/")
             self.debug("response code:: {}".format(img.status_code))
             if img.status_code != 200:
@@ -356,7 +356,6 @@ class ImagingInterface:
             self.debug("Image ID:: {}".format(imageId))
             return Image.open(BytesIO(img.content)), imageId
         else:
-            self.cropIdIndex += 1
             return self.getCroppedImage(self.cropIds[self.cropIdIndex])
 
     def getPrevCroppedImage(self):
@@ -371,14 +370,13 @@ class ImagingInterface:
         self.debug("getPrevCroppedImage()")
         if len(self.cropIds) > 0:
             # if there is no more previous images, get the last image
-            if abs(self.cropIdIndex) >= len(self.cropIds):
-                #self.cropIdIndex = -1 * len(self.cropIds)
+            self.cropIdIndex -= 1
+            if abs(self.cropIdIndex) > len(self.cropIds):
+                self.cropIdIndex = -1 * (len(self.cropIds)+1)
                 return None
             else: # else get the previous
-                self.cropIdIndex -= 1
-
-            imageId = self.cropIds[self.cropIdIndex]
-            return self.getCroppedImage(imageId)
+                imageId = self.cropIds[self.cropIdIndex]
+                return self.getCroppedImage(imageId)
         else:
             self.debug("We haven't gotten any images yet")
             return None
