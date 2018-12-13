@@ -69,7 +69,6 @@ class BaseDAO(object):
             print(error)
             return -1
 
-
     def executeStatements(self, stmts):
         """
         Tries to execute all SQL statements in the stmts list.

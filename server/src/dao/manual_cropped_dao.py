@@ -158,6 +158,37 @@ class ManualCroppedDAO(BaseDAO):
 
         return results
 
+
+    def updateImage(self, id, updateContent):
+        """
+        Update the image with the specified crop_id.
+
+        @type id: int
+        @param id: Crop_id of the cropped information to update
+
+        @type updateContent: {object}
+        @param updateContent: Dictionary/JSON of attributes to update
+
+        @rtype: manual_cropped
+        @return: manual_cropped instance showing the current state of the now-updated row in the table. If the update fails, None
+        """
+
+        values = []
+        for clmn, value in updateContent.toDict().items():
+            updateStr += clmn + "= %s, "
+            values.append(value.__str__())
+        
+        updateStr = updateStr[:-2] # remove last space/comma
+        updateStr += " WHERE id = %s RETURNING id;"
+        values.append(id)
+        
+        resultId = super(ManualCroppedDAO, self).getResultingId(updateStr, values)
+        if resultId != -1:
+            return self.getImage(resultId)
+        else:
+            return None
+
+
     def updateImageByUID(self, id, updateContent):
         """
         Update the image with the specified image_id.
@@ -176,12 +207,11 @@ class ManualCroppedDAO(BaseDAO):
         img = manual_cropped(json=updateContent)
         updateStr = "UPDATE manual_cropped SET "
 
-        # compose the update string:
         values = []
-        for clmn, value in img.toDict().items():
+        for clmn, value in updateContent.toDict().items():
             updateStr += clmn + "= %s, "
             values.append(value.__str__())
-
+        
         updateStr = updateStr[:-2] # remove last space/comma
         updateStr += " WHERE image_id = %s RETURNING id;"
         values.append(id)
