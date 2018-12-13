@@ -18,6 +18,8 @@ Tab0:
     add error handling if entries aren't in the right format
     add error handling if not connected to correct wifi
 Tab1:
+    Don't crop if you single click 
+    If you try to crop off the picture have it go to edge of picture
     Add zooming feature
     Add panning feature
     Fix bug of initial sizing
@@ -35,7 +37,6 @@ Tab3:
 
 KNOWN BUGS:
     Weird exit is bound to an event (doesn't do anything) when rerun in iPython3
-    If you click, but don't drag on the crop screen, you still see rectangle
     When you click on the 2nd tab right at the beginning, and then use the left/intruder_height
         buttons, it moves one tab, then unbinds like it's supposed to.
 '''
@@ -336,6 +337,9 @@ class GuiClass(tk.Frame):
         @rtype:  None
         @return: None
         """
+        print("click")
+        #print(event.x,event.y)
+        self.t1c1i1.bind("<ButtonRelease-1>",self.mouse_release)
         self.t1c1i1.bind("<Motion>",self.mouse_move)
         self.offset_x = int((self.t1c1i1_width - self.t1c1i1_img_width )/2.0)
         self.offset_y = int((self.t1c1i1_height - self.t1c1i1_img_height)/2.0)
@@ -351,6 +355,7 @@ class GuiClass(tk.Frame):
         @rtype:  None
         @return: None
         """
+        print("moving")
         self.t1c1i1.bind("<ButtonRelease-1>",self.mouse_release)
         self.x1 = event.x - self.offset_x
         self.y1 = event.y - self.offset_y
@@ -372,6 +377,7 @@ class GuiClass(tk.Frame):
         @rtype:  None
         @return: None
         """
+        print("released")
         if self.cropped:
             self.undoCrop()
         self.t1c1i1.unbind("<Motion>")
