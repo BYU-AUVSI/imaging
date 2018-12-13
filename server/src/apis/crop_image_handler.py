@@ -12,9 +12,6 @@ api  = Namespace('image/crop', description="All cropped image calls route throug
 imageIDParser = api.parser()
 imageIDParser.add_argument('X-Image-Id', location='headers', type=int, required=True, help='Specify the associated image id for this image.')
 
-cropIDParser = api.parser()
-imageIDParser.add_argument('X-Crop-Id', location='headers', type=int, required=True, help='The cropped id for the image')
-
 @api.route('/')
 class CroppedImageHandler(Resource):
     @api.doc(description='Gets the next un-tapped cropped image')
@@ -122,6 +119,8 @@ class SpecificCroppedImageInfoHandler(Resource):
             abort(400, 'Must specify values to update')
         if 'image_id' in content:
             abort(400, 'Updating image_id is forbidden!')
+        if 'id' in content:
+            abort(400, "Updating the crop_id (id) is forbidden")
 
         dao = ManualCroppedDAO(defaultConfigPath())
         result = dao.updateImage(crop_id, content)

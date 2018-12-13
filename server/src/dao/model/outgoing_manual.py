@@ -170,11 +170,11 @@ class outgoing_manual:
         """
         Boolean to indicate whether the classification has been submitted to the judges yet
         """
-        return self._Submitted
+        return self._submitted
 
     @submitted.setter
-    def submitted(self, Submitted):
-        self._Submitted = Submitted
+    def submitted(self, submitted):
+        self._submitted = submitted
 
     # TODO: this is hacky and i hate it
     def allProps(self):

@@ -7,9 +7,10 @@ class ClassificationDAO(BaseDAO):
     Contains general database methods which work for both types.
     """
 
-    def __init__(self, configFilePath, outgoingTableName):
+    def __init__(self, configFilePath, outgoingTableName, uidClmn):
         super(ClassificationDAO, self).__init__(configFilePath)
         self.outgoingTableName = outgoingTableName # 0 for autonomous. 1 for manual
+        self.uidClmn = uidClmn
 
     def upsertClassification(self, classification):
         """
@@ -47,7 +48,7 @@ class ClassificationDAO(BaseDAO):
             return -1
         else: 
             insertClmnNames = insertClmnNames[:-2] + ')' # remove last comma/space
-            insertClmnValues = insertClmnValues[:-2] + ') ON CONFLICT (image_id) DO '
+            insertClmnValues = insertClmnValues[:-2] + ') ON CONFLICT (' + self.uidClmn + ') DO '
             updateCls = updateCls[:-2] + 'RETURNING id;'
 
         insertCls += insertClmnNames + insertClmnValues + updateCls
@@ -93,9 +94,9 @@ class ClassificationDAO(BaseDAO):
         @param id: The id of the image to try and retrieve
         """
 
-        selectClsById = """SELECT id, image_id, type, latitude, longitude, orientation, shape, background_color, alphanumeric, alphanumeric_color, description, submitted
+        selectClsById = 'SELECT id, ' + self.uidClmn + """, type, latitude, longitude, orientation, shape, background_color, alphanumeric, alphanumeric_color, description, submitted
             FROM """ + self.outgoingTableName + """ 
-            WHERE image_id = %s
+            WHERE """ + self.uidClmn + """ = %s
             LIMIT 1;"""
 
         selectedClass = super(ClassificationDAO, self).basicTopSelect(selectClsById, (id,))
@@ -115,7 +116,7 @@ class ClassificationDAO(BaseDAO):
                  doesn't exist, None is returned.
         """
 
-        selectClsById = """SELECT id, image_id, type, latitude, longitude, orientation, shape, background_color, alphanumeric, alphanumeric_color, description, submitted
+        selectClsById = 'SELECT id, ' + self.uidClmn + """, type, latitude, longitude, orientation, shape, background_color, alphanumeric, alphanumeric_color, description, submitted
             FROM """ + self.outgoingTableName + """ 
             WHERE id = %s
             LIMIT 1;"""
@@ -132,7 +133,7 @@ class ClassificationDAO(BaseDAO):
                   classes to place the results in their desired object type.
         """
 
-        selectAllSql = """SELECT id, image_id, type, latitude, longitude, orientation, shape, background_color, alphanumeric, alphanumeric_color, description, submitted
+        selectAllSql = 'SELECT id, ' + self.uidClmn + """, type, latitude, longitude, orientation, shape, background_color, alphanumeric, alphanumeric_color, description, submitted
             FROM """ + self.outgoingTableName + """ 
             ORDER BY id;"""
 
@@ -141,19 +142,53 @@ class ClassificationDAO(BaseDAO):
         # this cursor will be closed by the child
         return cur
 
-    def updateClassificationByUID(self, id, updateClass):
+    def updateClassification(self, id, updateClass):
         """
         Builds an update string based on the available key-value pairs in the given classification object
         if successful, returns an classification object of the entire row that was updated
 
         @type id: int
-        @param id: The image_id of the classification to update
+        @param id: The id of the classification to update (ie: the id column in the classification table)
 
         @type updateClass: outgoing_autonomous or outgoing_manual
         @param updateClass: Information to attempt to update for the classification with the provided image_id
 
         @rtype: outgoing_autonomous or outgoing_manual
         @return: The classification of the now updated image_id if successful. Otherwise None
+        """
+        updateStr = "UPDATE " + self.outgoingTableName + " SET "
+
+        values = []
+        for clmn, value in updateClass.toDict().items():
+            updateStr += clmn + "= %s, "
+            values.append(value.__str__())
+
+        # if someone tried to pass an empty update
+        if not values:
+            return None
+        
+        updateStr = updateStr[:-2] # remove last space/comma
+        updateStr += " WHERE id = %s RETURNING id;"
+        values.append(id)
+        resultId = super(ClassificationDAO, self).getResultingId(updateStr, values)
+        if resultId != -1:
+            return self.getClassification(resultId)
+        else:
+            return None
+
+    def updateClassificationByUID(self, id, updateClass):
+        """
+        Builds an update string based on the available key-value pairs in the given classification object
+        if successful, returns an classification object of the entire row that was updated
+
+        @type id: int
+        @param id: The uid value (image_id for autonomous, crop_id for manual) of the classification to update
+
+        @type updateClass: outgoing_autonomous or outgoing_manual
+        @param updateClass: Information to attempt to update for the classification with the provided image_id
+
+        @rtype: outgoing_autonomous or outgoing_manual
+        @return: The classification of the now updated uid row if successful. Otherwise None
         """
 
         updateStr = "UPDATE " + self.outgoingTableName + " SET "
@@ -168,7 +203,7 @@ class ClassificationDAO(BaseDAO):
             return None
         
         updateStr = updateStr[:-2] # remove last space/comma
-        updateStr += " WHERE image_id = %s RETURNING id;"
+        updateStr += " WHERE " + self.uidClmn + " = %s RETURNING id;"
         values.append(id)
         resultId = super(ClassificationDAO, self).getResultingId(updateStr, values)
         if resultId != -1:
@@ -187,7 +222,7 @@ class ClassificationDAO(BaseDAO):
         getDistinctTypes = """SELECT alphanumeric, shape, type
             FROM """ + self.outgoingTableName
 
-        selectClass = """SELECT id, image_id, type, latitude, longitude, orientation, shape, background_color, alphanumeric, alphanumeric_color, description, submitted
+        selectClass = 'SELECT id, ' + self.uidClmn + """, type, latitude, longitude, orientation, shape, background_color, alphanumeric, alphanumeric_color, description, submitted
             FROM """ + self.outgoingTableName + " WHERE "
 
         if whereClause is not None:
