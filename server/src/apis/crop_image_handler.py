@@ -148,5 +148,5 @@ class AllCroppedImagesHandler(Resource):
 
 def cropImageSender(id, filename):
     response = make_response(send_file(filename, as_attachment=False, attachment_filename=filename, mimetype='image/jpeg'))
-    response.headers['X-Image-Id'] = id
+    response.headers['X-Crop-Id'] = id
     return response
