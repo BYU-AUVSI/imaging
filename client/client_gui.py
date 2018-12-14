@@ -18,7 +18,7 @@ Tab0:
     add error handling if entries aren't in the right format
     add error handling if not connected to correct wifi
 Tab1:
-    Don't crop if you single click 
+    Don't crop if you single click
     If you try to crop off the picture have it go to edge of picture
     Add zooming feature
     Add panning feature
