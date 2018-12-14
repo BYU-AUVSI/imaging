@@ -39,7 +39,7 @@ class ManualCroppedDAO(BaseDAO):
             return -1
         else:
             insertClmnNames = insertClmnNames[:-2] + ')' # remove last comma/space
-            insertClmnValues = insertClmnValues[:-2] + ') ON CONFLICT (image_id) DO '
+            insertClmnValues = insertClmnValues[:-2] + ') ON CONFLICT (id) DO '
             updateCls = updateCls[:-2] + 'RETURNING id;'
 
         insertImg += insertClmnNames + insertClmnValues + updateCls
@@ -158,6 +158,39 @@ class ManualCroppedDAO(BaseDAO):
 
         return results
 
+
+    def updateImage(self, id, updateContent):
+        """
+        Update the image with the specified crop_id.
+
+        @type id: int
+        @param id: Crop_id of the cropped information to update
+
+        @type updateContent: {object}
+        @param updateContent: Dictionary/JSON of attributes to update
+
+        @rtype: manual_cropped
+        @return: manual_cropped instance showing the current state of the now-updated row in the table. If the update fails, None
+        """
+        img = manual_cropped(json=updateContent)
+        updateStr = "UPDATE manual_cropped SET "
+
+        values = []
+        for clmn, value in img.toDict().items():
+            updateStr += clmn + "= %s, "
+            values.append(value.__str__())
+        
+        updateStr = updateStr[:-2] # remove last space/comma
+        updateStr += " WHERE id = %s RETURNING id;"
+        values.append(id)
+        
+        resultId = super(ManualCroppedDAO, self).getResultingId(updateStr, values)
+        if resultId != -1:
+            return self.getImage(resultId)
+        else:
+            return None
+
+
     def updateImageByUID(self, id, updateContent):
         """
         Update the image with the specified image_id.
@@ -176,12 +209,11 @@ class ManualCroppedDAO(BaseDAO):
         img = manual_cropped(json=updateContent)
         updateStr = "UPDATE manual_cropped SET "
 
-        # compose the update string:
         values = []
         for clmn, value in img.toDict().items():
             updateStr += clmn + "= %s, "
             values.append(value.__str__())
-
+        
         updateStr = updateStr[:-2] # remove last space/comma
         updateStr += " WHERE image_id = %s RETURNING id;"
         values.append(id)

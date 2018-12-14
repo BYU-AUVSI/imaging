@@ -9,7 +9,7 @@ class OutgoingAutonomousDAO(ClassificationDAO):
     """
 
     def __init__(self, configFilePath):
-        super(OutgoingAutonomousDAO, self).__init__(configFilePath, 'outgoing_autonomous')
+        super(OutgoingAutonomousDAO, self).__init__(configFilePath, 'outgoing_autonomous', 'image_id')
 
     def checkedReturn(self, rawResponse):
         if rawResponse is None:
@@ -49,6 +49,17 @@ class OutgoingAutonomousDAO(ClassificationDAO):
         """
         selectedClass = super(OutgoingAutonomousDAO, self).getClassification(id)
         return self.checkedReturn(selectedClass)
+
+    def updateClassification(self, id, updateClass):
+        """
+        See classification_dao docs. Here we're just making sure we cast the final object 
+        to the proper outgoing classification model type. We're also properly setting up the 
+        initial model of stuff to update before passing it to super
+        """
+
+        updateModel = outgoing_autonomous(json=updateClass)
+        selectedClass = super(OutgoingAutonomousDAO, self).updateClassification(id, updateModel)
+        return selectedClass # this is already the proper model object
 
     def updateClassificationByUID(self, id, updateClass):
         """

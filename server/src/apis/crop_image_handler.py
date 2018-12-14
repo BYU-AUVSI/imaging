@@ -9,14 +9,14 @@ import os, time
 
 api  = Namespace('image/crop', description="All cropped image calls route through here")
 
-newCroppedParser = api.parser()
-newCroppedParser.add_argument('X-Image-Id', location='headers', type=int, required=True, help='Specify the associated image id for this image.')
+imageIDParser = api.parser()
+imageIDParser.add_argument('X-Image-Id', location='headers', type=int, required=True, help='Specify the associated image id for this image.')
 
 @api.route('/')
 class CroppedImageHandler(Resource):
     @api.doc(description='Gets the next un-tapped cropped image')
     @api.doc(responses={200:'OK', 404:'No available images found'})
-    @api.header('X-Image-Id', 'Id of the image returned')
+    @api.header('X-Crop-Id', 'Crop Id of the image returned. Not this is a unique from the base image_id')
     def get(self):
         # Get content:
         dao = ManualCroppedDAO(defaultConfigPath())
@@ -27,12 +27,12 @@ class CroppedImageHandler(Resource):
             return {'message': 'Failed to locate untapped image'}, 404
         
         # success!
-        return cropImageSender(image.image_id, image.cropped_path)
+        return cropImageSender(image.id, image.cropped_path)
     
     @api.doc(description='Adds a new cropped image to the server')
-    @api.expect(newCroppedParser)
+    @api.expect(imageIDParser)
     @api.doc(responses={200:'OK', 400:'Improper image post'})
-    @api.header('X-Image-Id', 'Id of the image. If successful, this will match the X-Image-Id provided in the request')
+    @api.header('X-Crop-Id', 'Crop ID of the image if successfully inserted. This WILL be different from the Image-ID provided in the request')
     def post(self):
         # basic setup pieces for this taken from :
         # http://flask.pocoo.org/docs/1.0/patterns/fileuploads/
@@ -75,55 +75,57 @@ class CroppedImageHandler(Resource):
             return {'message': 'Failed to insert image into manual_cropped! (If youre trying to update information on an image_id that already exists, you should use PUT)'}, 500
         
         # done!
-        response = make_response(jsonify({'message': 'success!', 'id': cropped.image_id}))
-        response.headers['X-Image-Id'] = cropped.image_id
+        response = make_response(jsonify({'message': 'success!', 'id': resultingId}))
+        response.headers['X-Crop-Id'] = resultingId
         return response
 
 
-@api.route('/<int:image_id>')
-@api.doc(params={'image_id': 'ID of the cropped image to retrieve'}, required=True)
+@api.route('/<int:crop_id>')
+@api.doc(params={'crop_id': 'Cropped ID of the cropped image to retrieve'}, required=True)
 class SpecificCroppedImageHandler(Resource):
     @api.doc(description='Attempts to retrieve the cropped image with the given id')
     @api.doc(responses={200:'OK', 404:'Cropped image with this id not found'})
     @api.header('X-Crop-Id', 'Crop Id of the image returned. Will match id parameter image was found')
-    def get(self, image_id):
+    def get(self, crop_id):
         # Get content:
         dao = ManualCroppedDAO(defaultConfigPath())
-        image = dao.getImageByUID(image_id)
+        image = dao.getImage(crop_id)
 
         # response validation:
         if image is None:
-            return {'message': 'Failed to locate cropped id {}'.format(id)}, 404
+            return {'message': 'Failed to locate cropped id {}'.format(crop_id)}, 404
         
         # success!
-        return cropImageSender(image.image_id, image.cropped_path)
+        return cropImageSender(image.id, image.cropped_path)
 
 
-@api.route('/<int:image_id>/info')
-@api.doc(params={'image_id': 'ID of the cropped image to update or get info on'}, required=True)
+@api.route('/<int:crop_id>/info')
+@api.doc(params={'crop_id': 'ID of the cropped image to update or get info on'}, required=True)
 class SpecificCroppedImageInfoHandler(Resource):
     @api.doc(description='Get information about a cropped image from the database.')
-    def get(self, image_id):
+    def get(self, crop_id):
         dao = ManualCroppedDAO(defaultConfigPath())
-        image = dao.getImageByUID(image_id)
+        image = dao.getImage(crop_id)
 
         if image is None:
-            return {'message': 'Failed to locate cropped id {}'.format(image_id)}, 404
-        return jsonify(image.toJsonResponse(exclude=('id',)))
+            return {'message': 'Failed to locate cropped id {}'.format(crop_id)}, 404
+        return jsonify(image.toJsonResponse())
 
     @api.doc(description='Update information on the specified cropped image')
     @api.doc()
-    def put(self, image_id):
+    def put(self, crop_id):
         content = request.get_json()
         if content is None:
             abort(400, 'Must specify values to update')
         if 'image_id' in content:
             abort(400, 'Updating image_id is forbidden!')
+        if 'id' in content:
+            abort(400, "Updating the crop_id (id) is forbidden")
 
         dao = ManualCroppedDAO(defaultConfigPath())
-        result = dao.updateImageByUID(image_id, content)
+        result = dao.updateImage(crop_id, content)
         if result is None:
-            return {'message': 'No image with id {} found to update (or was there a server error?)'.format(image_id)}, 404
+            return {'message': 'No image with id {} found to update (or was there a server error?)'.format(crop_id)}, 404
         else:
             return jsonify(result.toJsonResponse())
 
@@ -139,11 +141,11 @@ class AllCroppedImagesHandler(Resource):
         if manualCroppedList == None or not manualCroppedList:
             return {'message': 'Cropped table is empty!'}, 404
 
-        exportable = [ img.toJsonResponse(exclude=('id',)) for img in manualCroppedList ]
+        exportable = [ img.toJsonResponse() for img in manualCroppedList ]
         return jsonify(exportable)
         
 
 def cropImageSender(id, filename):
     response = make_response(send_file(filename, as_attachment=False, attachment_filename=filename, mimetype='image/jpeg'))
-    response.headers['X-Image-Id'] = id
+    response.headers['X-Crop-Id'] = id
     return response

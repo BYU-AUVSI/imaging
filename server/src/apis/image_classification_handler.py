@@ -11,6 +11,10 @@ api = Namespace('image/class', description='Imaging classification calls route t
 classificationParser = api.parser()
 classificationParser.add_argument('X-Manual', location='headers', type=inputs.boolean, required=True)
 
+classificationPostParser = api.parser()
+classificationPostParser.add_argument('X-Manual', location='headers', type=inputs.boolean, required=True)
+classificationPostParser.add_argument('X-Prev-Id', location='headers', type=int, required=True, help='Previous id for the last step of the image. For autonomous this is image_id. For manual its the crop_id')
+
 classification = api.model('Classification', {
     'type': fields.String(required=False, description='Classification type(standard, off_axis, or emergent)'),
     'latitude': fields.Float(required=False, description='Latitude coordinate of object'),
@@ -40,62 +44,73 @@ class AllClassificationsHandler(Resource):
         if not outgoingList:
             return {'message': 'Outgoing table is empty!'}, 404
 
-        exportable = [ classification.toDict(exclude=('id',)) for classification in outgoingList ]
+        exportable = [ classification.toDict() for classification in outgoingList ]
         return jsonify(exportable)
 
 
-@api.route('/<int:image_id>')
-@api.doc(params={'image_id': 'Image ID of the classification entry to update or get info on'}, required=True)
-class SpecificClassificationHandler(Resource):
-
-    @api.doc(description='Get the classification for the given image id')
-    @api.expect(classificationParser)
-    def get(self, image_id):
-        # Input Validation::
+@api.route("/")
+class ClassifiedImageHandler(Resource):
+    @api.doc(description='Automatically add a new classifcation to the server')
+    @api.expect(classificationPostParser)
+    @api.doc(responses={200:'OK', 400:'Improper image post'})
+    @api.header('X-Class-Id', 'Crop ID of the image if successfully inserted. This WILL be different from the Image-ID provided in the request')
+    def post(self):
         manual = checkXManual(request)
 
-        dao = getClassificationDAO(manual)
-
-        result = dao.getClassification(image_id)
-        if result is None:
-            return {'message': 'Failed to locate classification with id {}'.format(image_id)}, 404
-
-        return jsonify(result.toDict(exclude=('id',)))
-
-    @api.doc(description='Create a new classification entry. NOTE: if an entry already exists for the given Image-Id (specified in the header), then that entry will be updated with this information instead of inserted.')
-    @api.expect(classificationParser)
-    @api.expect(classification)
-    def post(self, image_id):
-        # Input Validation::
-        manual = checkXManual(request)
+        prevId = -1
+        if 'X-Prev-Id' in request.headers:
+            prevId = request.headers.get('X-Prev-Id')
+        else:
+            abort(400, "Need to specify header 'X-Prev-Id'!")
 
         dao = getClassificationDAO(manual)
         if manual:
             outgoingIn = outgoing_manual(json=api.payload)
+            outgoingIn.crop_id = prevId
+            resultingId = dao.upsertClassification(outgoingIn)
         else:
             outgoingIn = outgoing_autonomous(json=api.payload)
-        outgoingIn.image_id = image_id
+            outgoingIn.image_id = prevId
+            resultingId = dao.insertClassification(outgoingIn)
         
-        resultingId = dao.upsertClassification(outgoingIn)
-
         if resultingId == -1:
             return {'message': 'Failed to insert classification into outgoing table'}, 500
 
-        response = make_response(jsonify({'message': 'success!', 'id': image_id}))
+        response = make_response(jsonify({'message': 'success!', 'id': resultingId}))
+        response.headers['X-Class-Id'] = resultingId
         return response
+
+
+@api.route('/<int:class_id>')
+@api.doc(params={'class_id': 'Classification ID of the classification entry to update or get info on'}, required=True)
+class SpecificClassificationHandler(Resource):
+
+    @api.doc(description='Get the classification for the given id')
+    @api.expect(classificationParser)
+    def get(self, class_id):
+        # Input Validation::
+        manual = checkXManual(request)
+
+        dao = getClassificationDAO(manual)
+
+        result = dao.getClassification(class_id)
+        if result is None:
+            return {'message': 'Failed to locate classification with id {}'.format(class_id)}, 404
+
+        return jsonify(result.toDict())
 
 
     @api.doc(description='Update information for the specified classification entry')
     @api.expect(classificationParser)
     @api.expect(classification)
-    def put(self, image_id):
+    def put(self, class_id):
         # Input Validation::
         manual = checkXManual(request)
 
         dao = getClassificationDAO(manual)
 
-        result = dao.updateClassificationByUID(image_id, api.payload)
+        result = dao.updateClassification(class_id, request.get_json())
         if result is None:
-            return {'message': 'No image with id {} found with a classification to update or your input was invalid (or was there a server error?)'.format(image_id)}, 404
+            return {'message': 'No image with id {} found with a classification to update or your input was invalid (or was there a server error?)'.format(class_id)}, 404
         else:
             return jsonify(result.toDict())

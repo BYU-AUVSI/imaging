@@ -16,7 +16,7 @@ class outgoing_manual:
         """
         if tableValues is not None:
             self.id = tableValues[0]
-            self.image_id = tableValues[1]
+            self.crop_id = tableValues[1]
             self.type = tableValues[2]
             self.latitude = tableValues[3]
             self.longitude = tableValues[4]
@@ -44,16 +44,16 @@ class outgoing_manual:
         self._id = id
 
     @property
-    def image_id(self):
+    def crop_id(self):
         """
-        Unique image_id, publicly exposed by the API and used to access information on the 
+        Unique crop_id, publicly exposed by the API and used to access information on the 
         image in various states (raw, cropped, and classified)
         """
-        return self._image_id
+        return self._crop_id
 
-    @image_id.setter
-    def image_id(self, image_id):
-        self._image_id = image_id
+    @crop_id.setter
+    def crop_id(self, crop_id):
+        self._crop_id = crop_id
 
     @property
     def type(self):
@@ -170,15 +170,15 @@ class outgoing_manual:
         """
         Boolean to indicate whether the classification has been submitted to the judges yet
         """
-        return self._Submitted
+        return self._submitted
 
     @submitted.setter
-    def submitted(self, Submitted):
-        self._Submitted = Submitted
+    def submitted(self, submitted):
+        self._submitted = submitted
 
     # TODO: this is hacky and i hate it
     def allProps(self):
-        return ['id', 'image_id', 'type', 'latitude', 'longitude', 'orientation', 'shape', 'background_color', 'alphanumeric', 'alphanumeric_color', 'description', 'submitted']
+        return ['id', 'crop_id', 'type', 'latitude', 'longitude', 'orientation', 'shape', 'background_color', 'alphanumeric', 'alphanumeric_color', 'description', 'submitted']
 
     def toDict(self, exclude=None):
         """

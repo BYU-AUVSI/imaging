@@ -52,13 +52,12 @@ CREATE TABLE "public"."manual_cropped" (
   crop_coordinate_tl point,
   crop_coordinate_br point,
   tapped boolean NOT NULL default FALSE,
-  PRIMARY KEY ("id"),
-  UNIQUE ("image_id")
+  PRIMARY KEY ("id")
 );
 
 CREATE TABLE "public"."outgoing_manual" (
   id serial NOT NULL,
-  image_id int NOT NULL,
+  crop_id int NOT NULL,
   type text CHECK(type = 'standard' OR type = 'off_axis' OR type = 'emergent'),
   latitude real,
   longitude real,
@@ -70,7 +69,7 @@ CREATE TABLE "public"."outgoing_manual" (
   description text default '',
   submitted boolean NOT NULL default FALSE,
   PRIMARY KEY ("id"),
-  UNIQUE ("image_id")
+  UNIQUE ("crop_id")
 );
 
 CREATE TABLE "public"."outgoing_autonomous" (

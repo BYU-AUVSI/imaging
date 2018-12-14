@@ -9,7 +9,7 @@ class OutgoingManualDAO(ClassificationDAO):
     """
 
     def __init__(self, configFilePath):
-        super(OutgoingManualDAO, self).__init__(configFilePath, 'outgoing_manual')
+        super(OutgoingManualDAO, self).__init__(configFilePath, 'outgoing_manual', 'crop_id')
 
 
     def checkedReturn(self, rawResponse):
@@ -49,7 +49,18 @@ class OutgoingManualDAO(ClassificationDAO):
         to the proper outgoing classification model type
         """
         selectedClass = super(OutgoingManualDAO, self).getClassification(id)
-        return self.checkedReturn(selectedClass)
+        return self.checkedReturn(selectedClass) 
+
+    def updateClassification(self, id, updateClass):
+        """
+        See classification_dao docs. Here we're just making sure we cast the final object 
+        to the proper outgoing classification model type. We're also properly setting up the 
+        initial model of stuff to update before passing it to super
+        """
+
+        updateModel = outgoing_manual(json=updateClass)
+        selectedClass = super(OutgoingManualDAO, self).updateClassification(id, updateModel)
+        return selectedClass # this is already the proper model object
 
     def updateClassificationByUID(self, id, updateClass):
         """
@@ -60,7 +71,7 @@ class OutgoingManualDAO(ClassificationDAO):
 
         updateModel = outgoing_manual(json=updateClass)
         selectedClass = super(OutgoingManualDAO, self).updateClassificationByUID(id, updateModel)
-        return selectedClass # the above getClassification handle putting this into the proper object
+        return selectedClass # this is already the proper model object
 
     def getAllDistinct(self):
         return super(OutgoingManualDAO, self).getAllDistinct(self)
