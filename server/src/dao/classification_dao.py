@@ -117,7 +117,7 @@ class ClassificationDAO(BaseDAO):
         @param id: The id of the image to try and retrieve
         """
 
-        selectClsById = 'SELECT id, ' + self.uidClmn + """, type, latitude, longitude, orientation, shape, background_color, alphanumeric, alphanumeric_color, description, submitted
+        selectClsById = 'SELECT id, ' + self.uidClmn + """, target, type, latitude, longitude, orientation, shape, background_color, alphanumeric, alphanumeric_color, description, submitted
             FROM """ + self.outgoingTableName + """ 
             WHERE """ + self.uidClmn + """ = %s
             LIMIT 1;"""
@@ -139,7 +139,7 @@ class ClassificationDAO(BaseDAO):
                  doesn't exist, None is returned.
         """
 
-        selectClsById = 'SELECT id, ' + self.uidClmn + """, type, latitude, longitude, orientation, shape, background_color, alphanumeric, alphanumeric_color, description, submitted
+        selectClsById = 'SELECT id, ' + self.uidClmn + """, target, type, latitude, longitude, orientation, shape, background_color, alphanumeric, alphanumeric_color, description, submitted
             FROM """ + self.outgoingTableName + """ 
             WHERE id = %s
             LIMIT 1;"""
@@ -156,7 +156,7 @@ class ClassificationDAO(BaseDAO):
                   classes to place the results in their desired object type.
         """
 
-        selectAllSql = 'SELECT id, ' + self.uidClmn + """, type, latitude, longitude, orientation, shape, background_color, alphanumeric, alphanumeric_color, description, submitted
+        selectAllSql = 'SELECT id, ' + self.uidClmn + """, target, type, latitude, longitude, orientation, shape, background_color, alphanumeric, alphanumeric_color, description, submitted
             FROM """ + self.outgoingTableName + """ 
             ORDER BY id;"""
 
@@ -245,13 +245,13 @@ class ClassificationDAO(BaseDAO):
         getDistinctTypes = """SELECT alphanumeric, shape, type
             FROM """ + self.outgoingTableName
 
-        selectClass = 'SELECT id, ' + self.uidClmn + """, type, latitude, longitude, orientation, shape, background_color, alphanumeric, alphanumeric_color, description, submitted
+        selectClass = 'SELECT id, ' + self.uidClmn + """, target, type, latitude, longitude, orientation, shape, background_color, alphanumeric, alphanumeric_color, description, submitted
             FROM """ + self.outgoingTableName + " WHERE "
 
         if whereClause is not None:
             getDistinctTypes += " WHERE " + whereClause + " "
             selectClass += whereClause + " AND "
-        getDistinctTypes += "GROUP BY alphanumeric, shape, type;"
+        getDistinctTypes += " GROUP BY alphanumeric, shape, type;"
         selectClass += " alphanumeric = %s and shape = %s and type = %s;"
 
         print(getDistinctTypes)
@@ -279,3 +279,10 @@ class ClassificationDAO(BaseDAO):
         classCur.close()
         cur.close()
         return distinctClassifications
+
+    def determineTargetBin(self, uid):
+        """
+        Internal method used for determinging what target bin a particular row (specified
+        by the UID param should belong to)
+        """
+        return None

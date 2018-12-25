@@ -17,16 +17,17 @@ class outgoing_manual:
         if tableValues is not None:
             self.id = tableValues[0]
             self.crop_id = tableValues[1]
-            self.type = tableValues[2]
-            self.latitude = tableValues[3]
-            self.longitude = tableValues[4]
-            self.orientation = tableValues[5]
-            self.shape = tableValues[6]
-            self.background_color = tableValues[7]
-            self.alphanumeric = tableValues[8]
-            self.alphanumeric_color = tableValues[9]
-            self.description = tableValues[10]
-            self.submitted = tableValues[11]
+            self.target = tableValues[2]
+            self.type = tableValues[3]
+            self.latitude = tableValues[4]
+            self.longitude = tableValues[5]
+            self.orientation = tableValues[6]
+            self.shape = tableValues[7]
+            self.background_color = tableValues[8]
+            self.alphanumeric = tableValues[9]
+            self.alphanumeric_color = tableValues[10]
+            self.description = tableValues[11]
+            self.submitted = tableValues[12]
         elif json is not None:
             for prop in self.allProps():
                 if prop in json:
@@ -54,6 +55,21 @@ class outgoing_manual:
     @crop_id.setter
     def crop_id(self, crop_id):
         self._crop_id = crop_id
+
+    @property
+    def target(self):
+        """
+        Target Id this classification is being bundled into. Generally this is an internal
+        only column managed by the DAO, but can be manually modified if needed. Classifications
+        that are similar enough are placed into a 'target bin'. Since it is likely multiple images
+        will be taken of each target, this prevents us from submitting multiple images of the same
+        target to AUVSI.
+        """
+        return self._target
+
+    @target.setter
+    def target(self, target):
+        self._target = target
 
     @property
     def type(self):
@@ -178,7 +194,7 @@ class outgoing_manual:
 
     # TODO: this is hacky and i hate it
     def allProps(self):
-        return ['id', 'crop_id', 'type', 'latitude', 'longitude', 'orientation', 'shape', 'background_color', 'alphanumeric', 'alphanumeric_color', 'description', 'submitted']
+        return ['id', 'crop_id', 'type', 'target', 'latitude', 'longitude', 'orientation', 'shape', 'background_color', 'alphanumeric', 'alphanumeric_color', 'description', 'submitted']
 
     def toDict(self, exclude=None):
         """
