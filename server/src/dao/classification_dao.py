@@ -52,7 +52,9 @@ class ClassificationDAO(BaseDAO):
             updateCls = updateCls[:-2] + 'RETURNING id;'
 
         insertCls += insertClmnNames + insertClmnValues + updateCls
-        return super(ClassificationDAO, self).getResultingId(insertCls, insertValues + insertValues)
+        id = super(ClassificationDAO, self).getResultingId(insertCls, insertValues + insertValues)
+        self.assignTargetBin(id)
+        return id
 
     def insertClassification(self, classification):
         insertCls = "INSERT INTO " + self.outgoingTableName
@@ -75,7 +77,9 @@ class ClassificationDAO(BaseDAO):
             insertClmnValues = insertClmnValues[:-2] + ') RETURNING id;'
 
         insertCls += insertClmnNames + insertClmnValues
-        return super(ClassificationDAO, self).getResultingId(insertCls, insertValues)
+        id = super(ClassificationDAO, self).getResultingId(insertCls, insertValues)
+        self.assignTargetBin(id)
+        return id
 
     def addClassification(self, classification):
         """
@@ -194,6 +198,7 @@ class ClassificationDAO(BaseDAO):
         updateStr += " WHERE id = %s RETURNING id;"
         values.append(id)
         resultId = super(ClassificationDAO, self).getResultingId(updateStr, values)
+        self.assignTargetBin(resultId) # the update could have potentially changed the target bin for this classification
         if resultId != -1:
             return self.getClassification(resultId)
         else:
@@ -229,6 +234,7 @@ class ClassificationDAO(BaseDAO):
         updateStr += " WHERE " + self.uidClmn + " = %s RETURNING id;"
         values.append(id)
         resultId = super(ClassificationDAO, self).getResultingId(updateStr, values)
+        self.assignTargetBin(resultId) # update could have potentially changed the target bin for this classification
         if resultId != -1:
             return self.getClassification(resultId)
         else:
@@ -280,9 +286,71 @@ class ClassificationDAO(BaseDAO):
         cur.close()
         return distinctClassifications
 
-    def determineTargetBin(self, uid):
+    def assignTargetBin(self, uid):
         """
         Internal method used for determinging what target bin a particular row (specified
         by the UID param should belong to)
+
+        @return: void
         """
-        return None
+        #NOTE: This select needs to work for either 'outgoing_' table
+        getClassificationInfo = """SELECT id, alphanumeric, shape, type 
+            FROM """ + self.outgoingTableName + """
+            WHERE id = %s;"""
+
+        classificationInfo = super(ClassificationDAO, self).basicTopSelect(getClassificationInfo, (uid,))
+        if classificationInfo is None or not classificationInfo:
+            print("Failed to retrieve info for uid {}".format(uid))
+            return
+
+        # use the retrieved info to see if there are other targets 
+        # that match and what target bin they are
+
+        # basically we'll assign to the first matching target (limit 1), since
+        # this whole setup assumes that other matching targets would have the 
+        # same target id
+        getPotentialTargetIds = """SELECT target 
+            FROM """ + self.outgoingTableName + """ 
+            WHERE alphanumeric = %s and shape = %s and type = %s LIMIT 1;"""
+
+        cur = self.conn.cursor()
+        cur.execute(getPotentialTargetIds, (classificationInfo[1], classificationInfo[2], classificationInfo[3]))
+
+        if cur is None:
+            print("Something went wrong trying to get target id for {}".format(uid))
+            return
+
+        # default target id to indicate there is no target id for
+        # this type yet
+        targetId = -1
+
+        try:
+            targetIdResult = cur.fetchone()
+            # if there's a target this uid belongs to, grab it
+            if targetIdResult is not None:
+                targetId = targetIdResult[0]
+        except (Exception) as error:
+            print("No result for potential target id for uid {}".format(uid))
+
+        if targetId == -1:
+            # then we need to figure out what target id we can assign it to
+            # grab the current largest target id in the table
+            getLargestTargetId = "SELECT MAX(target) FROM " + self.outgoingTableName
+
+            largestTargetId = super(ClassificationDAO, self).basicTopSelect(getLargestTargetId, None)
+            
+            if largestTargetId is None:
+                # then there are currently no targets in the table.
+                # this likely indicates that the current uid is the very fist to be added
+                # just start target counting at 1
+                targetId = 1
+            else:
+                # if there are target ids, we know from the previous query's failure that the current uid
+                # represents a new target. reflect this by adding one to the current largest id
+                targetId = largestTargetId[0] + 1
+        
+        updateTargetId = "UPDATE " + self.outgoingTableName + " SET target = %s WHERE id = %s RETURNING id;"
+
+        ret = super(ClassificationDAO, self).getResultingId(updateTargetId, (targetId, uid))
+        if ret == -1:
+            print("Updating target id column for {} failed!".format(uid))
