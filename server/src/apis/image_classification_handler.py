@@ -69,9 +69,11 @@ class ClassifiedImageHandler(Resource):
             outgoingIn.crop_id = prevId
             resultingId = dao.upsertClassification(outgoingIn)
         else:
+            # since image_id in outgoing_autonomous is not unique like 
+            # crop_id is for outgoing_manual, we just do a straight insert here
             outgoingIn = outgoing_autonomous(json=api.payload)
             outgoingIn.image_id = prevId
-            resultingId = dao.insertClassification(outgoingIn)
+            resultingId = dao.addClassification(outgoingIn)
         
         if resultingId == -1:
             return {'message': 'Failed to insert classification into outgoing table'}, 500

@@ -42,7 +42,7 @@ def testClassificationInsert():
     dao = OutgoingManualDAO(getDefaultConfigFile())
 
     testIns = outgoing_manual()
-    testIns.image_id = 42
+    testIns.crop_id = 42
     testIns.shape = 'circle'
     testIns.background_color = 'white'
     testIns.alphanumeric = 'A'
@@ -65,6 +65,46 @@ def testClassificationInsert():
     print('done!')
 
 
+def testClassificationTargetBinning():
+
+    print('get manual classification dao')
+    dao = OutgoingManualDAO(getDefaultConfigFile())
+
+    testIns = outgoing_manual()
+    testIns.crop_id = 42
+    testIns.shape = 'circle'
+    testIns.background_color = 'white'
+    testIns.alphanumeric = 'A'
+    testIns.alphanumeric_color = 'black'
+
+    print('insert crop_id 42')
+    resultingId = dao.addClassification(testIns)
+    assert resultingId != -1
+    insResult = dao.getClassification(resultingId)
+    assert insResult.target != -1
+    
+    print('insert record that should be in same target bin as 42')
+    testIns.crop_id = 43
+    resultingId = dao.addClassification(testIns)
+    assert resultingId != -1
+    insResult2 = dao.getClassification(resultingId)
+    assert insResult.target == insResult2.target
+
+    print('insert record that belongs in a different target')
+    testIns.crop_id = 44
+    testIns.alphanumeric = 'C'
+    resultingId = dao.addClassification(testIns)
+    assert resultingId != -1
+    insResult3 = dao.getClassification(resultingId)
+    assert insResult3.target != insResult2.target
+
+    print("updating uid 42")
+    testIns.crop_id = 42
+    testIns.alphanumeric = 'C'
+    result = dao.updateClassificationByUID(testIns.crop_id, testIns.toDict())
+    assert result.id != -1
+    assert result.target == insResult3.target
+
 def testDistinctManualClassification():
     print('get classification dao')
     dao = OutgoingManualDAO(getDefaultConfigFile())
@@ -80,7 +120,8 @@ def testDistinctManualClassification():
 def main():
     # testIncomingImageGet()
     # testClassificationInsert()
-    testDistinctManualClassification()
+    testClassificationTargetBinning()
+    # testDistinctManualClassification()
 
 if __name__ == '__main__':
     print("waddup")

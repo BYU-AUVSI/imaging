@@ -9,7 +9,7 @@ class OutgoingAutonomousDAO(ClassificationDAO):
     """
 
     def __init__(self, configFilePath):
-        super(OutgoingAutonomousDAO, self).__init__(configFilePath, 'outgoing_autonomous', 'image_id')
+        super(OutgoingAutonomousDAO, self).__init__(configFilePath, 'outgoing_autonomous', 'id')
 
     def checkedReturn(self, rawResponse):
         if rawResponse is None:

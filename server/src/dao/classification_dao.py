@@ -7,10 +7,15 @@ class ClassificationDAO(BaseDAO):
     Contains general database methods which work for both types.
     """
 
-    def __init__(self, configFilePath, outgoingTableName, uidClmn):
+    def __init__(self, configFilePath, outgoingTableName, uidclmn):
         super(ClassificationDAO, self).__init__(configFilePath)
         self.outgoingTableName = outgoingTableName # 0 for autonomous. 1 for manual
-        self.uidClmn = uidClmn
+        # uid column is different for manual and autonomous. For manual it is the crop_id
+        # which is a foreign key to the associated cropped image in the manual_cropped table
+        # for autonomous, its just the id column, since its the only unique-enforced column
+        # in the autonomous table. the UID column is needed for the upsert method, which requires
+        # a unique-constrained column to detect insertion conflicts
+        self.uidclmn = uidclmn
 
     def upsertClassification(self, classification):
         """
@@ -48,36 +53,11 @@ class ClassificationDAO(BaseDAO):
             return -1
         else: 
             insertClmnNames = insertClmnNames[:-2] + ')' # remove last comma/space
-            insertClmnValues = insertClmnValues[:-2] + ') ON CONFLICT (' + self.uidClmn + ') DO '
+            insertClmnValues = insertClmnValues[:-2] + ') ON CONFLICT (' + self.uidclmn + ') DO '
             updateCls = updateCls[:-2] + 'RETURNING id;'
 
         insertCls += insertClmnNames + insertClmnValues + updateCls
         id = super(ClassificationDAO, self).getResultingId(insertCls, insertValues + insertValues)
-        self.assignTargetBin(id)
-        return id
-
-    def insertClassification(self, classification):
-        insertCls = "INSERT INTO " + self.outgoingTableName
-
-        # this will dynamically build the upsert string based on 
-        # only the values that were provided us in classification
-        insertValues = []
-        insertClmnNames = '('
-        insertClmnValues = ' VALUES('
-        for clmn, value in classification.toDict(exclude=('id',)).items():
-            insertClmnNames += clmn + ', '
-            insertClmnValues += '%s, '
-            insertValues.append(value.__str__())
-
-        # if there were no values to insert...
-        if not insertValues:
-            return -1
-        else: 
-            insertClmnNames = insertClmnNames[:-2] + ')' # remove last comma/space
-            insertClmnValues = insertClmnValues[:-2] + ') RETURNING id;'
-
-        insertCls += insertClmnNames + insertClmnValues
-        id = super(ClassificationDAO, self).getResultingId(insertCls, insertValues)
         self.assignTargetBin(id)
         return id
 
@@ -111,7 +91,9 @@ class ClassificationDAO(BaseDAO):
             insertClmnValues = insertClmnValues[:-2] + ') RETURNING id;'
 
         insertCls += insertClmnNames + insertClmnValues
-        return super(ClassificationDAO, self).getResultingId(insertCls, insertValues)
+        id = super(ClassificationDAO, self).getResultingId(insertCls, insertValues)
+        self.assignTargetBin(id)
+        return id
 
     def getClassificationByUID(self, id):
         """
@@ -120,10 +102,12 @@ class ClassificationDAO(BaseDAO):
         @type id: int
         @param id: The id of the image to try and retrieve
         """
-
-        selectClsById = 'SELECT id, ' + self.uidClmn + """, target, type, latitude, longitude, orientation, shape, background_color, alphanumeric, alphanumeric_color, description, submitted
+        # its best just to use * on these given the table differences between manual/autonomous
+        # for autonomous, getClassification and getClassificationByUID are identical since its 
+        # UID column is just 'id'
+        selectClsById = """SELECT *
             FROM """ + self.outgoingTableName + """ 
-            WHERE """ + self.uidClmn + """ = %s
+            WHERE """ + self.uidclmn + """ = %s
             LIMIT 1;"""
 
         selectedClass = super(ClassificationDAO, self).basicTopSelect(selectClsById, (id,))
@@ -143,7 +127,7 @@ class ClassificationDAO(BaseDAO):
                  doesn't exist, None is returned.
         """
 
-        selectClsById = 'SELECT id, ' + self.uidClmn + """, target, type, latitude, longitude, orientation, shape, background_color, alphanumeric, alphanumeric_color, description, submitted
+        selectClsById = """SELECT *
             FROM """ + self.outgoingTableName + """ 
             WHERE id = %s
             LIMIT 1;"""
@@ -160,7 +144,7 @@ class ClassificationDAO(BaseDAO):
                   classes to place the results in their desired object type.
         """
 
-        selectAllSql = 'SELECT id, ' + self.uidClmn + """, target, type, latitude, longitude, orientation, shape, background_color, alphanumeric, alphanumeric_color, description, submitted
+        selectAllSql = """SELECT *
             FROM """ + self.outgoingTableName + """ 
             ORDER BY id;"""
 
@@ -210,7 +194,7 @@ class ClassificationDAO(BaseDAO):
         if successful, returns an classification object of the entire row that was updated
 
         @type id: int
-        @param id: The uid value (image_id for autonomous, crop_id for manual) of the classification to update
+        @param id: The uid value (id for autonomous, crop_id for manual) of the classification to update
 
         @type updateClass: outgoing_autonomous or outgoing_manual
         @param updateClass: Information to attempt to update for the classification with the provided image_id
@@ -231,7 +215,7 @@ class ClassificationDAO(BaseDAO):
             return None
         
         updateStr = updateStr[:-2] # remove last space/comma
-        updateStr += " WHERE " + self.uidClmn + " = %s RETURNING id;"
+        updateStr += " WHERE " + self.uidclmn + " = %s RETURNING id;"
         values.append(id)
         resultId = super(ClassificationDAO, self).getResultingId(updateStr, values)
         self.assignTargetBin(resultId) # update could have potentially changed the target bin for this classification
@@ -244,6 +228,8 @@ class ClassificationDAO(BaseDAO):
         """
         Get all the unique classifications in the classification queue
         Submitted or not.
+
+        TODO: redo this method given the new target clmn
         """
         
         # start by getting the distinct target types in our table
@@ -251,7 +237,7 @@ class ClassificationDAO(BaseDAO):
         getDistinctTypes = """SELECT alphanumeric, shape, type
             FROM """ + self.outgoingTableName
 
-        selectClass = 'SELECT id, ' + self.uidClmn + """, target, type, latitude, longitude, orientation, shape, background_color, alphanumeric, alphanumeric_color, description, submitted
+        selectClass = """SELECT *
             FROM """ + self.outgoingTableName + " WHERE "
 
         if whereClause is not None:
@@ -286,21 +272,27 @@ class ClassificationDAO(BaseDAO):
         cur.close()
         return distinctClassifications
 
-    def assignTargetBin(self, uid):
+    def getAllTargets(self, modelGenerator, whereClause=None):
+        return None
+
+    def assignTargetBin(self, id):
         """
         Internal method used for determinging what target bin a particular row (specified
         by the UID param should belong to)
 
-        @return: void
+        @type id: int
+        @param id: the base classification id of the classification to bin into a target (aka the id column)
+
+        @return: None
         """
         #NOTE: This select needs to work for either 'outgoing_' table
         getClassificationInfo = """SELECT id, alphanumeric, shape, type 
             FROM """ + self.outgoingTableName + """
             WHERE id = %s;"""
 
-        classificationInfo = super(ClassificationDAO, self).basicTopSelect(getClassificationInfo, (uid,))
+        classificationInfo = super(ClassificationDAO, self).basicTopSelect(getClassificationInfo, (id,))
         if classificationInfo is None or not classificationInfo:
-            print("Failed to retrieve info for uid {}".format(uid))
+            print("Failed to retrieve info for uid {}".format(id))
             return
 
         # use the retrieved info to see if there are other targets 
@@ -311,13 +303,16 @@ class ClassificationDAO(BaseDAO):
         # same target id
         getPotentialTargetIds = """SELECT target 
             FROM """ + self.outgoingTableName + """ 
-            WHERE alphanumeric = %s and shape = %s and type = %s LIMIT 1;"""
+            WHERE (alphanumeric = %s OR (alphanumeric IS NULL AND %s IS NULL)) 
+                and (shape = %s OR (shape IS NULL AND %s IS NULL)) 
+                and (type  = %s OR (type  IS NULL AND %s IS NULL)) LIMIT 1;"""
+        # all this complicated stuff is for if one of these columns is NULL
 
         cur = self.conn.cursor()
-        cur.execute(getPotentialTargetIds, (classificationInfo[1], classificationInfo[2], classificationInfo[3]))
+        cur.execute(getPotentialTargetIds, (classificationInfo[1], classificationInfo[1], classificationInfo[2], classificationInfo[2], classificationInfo[3], classificationInfo[3]))
 
         if cur is None:
-            print("Something went wrong trying to get target id for {}".format(uid))
+            print("Something went wrong trying to get target id for {}".format(id))
             return
 
         # default target id to indicate there is no target id for
@@ -327,10 +322,10 @@ class ClassificationDAO(BaseDAO):
         try:
             targetIdResult = cur.fetchone()
             # if there's a target this uid belongs to, grab it
-            if targetIdResult is not None:
+            if targetIdResult is not None and targetIdResult[0] is not None:
                 targetId = targetIdResult[0]
         except (Exception) as error:
-            print("No result for potential target id for uid {}".format(uid))
+            print("No result for potential target id for uid {}".format(id))
 
         if targetId == -1:
             # then we need to figure out what target id we can assign it to
@@ -339,7 +334,7 @@ class ClassificationDAO(BaseDAO):
 
             largestTargetId = super(ClassificationDAO, self).basicTopSelect(getLargestTargetId, None)
             
-            if largestTargetId is None:
+            if largestTargetId is None or largestTargetId[0] is None:
                 # then there are currently no targets in the table.
                 # this likely indicates that the current uid is the very fist to be added
                 # just start target counting at 1
@@ -351,6 +346,6 @@ class ClassificationDAO(BaseDAO):
         
         updateTargetId = "UPDATE " + self.outgoingTableName + " SET target = %s WHERE id = %s RETURNING id;"
 
-        ret = super(ClassificationDAO, self).getResultingId(updateTargetId, (targetId, uid))
+        ret = super(ClassificationDAO, self).getResultingId(updateTargetId, (targetId, id))
         if ret == -1:
-            print("Updating target id column for {} failed!".format(uid))
+            print("Updating target id column for {} failed!".format(id))

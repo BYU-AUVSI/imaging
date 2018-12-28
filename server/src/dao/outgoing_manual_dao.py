@@ -11,7 +11,6 @@ class OutgoingManualDAO(ClassificationDAO):
     def __init__(self, configFilePath):
         super(OutgoingManualDAO, self).__init__(configFilePath, 'outgoing_manual', 'crop_id')
 
-
     def checkedReturn(self, rawResponse):
         if rawResponse is None:
             return None
