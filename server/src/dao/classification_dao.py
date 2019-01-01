@@ -225,56 +225,90 @@ class ClassificationDAO(BaseDAO):
         else:
             return None
 
-    def getAllDistinct(self, modelGenerator, whereClause=None):
+    def getAllTargets(self, modelGenerator, whereClause=None):
         """
         Get all the unique classifications in the classification queue
         Submitted or not.
 
         TODO: redo this method given the new target clmn
         """
+        # get the target ids that work with our where clause:
+        targets = self.getAllTargetIDs(whereClause)
+
+        if targets is None:
+            return []
+
+        # NOTE: this is a bit dangerous, but allows this query to work on either
+        # table. We're RELYING ON the target column being at INDEX 2
+        getAll = """SELECT *
+            FROM """ + self.outgoingTableName + """
+            WHERE target IN %s ORDER BY target;"""
+
+        cur = self.conn.cursor()
+        cur.execute(cur.mogrify(getAll, (tuple(targets),)))
+
+        rawRecords = cur.fetchall()
+
+        allClassifications = []
+        lastTarget = -1
+
+        currentTarget = []
+
+        for record in rawRecords:
+
+            model = modelGenerator.newModelFromRow(record)
+
+            if record[2] != lastTarget and lastTarget != -1:
+                # ie: if the target has changed
+                allClassifications.append(currentTarget)
+                currentTarget = []
+
+            currentTarget.append(model)
+            lastTarget = record[2]
+
+        allClassifications.append(currentTarget)
+
+        return allClassifications
+
+    def getAllTargetIDs(self, whereClause=None):
+        """
+        Get a list of the target ids currently in this outgoing table.
+
+        @type whereClause: string
+        @param whereClause: Specify a WHERE to select the targets on. Essentially apply a filter
+            for what target ids are returned. ie: pass "submitted = 'unsubmitted'" for this method
+            to return a list of target ids that have not been submitted yet.
         
-        # start by getting the distinct target types in our table
-        # a 'distinct target' is one with unique shape and character
-        getDistinctTypes = """SELECT alphanumeric, shape, type
+        @rtype: list of int
+        @return: A list of target all target ids if no whereClause is provided and the query is 
+            successful. Or a list of filtered ids if a whereClause is provided. If something fails,
+            None
+        """
+
+        getTargetIds = """SELECT target
             FROM """ + self.outgoingTableName
 
-        selectClass = """SELECT *
-            FROM """ + self.outgoingTableName + " WHERE "
-
+        # add the where clause if we have one
         if whereClause is not None:
-            getDistinctTypes += " WHERE " + whereClause + " "
-            selectClass += whereClause + " AND "
-        getDistinctTypes += " GROUP BY alphanumeric, shape, type;"
-        selectClass += " alphanumeric = %s and shape = %s and type = %s;"
+            getTargetIds += " WHERE " + whereClause
 
-        print(getDistinctTypes)
+        getTargetIds += " GROUP BY target;"
 
-        distinctClassifications = []
         cur = self.conn.cursor()
-        cur.execute(getDistinctTypes)
+        cur.execute(getTargetIds)
 
         if cur is None:
-            return distinctClassifications
+            cur.close()
+            return None
 
-        classCur = self.conn.cursor()
-                
-        # classCur.prepare(selectClass)
-        for row in cur:
+        targetList = []
+        rawRecords = cur.fetchall() #list of list
 
-            classification = []
-            classCur.execute(selectClass, row)
-            for result in classCur:
-                outRow = modelGenerator.newModelFromRow(result)
-                classification.append(outRow)
+        for record in rawRecords:
+            targetList.append(record[0])
 
-            distinctClassifications.append(classification)
-
-        classCur.close()
-        cur.close()
-        return distinctClassifications
-
-    def getAllTargets(self, modelGenerator, whereClause=None):
-        return None
+        print(targetList)
+        return targetList
 
     def assignTargetBin(self, id):
         """
@@ -315,6 +349,7 @@ class ClassificationDAO(BaseDAO):
 
         if cur is None:
             print("Something went wrong trying to get target id for {}".format(id))
+            cur.close()
             return
 
         # default target id to indicate there is no target id for
@@ -335,6 +370,8 @@ class ClassificationDAO(BaseDAO):
                     submissionState = 'inherited_submission'
         except (Exception) as error:
             print("No result for potential target id for uid {}".format(id))
+
+        cur.close()
 
         if targetId == -1:
             # then we need to figure out what target id we can assign it to
