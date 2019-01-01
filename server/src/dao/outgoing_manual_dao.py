@@ -75,11 +75,17 @@ class OutgoingManualDAO(ClassificationDAO):
     def getAllDistinct(self):
         return super(OutgoingManualDAO, self).getAllDistinct(self)
     
-    def getAllDistinctPending(self):
+    def getPendingTargets(self):
         """
         Get images grouped by distinct targets pending submission (ei: submitted = false)
         """
         return super(OutgoingManualDAO, self).getAllDistinct(self, whereClause=" submitted = FALSE ")
+
+    def submitAllPendingTargets(self):
+        return None
+
+    def submitPendingTarget(self, target):
+        return None
 
     def newModelFromRow(self, row):
         """

@@ -91,6 +91,7 @@ class ClassificationDAO(BaseDAO):
             insertClmnValues = insertClmnValues[:-2] + ') RETURNING id;'
 
         insertCls += insertClmnNames + insertClmnValues
+
         id = super(ClassificationDAO, self).getResultingId(insertCls, insertValues)
         self.assignTargetBin(id)
         return id
@@ -288,7 +289,7 @@ class ClassificationDAO(BaseDAO):
         #NOTE: This select needs to work for either 'outgoing_' table
         getClassificationInfo = """SELECT id, alphanumeric, shape, type 
             FROM """ + self.outgoingTableName + """
-            WHERE id = %s;"""
+            WHERE id = %s LIMIT 1;"""
 
         classificationInfo = super(ClassificationDAO, self).basicTopSelect(getClassificationInfo, (id,))
         if classificationInfo is None or not classificationInfo:
@@ -301,15 +302,16 @@ class ClassificationDAO(BaseDAO):
         # basically we'll assign to the first matching target (limit 1), since
         # this whole setup assumes that other matching targets would have the 
         # same target id
-        getPotentialTargetIds = """SELECT target 
+        getPotentialTargetIds = """SELECT target, submitted 
             FROM """ + self.outgoingTableName + """ 
             WHERE (alphanumeric = %s OR (alphanumeric IS NULL AND %s IS NULL)) 
-                and (shape = %s OR (shape IS NULL AND %s IS NULL)) 
-                and (type  = %s OR (type  IS NULL AND %s IS NULL)) LIMIT 1;"""
+                AND (shape = %s OR (shape IS NULL AND %s IS NULL)) 
+                AND (type  = %s OR (type  IS NULL AND %s IS NULL)) 
+                AND id != %s LIMIT 1;"""
         # all this complicated stuff is for if one of these columns is NULL
 
         cur = self.conn.cursor()
-        cur.execute(getPotentialTargetIds, (classificationInfo[1], classificationInfo[1], classificationInfo[2], classificationInfo[2], classificationInfo[3], classificationInfo[3]))
+        cur.execute(getPotentialTargetIds, (classificationInfo[1], classificationInfo[1], classificationInfo[2], classificationInfo[2], classificationInfo[3], classificationInfo[3], id))
 
         if cur is None:
             print("Something went wrong trying to get target id for {}".format(id))
@@ -318,12 +320,19 @@ class ClassificationDAO(BaseDAO):
         # default target id to indicate there is no target id for
         # this type yet
         targetId = -1
+        submissionState = 'unsubmitted'
 
         try:
             targetIdResult = cur.fetchone()
             # if there's a target this uid belongs to, grab it
             if targetIdResult is not None and targetIdResult[0] is not None:
+                print("we got {} and {}".format(targetIdResult[0], targetIdResult[1]))
                 targetId = targetIdResult[0]
+                # check what the submission status for this target is, so that this
+                # id can reflect it:
+                if targetIdResult[1] != 'unsubmitted':
+                    # then this target type has been submitted. make this id reflect that
+                    submissionState = 'inherited_submission'
         except (Exception) as error:
             print("No result for potential target id for uid {}".format(id))
 
@@ -344,8 +353,8 @@ class ClassificationDAO(BaseDAO):
                 # represents a new target. reflect this by adding one to the current largest id
                 targetId = largestTargetId[0] + 1
         
-        updateTargetId = "UPDATE " + self.outgoingTableName + " SET target = %s WHERE id = %s RETURNING id;"
+        updateTargetId = "UPDATE " + self.outgoingTableName + " SET target = %s, submitted = %s WHERE id = %s RETURNING id;"
 
-        ret = super(ClassificationDAO, self).getResultingId(updateTargetId, (targetId, id))
+        ret = super(ClassificationDAO, self).getResultingId(updateTargetId, (targetId, submissionState, id))
         if ret == -1:
             print("Updating target id column for {} failed!".format(id))

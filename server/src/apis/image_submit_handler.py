@@ -22,7 +22,7 @@ class PendingSubmissionHandler(Resource):
         print(manual)
         dao = getClassificationDAO(manual)
 
-        results = dao.getAllDistinctPending()
+        results = dao.getPendingTargets()
         print(results)
         if results is None or not results:
             return {'message': 'Could not locate any distinct targets'}, 404
