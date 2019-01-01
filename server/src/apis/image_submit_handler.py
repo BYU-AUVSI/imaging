@@ -17,6 +17,7 @@ classificationParser.add_argument('X-Manual', location='headers', type=inputs.bo
 class PendingSubmissionHandler(Resource):
 
     @api.doc(description='See all classifications pending submission. Grouped by targets')
+    @api.doc(responses={200:'OK', 400:'X-Manual header not specified', 404:'Could not find any targets pending submission'})
     def get(self):
         manual = checkXManual(request)
         print(manual)
@@ -24,7 +25,7 @@ class PendingSubmissionHandler(Resource):
 
         results = dao.getPendingTargets()
         print(results)
-        if results is None or not results:
+        if results is None or not results or not results[0]:
             return {'message': 'Could not locate any distinct targets'}, 404
 
         jsonible = []

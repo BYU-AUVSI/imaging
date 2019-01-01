@@ -11,28 +11,27 @@ api = Namespace('image/class', description='Imaging classification calls route t
 classificationParser = api.parser()
 classificationParser.add_argument('X-Manual', location='headers', type=inputs.boolean, required=True)
 
-classificationPostParser = api.parser()
-classificationPostParser.add_argument('X-Manual', location='headers', type=inputs.boolean, required=True)
-classificationPostParser.add_argument('X-Prev-Id', location='headers', type=int, required=True, help='Previous id for the last step of the image. For autonomous this is image_id. For manual its the crop_id')
-
-classification = api.model('Classification', {
-    'type': fields.String(required=False, description='Classification type(standard, off_axis, or emergent)'),
-    'latitude': fields.Float(required=False, description='Latitude coordinate of object'),
-    'longitude': fields.Float(required=False, description='longitude coordinate of object'),
-    'orientation': fields.String(required=False, description='Describes the heading/orientation of the letter(N, NE, E, etc...)'),
-    'shape': fields.String(required=False, description='The shape of the object for standard/off_axis types(circle, triangle, square, etc...)'),
-    'background_color': fields.String(required=False, description='Color of the background the letter is on for standard/off_axis types(white, black, orange, etc...)'),
-    'alphanumeric': fields.String(required=False, description='The letter within the object for standard/off_axis types(A, B, C, etc...)'),
-    'alphanumeric_color': fields.String(required=False, description='Color of the letter for standard/off_axis types(white, black, orange, etc...)'),
+# for documentation purposes. Defines the response for some of the methods below
+classificationModel = api.model('Classification', {
+    'target': fields.Integer(required=False, description='which target number this is. This field is automatically managed by the server. It groups classifications together based on alphanumeric, shape and type', example=1),
+    'type': fields.String(required=False, description='Classification type(standard, off_axis, or emergent)', example="standard"),
+    'latitude': fields.Float(required=False, description='Latitude coordinate of object', example=40.246354),
+    'longitude': fields.Float(required=False, description='longitude coordinate of object', example=-111.647553),
+    'orientation': fields.String(required=False, description='Describes the heading/orientation of the letter(N, NE, E, etc...)', example='N'),
+    'shape': fields.String(required=False, description='The shape of the object for standard/off_axis types(circle, triangle, square, etc...)', example='circle'),
+    'background_color': fields.String(required=False, description='Color of the background the letter is on for standard/off_axis types(white, black, orange, etc...)', example='orange'),
+    'alphanumeric': fields.String(required=False, description='The letter within the object for standard/off_axis types(A, B, C, etc...)', example='A'),
+    'alphanumeric_color': fields.String(required=False, description='Color of the letter for standard/off_axis types(white, black, orange, etc...)', example='black'),
     'description': fields.String(required=False, description='For the emergent type, description of what it is'),
-    'submitted': fields.Boolean(required=False, description='Whether or not this particular classification has been submitted to the judges over interop(defaults to false)')
+    'submitted': fields.String(required=False, description='Whether or not this particular classification has been submitted to the judges. Defaults to "unsubmitted". "submitted" indicates that this classification has been submitted to the judges. "inherited_submission" indicates that another classification for the same target (ie: another image of the same target) has already been submitted, and its therefore unnecessary to submit this one.', example='unsubmitted')
 })
 
 @api.route('/all')
 class AllClassificationsHandler(Resource):
 
     @api.doc(description='Get all the completed classifications for the corresponding process type (Manual or Autonomous)')
-    @api.expect(classificationParser)
+    @api.response(200, 'OK', [classificationModel])
+    @api.doc(responses={400:'X-Manual header not specified', 404:'Outgoing classification table is empty'})
     def get(self):
         # Input Validation::
         manual = checkXManual(request)
@@ -51,8 +50,7 @@ class AllClassificationsHandler(Resource):
 @api.route("/")
 class ClassifiedImageHandler(Resource):
     @api.doc(description='Automatically add a new classifcation to the server')
-    @api.expect(classificationPostParser)
-    @api.doc(responses={200:'OK', 400:'Improper image post'})
+    @api.doc(responses={200:'OK', 400:'Improper image post', 500: 'Something failed server-side'})
     @api.header('X-Class-Id', 'Crop ID of the image if successfully inserted. This WILL be different from the Image-ID provided in the request')
     def post(self):
         manual = checkXManual(request)
@@ -89,6 +87,8 @@ class SpecificClassificationHandler(Resource):
 
     @api.doc(description='Get the classification for the given id')
     @api.expect(classificationParser)
+    @api.response(200, 'OK', classificationModel)
+    @api.doc(responses={400:'X-Manual header not specified', 404:'Could not find classification with given ID'})
     def get(self, class_id):
         # Input Validation::
         manual = checkXManual(request)
@@ -104,7 +104,8 @@ class SpecificClassificationHandler(Resource):
 
     @api.doc(description='Update information for the specified classification entry')
     @api.expect(classificationParser)
-    @api.expect(classification)
+    @api.response(200, 'OK', classificationModel)
+    @api.doc(responses={400:'X-Manual header not specified', 404:'Could not find classification with given ID'})
     def put(self, class_id):
         # Input Validation::
         manual = checkXManual(request)
