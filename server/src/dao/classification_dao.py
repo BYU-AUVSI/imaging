@@ -314,10 +314,13 @@ class ClassificationDAO(BaseDAO):
         # grab a classification for this target and set it as the one we're submitting
         claimClassificationToSubmit = 'UPDATE ' + self.outgoingTableName + """
             SET submitted = 'submitted' 
-            WHERE target = %s AND submitted = 'unsubmitted' LIMIT 1 RETURNING id;"""
+            WHERE id = (
+                SELECT id FROM """ + self.outgoingTableName + """ 
+                WHERE target = %s AND submitted = 'unsubmitted' LIMIT 1)
+            RETURNING id;"""
 
         # update all the other classifications for this target to be inherited_submission
-        updateTargetClassifications =  'UPDATE' + self.outgoingTableName + """
+        updateTargetClassifications =  'UPDATE ' + self.outgoingTableName + """
             SET submitted = 'inherited_submission'
             WHERE target = %s AND submitted = 'unsubmitted';"""
 
@@ -328,14 +331,10 @@ class ClassificationDAO(BaseDAO):
             # an sql error, or that the specified target doesn't exist
             return None
 
-        super(ClassificationDAO, self).executeStatements((updateTargetClassifications,))
+        cur = self.conn.cursor()
+        cur.execute(updateTargetClassifications, (target,))
+        cur.close()
 
-        # 1: get classification from outgoing table where target = target 
-        #       and submitted = 'unsubmitted'
-
-        # 2. Update retrieved classification SET submitted = 'submitted'
-        # 3. Update target: SET submitted = 'inherited_submission' WHERE target = target AND submitted = 'unsubmitted'
-        # 4. Get lat-long, colors for all classifications in target. Average/most common. (Remove outliers for lat-long??)
         return self.getSubmittedClassification(modelGenerator, target)
 
     def getSubmittedClassification(self, modelGenerator, target):
@@ -374,8 +373,11 @@ class ClassificationDAO(BaseDAO):
             return finalModel
 
         # Average it out!
-        finalModel.latitude = self.calcClmnAvg(allClass, 0)
-        
+        finalModel.latitude           = self.calcClmnAvg(allClass, 0)
+        finalModel.longitude          = self.calcClmnAvg(allClass, 1)
+        finalModel.orientation        = self.findMostCommonValue(allClass, 2)
+        finalModel.background_color   = self.findMostCommonValue(allClass, 3)
+        finalModel.alphanumeric_color = self.findMostCommonValue(allClass, 4)
 
         return finalModel
 
@@ -397,6 +399,28 @@ class ClassificationDAO(BaseDAO):
             ttl += row[clmnNum]
 
         return ttl / float(len(classifications))
+
+    def findMostCommonValue(self, classifications, clmnNum):
+        """
+        Calculate the most common value in a specified column (useful for all the enum columns)
+
+        @type classifications: list of value lists (ie: from a cursor.fetchall())
+        @param classifications: database rows to use to calculate the average
+        @type clmnNun: int
+        @param clmnNum: Integer of the column to access in each row to get values for avg calculation
+        """
+
+        valueCounts = {}
+        for row in classifications:
+            if row[clmnNum] is not None:
+                if row[clmnNum] not in valueCounts:
+                    valueCounts[row[clmnNum]] = 0
+                valueCounts[row[clmnNum]] += 1
+
+        if valueCounts: # if the dictionary isnt empty
+            mostCommon = max(valueCounts, key=valueCounts.get)
+            return mostCommon
+        return None
 
     def assignTargetBin(self, id):
         """

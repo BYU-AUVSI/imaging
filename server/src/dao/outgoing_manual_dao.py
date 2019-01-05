@@ -90,7 +90,7 @@ class OutgoingManualDAO(ClassificationDAO):
 
         @return: an outgoing_manual object that can be used to submit the final classification
         """
-        return return super(OutgoingManualDAO, self).submitPendingTarget(self, target)
+        return super(OutgoingManualDAO, self).submitPendingTarget(self, target)
 
     def newModelFromRow(self, row):
         """

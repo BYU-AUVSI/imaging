@@ -35,7 +35,6 @@ def testIncomingImageGet():
 
     dao.close()
     
-
 def testClassificationInsert():
     # True for manual classification
     print('get classification dao')
@@ -63,7 +62,6 @@ def testClassificationInsert():
     print(result)
     
     print('done!')
-
 
 def testClassificationTargetBinning():
 
@@ -93,6 +91,7 @@ def testClassificationTargetBinning():
     print('insert record that belongs in a different target')
     testIns.crop_id = 44
     testIns.alphanumeric = 'C'
+    testIns.submitted = 'submitted' # this wont work -> it should still be unsubmitted
     resultingId = dao.addClassification(testIns)
     assert resultingId != -1
     insResult3 = dao.getClassification(resultingId)
@@ -101,6 +100,7 @@ def testClassificationTargetBinning():
     print("updating uid 42")
     testIns.crop_id = 42
     testIns.alphanumeric = 'C'
+    testIns.submitted = 'unsubmitted'
     result = dao.updateClassificationByUID(testIns.crop_id, testIns.toDict())
     assert result.id != -1
     assert result.target == insResult3.target
@@ -117,10 +117,84 @@ def testDistinctManualClassification():
 
     print(jsonify(printable))
 
+def testTargetIdGetting():
+    print('get manual classification dao')
+    dao = OutgoingManualDAO(getDefaultConfigFile())
+
+    dao.getPendingTargets()
+
+def testAvgFunction():
+    toAvg = [[0,1.0], [1,1.1], [2,1.4]]
+
+    dao = OutgoingManualDAO(getDefaultConfigFile())
+
+    result = dao.calcClmnAvg(toAvg, 1)
+    print(f'RESULT::: {result}')
+
+def testMostCommonFunction():
+    toMostCommon = [[0, 'A'], [1, 'B'], [3, 'B'], [4, 'C']]
+
+    dao = OutgoingManualDAO(getDefaultConfigFile())
+
+    result = dao.findMostCommonValue(toMostCommon, 1)
+    assert result == 'B'
+    print(f'RESULT::: {result}')
+    result = dao.findMostCommonValue([[0, None], [1, None]], 1)
+    assert result is None
+
+def testSubmitPendingTarget():
+    # insert some targets
+    dao = OutgoingManualDAO(getDefaultConfigFile())
+
+    testIns = outgoing_manual()
+    testIns.crop_id = 42
+    testIns.latitude = 40.111
+    testIns.longitude = -111.111
+    testIns.orientation = 'N'
+    testIns.shape = 'circle'
+    testIns.background_color = 'white'
+    testIns.alphanumeric = 'A'
+    testIns.alphanumeric_color = 'black'
+    resultingId = dao.addClassification(testIns)
+    assert resultingId != -1
+
+    testIns.crop_id = 43
+    testIns.latitude = 40.222
+    testIns.longitude = -111.222
+    testIns.orientation = 'NE'
+    testIns.background_color = 'orange'
+    resultingId = dao.addClassification(testIns)
+    assert resultingId != -1
+
+    testIns.crop_id = 44
+    testIns.latitude = 40.333
+    testIns.longitude = -111.333
+    testIns.alphanumeric_color = 'white'
+    resultingId = dao.addClassification(testIns)
+    assert resultingId != -1
+
+    classResult = dao.getClassification(resultingId)
+
+    submissionResult = dao.submitPendingTarget(classResult.target)
+
+    print(submissionResult.toDict())
+
+    assert submissionResult.latitude == 40.222
+    assert submissionResult.longitude == -111.222
+    assert submissionResult.orientation == 'NE'
+    assert submissionResult.background_color == 'orange'
+    assert submissionResult.alphanumeric_color == 'black'
+    assert submissionResult.alphanumeric == 'A'
+    assert submissionResult.shape == 'circle'
+
 def main():
     # testIncomingImageGet()
     # testClassificationInsert()
-    testClassificationTargetBinning()
+    # testClassificationTargetBinning()
+    # testTargetIdGetting()
+    # testAvgFunction()
+    # testMostCommonFunction()
+    testSubmitPendingTarget()
     # testDistinctManualClassification()
 
 if __name__ == '__main__':
