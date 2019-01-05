@@ -141,7 +141,10 @@ class manual_cropped:
             corrected_name = attr[1:] # remove first underscore
             # add everything we weren't explicitly told to exclude
             if exclude is None or corrected_name not in exclude:
-                dict[corrected_name] = value.__str__()
+                if corrected_name == 'crop_coordinate_tl' or corrected_name == 'crop_coordinate_br':
+                    dict[corrected_name] = value.__str__()
+                else:
+                    dict[corrected_name] = value
         return dict
 
     def toJsonResponse(self, exclude=None):

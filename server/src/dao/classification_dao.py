@@ -255,7 +255,6 @@ class ClassificationDAO(BaseDAO):
         currentTarget = []
 
         for record in rawRecords:
-
             model = modelGenerator.newModelFromRow(record)
 
             if record[2] != lastTarget and lastTarget != -1:
@@ -310,6 +309,95 @@ class ClassificationDAO(BaseDAO):
         print(targetList)
         return targetList
 
+    def submitPendingTarget(self, modelGenerator, target):
+
+        # grab a classification for this target and set it as the one we're submitting
+        claimClassificationToSubmit = 'UPDATE ' + self.outgoingTableName + """
+            SET submitted = 'submitted' 
+            WHERE target = %s AND submitted = 'unsubmitted' LIMIT 1 RETURNING id;"""
+
+        # update all the other classifications for this target to be inherited_submission
+        updateTargetClassifications =  'UPDATE' + self.outgoingTableName + """
+            SET submitted = 'inherited_submission'
+            WHERE target = %s AND submitted = 'unsubmitted';"""
+
+        claimedClassification = super(ClassificationDAO, self).getResultingId(claimClassificationToSubmit, (target,))
+
+        if claimedClassification == -1:
+            # claiming a single classification failed. Likely indicating either 
+            # an sql error, or that the specified target doesn't exist
+            return None
+
+        super(ClassificationDAO, self).executeStatements((updateTargetClassifications,))
+
+        # 1: get classification from outgoing table where target = target 
+        #       and submitted = 'unsubmitted'
+
+        # 2. Update retrieved classification SET submitted = 'submitted'
+        # 3. Update target: SET submitted = 'inherited_submission' WHERE target = target AND submitted = 'unsubmitted'
+        # 4. Get lat-long, colors for all classifications in target. Average/most common. (Remove outliers for lat-long??)
+        return self.getSubmittedClassification(modelGenerator, target)
+
+    def getSubmittedClassification(self, modelGenerator, target):
+        """
+        Get the classification that was submitted for this target.
+
+        Note, this will perform all the averaging functions again (of lat-long and color) as
+        if happening for the first time. So if another classification has been added
+        for this target, final values will be slightly different
+        """
+
+        getSubmittedClass = 'SELECT * FROM ' + self.outgoingTableName + """
+            WHERE target = %s AND submitted = 'submitted' LIMIT 1;"""
+
+        # get all the classifications for the target so we can do averaging/ most-common-value stuff
+        # NOTE: we use the column numbers from this query below when doing avg/MCV stuff
+        getOtherClass = """SELECT latitude, longitude, orientation, background_color, alphanumeric_color
+            FROM """ + self.outgoingTableName + """
+            WHERE target = %s;"""
+
+        result = super(ClassificationDAO, self).basicTopSelect(getSubmittedClass, (target,))
+
+        if result is None:
+            print(f'Failed to retrieve submitted classification for target {target}')
+            return None
+        
+        finalModel = modelGenerator.newModelFromRow(result)
+
+        cur = self.conn.cursor()
+        cur.execute(getOtherClass, (target,))
+        allClass = cur.fetchall()
+
+        if allClass is None or not allClass or not allClass[0]:
+            # this should never happen
+            print(f'Failed to retrieve all classifications for target {target}')
+            return finalModel
+
+        # Average it out!
+        finalModel.latitude = self.calcClmnAvg(allClass, 0)
+        
+
+        return finalModel
+
+    def calcClmnAvg(self, classifications, clmnNum):
+        """
+        Calculate the average of the specified column
+
+        @type classifications: list of value lists (ie: from a cursor.fetchall())
+        @param classifications: database rows to use to calculate the average
+        @type clmnNun: int
+        @param clmnNum: Integer of the column to access in each row to get values for avg calculation
+
+        @rtype: float
+        @return: Average of the numbers in clmnNum as a float
+        """
+
+        ttl = 0.0
+        for row in classifications:
+            ttl += row[clmnNum]
+
+        return ttl / float(len(classifications))
+
     def assignTargetBin(self, id):
         """
         Internal method used for determinging what target bin a particular row (specified
@@ -361,7 +449,6 @@ class ClassificationDAO(BaseDAO):
             targetIdResult = cur.fetchone()
             # if there's a target this uid belongs to, grab it
             if targetIdResult is not None and targetIdResult[0] is not None:
-                print("we got {} and {}".format(targetIdResult[0], targetIdResult[1]))
                 targetId = targetIdResult[0]
                 # check what the submission status for this target is, so that this
                 # id can reflect it:

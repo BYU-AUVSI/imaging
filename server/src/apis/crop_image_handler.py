@@ -1,5 +1,5 @@
 from flask import jsonify, make_response, send_file, abort, request
-from flask_restplus import Namespace, Resource, fields
+from flask_restplus import Namespace, Resource, fields, marshal
 from dao.manual_cropped_dao import ManualCroppedDAO
 from dao.model.manual_cropped import manual_cropped
 from dao.model.point import point

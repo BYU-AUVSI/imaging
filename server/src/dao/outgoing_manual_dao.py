@@ -85,14 +85,17 @@ class OutgoingManualDAO(ClassificationDAO):
         return None
 
     def submitPendingTarget(self, target):
-        return None
+        """
+        Submit the specified pending target to the judges.
+
+        @return: an outgoing_manual object that can be used to submit the final classification
+        """
+        return return super(OutgoingManualDAO, self).submitPendingTarget(self, target)
 
     def newModelFromRow(self, row):
         """
         Kinda a reflective function for the classification dao. Pass self up
         to the super ClassificationDAO, and it calls this method to create the 
         proper model object in its response.
-
-        Not uber elegant, only used by getAllDistinct atm.
         """
         return outgoing_manual(row)
