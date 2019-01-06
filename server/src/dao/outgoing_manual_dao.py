@@ -77,20 +77,25 @@ class OutgoingManualDAO(ClassificationDAO):
     
     def getPendingTargets(self):
         """
+        See classification_dao docs
         Get images grouped by distinct targets pending submission (ei: submitted = false)
         """
         return super(OutgoingManualDAO, self).getAllTargets(self, whereClause=" submitted = 'unsubmitted' ")
 
     def submitAllPendingTargets(self):
-        return None
+        """
+        See classification_dao docs
+        """
+        return super(OutgoingManualDAO, self).submitAllPendingTargets(self)
 
     def submitPendingTarget(self, target):
         """
+        See classification_dao docs
         Submit the specified pending target to the judges.
 
         @return: an outgoing_manual object that can be used to submit the final classification
         """
-        return super(OutgoingManualDAO, self).submitPendingTarget(self, target)
+        return super(OutgoingManualDAO, self).submitPendingTargetClass(self, target)
 
     def newModelFromRow(self, row):
         """

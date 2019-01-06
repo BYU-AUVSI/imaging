@@ -6,6 +6,7 @@ from dao.incoming_image_dao import IncomingImageDAO
 from dao.model.incoming_image import incoming_image
 from dao.model.outgoing_manual import outgoing_manual
 from dao.outgoing_manual_dao import OutgoingManualDAO
+from dao.base_dao import BaseDAO
 
 """
 These tests are really hacky atm. Basically they just assume a whole bunch of crap
@@ -13,6 +14,12 @@ about how your current instance is setup (ie: what is and isn't in the database)
 
 TOOD: Make them not crappy
 """
+
+def truncateTable(tableName):
+    truncateSql = "TRUNCATE TABLE " + tableName
+
+    dao = BaseDAO(getDefaultConfigFile())
+    dao.executeStatements((truncateSql,))
 
 def getDefaultConfigFile():
     return os.path.dirname(os.path.realpath(__file__))  + '/../conf/config.ini'
@@ -187,6 +194,21 @@ def testSubmitPendingTarget():
     assert submissionResult.alphanumeric == 'A'
     assert submissionResult.shape == 'circle'
 
+def testSubmitAllPendingTargets():
+
+    dao = OutgoingManualDAO(getDefaultConfigFile())
+
+    # see how it works on an empty table 
+    result = dao.submitAllPendingTargets()
+    assert result is None
+
+    # this will insert records for 2 different targets
+    testClassificationTargetBinning()
+    result = dao.submitAllPendingTargets()
+    assert len(result) == 2
+
+    print(result)
+
 def main():
     # testIncomingImageGet()
     # testClassificationInsert()
@@ -194,7 +216,10 @@ def main():
     # testTargetIdGetting()
     # testAvgFunction()
     # testMostCommonFunction()
+    truncateTable('outgoing_manual')
     testSubmitPendingTarget()
+    truncateTable('outgoing_manual')
+    testSubmitAllPendingTargets()
     # testDistinctManualClassification()
 
 if __name__ == '__main__':

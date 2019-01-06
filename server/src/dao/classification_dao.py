@@ -279,7 +279,7 @@ class ClassificationDAO(BaseDAO):
             to return a list of target ids that have not been submitted yet.
         
         @rtype: list of int
-        @return: A list of target all target ids if no whereClause is provided and the query is 
+        @return: A list of all target ids if no whereClause is provided and the query is 
             successful. Or a list of filtered ids if a whereClause is provided. If something fails,
             None
         """
@@ -309,7 +309,55 @@ class ClassificationDAO(BaseDAO):
         print(targetList)
         return targetList
 
-    def submitPendingTarget(self, modelGenerator, target):
+    def submitAllPendingTargets(self, modelGenerator):
+        """
+        Finds all targets with a 'unsubmitted' status and submits them
+
+        @type modelGenerator: OutgoingManual or Autonomous DAO
+        @param modelGenerator: a DAO with a 'newModelFromRow' method which takes a 
+            row from its table and creates a model object
+
+        @rtype: [outgoing_manual] or [outgoing_autonomous] model
+        @return: A list of classifications that should be submitted to the
+            judges server. Note that it's the job of higher-level DAOs/handlers
+            to make sure this information is properly submitted. None if error
+            or no ids to submit
+        """
+
+        unsubmittedTargetIds = self.getAllTargetIDs(" submitted = 'unsubmitted' ")
+
+        if unsubmittedTargetIds is None or not unsubmittedTargetIds:
+            print('Either something went wrong, or there are no unsubmitted target ids.')
+            return None
+        
+        allSubmitted = []
+
+        for targetId in  unsubmittedTargetIds:
+            resultModel = self.submitPendingTargetClass(modelGenerator, targetId)
+            if resultModel is not None:
+                allSubmitted.append(resultModel)
+        
+        if not allSubmitted:
+            print(f'Failed to submit all the targets in this list: {unsubmittedTargetIds}')
+            return None
+
+        return allSubmitted
+
+    def submitPendingTargetClass(self, modelGenerator, target):
+        """
+        Changes the status to the given target id to 'submitted'
+
+        @type modelGenerator: OutgoingManual or Autonomous DAO
+        @param modelGenerator: a DAO with a 'newModelFromRow' method which takes a 
+            row from its table and creates a model object
+        @type target: int
+        @param target: Id of the target to submit (number from the 'target' column)
+
+        @rtype: outgoing_manual or outgoing_autonomous model
+        @return: a model object of what should be submitted to the judge's server
+            Its the job of higher-level DAO's/ handlers to make sure this information
+            is properly submitted. None if error, or if the id has already been submitted
+        """
 
         # grab a classification for this target and set it as the one we're submitting
         claimClassificationToSubmit = 'UPDATE ' + self.outgoingTableName + """
@@ -396,8 +444,11 @@ class ClassificationDAO(BaseDAO):
 
         ttl = 0.0
         for row in classifications:
-            ttl += row[clmnNum]
-
+            if row[clmnNum] is not None:
+                ttl += row[clmnNum]
+        
+        if ttl == 0.0:
+            return None
         return ttl / float(len(classifications))
 
     def findMostCommonValue(self, classifications, clmnNum):
