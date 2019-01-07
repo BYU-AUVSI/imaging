@@ -211,5 +211,5 @@ class outgoing_manual:
             corrected_name = attr[1:] # remove first underscore
 
             if exclude is None or corrected_name not in exclude:
-                dict[corrected_name] = value.__str__()
+                dict[corrected_name] = value
         return dict

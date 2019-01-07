@@ -21,7 +21,6 @@ class TestMostCommonFunction(unittest.TestCase):
 
 class TestManualClassificationInsert(unittest.TestCase):
     def test(self):
-        print('Start Classification Insert Test')
         # True for manual classification
         truncateTable('outgoing_manual')
         dao = OutgoingManualDAO(defaultConfigPath())
@@ -36,12 +35,10 @@ class TestManualClassificationInsert(unittest.TestCase):
 
         # should now fail to insert a duplicate crop_id
         self.assertEqual(dao.addClassification(testIns), -1)
-        
         self.assertIsNotNone(dao.getClassificationByUID(42))
 
 class TestManualClassificationTargetBinning(unittest.TestCase):
     def test(self):
-        print('Start Target Binning Test')
         truncateTable('outgoing_manual')
 
         dao = OutgoingManualDAO(defaultConfigPath())
@@ -83,7 +80,6 @@ class TestManualClassificationTargetBinning(unittest.TestCase):
 
 class TestManualSubmitPendingTarget(unittest.TestCase):
     def test(self):
-        print('Start Submit Pending Test')
         # insert some targets
         dao = OutgoingManualDAO(defaultConfigPath())
 
@@ -129,7 +125,6 @@ class TestManualSubmitPendingTarget(unittest.TestCase):
 
 class TestManualSubmitAllPendingTargets(unittest.TestCase):
     def test(self):
-        print('Start Submit All Pending Test')
         truncateTable('outgoing_manual')
         dao = OutgoingManualDAO(defaultConfigPath())
 
@@ -156,5 +151,3 @@ class TestManualSubmitAllPendingTargets(unittest.TestCase):
         result = dao.submitAllPendingTargets()
         self.assertIsNotNone(result)
         self.assertEqual(len(result), 2) # should have 2 targets
-
-

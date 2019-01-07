@@ -31,19 +31,22 @@ class AuvsiOdlcDao():
         # get the path we'll be saving to:
         baseSubmittedPath = defaultSubmittedImgDir()
         if manual:
-            baseSubmittedPath += 'manual/'
+            baseSubmittedPath = os.path.join(baseSubmittedPath, 'manual')
         else:
-            baseSubmittedPath += 'autonomous/'
+            baseSubmittedPath = os.path.join(baseSubmittedPath, 'autonomous')
         
         if not os.path.exists(baseSubmittedPath):
             os.makedirs(baseSubmittedPath)
         
+        if targetClassification.type == 'standard':
+            self.KEYS_TO_EXCLUDE.append('description')
+
         outDict = targetClassification.toDict(exclude=self.KEYS_TO_EXCLUDE)
-        jsonFileOut = baseSubmittedPath + str(targetClassification.target) + '.json'
+        jsonFileOut = os.path.join(baseSubmittedPath, str(targetClassification.target) + '.json')
 
         extension = imgPath.rsplit('.', 1)[1].lower()
         fileName  = imgPath.rsplit('/', 1)[1]
-        newFileName = str(targetClassification.target) + extension
+        newFileName = str(targetClassification.target) + '.' + extension
 
         # write target info to dictionary
         with open(jsonFileOut, 'w') as f:
@@ -56,5 +59,4 @@ class AuvsiOdlcDao():
         dst_file = os.path.join(baseSubmittedPath, fileName)
         new_dst_file_name = os.path.join(baseSubmittedPath, newFileName)
         os.rename(dst_file, new_dst_file_name)
-
-        return None
+        return True
