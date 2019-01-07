@@ -93,7 +93,8 @@ class ClassificationDAO(BaseDAO):
         insertCls += insertClmnNames + insertClmnValues
 
         id = super(ClassificationDAO, self).getResultingId(insertCls, insertValues)
-        self.assignTargetBin(id)
+        if id  != -1:
+            self.assignTargetBin(id)
         return id
 
     def getClassificationByUID(self, id):
@@ -306,7 +307,6 @@ class ClassificationDAO(BaseDAO):
         for record in rawRecords:
             targetList.append(record[0])
 
-        print(targetList)
         return targetList
 
     def submitAllPendingTargets(self, modelGenerator):
