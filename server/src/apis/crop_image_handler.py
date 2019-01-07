@@ -1,5 +1,5 @@
 from flask import jsonify, make_response, send_file, abort, request
-from flask_restplus import Namespace, Resource, fields, marshal
+from flask_restplus import Namespace, Resource, fields
 from dao.manual_cropped_dao import ManualCroppedDAO
 from dao.model.manual_cropped import manual_cropped
 from dao.model.point import point
@@ -16,7 +16,7 @@ croppedImageModel = api.model('Crop Image Info', {
     'id': fields.Integer(description='Auto-generated id for the cropped image', example=1234),
     'image_id': fields.Integer(description='Id for the Raw image this crop came from. Image_id corresponds to the "id" column/value from a raw image / incoming_image table', example=12),
     'timestamp': fields.Float(description='Unix epoch UTC timestamp of when the image was submitted to the server (not particularly helpful)', example=1541063315.2),
-    'cropped_path': fields.String(description='SERVER-SIDE absolute path to the cropped image this data corresponds to', example='/Users/len0rd/code/auvsi/imaging/server/src/../images/9999/crop/051117-09_41_14_523.jpg'),
+    'cropped_path': fields.String(description='SERVER-SIDE absolute path to the cropped image this data corresponds to', example='/Users/len0rd/code/auvsi/imaging/server/src/images/9999/crop/051117-09_41_14_523.jpg'),
     'crop_coordinate_tl': fields.String(description='The top-left coordinate where the crop took place on the raw image. This coordinate corresponds to the top-left point of the bounding box used to define this cropped image. Coordinates are in pixels', example='(12345,12345)'),
     'crop_coordinate_br': fields.String(description='The bottom-right coordinate where the crop took place on the raw image. This coordinate corresponds to the bottom-right point of the bounding box used to define this cropped image. Coordinates are in pixels', example='(12999,66677)'),
     'crop_coordinate_tl.x': fields.Integer(description='The X component of the above top-left coordinate as an integer', example=12345),

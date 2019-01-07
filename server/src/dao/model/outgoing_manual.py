@@ -196,20 +196,29 @@ class outgoing_manual:
     def allProps(self):
         return ['id', 'crop_id', 'type', 'target', 'latitude', 'longitude', 'orientation', 'shape', 'background_color', 'alphanumeric', 'alphanumeric_color', 'description', 'submitted']
 
-    def toDict(self, exclude=None):
+    def toDict(self, exclude=None, include=None):
         """
         Return attributes contained in this model as a dictionary
 
         @type exclude: (string)
-        @param exclude: Attribute names to exclude from the generated result
+        @param exclude: Attribute names to exclude from the generated result. Exclude takes priority over include
+
+        @param include: (string)
+        @param include: as opposed to exclude, this allows you to specify only specific keys to include in the generated result
 
         @rtype: {string}
         @return: String dictionary of classification properties
+
         """
         dict = {}
         for attr, value in self.__dict__.items():
             corrected_name = attr[1:] # remove first underscore
+            
+            if exclude is not None and corrected_name in exclude:
+                continue
 
-            if exclude is None or corrected_name not in exclude:
+            if include is not None and corrected_name in include:
+                dict[corrected_name] = value
+            elif include is None:
                 dict[corrected_name] = value
         return dict

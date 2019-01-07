@@ -55,6 +55,7 @@ CREATE TABLE "public"."manual_cropped" (
   PRIMARY KEY ("id")
 );
 
+-- These enums ensure that classification values are only set to valid AUVSI values
 CREATE TYPE submit_status AS ENUM ('unsubmitted', 'inherited_submission', 'submitted');
 CREATE TYPE color_t AS ENUM ('white', 'black', 'gray', 'red', 'blue', 'green', 'yellow', 'purple', 'brown', 'orange');
 CREATE TYPE shape_t AS ENUM ('circle', 'semicircle', 'quarter_circle', 'triangle', 'square', 'rectangle', 'trapezoid', 'pentagon', 'hexagon', 'heptagon', 'octagon', 'star', 'cross');
@@ -82,6 +83,7 @@ CREATE TABLE "public"."outgoing_manual" (
 CREATE TABLE "public"."outgoing_autonomous" (
   id serial NOT NULL,
   image_id int NOT NULL,
+  crop_path text NOT NULL,
   target int, 
   type target_type_t,
   latitude real,
@@ -108,6 +110,7 @@ GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO imaging_server;
 ALTER DEFAULT PRIVILEGES FOR USER imaging_server IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO imaging_server;
 
 /* If you want to destroy the auvsi_imaging user here's how you do it: */
+-- DROP DATABASE auvsi;
 -- DROP OWNED BY imaging_server;
 -- REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA public FROM imaging_server;
 -- REVOKE ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public FROM imaging_server;

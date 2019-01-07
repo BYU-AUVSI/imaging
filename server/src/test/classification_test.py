@@ -123,6 +123,16 @@ class TestManualSubmitPendingTarget(unittest.TestCase):
         self.assertEqual(submissionResult.alphanumeric, 'A')
         self.assertEqual(submissionResult.shape, 'circle')
 
+        # make sure that when we submit another classification that belongs
+        # to the same target that its submitted state automatically goes to 
+        # 'inherited_submission'
+        testIns.crop_id = 45
+        resultingId = dao.addClassification(testIns)
+        self.assertNotEqual(resultingId, -1)
+        classResult = dao.getClassification(resultingId)
+        self.assertIsNotNone(classResult)
+        self.assertEqual(classResult.submitted, 'inherited_submission')
+
 class TestManualSubmitAllPendingTargets(unittest.TestCase):
     def test(self):
         truncateTable('outgoing_manual')

@@ -7,7 +7,8 @@ from .gps_handler import api as gps
 from .util_handler import api as util
 from .state_handler import api as state
 from .image_submit_handler import api as submit
-from .image_classification_handler import api as classification
+from .manual_image_classification_handler import api as manualClassification
+from .autonomous_image_classification_handler import api as autonomousClassification
 
 api = Api(
     # Api metadata
@@ -22,4 +23,5 @@ api.add_namespace(state)
 api.add_namespace(submit)
 api.add_namespace(rawImage)
 api.add_namespace(cropImage)
-api.add_namespace(classification)
+api.add_namespace(manualClassification)
+api.add_namespace(autonomousClassification)
