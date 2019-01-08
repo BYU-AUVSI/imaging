@@ -5,6 +5,7 @@ from test.test_helpers import truncateTable
 from dao.outgoing_manual_dao import OutgoingManualDAO
 from dao.model.outgoing_manual import outgoing_manual
 from dao.auvsi_odlc_file_dao import AuvsiOdlcDao
+from dao.model.outgoing_target import outgoing_target
 
 
 class TestManualAddClassification(unittest.TestCase):
@@ -34,7 +35,8 @@ class TestManualAddClassification(unittest.TestCase):
 
         imgPath = os.path.dirname(os.path.realpath(__file__)) + '/assets/star.png'
         
+        targetOut = outgoing_target(classOut, True)
         auvsiDao = AuvsiOdlcDao()
-        auvsiDao.addTarget(classOut, imgPath, True)
+        auvsiDao.addTarget(targetOut, imgPath)
 
 
