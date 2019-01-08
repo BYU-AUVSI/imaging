@@ -15,18 +15,17 @@ def allowedFileType(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def defaultConfigPath():
-    return os.path.abspath('../conf/config.ini')
+    return os.path.abspath(os.path.dirname(os.path.realpath(__file__)) + '/../conf/config.ini')
 
 def getLatestBaseImgDir():
     # root image dir:
-    rootImgDir = os.path.abspath('../images/')
+    rootImgDir = os.path.abspath(os.path.dirname(os.path.realpath(__file__)) + '/../images/')
     if not os.path.isdir(rootImgDir):
         os.makedirs(rootImgDir)
     latestSubDir = rootImgDir
 
     imgDirs = [d for d in os.listdir(rootImgDir) if os.path.isdir(os.path.join(rootImgDir, d))]
     imgDirs = [os.path.join(rootImgDir, dirname) for dirname in imgDirs]
-    print(f'IMG DIRSSS::: {imgDirs}')
     if not imgDirs:
         # if the directory is empty, create a folder with the current timestamp
         ts = str(int(time.time())) + '/'
