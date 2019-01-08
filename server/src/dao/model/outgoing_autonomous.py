@@ -17,16 +17,18 @@ class outgoing_autonomous:
         if tableValues is not None:
             self.id = tableValues[0]
             self.image_id = tableValues[1]
-            self.type = tableValues[2]
-            self.latitude = tableValues[3]
-            self.longitude = tableValues[4]
-            self.orientation = tableValues[5]
-            self.shape = tableValues[6]
-            self.background_color = tableValues[7]
-            self.alphanumeric = tableValues[8]
-            self.alphanumeric_color = tableValues[9]
-            self.description = tableValues[10]
-            self.submitted = tableValues[11]
+            self.crop_path = tableValues[2]
+            self.target = tableValues[3]
+            self.type = tableValues[4]
+            self.latitude = tableValues[5]
+            self.longitude = tableValues[6]
+            self.orientation = tableValues[7]
+            self.shape = tableValues[8]
+            self.background_color = tableValues[9]
+            self.alphanumeric = tableValues[10]
+            self.alphanumeric_color = tableValues[11]
+            self.description = tableValues[12]
+            self.submitted = tableValues[13]
         elif json is not None:
             for prop in self.allProps():
                 if prop in json:
@@ -54,6 +56,33 @@ class outgoing_autonomous:
     @image_id.setter
     def image_id(self, image_id):
         self._image_id = image_id
+
+    @property
+    def crop_path(self):
+        """
+        Filepath to where the autonomously cropped image is stored. The property is 
+        unique to outgoing_autonomous
+        """
+        return self._crop_path
+
+    @crop_path.setter
+    def crop_path(self, crop_path):
+        self._crop_path = crop_path
+
+    @property
+    def target(self):
+        """
+        Target Id this classification is being bundled into. Generally this is an internal
+        only column managed by the DAO, but can be manually modified if needed. Classifications
+        that are similar enough are placed into a 'target bin'. Since it is likely multiple images
+        will be taken of each target, this prevents us from submitting multiple images of the same
+        target to AUVSI.
+        """
+        return self._target
+
+    @target.setter
+    def target(self, target):
+        self._target = target
 
     @property
     def type(self):
@@ -178,22 +207,31 @@ class outgoing_autonomous:
 
     # TODO: this is hacky and i hate it
     def allProps(self):
-        return ['id', 'image_id', 'type', 'latitude', 'longitude', 'orientation', 'shape', 'background_color', 'alphanumeric', 'alphanumeric_color', 'description', 'submitted']
+        return ['id', 'image_id', 'crop_path', 'type', 'target', 'latitude', 'longitude', 'orientation', 'shape', 'background_color', 'alphanumeric', 'alphanumeric_color', 'description', 'submitted']
 
-    def toDict(self, exclude=None):
+    def toDict(self, exclude=None, include=None):
         """
         Return attributes contained in this model as a dictionary
 
         @type exclude: (string)
-        @param exclude: Attribute names to exclude from the generated result
+        @param exclude: Attribute names to exclude from the generated result. Exclude takes priority over include
+
+        @param include: (string)
+        @param include: as opposed to exclude, this allows you to specify only specific keys to include in the generated result
 
         @rtype: {string}
         @return: String dictionary of classification properties
+
         """
         dict = {}
         for attr, value in self.__dict__.items():
             corrected_name = attr[1:] # remove first underscore
+            
+            if exclude is not None and corrected_name in exclude:
+                continue
 
-            if exclude is None or corrected_name not in exclude:
-                dict[corrected_name] = value.__str__()
+            if include is not None and corrected_name in include:
+                dict[corrected_name] = value
+            elif include is None:
+                dict[corrected_name] = value
         return dict

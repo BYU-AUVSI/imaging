@@ -5,12 +5,27 @@ from dao.model.manual_cropped import manual_cropped
 from dao.model.point import point
 from config import defaultConfigPath, defaultCroppedImgPath, allowedFileType
 from werkzeug.utils import secure_filename
+from werkzeug.datastructures import FileStorage
 import os, time
 
 api  = Namespace('image/crop', description="All cropped image calls route through here")
 
 imageIDParser = api.parser()
 imageIDParser.add_argument('X-Image-Id', location='headers', type=int, required=True, help='Specify the associated image id for this image.')
+imageIDParser.add_argument('cropped_image', type=FileStorage, location='files', required=True, help='The cropped image file')
+
+croppedImageModel = api.model('Crop Image Info', {
+    'id': fields.Integer(description='Auto-generated id for the cropped image', example=1234),
+    'image_id': fields.Integer(description='Id for the Raw image this crop came from. Image_id corresponds to the "id" column/value from a raw image / incoming_image table', example=12),
+    'timestamp': fields.Float(description='Unix epoch UTC timestamp of when the image was submitted to the server (not particularly helpful)', example=1541063315.2),
+    'cropped_path': fields.String(description='SERVER-SIDE absolute path to the cropped image this data corresponds to', example='/Users/len0rd/code/auvsi/imaging/server/src/images/9999/crop/051117-09_41_14_523.jpg'),
+    'crop_coordinate_tl': fields.String(description='The top-left coordinate where the crop took place on the raw image. This coordinate corresponds to the top-left point of the bounding box used to define this cropped image. Coordinates are in pixels', example='(12345,12345)'),
+    'crop_coordinate_br': fields.String(description='The bottom-right coordinate where the crop took place on the raw image. This coordinate corresponds to the bottom-right point of the bounding box used to define this cropped image. Coordinates are in pixels', example='(12999,66677)'),
+    'crop_coordinate_tl.x': fields.Integer(description='The X component of the above top-left coordinate as an integer', example=12345),
+    'crop_coordinate_tl.y': fields.Integer(description='The Y component of the above top-left coordinate as an integer', example=12345),
+    'crop_coordinate_br.x': fields.Integer(description='The X component of the above bottom_right coordinate as an integer', example=12999),
+    'crop_coordinate_br.y': fields.Integer(description='The Y component of the above bottom_right coordinate as an integer', example=66677)
+})
 
 @api.route('/')
 class CroppedImageHandler(Resource):
@@ -103,6 +118,8 @@ class SpecificCroppedImageHandler(Resource):
 @api.doc(params={'crop_id': 'ID of the cropped image to update or get info on'}, required=True)
 class SpecificCroppedImageInfoHandler(Resource):
     @api.doc(description='Get information about a cropped image from the database.')
+    @api.response(200, 'OK', croppedImageModel)
+    @api.doc(responses={404: 'Failed to locate the given crop_id in the table'})
     def get(self, crop_id):
         dao = ManualCroppedDAO(defaultConfigPath())
         image = dao.getImage(crop_id)
@@ -112,7 +129,8 @@ class SpecificCroppedImageInfoHandler(Resource):
         return jsonify(image.toJsonResponse())
 
     @api.doc(description='Update information on the specified cropped image')
-    @api.doc()
+    @api.response(200, 'OK', croppedImageModel)
+    @api.doc(responses={400: 'Either: a) you didnt specify any values to update in the request body, b) you attempted to update image_id, or c) you attempted to update the id (aka crop_id)', 404: 'Failed to locate the given crop_id in the table'})
     def put(self, crop_id):
         content = request.get_json()
         if content is None:

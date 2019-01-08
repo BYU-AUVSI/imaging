@@ -11,7 +11,6 @@ class OutgoingManualDAO(ClassificationDAO):
     def __init__(self, configFilePath):
         super(OutgoingManualDAO, self).__init__(configFilePath, 'outgoing_manual', 'crop_id')
 
-
     def checkedReturn(self, rawResponse):
         if rawResponse is None:
             return None
@@ -76,18 +75,38 @@ class OutgoingManualDAO(ClassificationDAO):
     def getAllDistinct(self):
         return super(OutgoingManualDAO, self).getAllDistinct(self)
     
-    def getAllDistinctPending(self):
+    def getPendingTargets(self):
         """
+        See classification_dao docs
         Get images grouped by distinct targets pending submission (ei: submitted = false)
         """
-        return super(OutgoingManualDAO, self).getAllDistinct(self, whereClause=" submitted = FALSE ")
+        return super(OutgoingManualDAO, self).getAllTargets(self, whereClause=" submitted = 'unsubmitted' ")
+
+    def getSubmittedTarget(self, target):
+        return super(OutgoingManualDAO, self).getSubmittedClassification(self, target)
+
+    def submitAllPendingTargets(self):
+        """
+        See classification_dao docs
+        """
+        return super(OutgoingManualDAO, self).submitAllPendingTargets(self)
+
+    def submitPendingTarget(self, target):
+        """
+        See classification_dao docs
+        Submit the specified pending target to the judges.
+
+        @return: an outgoing_manual object that can be used to submit the final classification
+        """
+        return super(OutgoingManualDAO, self).submitPendingTargetClass(self, target)
+
+    def listTargetIds(self):
+        return super(OutgoingManualDAO, self).getAllTargetIDs()
 
     def newModelFromRow(self, row):
         """
         Kinda a reflective function for the classification dao. Pass self up
         to the super ClassificationDAO, and it calls this method to create the 
         proper model object in its response.
-
-        Not uber elegant, only used by getAllDistinct atm.
         """
         return outgoing_manual(row)

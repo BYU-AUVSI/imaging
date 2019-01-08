@@ -55,19 +55,27 @@ CREATE TABLE "public"."manual_cropped" (
   PRIMARY KEY ("id")
 );
 
+-- These enums ensure that classification values are only set to valid AUVSI values
+CREATE TYPE submit_status AS ENUM ('unsubmitted', 'inherited_submission', 'submitted');
+CREATE TYPE color_t AS ENUM ('white', 'black', 'gray', 'red', 'blue', 'green', 'yellow', 'purple', 'brown', 'orange');
+CREATE TYPE shape_t AS ENUM ('circle', 'semicircle', 'quarter_circle', 'triangle', 'square', 'rectangle', 'trapezoid', 'pentagon', 'hexagon', 'heptagon', 'octagon', 'star', 'cross');
+CREATE TYPE orientation_t AS ENUM ('N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW');
+CREATE TYPE target_type_t AS ENUM ('standard', 'off_axis', 'emergent');
+
 CREATE TABLE "public"."outgoing_manual" (
   id serial NOT NULL,
   crop_id int NOT NULL,
-  type text CHECK(type = 'standard' OR type = 'off_axis' OR type = 'emergent'),
+  target int,
+  type target_type_t,
   latitude real,
   longitude real,
-  orientation text CHECK(orientation = 'N' OR orientation = 'NE' OR orientation = 'E' OR orientation = 'SE' OR orientation = 'S' OR orientation = 'SW' OR orientation = 'W' OR orientation = 'NW'),
-  shape text CHECK(shape = 'circle' OR shape = 'semicircle' OR shape = 'quarter_circle' OR shape = 'triangle' OR shape = 'square' OR shape = 'rectangle' OR shape = 'trapezoid' OR shape = 'pentagon' OR shape = 'hexagon' OR shape = 'heptagon' OR shape = 'octagon' OR shape = 'star' OR shape = 'cross'),
-  background_color text CHECK(background_color = 'white' OR background_color = 'black' OR background_color = 'gray' OR background_color = 'red' OR background_color = 'blue' OR background_color = 'green' OR background_color = 'yellow' OR background_color = 'purple' OR background_color = 'brown' OR background_color = 'orange'),
+  orientation orientation_t,
+  shape shape_t,
+  background_color color_t,
   alphanumeric text,
-  alphanumeric_color text CHECK(alphanumeric_color = 'white' OR alphanumeric_color = 'black' OR alphanumeric_color = 'gray' OR alphanumeric_color = 'red' OR alphanumeric_color = 'blue' OR alphanumeric_color = 'green' OR alphanumeric_color = 'yellow' OR alphanumeric_color = 'purple' OR alphanumeric_color = 'brown' OR alphanumeric_color = 'orange'),
+  alphanumeric_color color_t,
   description text default '',
-  submitted boolean NOT NULL default FALSE,
+  submitted submit_status NOT NULL default 'unsubmitted',
   PRIMARY KEY ("id"),
   UNIQUE ("crop_id")
 );
@@ -75,16 +83,18 @@ CREATE TABLE "public"."outgoing_manual" (
 CREATE TABLE "public"."outgoing_autonomous" (
   id serial NOT NULL,
   image_id int NOT NULL,
-  type text CHECK(type = 'standard' OR type = 'off_axis' OR type = 'emergent'),
+  crop_path text NOT NULL,
+  target int, 
+  type target_type_t,
   latitude real,
   longitude real,
-  orientation text CHECK(orientation = 'N' OR orientation = 'NE' OR orientation = 'E' OR orientation = 'SE' OR orientation = 'S' OR orientation = 'SW' OR orientation = 'W' OR orientation = 'NW'),
-  shape text CHECK(shape = 'circle' OR shape = 'semicircle' OR shape = 'quarter_circle' OR shape = 'triangle' OR shape = 'square' OR shape = 'rectangle' OR shape = 'trapezoid' OR shape = 'pentagon' OR shape = 'hexagon' OR shape = 'heptagon' OR shape = 'octagon' OR shape = 'star' OR shape = 'cross'),
-  background_color text CHECK(background_color = 'white' OR background_color = 'black' OR background_color = 'gray' OR background_color = 'red' OR background_color = 'blue' OR background_color = 'green' OR background_color = 'yellow' OR background_color = 'purple' OR background_color = 'brown' OR background_color = 'orange'),
+  orientation orientation_t,
+  shape shape_t,
+  background_color color_t,
   alphanumeric text,
-  alphanumeric_color text CHECK(alphanumeric_color = 'white' OR alphanumeric_color = 'black' OR alphanumeric_color = 'gray' OR alphanumeric_color = 'red' OR alphanumeric_color = 'blue' OR alphanumeric_color = 'green' OR alphanumeric_color = 'yellow' OR alphanumeric_color = 'purple' OR alphanumeric_color = 'brown' OR alphanumeric_color = 'orange'),
+  alphanumeric_color color_t,
   description text default '',
-  submitted boolean NOT NULL default FALSE,
+  submitted submit_status NOT NULL default 'unsubmitted',
   PRIMARY KEY ("id")
 );
 
@@ -100,6 +110,7 @@ GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO imaging_server;
 ALTER DEFAULT PRIVILEGES FOR USER imaging_server IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO imaging_server;
 
 /* If you want to destroy the auvsi_imaging user here's how you do it: */
+-- DROP DATABASE auvsi;
 -- DROP OWNED BY imaging_server;
 -- REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA public FROM imaging_server;
 -- REVOKE ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public FROM imaging_server;

@@ -9,7 +9,7 @@ class OutgoingAutonomousDAO(ClassificationDAO):
     """
 
     def __init__(self, configFilePath):
-        super(OutgoingAutonomousDAO, self).__init__(configFilePath, 'outgoing_autonomous', 'image_id')
+        super(OutgoingAutonomousDAO, self).__init__(configFilePath, 'outgoing_autonomous', 'id')
 
     def checkedReturn(self, rawResponse):
         if rawResponse is None:
@@ -75,11 +75,33 @@ class OutgoingAutonomousDAO(ClassificationDAO):
     def getAllDistinct(self):
         return super(OutgoingAutonomousDAO, self).getAllDistinct(self)
 
-    def getAllDistinctPending(self):
+    def getPendingTargets(self):
         """
+        See classification_dao docs
         Get images grouped by distinct targets pending submission (ei: submitted = false)
         """
-        return super(OutgoingAutonomousDAO, self).getAllDistinct(self, whereClause="WHERE submitted=FALSE ")
+        return super(OutgoingAutonomousDAO, self).getAllTargets(self, whereClause=" submitted = 'unsubmitted' ")
+
+    def getSubmittedTarget(self, target):
+        return super(OutgoingAutonomousDAO, self).getSubmittedClassification(self, target)
+
+    def submitAllPendingTargets(self):
+        """
+        See classification_dao docs
+        """
+        return super(OutgoingAutonomousDAO, self).submitAllPendingTargets(self)
+
+    def submitPendingTarget(self, target):
+        """
+        See classification_dao docs
+        Submit the specified pending target to the judges.
+
+        @return: an outgoing_manual object that can be used to submit the final classification
+        """
+        return super(OutgoingAutonomousDAO, self).submitPendingTargetClass(self, target)
+
+    def listTargetIds(self):
+        return super(OutgoingAutonomousDAO, self).getAllTargetIDs()
 
     def newModelFromRow(self, row):
         """

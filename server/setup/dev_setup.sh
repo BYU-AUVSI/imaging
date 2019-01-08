@@ -36,10 +36,7 @@ pip install -r pip-requirements.txt
 if [ ${machine} = "Linux" ]; then
     workDir=$PWD
     # setup db as postgres
-    sudo -i -u postgres bash << EOF
-    cd $workDir
-    psql -f setup_database.sql
-    EOF
+    sudo -u postgres -H sh -c "cd $workDir; psql -f setup_database.sql" 
 else
     # on mac just run it like this
     psql -f setup_database.sql
