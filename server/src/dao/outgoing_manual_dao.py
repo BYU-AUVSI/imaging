@@ -82,6 +82,9 @@ class OutgoingManualDAO(ClassificationDAO):
         """
         return super(OutgoingManualDAO, self).getAllTargets(self, whereClause=" submitted = 'unsubmitted' ")
 
+    def getSubmittedTarget(self, target):
+        return super(OutgoingManualDAO, self).getSubmittedClassification(self, target)
+
     def submitAllPendingTargets(self):
         """
         See classification_dao docs
@@ -96,6 +99,9 @@ class OutgoingManualDAO(ClassificationDAO):
         @return: an outgoing_manual object that can be used to submit the final classification
         """
         return super(OutgoingManualDAO, self).submitPendingTargetClass(self, target)
+
+    def listTargetIds(self):
+        return super(OutgoingManualDAO, self).getAllTargetIDs()
 
     def newModelFromRow(self, row):
         """

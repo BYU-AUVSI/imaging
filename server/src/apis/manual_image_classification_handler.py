@@ -6,10 +6,13 @@ from config import defaultConfigPath
 
 api = Namespace('image/class/manual', description='Image classification calls for manual clients route through here')
 
+cropIDParser = api.parser()
+cropIDParser.add_argument('X-Crop-Id', location='headers', type=int, required=True, help='The cropped_id this classification is associated with')
+
 # for documentation purposes. Defines the response for some of the methods below
 classificationModel = api.model('Manual Classification', {
     'target': fields.Integer(required=False, description='which target number this is. This field is automatically managed by the server. It groups classifications together based on alphanumeric, shape and type', example=1),
-    'image_id': fields.Integer(reqired=True, description='Id of the cropped image this classification originally comes from', example=123),
+    'crop_id': fields.Integer(reqired=True, description='Id of the cropped image this classification originally comes from', example=123),
     'type': fields.String(required=False, description='Classification type(standard, off_axis, or emergent)', example="standard"),
     'latitude': fields.Float(required=False, description='Latitude coordinate of object', example=40.246354),
     'longitude': fields.Float(required=False, description='longitude coordinate of object', example=-111.647553),
@@ -44,13 +47,16 @@ class AllClassificationsHandler(Resource):
 class ClassifiedImageHandler(Resource):
     @api.doc(description='Automatically add a new classifcation to the server')
     @api.doc(responses={200:'OK', 400:'Improper image post', 500: 'Something failed server-side'})
-    @api.header('X-Class-Id', 'Crop ID of the image if successfully inserted. This WILL be different from the Image-ID provided in the request')
+    # @api.doc(body=classificationModel)
+    # @api.expect(cropIDParser)
+    @api.expect(classificationModel)
+    @api.header('X-Class-Id', 'Classification ID of the image if successfully inserted. This WILL be different from the Crop-ID provided in the request')
     def post(self):
         prevId = -1
-        if 'X-Prev-Id' in request.headers:
-            prevId = request.headers.get('X-Prev-Id')
+        if 'X-Crop-Id' in request.headers:
+            prevId = request.headers.get('X-Crop-Id')
         else:
-            abort(400, "Need to specify header 'X-Prev-Id'!")
+            abort(400, "Need to specify header 'X-Crop-Id'!")
 
         dao = OutgoingManualDAO(defaultConfigPath())
         
@@ -76,21 +82,19 @@ class SpecificClassificationHandler(Resource):
     def get(self, class_id):
 
         dao = OutgoingManualDAO(defaultConfigPath())
-
         result = dao.getClassification(class_id)
         if result is None:
             return {'message': 'Failed to locate classification with id {}'.format(class_id)}, 404
-
         return jsonify(result.toDict())
 
 
     @api.doc(description='Update information for the specified classification entry')
     @api.response(200, 'OK', classificationModel)
-    @api.doc(responses={400:'X-Manual header not specified', 404:'Could not find classification with given ID'})
+    @api.doc(body=classificationModel)
+    @api.doc(responses={404:'Could not find classification with given ID'})
     def put(self, class_id):
 
         dao = OutgoingManualDAO(defaultConfigPath())
-
         result = dao.updateClassification(class_id, request.get_json())
         if result is None:
             return {'message': 'No image with id {} found with a classification to update or your input was invalid (or was there a server error?)'.format(class_id)}, 404

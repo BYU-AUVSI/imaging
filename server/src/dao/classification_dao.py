@@ -338,7 +338,7 @@ class ClassificationDAO(BaseDAO):
                 allSubmitted.append(resultModel)
         
         if not allSubmitted:
-            print(f'Failed to submit all the targets in this list: {unsubmittedTargetIds}')
+            print('Failed to submit all the targets in this list: {}'.format(unsubmittedTargetIds))
             return None
 
         return allSubmitted
@@ -428,6 +428,24 @@ class ClassificationDAO(BaseDAO):
         finalModel.alphanumeric_color = self.findMostCommonValue(allClass, 4)
 
         return finalModel
+
+    def resetTargetSubmissionStatus(self, target):
+        """
+        Resets all classifications for the given target to an 'unsubmitted' state.
+        This is useful if something at a higher level fails and the target in fact failed
+        to submit
+
+        @type target: int
+        @param target: the target_id to reset
+        """
+
+        resetTargetSql = "UPDATE " + self.outgoingTableName + """
+            SET submitted = 'unsubmitted' 
+            WHERE target = %s;"""
+
+        cur = self.conn.cursor()
+        cur.execute(resetTargetSql, (target,))
+        cur.close()      
 
     def calcClmnAvg(self, classifications, clmnNum):
         """

@@ -5,12 +5,14 @@ from dao.model.manual_cropped import manual_cropped
 from dao.model.point import point
 from config import defaultConfigPath, defaultCroppedImgPath, allowedFileType
 from werkzeug.utils import secure_filename
+from werkzeug.datastructures import FileStorage
 import os, time
 
 api  = Namespace('image/crop', description="All cropped image calls route through here")
 
 imageIDParser = api.parser()
 imageIDParser.add_argument('X-Image-Id', location='headers', type=int, required=True, help='Specify the associated image id for this image.')
+imageIDParser.add_argument('cropped_image', type=FileStorage, location='files', required=True, help='The cropped image file')
 
 croppedImageModel = api.model('Crop Image Info', {
     'id': fields.Integer(description='Auto-generated id for the cropped image', example=1234),

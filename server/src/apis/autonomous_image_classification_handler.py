@@ -1,5 +1,6 @@
 import os, time
 from werkzeug.utils import secure_filename
+from werkzeug.datastructures import FileStorage
 from config import defaultConfigPath, defaultCroppedImgPath, allowedFileType
 from flask import request, jsonify, abort, make_response
 from flask_restplus import Namespace, Resource, fields
@@ -11,6 +12,7 @@ api = Namespace('image/class/autonomous', description="Image classification call
 
 imageIDParser = api.parser()
 imageIDParser.add_argument('X-Image-Id', location='headers', type=int, required=True, help='The original raw image_id this classification comes from')
+imageIDParser.add_argument('cropped_image', type=FileStorage, location='files', required=True, help='The cropped image file')
 
 # for documentation purposes. Defines the response for some of the methods below
 classificationModel = api.model('Autonomous Classification', {
@@ -91,7 +93,7 @@ class AutonomousClassificationImageHandler(Resource):
         return response
 
 
-@api.route('/<int:class_id>')
+@api.route('/<int:class_id>/info')
 @api.doc(params={'class_id': 'Classification ID of the classification entry to update or get info on'}, required=True)
 class AutonomousSpecificClassificationHandler(Resource):
 
@@ -107,7 +109,6 @@ class AutonomousSpecificClassificationHandler(Resource):
             return {'message': 'Failed to locate classification with id {}'.format(class_id)}, 404
 
         return jsonify(result.toDict())
-
 
     @api.doc(description='Update information for the specified classification entry')
     @api.response(200, 'OK', classificationModel)
