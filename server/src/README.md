@@ -6,7 +6,11 @@ There are two main scripts that are run here:
 
 `ros_ingest.py` Runs the ingester, which connects ROS to the database. It subscribes to appropriate ros_topics and then pushes their messages into a database using the appropriate DAO.
 
+## Other useful stuff
+
 `test.py` Is a supplemental script used to run unit tests. Should be run when changes are made to dao modules, or from a continuous integration platform
+
+`generate_api_tests.py` Generates the `postman_import.json` file which can be imported as a collection into [Postman](https://www.getpostman.com). The collection will have all the possible endpoints and should make it easy for you to plug in values and test them out. The root page of the server (http://localhost:5000) uses swagger which also supports some quick-and-dirty testing.
 
 ## Structure
 

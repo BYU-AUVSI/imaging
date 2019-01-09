@@ -425,7 +425,7 @@ class ClassificationDAO(BaseDAO):
         result = super(ClassificationDAO, self).basicTopSelect(getSubmittedClass, (target,))
 
         if result is None:
-            print(f'Failed to retrieve submitted classification for target {target}')
+            print('Failed to retrieve submitted classification for target {}'.format(target))
             return None
         
         finalModel = modelGenerator.newModelFromRow(result)
@@ -436,7 +436,7 @@ class ClassificationDAO(BaseDAO):
 
         if allClass is None or not allClass or not allClass[0]:
             # this should never happen
-            print(f'Failed to retrieve all classifications for target {target}')
+            print('Failed to retrieve all classifications for target {}'.format(target))
             return finalModel
 
         # Average it out!

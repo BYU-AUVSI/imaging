@@ -37,7 +37,7 @@ class RosIngester:
         self.gps_msg_ = incoming_gps()
         # imageing ingestion setup:
         self.img_dao_ = IncomingImageDAO(configPath)
-        self.img_subscriber_ = rospy.Subscriber("/other_camera/image_raw/compressed", CompressedImage, self.imgCallback,  queue_size = 10)
+        self.img_subscriber_ = rospy.Subscriber("/a6000_ros_node/img/compressed", CompressedImage, self.imgCallback,  queue_size = 10)
         self.img_msg_ = incoming_image()
         self.img_msg_.manual_tap = False
         self.img_msg_.autonomous_tap = False
