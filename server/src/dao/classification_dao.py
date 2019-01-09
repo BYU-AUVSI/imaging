@@ -385,6 +385,25 @@ class ClassificationDAO(BaseDAO):
 
         return self.getSubmittedClassification(modelGenerator, target)
 
+    def getAllSubmittedClassification(self, modelGenerator):
+        """
+        Get all classification values that are marked as submitted.
+        Note this uses #getSubmittedClassification(), so all it's implications
+        (described in its docs) hold here
+        """
+        submittedTargets = self.getAllTargetIDs(whereClause=" submitted = 'submitted' ")
+
+        if submittedTargets is None or not submittedTargets:
+            return []
+
+        submittedClassifications = []
+        for target in submittedTargets:
+            subClass = self.getSubmittedClassification(modelGenerator, target)
+            if subClass is not None:
+                submittedClassifications.append(subClass)
+        
+        return submittedClassifications
+
     def getSubmittedClassification(self, modelGenerator, target):
         """
         Get the classification that was submitted for this target.

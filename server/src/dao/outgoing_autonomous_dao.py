@@ -85,6 +85,9 @@ class OutgoingAutonomousDAO(ClassificationDAO):
     def getSubmittedTarget(self, target):
         return super(OutgoingAutonomousDAO, self).getSubmittedClassification(self, target)
 
+    def getSubmittedTargets(self):
+        return super(OutgoingAutonomousDAO, self).getAllSubmittedClassification(self)
+
     def submitAllPendingTargets(self):
         """
         See classification_dao docs

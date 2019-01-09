@@ -82,6 +82,9 @@ class OutgoingManualDAO(ClassificationDAO):
         """
         return super(OutgoingManualDAO, self).getAllTargets(self, whereClause=" submitted = 'unsubmitted' ")
 
+    def getSubmittedTargets(self):
+        return super(OutgoingManualDAO, self).getAllSubmittedClassification(self)
+
     def getSubmittedTarget(self, target):
         return super(OutgoingManualDAO, self).getSubmittedClassification(self, target)
 
