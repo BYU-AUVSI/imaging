@@ -1,0 +1,37 @@
+name: img_srv
+channels:
+  - defaults
+dependencies:
+  - ca-certificates=2018.03.07=0
+  - certifi=2018.11.29=py37_0
+  - krb5=1.16.1=hddcf347_7
+  - libcxx=4.0.1=hcfea43d_1
+  - libcxxabi=4.0.1=hcfea43d_1
+  - libedit=3.1.20170329=hb402a30_2
+  - libffi=3.2.1=h475c297_4
+  - libpq=11.1=h051b688_0
+  - ncurses=6.1=h0a44026_1
+  - openssl=1.1.1a=h1de35cc_0
+  - pip=18.1=py37_0
+  - psycopg2=2.7.6.1=py37ha12b0ac_0
+  - python=3.7.2=haf84260_0
+  - readline=7.0=h1de35cc_5
+  - setuptools=40.6.3=py37_0
+  - sqlite=3.26.0=ha441bb4_0
+  - tk=8.6.8=ha441bb4_0
+  - wheel=0.32.3=py37_0
+  - xz=5.2.4=h1de35cc_4
+  - zlib=1.2.11=h1de35cc_3
+  - pip:
+    - aniso8601==4.1.0
+    - click==7.0
+    - flask==1.0.2
+    - flask-restplus==0.12.1
+    - itsdangerous==1.1.0
+    - jinja2==2.10
+    - jsonschema==2.6.0
+    - markupsafe==1.1.0
+    - pytz==2018.9
+    - six==1.12.0
+    - werkzeug==0.14.1
+prefix: /anaconda3/envs/img_srv
