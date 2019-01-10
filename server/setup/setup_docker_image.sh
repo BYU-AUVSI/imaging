@@ -26,6 +26,6 @@ if [ ${machine} = "Linux" ]; then
     read -p "Edit crontab? (Y/N)" confirm
     if [ $confirm = "Y" -o $confirm = "y" ]; then
         # copy command into crontab and set it to run @reboot
-        echo "@reboot docker run --network host --interactive --tty -e ROS_MASTER_URI=\"$ROS_MASTER_URI\" --publish 5000:5000 --name imaging-server byuauvsi/imaging_server" | sudo tee -a /var/spool/cron/crontabs/$USER
+        echo "@reboot docker run --network host --interactive --tty -e ROS_MASTER_URI=\"\$ROS_MASTER_URI\" --publish 5000:5000 --name imaging-server byuauvsi/imaging_server" | sudo tee -a /var/spool/cron/crontabs/$USER
     fi
 fi
