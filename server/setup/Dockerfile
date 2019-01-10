@@ -45,21 +45,6 @@ RUN wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-k
     && apt-get update \
     && apt-get install -y postgresql postgresql-contrib
 
-# installing python3.7 on ubuntu 16.04
-# is a bit of a pain, but can be done with this stuff:
-# wholllle ton of lib dependencies for python3.7
-# RUN apt-get install -y \
-#     python3-dev \
-#     python3-setuptools zlib1g-dev libbz2-dev libc6-dev libgdbm-dev tk-dev libsqlite3-dev libssl-dev libncursesw5-dev libreadline-gplv2-dev openssl libffi-dev
-# RUN mkdir -p /tmp/python37
-# WORKDIR /tmp/python37
-# RUN wget https://www.python.org/ftp/python/3.7.0/Python-3.7.0.tar.xz && \
-#     tar xvf Python-3.7.0.tar.xz && \
-#     cd Python-3.7.0 && \
-#     ./configure && \
-#     make altinstall && \
-#     pip3.7 install -U pip
-
 #===============================
 # SECTION 2: ROS DEPENDENCIES
 #===============================
@@ -102,7 +87,7 @@ RUN pip install -r pip-requirements.txt
 # run our postgres setup script
 USER postgres
 RUN /etc/init.d/postgresql start \
-    && psql -f /opt/catkin_ws/src/server/setup/setup_database.sql
+    && psql -f /opt/catkin_ws/src/server/setup/internal/setup_database.sql
 
 #===============================
 # SECTION 4: STARTUP
