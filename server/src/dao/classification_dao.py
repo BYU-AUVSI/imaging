@@ -137,6 +137,24 @@ class ClassificationDAO(BaseDAO):
         selectedClass = super(ClassificationDAO, self).basicTopSelect(selectClsById, (id,))
         return selectedClass
 
+    def removeClassification(self, id):
+        """
+        Remove the classification with the specified TABLE id from the tabl.
+        This is useful if a classification is painfully wrong, and you dont want it
+        to have any effect on the final submission.
+
+        @type id: int
+        @param id: The table id of the classification to retrieve.
+
+        @rtype: boolean
+        @return: True if the classification was successfully removed, otherwise False
+        """
+        removeSql = "DELETE FROM " + self.outgoingTableName + " WHERE id = %s;"
+
+        rcount = super(ClassificationDAO, self).getNumAffectedRows(removeSql, (id,))
+
+        return rcount > 0
+
     def getAll(self):
         """
         Get all the images currently in this table

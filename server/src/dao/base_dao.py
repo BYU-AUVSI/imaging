@@ -113,3 +113,28 @@ class BaseDAO(object):
             print(error)
             return None
 
+    def getNumAffectedRows(self, stmt, values):
+        """
+        Get the number of rows affected by the given query.
+        This is particularly useful for bulk updates or deletes
+        to verify that the correct number of rows were affected
+
+        @type stmt: string
+        @param stmt: Sql statement string to run
+
+        @type values: [object]
+        @param values: List of objects (generally int, float and string), to safely place in the 
+                       sql statement.
+
+        @rtype: int
+        @return: Number of rows affected by the query if successful, otherwise -1
+        """
+        try:
+            cur = self.conn.cursor()
+            cur.execute(stmt, values)
+            rowcount = cur.rowcount
+            cur.close()
+            return rowcount
+        except (Exception) as error:
+            print(error)
+            return -1

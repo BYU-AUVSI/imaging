@@ -133,6 +133,43 @@ class TestManualSubmitPendingTarget(unittest.TestCase):
         self.assertIsNotNone(classResult)
         self.assertEqual(classResult.submitted, 'inherited_submission')
 
+class TestManualClassificationRemoval(unittest.TestCase):
+    def test(self):
+        # insert some targets
+        dao = OutgoingManualDAO(defaultConfigPath())
+
+        truncateTable('outgoing_manual')
+
+        # make sure if fails when we try and remove on empty table:
+        deleteResult = dao.removeClassification(100)
+        self.assertFalse(deleteResult)
+        
+        testIns = outgoing_manual()
+        testIns.crop_id = 42
+        testIns.latitude = 40.111
+        testIns.longitude = -111.111
+        testIns.orientation = 'N'
+        testIns.shape = 'circle'
+        testIns.background_color = 'white'
+        testIns.alphanumeric = 'A'
+        testIns.alphanumeric_color = 'black'
+        resultingId = dao.addClassification(testIns)
+        self.assertIsNot(resultingId, -1)
+
+        testIns.crop_id = 44
+        otherId = dao.addClassification(testIns)
+        self.assertNotEqual(otherId, -1)
+
+        # make sure it doesn't delete everything:
+        deleteResult = dao.removeClassification(otherId + 5) # give bogus id that should fail
+        self.assertFalse(deleteResult)
+        self.assertEqual(len(dao.getAll()), 2) # make sure there's still 2 records
+
+        deleteResult = dao.removeClassification(resultingId)
+        self.assertTrue(deleteResult)
+        self.assertEqual(len(dao.getAll()), 1) # should still be 1 record left
+        self.assertIsNotNone(dao.getClassification(otherId)) # make sure the otherId wasn't deleted on accident
+
 class TestManualSubmitAllPendingTargets(unittest.TestCase):
     def test(self):
         truncateTable('outgoing_manual')
