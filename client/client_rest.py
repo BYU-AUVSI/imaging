@@ -43,9 +43,12 @@ class CropInfo:
     the path of the cropped image, whether or not the cropped image has been seen by the imaging system,
     and the timestamp of the original image.
     """
-    def __init__(self, imgId, tl, br, path, isTapped, ts):
+    def __init__(self, cropId, imgId, tl, br, path, isTapped, ts):
         """
         The constructor for the CropInfo class.
+
+        @type  cropId: int
+        @param cropId: unique id of the cropped image
 
         @type  imgId: int
         @param imgId: the id of the original image
@@ -68,6 +71,7 @@ class CropInfo:
         @rtype:  None
         @return: None
         """
+        self.cropId = cropId
         self.imgId = imgId
         self.tl = tl
         self.br = br
@@ -311,24 +315,24 @@ class ImagingInterface:
             print("Server returned status code {}".format(imgInfoResp.status_code))
             return None
 
-    def getCroppedImage(self, imageId):
+    def getCroppedImage(self, cropId):
         """
         Retrieves a cropped image of the image from the server given the imageId.
 
-        @type  imageId: int
-        @param imageId: the id of the image
+        @type  cropId: int
+        @param cropId: the id of the image
 
         @rtype:  (Image, int)
         @return: a tuple of a pillow Image and the image id if the image with that id is cropped, otherwise None
         """
-        self.debug("getCroppedImage(id={})".format(imageId))
-        img = requests.get(self.url + "/image/crop/" + str(imageId), headers={'X-Manual': 'True'})
+        self.debug("getCroppedImage(id={})".format(cropId))
+        img = requests.get(self.url + "/image/crop/" + str(cropId), headers={'X-Manual': 'True'})
         self.debug("response code:: {}".format(img.status_code))
         if img.status_code != 200:
             # if we didnt get a good status code
             print("Server returned status code {}".format(img.status_code))
             return None
-        return Image.open(BytesIO(img.content)), imageId
+        return Image.open(BytesIO(img.content)), cropId
 
     def getNextCroppedImage(self):
         """
@@ -348,13 +352,13 @@ class ImagingInterface:
                 print("Server returned status code {}".format(img.status_code))
                 return None
 
-            imageId = int(img.headers['X-Image-Id'])
+            cropId = int(img.headers['X-Crop-Id'])
             if len(self.cropIds) >= self.numIdsStored:
                 self.cropIds.pop(0)
 
-            self.cropIds.append(imageId)
-            self.debug("Image ID:: {}".format(imageId))
-            return Image.open(BytesIO(img.content)), imageId
+            self.cropIds.append(cropId)
+            self.debug("Crop ID:: {}".format(cropId))
+            return Image.open(BytesIO(img.content)), cropId
         else:
             return self.getCroppedImage(self.cropIds[self.cropIdIndex])
 
@@ -375,35 +379,36 @@ class ImagingInterface:
                 self.cropIdIndex = -1 * (len(self.cropIds)+1)
                 return None
             else: # else get the previous
-                imageId = self.cropIds[self.cropIdIndex]
-                return self.getCroppedImage(imageId)
+                cropId = self.cropIds[self.cropIdIndex]
+                return self.getCroppedImage(cropId)
         else:
             self.debug("We haven't gotten any images yet")
             return None
 
-    def getCroppedImageInfo(self, imageId):
+    def getCroppedImageInfo(self, cropId):
         """
         Retrieves information about a cropped image from the server given the image id.
 
-        @type  imageId: int
-        @param imageId: the id of the image of interest
+        @type  cropId: int
+        @param cropId: the id of the image of interest
 
         @rtype:  CropInfo
         @return: an object that contains the information about the given cropped image
             if it exists and connects to the server, otherwise None
         """
-        self.debug("getCroppedImageInfo(id={})".format(imageId))
-        cropInfoResp = requests.get(self.url + "/image/crop/" + str(imageId) + "/info")
+        self.debug("getCroppedImageInfo(id={})".format(cropId))
+        cropInfoResp = requests.get(self.url + "/image/crop/" + str(cropId) + "/info")
         if cropInfoResp.status_code == 200:
             self.debug("response code:: {}".format(cropInfoResp.status_code))
             info_j = json.loads(cropInfoResp.content.decode('utf-8'))
             # tl = info_j['crop_coordinate_tl']
             # br = info_j['crop_coordinate_br']
-            return CropInfo(imageId,
+            return CropInfo(cropId,
+                            info_j['image_id'],
                             [info_j['crop_coordinate_tl.x'], info_j['crop_coordinate_tl.y']],
                             [info_j['crop_coordinate_br.x'], info_j['crop_coordinate_br.y']],
                             info_j['cropped_path'],
-                            info_j['tapped'].lower() == 'true',
+                            info_j['tapped'],
                             float(info_j['time_stamp']))
         else:
             print("Server returned status code {}".format(cropInfoResp.status_code))
@@ -426,13 +431,14 @@ class ImagingInterface:
         cropInfoList_j = json.loads(resp.content.decode('utf-8'))
         for i in range(len(cropInfoList_j)):
             cropInfoList.append(CropInfo(
+                                int(cropInfoList_j[i]['id']),
                                 int(cropInfoList_j[i]['image_id']),
                                 [cropInfoList_j[i]['crop_coordinate_tl.x'],
                                 cropInfoList_j[i]['crop_coordinate_tl.y']],
                                 [cropInfoList_j[i]['crop_coordinate_br.x'],
                                 cropInfoList_j[i]['crop_coordinate_br.y']],
                                 cropInfoList_j[i]['cropped_path'],
-                                cropInfoList_j[i]['tapped'].lower() == 'true',
+                                cropInfoList_j[i]['tapped'],
                                 float(cropInfoList_j[i]['time_stamp'])))
         return cropInfoList
 
@@ -663,6 +669,7 @@ if __name__ == "__main__":
     # interface = ImagingInterface(host="192.168.1.48", isDebug=True)
     # imgId = 2
     infoList = interface.getAllCroppedInfo()
+    info = interface.getCroppedImageInfo(84)
     query = interface.getRawImage(5)
 
     print("Done")
