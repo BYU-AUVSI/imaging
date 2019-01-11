@@ -80,9 +80,8 @@ RUN source /opt/ros/kinetic/setup.bash && \
 #===============================
 # get python3 dependencies
 WORKDIR /opt/catkin_ws/src/server/setup
-# RUN pip3.7 install -r pip-requirements.txt
-RUN pip3 install -r pip-requirements.txt
-RUN pip install -r pip-requirements.txt
+RUN pip3 install -r internal/pip-requirements.txt
+RUN pip install -r internal/pip-requirements.txt
 
 # run our postgres setup script
 USER postgres
@@ -92,11 +91,7 @@ RUN /etc/init.d/postgresql start \
 #===============================
 # SECTION 4: STARTUP
 #===============================
-# TODO: need to source catkin_ws and start ros_ingestor
 USER root
 COPY server/setup/internal/supervisor.conf /etc/supervisor/conf.d/supervisord.conf
 WORKDIR /opt/catkin_ws/src/server/src
-# ENTRYPOINT [ "bash" ]
-# CMD ["/usr/bin/supervisord"]
 CMD ["/opt/catkin_ws/src/server/setup/internal/docker_startup.sh"]
-# CMD [ "python3", "/opt/catkin_ws/src/server/src/server.py", "--host", "0.0.0.0" ]
