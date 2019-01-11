@@ -1,5 +1,5 @@
 from flask import jsonify, request
-from flask_restplus import Namespace, Resource, inputs
+from flask_restplus import Namespace, Resource, inputs, fields
 from dao.outgoing_manual_dao import OutgoingManualDAO
 from dao.outgoing_autonomous_dao import OutgoingAutonomousDAO
 from dao.model.outgoing_manual import outgoing_manual
@@ -13,8 +13,19 @@ from apis.helper_methods import checkXManual, getClassificationDAO
 
 api = Namespace('image/submit', description='Image submission helpers')
 
+# for documentation purposes. Defines potential input for target submit POST
+classificationModel = api.model('Target Classification Choices', {
+    'crop_id': fields.Integer(reqired=False, description='[optional] CLASSIFICATION_ID, of the classification that has the crop_id to use for target submission', example=12),
+    'orientation': fields.Integer(required=False, description='[optional] Classification id of the classification that has the orientation value we want to use for target submission', example=14),
+    'shape': fields.Integer(required=False, description='[optional] Classification id of the classification that has the shape value we want to use for target submission', example=12),
+    'background_color': fields.Integer(required=False, description='[optional] Classification id of the classification that has the background_color value we want to use for target submission', example=15),
+    'alphanumeric_color': fields.Integer(required=False, description='[optional] Classification id of the classification that has the alphanumeric_color value we want to use for target submission', example=13),
+    'description': fields.Integer(required=False, description='[optional][emergent-only] Classification id of the classification with the description we want to use for target submission', example=15)
+})
+
 classificationParser = api.parser()
 classificationParser.add_argument('X-Manual', location='headers', type=inputs.boolean, required=True, help="Specify whether this request is for manual or autonomous submissions")
+
 
 @api.route('/pend')
 @api.expect(classificationParser)
@@ -57,7 +68,20 @@ class SubmissionHandler(Resource):
 
     @api.doc(description="""Submit the specified target. Returns that target information that was submitted 
         after averaging all the classification values for the target. The structure of the returned json depends
-        on the type of target submitted""")
+        on the type of target submitted.\n
+        NOTE: Optionally, this request also accepts a json payload, where you can specify the classification_ids of target features you want to use.
+        ie: if the orientation held by classification 12 is correct for this target, you can tell the server to not average values,
+        but to instead just use classification 12's orientation value for the final target submission. The payload would look something like this:\n
+        {
+            "crop_id": 13,
+            "orientation": 12,
+            "shape": 15,
+            "background_color": 13,
+            "alphanumeric_color": 14,
+            "description": 15
+        }
+        Note all these values are optional. and 'crop_id' is in fact the CLASSIFICATION_ID that has the crop_id you want to use (confusing, but consistent). 
+        Description will only be used for the emergent object.""")
     @api.expect(classificationParser)
     @api.doc(responses={200:'OK', 400:'X-Manual header not specified', 404: 'Failed to find any targets with the given id waiting to be submitted'})
     def post(self, target_id):
