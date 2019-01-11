@@ -482,7 +482,7 @@ class ClassificationDAO(BaseDAO):
                     finalModel.description = descVal
                        
             keys = ['orientation', 'background_color', 'alphanumeric_color']
-            for i in len(keys):
+            for i in range(len(keys)):
                 sqlClmn = i + 4 # add offset so we know the clmn index for the all class list above
                 if keys[i] in optionalSpecs and optionalSpecs[keys[i]] is not None:
                     # get it

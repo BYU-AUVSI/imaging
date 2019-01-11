@@ -198,3 +198,56 @@ class TestManualSubmitAllPendingTargets(unittest.TestCase):
         result = dao.submitAllPendingTargets()
         self.assertIsNotNone(result)
         self.assertEqual(len(result), 2) # should have 2 targets
+
+class TestManualSubmitPendingTargetWithClassSpecs(unittest.TestCase):
+    def test(self):
+        truncateTable('outgoing_manual')
+        dao = OutgoingManualDAO(defaultConfigPath())
+
+        # at this point we should've already passed a bunch of tests
+        # relating to target submission above, so we can just test the
+        # classification specification feature here
+
+        testIns = outgoing_manual()
+        testIns.crop_id = 42
+        testIns.latitude = 40.111
+        testIns.longitude = -111.111
+        testIns.orientation = 'N'
+        testIns.shape = 'circle'
+        testIns.background_color = 'white'
+        testIns.alphanumeric = 'A'
+        testIns.alphanumeric_color = 'black'
+        firstClass = dao.addClassification(testIns)
+        self.assertNotEqual(firstClass, -1)
+
+        testIns.crop_id = 43
+        testIns.latitude = 40.222
+        testIns.longitude = -111.222
+        testIns.orientation = 'NE'
+        testIns.background_color = 'orange'
+        secondClass = dao.addClassification(testIns)
+        self.assertNotEqual(secondClass, -1)
+
+        testIns.crop_id = 44
+        testIns.latitude = 40.333
+        testIns.longitude = -111.333
+        testIns.alphanumeric_color = 'white'
+        thirdClass = dao.addClassification(testIns)
+        self.assertNotEqual(thirdClass, -1)
+
+        specs = {'orientation': secondClass,
+                'crop_id': firstClass,
+                'alphanumeric_color':thirdClass}
+
+        classResult = dao.getClassification(secondClass)
+        submissionResult = dao.submitPendingTarget(classResult.target, specs)
+
+        self.assertIsNotNone(submissionResult)
+
+        self.assertEqual(submissionResult.orientation, 'NE')
+        self.assertEqual(submissionResult.crop_id, 42)
+        self.assertEqual(submissionResult.alphanumeric_color, 'white')
+        self.assertEqual(submissionResult.background_color, 'orange')
+        self.assertEqual(submissionResult.alphanumeric, 'A')
+
+
