@@ -250,4 +250,48 @@ class TestManualSubmitPendingTargetWithClassSpecs(unittest.TestCase):
         self.assertEqual(submissionResult.background_color, 'orange')
         self.assertEqual(submissionResult.alphanumeric, 'A')
 
+        truncateTable('outgoing_manual')
+        ############################################
+        # test what happens when we put garbage in specs:
+        ############################################
+        testIns = outgoing_manual()
+        testIns.crop_id = 42
+        testIns.latitude = 40.111
+        testIns.longitude = -111.111
+        testIns.orientation = 'S'
+        testIns.shape = 'circle'
+        testIns.background_color = 'white'
+        testIns.alphanumeric = 'Q'
+        testIns.alphanumeric_color = 'black'
+        self.assertNotEqual(dao.addClassification(testIns), -1)
+
+        testIns.crop_id = 43
+        testIns.latitude = 40.222
+        testIns.longitude = -111.222
+        testIns.orientation = 'W'
+        testIns.background_color = 'orange'
+        secondClass = dao.addClassification(testIns)
+        self.assertNotEqual(secondClass, -1)
+
+        testIns.crop_id = 44
+        testIns.latitude = 40.333
+        testIns.longitude = -111.333
+        testIns.alphanumeric_color = 'white'
+        self.assertNotEqual(dao.addClassification(testIns), -1)
+
+        specs = {'orientation': secondClass,
+                'crop_id': None,
+                'alphanumeric_color':'wasdf'}
+
+        classResult = dao.getClassification(secondClass)
+        submissionResult = dao.submitPendingTarget(classResult.target, specs)
+
+        # Even though we fed a bunch of garbage in specs, submission should
+        # still succeed, defaulting to most common value, for the garbage stuff
+        self.assertIsNotNone(submissionResult)
+
+        self.assertEqual(submissionResult.orientation, 'W')
+        self.assertEqual(submissionResult.alphanumeric_color, 'black')
+        self.assertEqual(submissionResult.background_color, 'orange')
+        self.assertEqual(submissionResult.alphanumeric, 'Q')
 
