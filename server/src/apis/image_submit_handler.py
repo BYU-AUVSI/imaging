@@ -17,7 +17,6 @@ api = Namespace('image/submit', description='Image submission helpers')
 classificationModel = api.model('Target Classification Choices', {
     'crop_id': fields.Integer(reqired=False, description='[optional] CLASSIFICATION_ID, of the classification that has the crop_id to use for target submission', example=12),
     'orientation': fields.Integer(required=False, description='[optional] Classification id of the classification that has the orientation value we want to use for target submission', example=14),
-    'shape': fields.Integer(required=False, description='[optional] Classification id of the classification that has the shape value we want to use for target submission', example=12),
     'background_color': fields.Integer(required=False, description='[optional] Classification id of the classification that has the background_color value we want to use for target submission', example=15),
     'alphanumeric_color': fields.Integer(required=False, description='[optional] Classification id of the classification that has the alphanumeric_color value we want to use for target submission', example=13),
     'description': fields.Integer(required=False, description='[optional][emergent-only] Classification id of the classification with the description we want to use for target submission', example=15)
@@ -75,7 +74,6 @@ class SubmissionHandler(Resource):
         {
             "crop_id": 13,
             "orientation": 12,
-            "shape": 15,
             "background_color": 13,
             "alphanumeric_color": 14,
             "description": 15
@@ -87,6 +85,7 @@ class SubmissionHandler(Resource):
     def post(self, target_id):
         manual = checkXManual(request)
         dao = getClassificationDAO(manual)
+        content = request.get_json()
 
         allTargetIds = dao.listTargetIds()
 
@@ -97,7 +96,7 @@ class SubmissionHandler(Resource):
 
         resultTarget = None
         try:
-            resultTarget = dao.submitPendingTarget(target_id)
+            resultTarget = dao.submitPendingTarget(target_id, content)
         except Exception as e:
             # something failed, make sure the target classifications are reset to 'unsubmitted'
             dao.resetTargetSubmissionStatus(target_id)

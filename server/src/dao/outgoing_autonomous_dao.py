@@ -94,11 +94,12 @@ class OutgoingAutonomousDAO(ClassificationDAO):
         """
         return super(OutgoingAutonomousDAO, self).submitAllPendingTargets(self)
 
-    def submitPendingTarget(self, target):
+    def submitPendingTarget(self, target, optionalSpec=None):
         """
         See classification_dao docs
         Submit the specified pending target to the judges.
-
+        
+        @param optionalSpec: Not used by autonomous classifier. Manual only, just need to match method signature
         @return: an outgoing_manual object that can be used to submit the final classification
         """
         return super(OutgoingAutonomousDAO, self).submitPendingTargetClass(self, target)

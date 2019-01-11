@@ -361,7 +361,7 @@ class ClassificationDAO(BaseDAO):
 
         return allSubmitted
 
-    def submitPendingTargetClass(self, modelGenerator, target):
+    def submitPendingTargetClass(self, modelGenerator, target, optionalSpecs=None):
         """
         Changes the status to the given target id to 'submitted'
 
@@ -401,7 +401,7 @@ class ClassificationDAO(BaseDAO):
         cur.execute(updateTargetClassifications, (target,))
         cur.close()
 
-        return self.getSubmittedClassification(modelGenerator, target)
+        return self.getSubmittedClassification(modelGenerator, target, optionalSpecs)
 
     def getAllSubmittedClassification(self, modelGenerator):
         """
@@ -422,7 +422,7 @@ class ClassificationDAO(BaseDAO):
         
         return submittedClassifications
 
-    def getSubmittedClassification(self, modelGenerator, target):
+    def getSubmittedClassification(self, modelGenerator, target, optionalSpecs=None):
         """
         Get the classification that was submitted for this target.
 
@@ -436,7 +436,7 @@ class ClassificationDAO(BaseDAO):
 
         # get all the classifications for the target so we can do averaging/ most-common-value stuff
         # NOTE: we use the column numbers from this query below when doing avg/MCV stuff
-        getOtherClass = """SELECT latitude, longitude, orientation, background_color, alphanumeric_color
+        getOtherClass = """SELECT id, crop_id, latitude, longitude, orientation, background_color, alphanumeric_color, description
             FROM """ + self.outgoingTableName + """
             WHERE target = %s;"""
 
@@ -450,19 +450,53 @@ class ClassificationDAO(BaseDAO):
 
         cur = self.conn.cursor()
         cur.execute(getOtherClass, (target,))
-        allClass = cur.fetchall()
+        allClass = cur.fetchall() # list of lists. each inner list is a result row from the sql query
 
         if allClass is None or not allClass or not allClass[0]:
             # this should never happen
             print('Failed to retrieve all classifications for target {}'.format(target))
             return finalModel
 
-        # Average it out!
-        finalModel.latitude           = self.calcClmnAvg(allClass, 0)
-        finalModel.longitude          = self.calcClmnAvg(allClass, 1)
-        finalModel.orientation        = self.findMostCommonValue(allClass, 2)
-        finalModel.background_color   = self.findMostCommonValue(allClass, 3)
-        finalModel.alphanumeric_color = self.findMostCommonValue(allClass, 4)
+        # always calc avg for lat long (cant manually specify classification values for them)
+        finalModel.latitude           = self.calcClmnAvg(allClass, 2)
+        finalModel.longitude          = self.calcClmnAvg(allClass, 3)
+        if optionalSpecs is None:
+            # get most common for these, if we dont have manually specified classifications to use
+            finalModel.orientation        = self.findMostCommonValue(allClass, 4)
+            finalModel.background_color   = self.findMostCommonValue(allClass, 5)
+            finalModel.alphanumeric_color = self.findMostCommonValue(allClass, 6)
+        else:
+            # go through and figure out which values were manually specified
+            # everything in this else can only happen for a manual target submission
+            if 'crop_id' in optionalSpecs and optionalSpecs['crop_id'] is not None:
+                cropVal = self.getValueWithId(allClass, optionalSpecs['crop_id'], 1)
+                if cropVal is not None:
+                    # NOTE: the use of crop_id. Since this section will only ever be run by
+                    # manual, it's safe todo this. If you for some reason use this block with 
+                    # autonomous in the future, this would be unsafe (though i cant see a reason why)
+                    finalModel.crop_id = cropVal
+
+            if 'description' in optionalSpecs and optionalSpecs['description'] is not None:
+                descVal = self.getValueWithId(allClass, optionalSpecs['description'], 7)
+                if descVal is not None:
+                    finalModel.description = descVal
+                       
+            keys = ['orientation', 'background_color', 'alphanumeric_color']
+            for i in len(keys):
+                sqlClmn = i + 4 # add offset so we know the clmn index for the all class list above
+                if keys[i] in optionalSpecs and optionalSpecs[keys[i]] is not None:
+                    # get it
+                    val = self.getValueWithId(allClass, optionalSpecs[keys[i]], sqlClmn)
+                    if val is not None:
+                        # it worked! final output target submission will use the exact value from
+                        # the classification_id specified in optionalSpecs
+                        setattr(finalModel, keys[i], val)
+                    else:
+                        # if it failed to retrieve, then default to most common
+                        setattr(finalModel, keys[i], self.findMostCommonValue(allClass, sqlClmn))
+                else:
+                    # do most common as usual
+                    setattr(finalModel, keys[i], self.findMostCommonValue(allClass, sqlClmn))
 
         return finalModel
 
@@ -527,6 +561,23 @@ class ClassificationDAO(BaseDAO):
             mostCommon = max(valueCounts, key=valueCounts.get)
             return mostCommon
         return None
+
+    def getValueWithId(self, classifications, classificationId, clmnToRetrieve):
+        try:
+            # bit of input validation
+            classificationId = int(classificationId)
+        except (Exception) as error:
+            print(error)
+            return None
+    
+        for classification in classifications:
+            if classification[0] == classificationId:
+                if classification[clmnToRetrieve] is not None:
+                    return classification[clmnToRetrieve]
+                else:
+                    return None
+        return None
+            
 
     def assignTargetBin(self, id):
         """

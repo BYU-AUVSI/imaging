@@ -94,14 +94,14 @@ class OutgoingManualDAO(ClassificationDAO):
         """
         return super(OutgoingManualDAO, self).submitAllPendingTargets(self)
 
-    def submitPendingTarget(self, target):
+    def submitPendingTarget(self, target, optionalSpecs):
         """
         See classification_dao docs
         Submit the specified pending target to the judges.
 
         @return: an outgoing_manual object that can be used to submit the final classification
         """
-        return super(OutgoingManualDAO, self).submitPendingTargetClass(self, target)
+        return super(OutgoingManualDAO, self).submitPendingTargetClass(self, target, optionalSpecs)
 
     def listTargetIds(self):
         return super(OutgoingManualDAO, self).getAllTargetIDs()
