@@ -122,3 +122,17 @@ class AutonomousSpecificClassificationHandler(Resource):
             return {'message': 'No image with id {} found with a classification to update or your input was invalid (or was there a server error?)'.format(class_id)}, 404
         else:
             return jsonify(result.toDict())
+
+    @api.doc(description='Delete the given classification from the ougoing table')
+    @api.doc(responses={404:'Could not find classification with given ID', 500: 'The delete didnt work for some reason'})
+    def delete(self, class_id):
+        dao = OutgoingAutonomousDAO(defaultConfigPath())
+
+        if dao.getClassification(class_id) is None:
+            return {'message': 'Couldnt find classification with id {}'.format(class_id)}, 404
+
+        result = dao.removeClassification(class_id)
+        if not result:
+            return {'message': 'Something went wrong while trying to delete id {} (was it delete by someone else first??)'.format(class_id)}, 500
+        
+        return {'message': 'success!', 'id': class_id}
