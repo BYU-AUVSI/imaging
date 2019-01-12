@@ -2,8 +2,6 @@
 
 The is the code to run the server. We should fill this readme out more.
 
-**Roadmap- ros_ingester / DAO -> REST API -> dockerize**
-
 ![server overview](docs/img/serverFlowchart.png)
 
 The server has 3 main jobs:
@@ -22,14 +20,36 @@ The server has 3 main jobs:
 
 `src/` All source code for the server
 
+Any folder called `internal` is stuff you dont need to worry about, unless you're really digging into things.
+
+## Running It
+
+Once installed (see [installation](#installation) guide below), running the rest server is easy. From this folder:
+
+`python src/server.py`
+
+If you also want to run the ros ingestion code, place this repository in your workspace/src folder. once it's built, you can run the ingester with:
+
+`rosrun imaging_ros_ingester ros_ingest`
+
+(Notice that the server and ros_ingester and completely independent of each other. This is intentional)
+
 ## REST API
 
-All API documentation can be found on the root of the website. (ie: http://localhost:5000 if running on your machine)
+All REST API documentation can be found on the homepage of server, once you start it running (with `python src/server.py`). If the server is running on your machine for example, you can see the documentation at: http://localhost:5000
 
 ## Installation
 
-TODO: easy installation with docker, or the dev_setup.sh script
+There are two main installation methods: production and development.
+
+### Development
+
+If you're looking to develop and actively test/use the server code on your own machine, run the `./setup/dev_setup.sh` script. It's highly recommended (especially if you're using ubuntu 16.04), to use a [conda environment](https://conda.io/docs/user-guide/install/index.html).
+
+### Production
+
+TODO: talk about docker img
 
 ## Motivation
 
-The above setup minimizes imaging's dependence on ROS, thus increasing transferability. Want to use something other than ROS in the future? Then all you need to do is change the < 100 line ros_ingest.py script, (which describes how to pull data in from the plane) and you're good to go!
+The above setup minimizes imaging's dependence on ROS, thus increasing transferability. Want to use something other than ROS in the future? Then all you need to do is change the < 100 line ros_ingest.py script, (which describes how to pull data in from the plane) and the rest (hehe) of the server-client codebase is good to go!
