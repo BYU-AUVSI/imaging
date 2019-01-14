@@ -56,7 +56,7 @@ class RosIngester:
         self.state_msg_ = incoming_state()
         self.state_interval_ = 0
         
-        basePath = currentPath + '/../images/' + startTs
+        basePath = os.path.abspath(currentPath + '/../images/' + startTs)
         print("Base dir for images:: {}".format(basePath))
 
         self.raw_path_  = basePath + "/raw/"
