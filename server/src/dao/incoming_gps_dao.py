@@ -14,7 +14,7 @@ class IncomingGpsDAO(BaseDAO):
 
     def addGps(self, incomingGps):
         """
-        Adds the specified image to the incoming_image table
+        Adds the specified gps measurement to the incoming_gps table
 
         @type incomingGps: incoming_gps
         @param incomingGps: The gps measurement to add to the database
@@ -22,7 +22,7 @@ class IncomingGpsDAO(BaseDAO):
         @rtype: int
         @return: Id of gps measurement if successfully inserted, otherwise -1
         """
-        insertStmt = "INSERT INTO incoming_gps (time_stamp, latitude, longitude, altitude) VALUES(to_timestamp(%s), %s, %s, %s) RETURNING id;"
+        insertStmt = "INSERT INTO incoming_gps (time_stamp, latitude, longitude, altitude) VALUES(to_timestamp(%s) AT TIME ZONE 'UTC', %s, %s, %s) RETURNING id;"
         return super(IncomingGpsDAO, self).getResultingId(insertStmt, incomingGps.insertValues())
 
     def getGpsById(self, id):

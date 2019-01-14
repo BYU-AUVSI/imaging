@@ -31,6 +31,7 @@ class BaseDAO(object):
         before finishing with a dao.
         """
         self.conn.close()
+        self.conn = None
 
     @property
     def conn(self):

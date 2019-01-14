@@ -22,7 +22,7 @@ class IncomingStateDAO(BaseDAO):
         @rtype: int
         @return: Id of state measurements if successfully inserted, otherwise -1
         """
-        insertStmt = "INSERT INTO incoming_state (time_stamp, roll, pitch, yaw) VALUES(to_timestamp(%s), %s, %s, %s) RETURNING id;"
+        insertStmt = "INSERT INTO incoming_state (time_stamp, roll, pitch, yaw) VALUES(to_timestamp(%s) AT TIME ZONE 'UTC', %s, %s, %s) RETURNING id;"
         return super(IncomingStateDAO, self).getResultingId(insertStmt, incomingState.insertValues())
 
     def getStateById(self, id):
