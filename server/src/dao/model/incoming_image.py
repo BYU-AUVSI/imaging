@@ -5,12 +5,14 @@ class incoming_image:
     """
 
     def __init__(self, tableValues=None):
+        self.focal_length = None # so errors arent thrown if an incoming image doesnt have the data for some reason (ie: playing back an old bag)
         if tableValues is not None:
             self.image_id = tableValues[0]
             self.time_stamp = tableValues[1]
-            self.image_path = tableValues[2]
-            self.manual_tap = tableValues[3]
-            self.autonomous_tap = tableValues[4]
+            self.focal_length = tableValues[2]
+            self.image_path = tableValues[3]
+            self.manual_tap = tableValues[4]
+            self.autonomous_tap = tableValues[5]
 
     @property
     def image_id(self):
@@ -35,6 +37,17 @@ class incoming_image:
     @time_stamp.setter
     def time_stamp(self, time_stamp):
         self._time_stamp = time_stamp
+
+    @property
+    def focal_length(self):
+        """
+        The focal length of the image at the time of capture. In mm as float.
+        """
+        return self._focal_length
+
+    @focal_length.setter
+    def focal_length(self, focal_length):
+        self._focal_length = focal_length
 
     @property
     def image_path(self):
@@ -80,7 +93,7 @@ class incoming_image:
         @rtype: [object]
         @return: Ordered object list - time_stamp, image_path, manual_tap, autonomous_tap
         """
-        return [self.time_stamp, self.image_path, self.manual_tap, self.autonomous_tap]
+        return [self.time_stamp, self.focal_length, self.image_path, self.manual_tap, self.autonomous_tap]
 
     def toDict(self):
         """
@@ -102,6 +115,7 @@ class incoming_image:
         return """IncomingImage:\n
             \tid: {}\n
             \ttime_stamp: {}\n
+            \tfocal_length: {}\n
             \timage_path: {}\n
             \tmanual_tap: {}\n
-            \tautonomous_tap: {}""".format(self.image_id, self.time_stamp, self.image_path, self.manual_tap, self.autonomous_tap)
+            \tautonomous_tap: {}""".format(self.image_id, self.time_stamp, self.focal_length, self.image_path, self.manual_tap, self.autonomous_tap)

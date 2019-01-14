@@ -12,6 +12,7 @@ from dao.incoming_state_dao import IncomingStateDAO
 from inertial_sense.msg import GPS
 from rosplane_msgs.msg import State
 from sensor_msgs.msg import CompressedImage
+from std_msgs.msg import Float32
 from dao.model.incoming_gps import incoming_gps
 from dao.model.incoming_image import incoming_image
 from dao.model.incoming_state import incoming_state
@@ -35,12 +36,19 @@ class RosIngester:
         self.gps_dao_ = IncomingGpsDAO(configPath)
         self.gps_subscriber_ = rospy.Subscriber('/gps', GPS, self.gpsCallback, queue_size=10)
         self.gps_msg_ = incoming_gps()
-        # imageing ingestion setup:
+
+        # imaging ingestion setup:
         self.img_dao_ = IncomingImageDAO(configPath)
         self.img_subscriber_ = rospy.Subscriber("/a6000_ros_node/img/compressed", CompressedImage, self.imgCallback,  queue_size = 10)
         self.img_msg_ = incoming_image()
+        self.img_msg_.focal_length = 16.0 # this is a safe starting assumption == fully zoomed out on a6000
         self.img_msg_.manual_tap = False
         self.img_msg_.autonomous_tap = False
+
+        # focal length ingestion setup (we could roll with a custom msg to 
+        # include it with the image msg, but IMO it's better to stick to standard msg types)
+        # to reduce dependency tracking.... But you may feel otherwise. Really there's no great solution here
+        self.fl_subscriber = rospy.Subscriber("/a6000_ros_node/img/focal_length", Float32, self.flCallback,  queue_size = 10)
 
         # state ingestion setup:
         self.state_dao_ = IncomingStateDAO(configPath)
@@ -118,6 +126,9 @@ class RosIngester:
         if resultingId == -1:
             print("FAILED to insert image:")
             print("ts: {}, path: {}, manual_tap: {}, autonomous_tap: {}".format(*self.img_msg_.insertValues()))
+
+    def flCallback(self, msg):
+        self.img_msg_.focal_length = msg.data
 
 def main():
     # attempt to start the roscore

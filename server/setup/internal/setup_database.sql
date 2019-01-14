@@ -5,14 +5,24 @@
  *       cause errors other wise
  */
 
+ 
+/* Step 0: Destroy the current database and user if needed */
+/* This will generate an error or two the first time you run it 
+    since there is no database or user to delete */
+DROP DATABASE auvsi;
+DROP OWNED BY imaging_server;
+REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA public FROM imaging_server;
+REVOKE ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public FROM imaging_server;
+REVOKE ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public FROM imaging_server;
+DROP USER imaging_server;
+
 /* Step 1: create user `imaging_server` and database `auvsi` */
 CREATE USER imaging_server WITH ENCRYPTED PASSWORD 'Byuauvs1';
 CREATE DATABASE auvsi;-- WITH OWNER imaging_server;
 GRANT CONNECT ON DATABASE auvsi TO imaging_server;
 GRANT USAGE ON SCHEMA public TO imaging_server;
--- GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO imaging_server;
--- GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO imaging_server;
--- connect to the new database user
+
+-- connect to the new database
 \c auvsi;
 
 /* Step 2: create all the tables */
@@ -20,6 +30,7 @@ GRANT USAGE ON SCHEMA public TO imaging_server;
 CREATE TABLE "public"."incoming_image" (
   image_id serial NOT NULL,
   time_stamp timestamp NOT NULL,
+  focal_length real, 
   image_path text NOT NULL,
   manual_tap boolean NOT NULL default FALSE,
   autonomous_tap boolean NOT NULL default FALSE,
@@ -109,10 +120,4 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO imaging_s
 GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO imaging_server;
 ALTER DEFAULT PRIVILEGES FOR USER imaging_server IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO imaging_server;
 
-/* If you want to destroy the auvsi_imaging user here's how you do it: */
--- DROP DATABASE auvsi;
--- DROP OWNED BY imaging_server;
--- REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA public FROM imaging_server;
--- REVOKE ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public FROM imaging_server;
--- REVOKE ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public FROM imaging_server;
--- DROP USER imaging_server;
+
