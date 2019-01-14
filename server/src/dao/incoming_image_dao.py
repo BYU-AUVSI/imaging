@@ -22,8 +22,8 @@ class IncomingImageDAO(BaseDAO):
         @return: Id of image if successfully inserted, otherwise -1
         """
         insertStmt = """INSERT INTO incoming_image 
-            (time_stamp, image_path, manual_tap, autonomous_tap) 
-            VALUES(to_timestamp(%s), %s, %s, %s) 
+            (time_stamp, focal_length, image_path, manual_tap, autonomous_tap) 
+            VALUES(to_timestamp(%s), %s, %s, %s, %s) 
             RETURNING image_id;"""
         return super(IncomingImageDAO, self).getResultingId(insertStmt, incomingImage.insertValues())
 
@@ -37,7 +37,7 @@ class IncomingImageDAO(BaseDAO):
         @rtype: incoming_image
         @return: An incoming_image with the info for that image if successfully found, otherwise None
         """
-        selectImgById = """SELECT image_id, date_part('epoch', time_stamp), image_path, manual_tap, autonomous_tap 
+        selectImgById = """SELECT image_id, date_part('epoch', time_stamp), focal_length, image_path, manual_tap, autonomous_tap 
             FROM incoming_image 
             WHERE image_id = %s 
             LIMIT 1;"""
