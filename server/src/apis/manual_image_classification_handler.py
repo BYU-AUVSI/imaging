@@ -25,6 +25,17 @@ classificationModel = api.model('Manual Classification', {
     'submitted': fields.String(required=False, description='Whether or not this particular classification has been submitted to the judges. Defaults to "unsubmitted". "submitted" indicates that this classification has been submitted to the judges. "inherited_submission" indicates that another classification for the same target (ie: another image of the same target) has already been submitted, and its therefore unnecessary to submit this one.', example='unsubmitted')
 })
 
+classificationSubmission = api.model('Submit Manual Clasification', {
+    'latitude': fields.Float(required=False, description='Latitude coordinate of object', example=40.246354),
+    'longitude': fields.Float(required=False, description='longitude coordinate of object', example=-111.647553),
+    'orientation': fields.String(required=False, description='Describes the heading/orientation of the letter(N, NE, E, etc...)', example='N'),
+    'shape': fields.String(required=False, description='The shape of the object for standard/off_axis types(circle, triangle, square, etc...)', example='circle'),
+    'background_color': fields.String(required=False, description='Color of the background the letter is on for standard/off_axis types(white, black, orange, etc...)', example='orange'),
+    'alphanumeric': fields.String(required=False, description='The letter within the object for standard/off_axis types(A, B, C, etc...)', example='A'),
+    'alphanumeric_color': fields.String(required=False, description='Color of the letter for standard/off_axis types(white, black, orange, etc...)', example='black'),
+    'description': fields.String(required=False, description='For the emergent type, description of what it is')
+})
+
 @api.route('/all')
 class AllClassificationsHandler(Resource):
 
@@ -49,7 +60,7 @@ class ClassifiedImageHandler(Resource):
     @api.doc(responses={200:'OK', 400:'Improper image post', 500: 'Something failed server-side'})
     # @api.doc(body=classificationModel)
     # @api.expect(cropIDParser)
-    @api.expect(classificationModel)
+    @api.expect(classificationSubmission)
     @api.header('X-Class-Id', 'Classification ID of the image if successfully inserted. This WILL be different from the Crop-ID provided in the request')
     def post(self):
         prevId = -1
@@ -60,7 +71,9 @@ class ClassifiedImageHandler(Resource):
 
         dao = OutgoingManualDAO(defaultConfigPath())
         
-        outgoingIn = outgoing_manual(json=api.payload)
+        print(request.get_json())
+
+        outgoingIn = outgoing_manual(json=request.get_json())
         outgoingIn.crop_id = prevId
         resultingId = dao.upsertClassification(outgoingIn)
         
