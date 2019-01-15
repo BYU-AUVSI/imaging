@@ -7,7 +7,7 @@ class TestGetConn(unittest.TestCase):
         # basically just confirm that we're able
         # to connect
         dao = BaseDAO(defaultConfigPath())
-
+        self.assertIsNotNone(dao)
         self.assertIsNotNone(dao.conn)
 
 # basically all the other methods in BaseDao are tested by

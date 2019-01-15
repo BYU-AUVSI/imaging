@@ -31,6 +31,18 @@ classificationModel = api.model('Autonomous Classification', {
     'submitted': fields.String(required=False, description='Whether or not this particular classification has been submitted to the judges. Defaults to "unsubmitted". "submitted" indicates that this classification has been submitted to the judges. "inherited_submission" indicates that another classification for the same target (ie: another image of the same target) has already been submitted, and its therefore unnecessary to submit this one.', example='unsubmitted')
 })
 
+classificationSubmission = api.model('Submit Autonomous Classification', {
+    'type': fields.String(required=False, description='Classification type(standard, off_axis, or emergent)', example="standard"),
+    'latitude': fields.Float(required=False, description='Latitude coordinate of object', example=40.246354),
+    'longitude': fields.Float(required=False, description='longitude coordinate of object', example=-111.647553),
+    'orientation': fields.String(required=False, description='Describes the heading/orientation of the letter(N, NE, E, etc...)', example='N'),
+    'shape': fields.String(required=False, description='The shape of the object for standard/off_axis types(circle, triangle, square, etc...)', example='circle'),
+    'background_color': fields.String(required=False, description='Color of the background the letter is on for standard/off_axis types(white, black, orange, etc...)', example='orange'),
+    'alphanumeric': fields.String(required=False, description='The letter within the object for standard/off_axis types(A, B, C, etc...)', example='A'),
+    'alphanumeric_color': fields.String(required=False, description='Color of the letter for standard/off_axis types(white, black, orange, etc...)', example='black'),
+    'description': fields.String(required=False, description='For the emergent type, description of what it is')
+})
+
 @api.route("/all")
 class AllAutonomousClassificationsHandler(Resource):
     @api.doc(description='Get all the manual classifications currently on the server')
@@ -112,6 +124,7 @@ class AutonomousSpecificClassificationHandler(Resource):
 
     @api.doc(description='Update information for the specified classification entry')
     @api.response(200, 'OK', classificationModel)
+    @api.expect(classificationSubmission)
     @api.doc(responses={400:'X-Manual header not specified', 404:'Could not find classification with given ID'})
     def put(self, class_id):
 

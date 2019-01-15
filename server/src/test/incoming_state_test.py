@@ -4,6 +4,11 @@ from test.test_helpers import truncateTable
 from dao.incoming_state_dao import IncomingStateDAO
 from dao.model.incoming_state import incoming_state
 
+class TestIncomingStateConnection(unittest.TestCase):
+    def test(self):
+        dao = IncomingStateDAO(defaultConfigPath())
+        self.assertIsNotNone(dao)
+        self.assertIsNotNone(dao.conn)
 
 class TestStateInsert(unittest.TestCase):
     def test(self):

@@ -4,7 +4,12 @@ from test.test_helpers import truncateTable
 from dao.incoming_gps_dao import IncomingGpsDAO
 from dao.model.incoming_gps import incoming_gps
 
-
+class TestIncomingGpsConnection(unittest.TestCase):
+    def test(self):
+        dao = IncomingGpsDAO(defaultConfigPath())
+        self.assertIsNotNone(dao)
+        self.assertIsNotNone(dao.conn)
+        
 class TestGpsInsert(unittest.TestCase):
     def test(self):
         model = incoming_gps()
@@ -15,7 +20,7 @@ class TestGpsInsert(unittest.TestCase):
 
         truncateTable('incoming_gps')
         dao = IncomingGpsDAO(defaultConfigPath())
-        self.assertIsNotNone(dao)
+
         resultingId = dao.addGps(model)
         self.assertIsNotNone(resultingId)
         self.assertNotEqual(resultingId, -1)

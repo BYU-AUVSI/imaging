@@ -4,6 +4,12 @@ from config import defaultConfigPath
 from test.test_helpers import truncateTable
 import unittest
 
+class TestOutgoingManualConnection(unittest.TestCase):
+    def test(self):
+        dao = OutgoingManualDAO(defaultConfigPath())
+        self.assertIsNotNone(dao)
+        self.assertIsNotNone(dao.conn)
+
 class TestAvgFunction(unittest.TestCase):
     def test(self):
         toAvg = [[0,1.0], [1,1.1], [2,1.4]]

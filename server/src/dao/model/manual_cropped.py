@@ -185,4 +185,4 @@ class manual_cropped:
         @rtype: [object]
         @return: Ordered object list - image_id, time_stamp, cropped_path, tapped
         """
-        return [self.image_id, self.time_stamp, self.cropped_path, self.tapped]
+        return [self.image_id, self.time_stamp, self.cropped_path]

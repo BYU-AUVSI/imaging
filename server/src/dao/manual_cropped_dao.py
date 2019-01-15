@@ -18,6 +18,8 @@ class ManualCroppedDAO(BaseDAO):
         @rtype: int
         @return: Internal table id of the record inserted/updated if successful. Otherwise -1
         """
+        if manualCropped is None:
+            return -1
 
         insertImg = "INSERT INTO manual_cropped "
         updateCls = "UPDATE SET "
@@ -31,10 +33,15 @@ class ManualCroppedDAO(BaseDAO):
                 insertClmnValues += '%s, '
                 updateCls += clmn + '= %s, '
             else:
-                insertClmnValues += 'to_timestamp(%s), '
-                updateCls += clmn + '= to_timestamp(%s), '
+                insertClmnValues += "to_timestamp(%s) AT TIME ZONE 'UTC', "
+                updateCls += clmn + "= to_timestamp(%s) AT TIME ZONE 'UTC', "
             insertValues.append(value.__str__())
 
+        if manualCropped.id is not None and manualCropped.id != -1:
+            insertClmnNames  += 'id, '
+            insertClmnValues += '%s, '
+            updateCls += 'id= %s, '
+            insertValues.append(manualCropped.id)
         if not insertValues:
             return -1
         else:
@@ -56,33 +63,15 @@ class ManualCroppedDAO(BaseDAO):
         @rtype: int
         @return: Internal table id of the manual_cropped entry if successfully inserted, otherwise -1
         """
+        if manualCropped is None:
+            return -1
         
         insertImg = """INSERT INTO manual_cropped
-            (image_id, time_stamp, cropped_path, tapped) 
-            VALUES(%s, to_timestamp(%s), %s, %s) 
+            (image_id, time_stamp, cropped_path) 
+            VALUES(%s, to_timestamp(%s) AT TIME ZONE 'UTC', %s) 
             RETURNING id;"""
 
         return super(ManualCroppedDAO, self).getResultingId(insertImg, manualCropped.insertValues())
-    
-    def getImageByUID(self, id):
-        """
-        Attempts to get the image with the specified universal-identifier
-
-        @type id: int
-        @param id: The id of the image to try and retrieve
-
-        @rtype: manual_cropped
-        @return: A manual_cropped image with the info for that image if successfully found, otherwise None
-        """
-        selectImgById = """SELECT id, image_id, date_part('epoch', time_stamp), cropped_path, crop_coordinate_tl, crop_coordinate_br, tapped
-            FROM manual_cropped
-            WHERE image_id = %s
-            LIMIT 1;"""
-        selectedImage = super(ManualCroppedDAO, self).basicTopSelect(selectImgById, (id,))
-
-        if selectedImage is None:
-            return None
-        return manual_cropped(selectedImage)
 
     def getImage(self, id):
         """
@@ -177,7 +166,10 @@ class ManualCroppedDAO(BaseDAO):
 
         values = []
         for clmn, value in img.toDict().items():
-            updateStr += clmn + "= %s, "
+            updateStr += clmn + "= %s "
+            if clmn == 'time_stamp':
+                updateStr += "AT TIME ZONE 'UTC'"
+            updateStr += ", "
             values.append(value.__str__())
         
         updateStr = updateStr[:-2] # remove last space/comma
@@ -212,6 +204,9 @@ class ManualCroppedDAO(BaseDAO):
         values = []
         for clmn, value in img.toDict().items():
             updateStr += clmn + "= %s, "
+            if clmn == 'time_stamp':
+                updateStr += "AT TIME ZONE 'UTC'"
+            updateStr += ", "
             values.append(value.__str__())
         
         updateStr = updateStr[:-2] # remove last space/comma

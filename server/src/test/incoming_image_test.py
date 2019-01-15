@@ -4,6 +4,12 @@ from test.test_helpers import truncateTable
 from dao.model.incoming_image import incoming_image
 from dao.incoming_image_dao import IncomingImageDAO
 
+class TestIncomingImageConnection(unittest.TestCase):
+    def test(self):
+        dao = IncomingImageDAO(defaultConfigPath())
+        self.assertIsNotNone(dao)
+        self.assertIsNotNone(dao.conn)
+
 class TestImageInsert(unittest.TestCase):
     def test(self):
         model = incoming_image()
@@ -15,7 +21,6 @@ class TestImageInsert(unittest.TestCase):
 
         truncateTable('incoming_image')
         dao = IncomingImageDAO(defaultConfigPath())
-        self.assertIsNotNone(dao)
 
         self.assertEqual(dao.addImage(None), -1)
 
