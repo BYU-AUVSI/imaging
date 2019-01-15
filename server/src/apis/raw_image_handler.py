@@ -51,7 +51,7 @@ class SpecificRawImageHandler(Resource):
         dao = IncomingImageDAO(defaultConfigPath())
         image  = dao.getImage(image_id)
         if image is None:
-            return {'message': 'Failed to locate raw id {}'.format(id)}, 404
+            return {'message': 'Failed to locate raw id {}'.format(image_id)}, 404
 
         # otherwise lets send the image::
         return rawImageSender(image.image_id, image.image_path)
@@ -68,7 +68,7 @@ class SpecificRawImageInfoHandler(Resource):
         image = dao.getImage(image_id)
 
         if image is None:
-            return {'message': 'Failed to locate raw id {}'.format(id)}, 404
+            return {'message': 'Failed to locate raw id {}'.format(image_id)}, 404
         return jsonify(image.toDict())
 
 

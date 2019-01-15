@@ -8,7 +8,7 @@ class ImageInfo:
     An ImageInfo object holds the information concerning an image such as the image id, the image path,
     the timestamp the image was taken, and whether or not it has been seen by the autonomous or manual system.
     """
-    def __init__(self, auto_tap, imageId, path, man_tap, ts):
+    def __init__(self, auto_tap, imageId, focal_len, path, man_tap, ts):
         """
         The constructor for the ImageInfo class.
 
@@ -32,6 +32,7 @@ class ImageInfo:
         """
         self.autonomous_tap = auto_tap
         self.id = imageId
+        self.focal_length = focal_len
         self.image_path = path
         self.manual_tap = man_tap
         self.time_stamp = ts
@@ -159,7 +160,8 @@ class ImagingInterface:
                  host="127.0.0.1",
                  port="5000",
                  numIdsStored=50,
-                 isDebug=False):
+                 isDebug=False,
+                 isManual=True):
         """
         The constructor for the ImagingInterface class.
 
@@ -187,6 +189,7 @@ class ImagingInterface:
         self.cropIdIndex = 0
         self.numIdsStored = numIdsStored
         self.isDebug = isDebug
+        self.isManual = isManual
 
     def ping(self):
         """
@@ -227,7 +230,7 @@ class ImagingInterface:
             if there are any images available for processing, otherwise None
         """
         self.debug("getImage(id={})".format(imageId))
-        img = requests.get(self.url + "/image/raw/" + str(imageId), headers={'X-Manual': 'True'})
+        img = requests.get(self.url + "/image/raw/" + str(imageId), headers={'X-Manual': str(self.isManual)})
         self.debug("response code:: {}".format(img.status_code))
         if img.status_code == 200:
             return Image.open(BytesIO(img.content)), imageId
@@ -235,7 +238,7 @@ class ImagingInterface:
             print("Server returned status code {}".format(img.status_code))
             return None
 
-    def getNextRawImage(self, isManual):
+    def getNextRawImage(self):
         """
         Retrieves the next available raw image from the server.
 
@@ -246,11 +249,11 @@ class ImagingInterface:
         @return: a tuple of a pillow Image and the image id if there are any images available for processing,
             otherwise None
         """
-        self.debug("getNextRawImage(isManual={})".format(isManual))
+        self.debug("getNextRawImage(isManual={})".format(self.isManual))
         self.rawIdIndex += 1
         if self.rawIdIndex > -1:
             self.rawIdIndex = 0
-            img = requests.get(self.url + "/image/raw/", headers={'X-Manual': str(isManual)})
+            img = requests.get(self.url + "/image/raw/", headers={'X-Manual': str(self.isManual)})
             self.debug("response code:: {}".format(img.status_code))
             if img.status_code != 200:
                 # if we didnt get a good status code
@@ -308,6 +311,7 @@ class ImagingInterface:
             info_j = json.loads(imgInfoResp.content.decode('utf-8'))
             return ImageInfo(info_j['autonomous_tap'].lower() == 'true',
                             imageId,
+                            info_j['focal_length'],
                             info_j['image_path'],
                             info_j['manual_tap'].lower() == 'true',
                             float(info_j['time_stamp']))
@@ -326,7 +330,7 @@ class ImagingInterface:
         @return: a tuple of a pillow Image and the image id if the image with that id is cropped, otherwise None
         """
         self.debug("getCroppedImage(id={})".format(cropId))
-        img = requests.get(self.url + "/image/crop/" + str(cropId), headers={'X-Manual': 'True'})
+        img = requests.get(self.url + "/image/crop/" + str(cropId), headers={'X-Manual': str(self.isManual)})
         self.debug("response code:: {}".format(img.status_code))
         if img.status_code != 200:
             # if we didnt get a good status code

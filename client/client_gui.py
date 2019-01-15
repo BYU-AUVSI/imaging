@@ -574,7 +574,7 @@ class GuiClass(tk.Frame):
         """
         if self.serverConnected:
             time0 = time.time()
-            query = self.interface.getNextRawImage(True)
+            query = self.interface.getNextRawImage()
             if query == None:
                 self.noNextRaw()
             else:
