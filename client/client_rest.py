@@ -18,6 +18,9 @@ class ImageInfo:
         @type  imageId: int
         @param imageId: the id related to the image
 
+        @type  focal_len: float
+        @param focal_len: The focal length of the image taken
+
         @type  path: String
         @param path: the file path to where the image is located
 
@@ -148,6 +151,28 @@ class StateMeasurement:
         self. pitch = pitch
         self.yaw = yaw
         self.time_stamp = ts
+
+class ManualClassification:
+    def __init__(self, cropId, target, classType, latitude, longitude, orientation,
+                 shape, bgColor, alpha, alphaColor, isAuto, desc, classId=-1):
+        self.classId = classId
+        self.cropId = cropId
+        self.target = target
+        self.classType = classType
+        self.latitude = float(latitude)
+        self.longitude = float(longitude)
+        self.orientation = orientation
+        self.shape = shape
+        self.bgColor = bgColor
+        self.alpha = alpha
+        self.alphaColor = alphaColor
+        self.isAuto = isAuto
+        self.desc = desc
+
+    def toJson(self):
+        return {
+            'latitude': self.latitude,
+            'crop_id': self.cropId}
 
 
 class ImagingInterface:
@@ -595,6 +620,19 @@ class ImagingInterface:
             print("Server returned status code {}".format(state.status_code))
             return None
 
+    def postManualClass(self, manClass):
+        self.debug("postManualClass()")
+        url = self.url + "/image/class/manual/"
+
+
+        resp = requests.post(url, json=body)
+        if resp.status_code == 200:
+            return resp
+        else:
+            print("Server returned status code {}".format(resp.status_code))
+            return None
+
+
 def testNextAndPrevRawImage(interface):
     interface.numIdsStored = 4
 
@@ -661,7 +699,7 @@ def testNextAndPrevCroppedImage(interface):
 
 def testCropPost(interface, imgId):
     img = interface.getRawImage(imgId)
-    resp = interface.postCroppedImage(imgId, img, [0, 0], [236, 236])
+    resp = interface.postCroppedImage(imgId, img[0], [0, 0], [236, 236])
     print(resp.status_code)
     print(resp.text)
     return resp
@@ -671,9 +709,10 @@ def testCropPost(interface, imgId):
 if __name__ == "__main__":
     interface = ImagingInterface(host="127.0.0.1", isDebug=True)
     # interface = ImagingInterface(host="192.168.1.48", isDebug=True)
-    # imgId = 2
-    infoList = interface.getAllCroppedInfo()
-    info = interface.getCroppedImageInfo(84)
-    query = interface.getRawImage(5)
+    imgId = 1
+    testCropPost(interface, imgId)
+    # infoList = interface.getAllCroppedInfo()
+    # info = interface.getCroppedImageInfo(84)
+    # query = interface.getRawImage(5)
 
     print("Done")
