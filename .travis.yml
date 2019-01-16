@@ -1,4 +1,9 @@
 language: python
+sudo: required
+dist: xenial
+services: postgresql
+before_script:
+  - psql -f server/setup/setup_database.sql -U postgres
 python:
   - "3.3"
   - "3.4"
