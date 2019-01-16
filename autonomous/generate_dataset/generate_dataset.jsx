@@ -250,11 +250,10 @@ function getQuarterCircle(x, y, r)
     var a = [];
     var r2 = (4 * r) / (3 * Math.PI); // Center of quarter circle
     a.push([x - r2, y - r2]); // Corner
-    var numSides = 5 * DIM_; // How defined the curve is
-    for (var i = 0; i < numSides; i++)
+    for (var i = 0; i < 500; i++)
     {
-        var x_coor = r * Math.cos(Math.PI / 2.0 * i / numSides) + x - r2;
-        var y_coor = r * Math.sin(Math.PI / 2.0 * i / numSides) + y - r2;
+        var x_coor = r * Math.cos(Math.PI / 2.0 * i / 500) + x - r2;
+        var y_coor = r * Math.sin(Math.PI / 2.0 * i / 500) + y - r2;
         a.push([x_coor, y_coor]);
     }
     return a;
@@ -264,26 +263,25 @@ function getSemiCircle(x, y, r)
 {
     var a = [];
     var r2 = (4 * r) / (3 * Math.PI); // Center of semi circle
-    var numSides = 10 * DIM_; // How defined the curve is
-    for (var i = 0; i < numSides; i++)
+    for (var i = 0; i < 1000; i++)
     {
-        var x_coor = r * Math.cos(Math.PI * i / numSides) + x;
-        var y_coor = r * Math.sin(Math.PI * i / numSides) + y - r2;
+        var x_coor = r * Math.cos(Math.PI * i / 1000) + x;
+        var y_coor = r * Math.sin(Math.PI * i / 1000) + y - r2;
         a.push([x_coor, y_coor]);
     }
     return a;
 }
 
-const DIM_ = 100; // dimension of sides for the square image
+const DIM_ = 200; // dimension of sides for the square image
 const X_CENTER_ = DIM_ * 0.5;
 const Y_CENTER_ = DIM_ * 0.5;
 const ROTATE_STEP_ = 45; //degrees to rotate the letter for each image
-const BLUR_LEVELS_ = 3; // how many blurs to apply 
-const BLUR_STEP_ = 2; // amount of blur to apply at each level
-//const BASE_SAVE_DIR_ = '~/Desktop/Generated/'; //base directory to save into
-const BASE_SAVE_DIR_ = 'C:\\Users\\Brandon\\Documents\\imaging\\autonomous\\generate_dataset\\pics\\' // base directory to save into
+const BLUR_LEVELS_ = 2; // how many blurs to apply 
+const BLUR_STEP_ = 3; // amount of blur to apply at each level
+const BASE_SAVE_DIR_ = '~/Desktop/Generated/'; //base directory to save into
+// const BASE_SAVE_DIR_ = 'C:\\Users\\Brandon\\Documents\\imaging\\autonomous\\generate_dataset\\pics\\' // base directory to save into
 
-var isTesting = true;
+var isTesting = false;
 
 var alphabet = [];
 if (isTesting)
@@ -292,7 +290,7 @@ if (isTesting)
 }
 else
 {
-    alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+    alphabet = "A".split("");
 }
 var dimHalf = DIM_ / 2;
 
@@ -385,8 +383,8 @@ if (isTesting)
 }
 else
 {
-    colorArrays = [whiteArray, blackArray, grayArray, redArray, blueArray,
-        greenArray, yellowArray, purpleArray, orangeArray, brownArray];
+    colorArrays = [whiteArray];//, blackArray, grayArray, redArray, blueArray,
+        //greenArray, yellowArray, purpleArray, orangeArray, brownArray];
 }
 
 
@@ -411,40 +409,18 @@ else
 {
     shapesArray =
         [
-            ["triangle-0", getTriangle(X_CENTER_, Y_CENTER_, triangleB, triangleH)], // Triangle pointing up
-            // ["triangle-90", rotateShape(X_CENTER_, Y_CENTER_, getTriangle(X_CENTER_, Y_CENTER_, triangleB, triangleH), 90)],  // Triangle pointing left
-            // ["triangle-180", rotateShape(X_CENTER_, Y_CENTER_, getTriangle(X_CENTER_, Y_CENTER_, triangleB, triangleH), 180)],// Triangle pointing down
-            // ["triangle-270", rotateShape(X_CENTER_, Y_CENTER_, getTriangle(X_CENTER_, Y_CENTER_, triangleB, triangleH), 270)],// Triangle pointing right
+            ["triangle", getTriangle(X_CENTER_, Y_CENTER_, triangleB, triangleH)], // Triangle pointing up
             ["square", getPolygon(X_CENTER_, Y_CENTER_, 4, squareR, 45)],    // Flat side up and down
-            ["square-45", getPolygon(X_CENTER_, Y_CENTER_, 4, squareR, 0)]   // Diamond shape
-                ["rectangle-long", getRectangle(X_CENTER_, Y_CENTER_, DIM_ * 0.5, DIM_)],             // Long rectangle
-            ["rectangle-wide", getRectangle(X_CENTER_, Y_CENTER_, DIM_, DIM_ * 0.5)],             // Wide rectangle
-            ["trapezoid-up", getTrapezoid(X_CENTER_, Y_CENTER_, DIM_ * 0.5, DIM_, DIM_ * 0.5)],     // Short side up
-            ["trapezoid-down", getTrapezoid(X_CENTER_, Y_CENTER_, DIM_, DIM_ * 0.5, DIM_ * 0.5)],   // Short side down
-            ["pentagon-0", getPolygon(X_CENTER_, Y_CENTER_, 5, pentagonR, 90)],        // Pointing up
-            // ["pentagon-90", getPolygon(X_CENTER_, Y_CENTER_, 5, pentagonR, 0)],        // Pointing right
-            // ["pentagon-180", getPolygon(X_CENTER_, Y_CENTER_, 5, pentagonR, -90)],     // Pointing down
-            // ["pentagon-270", getPolygon(X_CENTER_, Y_CENTER_, 5, pentagonR, 180)],     // Pointing left
-            ["hexagon-0", getPolygon(X_CENTER_, Y_CENTER_, 6, hexagonR, 0)],    // Flat side up and down
-            // ["hexagon-90", getPolygon(X_CENTER_, Y_CENTER_, 6, hexagonR, 90)],  // Flat side left and right
-            // ["heptagon-0", getPolygon(X_CENTER_, Y_CENTER_, 7, heptagonR, 90)],        // Pointing up
-            // ["heptagon-180", getPolygon(X_CENTER_, Y_CENTER_, 7, heptagonR, -90)],     // Pointing down
-            ["octagon-0", getPolygon(X_CENTER_, Y_CENTER_, 8, octagonR, 22.5)],       // Flat side up and down
-            // ["octagon-23", getPolygon(X_CENTER_, Y_CENTER_, 8, octagonR, 0)],         // Flat side left and right
-            ["cross-0", getCross(X_CENTER_, Y_CENTER_, crossW)],            // Regular cross
-            ["cross-45", rotateShape(X_CENTER_, Y_CENTER_, getCross(X_CENTER_, Y_CENTER_, crossW), 45)],    // Cross rotated like an X
-            ["star-0", getStar(X_CENTER_, Y_CENTER_, starW)],                                               // Star pointing up
-            // ["star-90", rotateShape(X_CENTER_, Y_CENTER_, getStar(X_CENTER_, Y_CENTER_, starW), -90)],     // Star pointing right
-            // ["star-180", rotateShape(X_CENTER_, Y_CENTER_, getStar(X_CENTER_, Y_CENTER_, starW), 180)],     // Star pointing down
-            // ["star-270", rotateShape(X_CENTER_, Y_CENTER_, getStar(X_CENTER_, Y_CENTER_, starW), 90)],     // Star pointing left
-            ["quarterCircle-0", getQuarterCircle(X_CENTER_, Y_CENTER_, quarterCircleR)],
-            // ["quarterCircle-90",rotateShape(X_CENTER_, Y_CENTER_, getQuarterCircle(X_CENTER_, Y_CENTER_, quarterCircleR), 90)],
-            // ["quarterCircle-180",rotateShape(X_CENTER_, Y_CENTER_, getQuarterCircle(X_CENTER_, Y_CENTER_, quarterCircleR), 180)],
-            // ["quarterCircle-270",rotateShape(X_CENTER_, Y_CENTER_, getQuarterCircle(X_CENTER_, Y_CENTER_, quarterCircleR), 270)],
-            ["semiCircle-0", getSemiCircle(X_CENTER_, Y_CENTER_, semiCircleR)],
-            // ["semiCircle-90",rotateShape(X_CENTER_, Y_CENTER_, getSemiCircle(X_CENTER_, Y_CENTER_, semiCircleR), 90)],
-            // ["semiCircle-180",rotateShape(X_CENTER_, Y_CENTER_, getSemiCircle(X_CENTER_, Y_CENTER_, semiCircleR), 180)],
-            // ["semiCircle-270",rotateShape(X_CENTER_, Y_CENTER_, getSemiCircle(X_CENTER_, Y_CENTER_, semiCircleR), 270)],
+            ["rectangle", getRectangle(X_CENTER_, Y_CENTER_, DIM_ * 0.5, DIM_)],             // Long rectangle
+            ["trapezoid", getTrapezoid(X_CENTER_, Y_CENTER_, DIM_ * 0.5, DIM_, DIM_ * 0.5)],     // Short side up
+            ["pentagon", getPolygon(X_CENTER_, Y_CENTER_, 5, pentagonR, 90)],        // Pointing up
+            ["hexagon", getPolygon(X_CENTER_, Y_CENTER_, 6, hexagonR, 0)],    // Flat side up and down
+            ["heptagon", getPolygon(X_CENTER_, Y_CENTER_, 7, heptagonR, 90)],        // Pointing up
+            ["octagon", getPolygon(X_CENTER_, Y_CENTER_, 8, octagonR, 22.5)],       // Flat side up and down
+            ["cross", getCross(X_CENTER_, Y_CENTER_, crossW)],            // Regular cross
+            ["star", getStar(X_CENTER_, Y_CENTER_, starW)],                                               // Star pointing up
+            ["quarterCircle", getQuarterCircle(X_CENTER_, Y_CENTER_, quarterCircleR)],
+            ["semiCircle", getSemiCircle(X_CENTER_, Y_CENTER_, semiCircleR)],
         ];
 }
 
@@ -461,30 +437,22 @@ else
 var jpegOpts = new JPEGSaveOptions;
 jpegOpts.FormatOptions = FormatOptions.STANDARDBASELINE;
 jpegOpts.quality = 7;
-
-// for (var j = 0; j < BLUR_LEVELS_; j++) {
-
-// textLayer.applyMotionBlur(45, BLUR_STEP_);
+setBackgroundColor("ffffff")
 
 for (var i = 0; i < alphabet.length; i++)
 {
     for (var shapeI = 0; shapeI < colorArrays.length; shapeI++)
     {
+        var startColor = 1;
         var shapeColorName = colorArrays[shapeI][0]; // name of color for naming the file
         if (shapeColorName === "white") // If the shape color is white change the background color to black
         {
-            setBackgroundColor("000000")
+            // setBackgroundColor("000000")
+            startColor = 2; // skip pure white since that's our background color
         }
-        else // Else white background
+        for (var shapeJ = startColor; shapeJ < colorArrays[shapeI].length; shapeJ++)
         {
-            setBackgroundColor("ffffff")
-        }
-        for (var shapeJ = 0; shapeJ < colorArrays[shapeI].length; shapeJ++)
-        {
-            if (shapeJ === 0)
-            {
-                shapeJ++; // shapeJ[0] is the name of the color, not a hex code
-            }
+
             for (var shapeK = 0; shapeK < shapesArray.length; shapeK++)
             {
                 var shapeName = shapesArray[shapeK][0]; // Name of shape for saving file
@@ -538,7 +506,7 @@ for (var i = 0; i < alphabet.length; i++)
                             do
                             {
                                 // true saves the jpeg as a copy
-                                baseDoc.saveAs(new File(BASE_SAVE_DIR_ + shapeColorName + shapeJ + "-" + shapeName + "-" + textColorName + textJ + "-" + alphabet[i] + "-blur" + j + "-" + angle + ".jpeg"), jpegOpts, true);
+                                baseDoc.saveAs(new File(BASE_SAVE_DIR_ + alphabet[i] + "-" + shapeName + "-" + shapeColorName + shapeJ + "-" + textColorName + textJ + "-blur" + j + "-" + angle + ".jpeg"), jpegOpts, true);
                                 angle += ROTATE_STEP_;
                                 textLayer.rotate(ROTATE_STEP_, AnchorPosition.MIDDLECENTER);
                             } while (angle < maxAngle);
