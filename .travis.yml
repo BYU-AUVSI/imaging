@@ -1,0 +1,16 @@
+language: python
+sudo: required
+dist: xenial
+services: postgresql
+before_script: # setup postgres db
+  - psql -f server/setup/internal/setup_database.sql -U postgres
+python:
+  - "3.5"
+  - "3.6"
+  - "3.7"
+# command to install dependencies
+install:
+  - pip install -r server/setup/internal/server-pip-requirements.txt
+# command to run tests
+script:
+  - cd server/src && python test.py
