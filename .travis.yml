@@ -2,7 +2,7 @@ language: python
 sudo: required
 dist: xenial
 services: postgresql
-before_script:
+before_script: # setup postgres db
   - psql -f server/setup/internal/setup_database.sql -U postgres
 python:
   - "3.5"
