@@ -327,6 +327,29 @@ class ClassificationDAO(BaseDAO):
 
         return targetList
 
+    def isTargetSubmitted(self, target):
+        """
+        Check if the specified target has already been submitted
+
+        @rtype: Boolean
+        @return: True if the target has been submitted, otherwise False
+        """
+        if target is None:
+            return False
+
+        getSubmitted = """SELECT target, submitted
+            FROM """ + self.outgoingTableName + """
+            WHERE target = %s AND submitted = 'submitted' LIMIT 1;"""
+
+        submittedTarget = super(ClassificationDAO, self).basicTopSelect(getSubmitted, (target,))
+        
+        if submittedTarget is None or not submittedTarget:
+            return False
+        elif submittedTarget[0] == target:
+            return True # we got a row
+
+        return False
+
     def submitAllPendingTargets(self, modelGenerator):
         """
         Finds all targets with a 'unsubmitted' status and submits them

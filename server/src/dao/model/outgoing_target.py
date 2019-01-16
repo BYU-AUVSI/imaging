@@ -161,18 +161,18 @@ class outgoing_target:
 
     def toJson(self):
         dict = {}
-        if self.type == 'standard' or self.type == 'off_axis':
-            for attr, value in self.__dict__.items():
-                corrected_name = attr[1:] # remove first underscore
-
-                if corrected_name not in self.KEYS_TO_EXCLUDE:
-                    dict[corrected_name] = value
-        else:
+        if self.type == 'emergent':
             # generate an emergent target output
             for attr, value in self.__dict__.items():
                 corrected_name = attr[1:] # remove first underscore
 
                 if corrected_name in self.EMERGENT_KEYS_TO_INCLUDE:
                     dict[corrected_name] = value
+        else:
+            for attr, value in self.__dict__.items():
+                corrected_name = attr[1:] # remove first underscore
+
+                if corrected_name not in self.KEYS_TO_EXCLUDE:
+                    dict[corrected_name] = value            
     
         return dict

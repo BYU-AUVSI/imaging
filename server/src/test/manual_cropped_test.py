@@ -78,3 +78,50 @@ class TestCropImageGet(unittest.TestCase):
         self.assertEqual(resultingModel.crop_coordinate_br.__str__(), model.crop_coordinate_br)
         self.assertEqual(resultingModel.crop_coordinate_tl.__str__(), model.crop_coordinate_tl)
         self.assertFalse(resultingModel.tapped)
+
+class TestCropImageGetNext(unittest.TestCase):
+    def test(self):
+        truncateTable('manual_cropped')
+        dao = ManualCroppedDAO(defaultConfigPath())
+
+        self.assertIsNone(dao.getNextImage())
+
+        model = manual_cropped()
+        model.image_id   = 123
+        model.time_stamp = 1547453775.2
+        model.cropped_path = '/im/a/totally/real/cropped/path/i/swear.jpg'
+        model.crop_coordinate_br = "(12,34)"
+        model.crop_coordinate_tl = "(56,78)"
+        resultingId = dao.upsertCropped(model)
+        self.assertNotEqual(resultingId, -1)
+
+        model.cropped_path = '/im/a/totally/real/cropped/path/2/i/swear.jpg'
+        model.image_id = 456
+        resultingId2 = dao.upsertCropped(model)
+        self.assertNotEqual(resultingId2, -1)
+
+        resultModel = dao.getNextImage()
+        self.assertIsNotNone(resultModel)
+        self.assertEqual(resultModel.id, resultingId)
+        self.assertTrue(resultModel.tapped)
+        self.assertEqual(resultModel.image_id, 123)
+        self.assertEqual(resultModel.crop_coordinate_tl.__str__(), model.crop_coordinate_tl)
+        self.assertEqual(resultModel.crop_coordinate_br.__str__(), model.crop_coordinate_br)
+
+        resultModel = dao.getNextImage()
+        self.assertIsNotNone(resultModel)
+        self.assertEqual(resultModel.id, resultingId2)
+        self.assertTrue(resultModel.tapped)
+        self.assertEqual(resultModel.image_id, model.image_id)
+        self.assertEqual(resultModel.cropped_path, model.cropped_path)
+        self.assertEqual(resultModel.crop_coordinate_tl.__str__(), model.crop_coordinate_tl)
+        self.assertEqual(resultModel.crop_coordinate_br.__str__(), model.crop_coordinate_br)
+
+        self.assertIsNone(dao.getNextImage())
+
+class TestCropImageGetAll(unittest.TestCase):
+    def test(self):
+        truncateTable('manual_cropped')
+        dao = ManualCroppedDAO(defaultConfigPath())
+
+        self.assertEqual(dao.getAll(), [])

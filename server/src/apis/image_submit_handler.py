@@ -85,7 +85,8 @@ class SubmissionHandler(Resource):
     def post(self, target_id):
         manual = checkXManual(request)
         dao = getClassificationDAO(manual)
-        content = request.get_json()
+        content = request.get_json(silent=True) #silence error throwing if no json present
+        print('heyyyy')
 
         allTargetIds = dao.listTargetIds()
 
@@ -93,6 +94,9 @@ class SubmissionHandler(Resource):
             return {'message': 'No classifications in outgoing (table empty)!'}, 404
         elif target_id not in allTargetIds:
             return {'message': 'Failed to find any targets with id {} to submit'.format(target_id)}, 404
+
+        if dao.isTargetSubmitted(target_id):
+            return {'message': 'Target {} has already been submitted'.format(target_id)}, 400
 
         resultTarget = None
         try:
