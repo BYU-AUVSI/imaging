@@ -86,7 +86,6 @@ class SubmissionHandler(Resource):
         manual = checkXManual(request)
         dao = getClassificationDAO(manual)
         content = request.get_json(silent=True) #silence error throwing if no json present
-        print('heyyyy')
 
         allTargetIds = dao.listTargetIds()
 
