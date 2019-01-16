@@ -146,12 +146,14 @@ print(model_ft)
 # Just normalization for validation
 data_transforms = {
     'train': transforms.Compose([
+        transforms.RandomRotation((0, 360), expand=True),
         transforms.Resize(input_size),
         transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
         transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
     ]),
     'val': transforms.Compose([
+        transforms.RandomRotation((0, 360), expand=True),
         transforms.Resize(input_size),
         transforms.CenterCrop(input_size),
         transforms.ToTensor(),
