@@ -166,53 +166,18 @@ class ManualCroppedDAO(BaseDAO):
 
         values = []
         for clmn, value in img.toDict().items():
-            updateStr += clmn + "= %s "
             if clmn == 'time_stamp':
-                updateStr += "AT TIME ZONE 'UTC'"
-            updateStr += ", "
+                updateStr += clmn + "= to_timestamp(%s) AT TIME ZONE 'UTC'"
+            else:
+                updateStr += clmn + "= %s "
+
             values.append(value.__str__())
+            updateStr += ", "
         
         updateStr = updateStr[:-2] # remove last space/comma
         updateStr += " WHERE id = %s RETURNING id;"
         values.append(id)
         
-        resultId = super(ManualCroppedDAO, self).getResultingId(updateStr, values)
-        if resultId != -1:
-            return self.getImage(resultId)
-        else:
-            return None
-
-
-    def updateImageByUID(self, id, updateContent):
-        """
-        Update the image with the specified image_id.
-
-        @type id: int
-        @param id: Image_id of the cropped information to update
-
-        @type updateContent: {object}
-        @param updateContent: Dictionary/JSON of attributes to update
-
-        @rtype: manual_cropped
-        @return: manual_cropped instance showing the current state of the now-updated row in the table. If the update fails, None
-        """
-        # push json into the manual_cropped model. this will
-        # extract any relevant attributes
-        img = manual_cropped(json=updateContent)
-        updateStr = "UPDATE manual_cropped SET "
-
-        values = []
-        for clmn, value in img.toDict().items():
-            updateStr += clmn + "= %s, "
-            if clmn == 'time_stamp':
-                updateStr += "AT TIME ZONE 'UTC'"
-            updateStr += ", "
-            values.append(value.__str__())
-        
-        updateStr = updateStr[:-2] # remove last space/comma
-        updateStr += " WHERE image_id = %s RETURNING id;"
-        values.append(id)
-        # this result id is a manual_cropped.id not image_id
         resultId = super(ManualCroppedDAO, self).getResultingId(updateStr, values)
         if resultId != -1:
             return self.getImage(resultId)

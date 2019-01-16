@@ -125,3 +125,66 @@ class TestCropImageGetAll(unittest.TestCase):
         dao = ManualCroppedDAO(defaultConfigPath())
 
         self.assertEqual(dao.getAll(), [])
+
+        model = manual_cropped()
+        model.image_id   = 123
+        model.time_stamp = 1547453775.2
+        model.cropped_path = '/im/a/totally/real/cropped/path/i/swear.jpg'
+        model.crop_coordinate_br = "(12,34)"
+        model.crop_coordinate_tl = "(56,78)"
+        resultingId = dao.upsertCropped(model)
+        self.assertNotEqual(resultingId, -1)
+
+        model.cropped_path = '/im/a/totally/real/cropped/path/2/i/swear.jpg'
+        model.image_id = 456
+        resultingId2 = dao.upsertCropped(model)
+        self.assertNotEqual(resultingId2, -1)
+
+        result = dao.getAll()
+
+        self.assertEqual(len(result), 2)
+
+class TestCropImageUpdate(unittest.TestCase):
+    def test(self):
+        truncateTable("manual_cropped")
+        dao = ManualCroppedDAO(defaultConfigPath())
+
+
+        model = manual_cropped()
+        model.image_id   = 123
+        model.time_stamp = 1547453775.2
+        model.cropped_path = '/im/a/totally/real/cropped/path/i/swear.jpg'
+        model.crop_coordinate_br = "(12,34)"
+        model.crop_coordinate_tl = "(56,78)"
+        resultingId = dao.upsertCropped(model)
+        self.assertNotEqual(resultingId, -1)
+
+        updateContent = {
+            "time_stamp": model.time_stamp + 1000,
+            "image_id": 456
+        }
+
+        # confirm update to bad id does nothing
+        self.assertIsNone(dao.updateImage(resultingId + 20, updateContent))
+        
+        resultingModel = dao.getImage(resultingId)
+        # confirm that nothing was changed in our one row:
+        self.assertIsNotNone(resultingModel)
+        self.assertEqual(resultingId, resultingModel.id)
+        self.assertEqual(model.time_stamp, resultingModel.time_stamp)
+        self.assertEqual(model.image_id, resultingModel.image_id)
+        self.assertEqual(model.cropped_path, resultingModel.cropped_path)
+        self.assertEqual(model.crop_coordinate_br.__str__(), resultingModel.crop_coordinate_br.__str__())
+        self.assertEqual(model.crop_coordinate_tl.__str__(), resultingModel.crop_coordinate_tl.__str__())
+        self.assertFalse(resultingModel.tapped)
+
+        # do a legit update now:
+        resultingModel = dao.updateImage(resultingId, updateContent)
+        self.assertIsNotNone(resultingModel)
+        self.assertEqual(resultingId, resultingModel.id)
+        self.assertEqual(resultingModel.image_id, 456)
+        self.assertEqual(model.time_stamp + 1000, resultingModel.time_stamp)
+        self.assertEqual(model.cropped_path, resultingModel.cropped_path)
+        self.assertEqual(model.crop_coordinate_br.__str__(), resultingModel.crop_coordinate_br.__str__())
+        self.assertEqual(model.crop_coordinate_tl.__str__(), resultingModel.crop_coordinate_tl.__str__())
+        self.assertFalse(resultingModel.tapped)

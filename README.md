@@ -1,4 +1,4 @@
-# Imaging [![Build Status](https://travis-ci.com/BYU-AUVSI/imaging.png)](https://travis-ci.com/BYU-AUVSI/imaging)
+# Imaging [![Build Status](https://travis-ci.com/BYU-AUVSI/imaging.svg)](https://travis-ci.com/BYU-AUVSI/imaging)
 
 This package contains all the code used by the imaging subsystem.
 
