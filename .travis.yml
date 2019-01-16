@@ -3,10 +3,8 @@ sudo: required
 dist: xenial
 services: postgresql
 before_script:
-  - psql -f server/setup/setup_database.sql -U postgres
+  - psql -f server/setup/internal/setup_database.sql -U postgres
 python:
-  - "3.3"
-  - "3.4"
   - "3.5"
   - "3.6"
   - "3.7"
