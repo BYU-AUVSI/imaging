@@ -1,12 +1,20 @@
-from dao.outgoing_manual_dao import OutgoingManualDAO
-from dao.model.outgoing_manual import outgoing_manual
+import unittest
 from config import defaultConfigPath
 from test.test_helpers import truncateTable
-import unittest
+from dao.outgoing_manual_dao import OutgoingManualDAO
+from dao.outgoing_autonomous_dao import OutgoingAutonomousDAO
+from dao.model.outgoing_manual import outgoing_manual
+from dao.model.outgoing_autonomous import outgoing_autonomous
 
 class TestOutgoingManualConnection(unittest.TestCase):
     def test(self):
         dao = OutgoingManualDAO(defaultConfigPath())
+        self.assertIsNotNone(dao)
+        self.assertIsNotNone(dao.conn)
+
+class TestOutgoingAutonomousConnection(unittest.TestCase):
+    def test(self):
+        dao = OutgoingAutonomousDAO(defaultConfigPath())
         self.assertIsNotNone(dao)
         self.assertIsNotNone(dao.conn)
 
@@ -25,9 +33,8 @@ class TestMostCommonFunction(unittest.TestCase):
         self.assertEqual(dao.findMostCommonValue(toMostCommon, 1), 'B')
         self.assertIsNone(dao.findMostCommonValue([[0, None], [1, None]], 1))
 
-class TestManualClassificationInsert(unittest.TestCase):
+class TestManualClassificationAdd(unittest.TestCase):
     def test(self):
-        # True for manual classification
         truncateTable('outgoing_manual')
         dao = OutgoingManualDAO(defaultConfigPath())
 
@@ -42,6 +49,25 @@ class TestManualClassificationInsert(unittest.TestCase):
         # should now fail to insert a duplicate crop_id
         self.assertEqual(dao.addClassification(testIns), -1)
         self.assertIsNotNone(dao.getClassificationByUID(42))
+
+class TestAutonomousClassificationAdd(unittest.TestCase):
+    def test(self):
+        truncateTable('outgoing_autonomous')
+        dao = OutgoingAutonomousDAO(defaultConfigPath())
+
+        testIns = outgoing_autonomous()
+        testIns.image_id = 123
+        testIns.crop_path = '/am/i/even/a/real/path/idk/anymore.jpg'
+        testIns.shape = 'circle'
+        testIns.background_color = 'white'
+        testIns.alphanumeric = 'A'
+        testIns.alphanumeric_color = 'black'
+        resultingId = dao.addClassification(testIns)
+        self.assertNotEqual(resultingId, -1)
+
+        # should be able to insert a duplicate record
+        self.assertNotEqual(dao.addClassification(testIns), -1)
+        self.assertIsNotNone(dao.getClassificationByUID(resultingId))
 
 class TestManualClassificationTargetBinning(unittest.TestCase):
     def test(self):

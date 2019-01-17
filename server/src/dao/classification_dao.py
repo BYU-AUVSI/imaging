@@ -254,7 +254,7 @@ class ClassificationDAO(BaseDAO):
         # get the target ids that work with our where clause:
         targets = self.getAllTargetIDs(whereClause)
 
-        if targets is None:
+        if targets is None or not targets:
             return []
 
         # NOTE: this is a bit dangerous, but allows this query to work on either

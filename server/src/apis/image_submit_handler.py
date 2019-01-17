@@ -40,7 +40,7 @@ class PendingSubmissionHandler(Resource):
         results = dao.getPendingTargets()
         print(results)
         if results is None or not results or not results[0]:
-            return {'message': 'Could not locate any distinct targets'}, 404
+            return {'message': 'Could not locate any targets pending submission'}, 404
 
         jsonible = []
         for target in results:
