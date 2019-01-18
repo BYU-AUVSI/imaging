@@ -38,7 +38,6 @@ class PendingSubmissionHandler(Resource):
         dao = getClassificationDAO(manual)
 
         results = dao.getPendingTargets()
-        print(results)
         if results is None or not results or not results[0]:
             return {'message': 'Could not locate any targets pending submission'}, 404
 
