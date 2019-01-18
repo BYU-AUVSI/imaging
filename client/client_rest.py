@@ -155,6 +155,11 @@ class StateMeasurement:
 class ManualClassification:
     def __init__(self, cropId, classType, latitude, longitude, orientation,
                  shape, bgColor, alpha, alphaColor, submitted, desc, classId=-1, target=-1):
+        """
+        classType = standard/Emergent
+        lat/lon/submitted/
+        desc = Description (None if not emergent)
+        """
         self.id = classId
         self.crop_id = cropId
         self.target = target
