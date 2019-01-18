@@ -212,7 +212,7 @@ class GuiClass(tk.Frame):
             tk.Grid.rowconfigure(self.tab2,y,weight=1)
 
         # Column One
-        self.t2c1title = ttk.Label(self.tab2, anchor=tk.CENTER, text='Classification Queue')
+        self.t2c1title = ttk.Label(self.tab2, anchor=tk.CENTER, text='                  ')
         self.t2c1title.grid(row=0,column=0,columnspan=4,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
 
         # Column Two
@@ -273,14 +273,64 @@ class GuiClass(tk.Frame):
         # Column Three
         self.t2sep23 = ttk.Separator(self.tab2, orient=tk.VERTICAL)
         self.t2sep23.grid(row=0, column=12, rowspan=50,sticky=tk.N+tk.S+tk.E+tk.W, pady=5)
-        self.t2c2title = ttk.Label(self.tab2, anchor=tk.CENTER, text='Classified Targets')
+        self.t2c2title = ttk.Label(self.tab2, anchor=tk.CENTER, text='                      ')
         self.t2c2title.grid(row=0,column=12,columnspan=4,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
 
 
 
-        # TAB 3: AUTONOMOUS TENDER ------------------------------------------------
+        # TAB 3: MANUAL TARGET SUBMISSION ------------------------------------------------
         self.tab3 = ttk.Frame(self.n)
-        self.n.add(self.tab3, text='Autonomous Tender')
+        self.n.add(self.tab3, text='Manual Target Submission')
+
+        for x in range(12):
+            tk.Grid.columnconfigure(self.tab2,x,weight=1)
+        for y in range(21):
+            tk.Grid.rowconfigure(self.tab2,y,weight=1)
+
+        # Title
+        self.t3titleA = ttk.Label(self.tab3, anchor=tk.CENTER, text='Target #')
+        self.t3titleA.grid(row=0,column=4,columnspan=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t3titleB = ttk.Label(self.tab3, anchor=tk.CENTER, text='5')
+        self.t3titleB.grid(row=0,column=5,columnspan=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t3titleC = ttk.Label(self.tab3, anchor=tk.CENTER, text='Out of')
+        self.t3titleC.grid(row=0,column=6,columnspan=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t3titleD = ttk.Label(self.tab3, anchor=tk.CENTER, text='20')
+        self.t3titleD.grid(row=0,column=7,columnspan=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+
+        # Column One
+        self.t3c1title = ttk.Label(self.tab3, anchor=tk.CENTER, text='Pic 1')
+        self.t3c1title.grid(row=1,column=0,columnspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+
+        # Column Two
+        self.t3c2title = ttk.Label(self.tab3, anchor=tk.CENTER, text='Pic 2')
+        self.t3c2title.grid(row=1,column=2,columnspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+
+        # Column Three
+        self.t3c3title = ttk.Label(self.tab3, anchor=tk.CENTER, text='Pic 3')
+        self.t3c3title.grid(row=1,column=4,columnspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+
+        # Column Four
+        self.t3c4title = ttk.Label(self.tab3, anchor=tk.CENTER, text='Pic 4')
+        self.t3c4title.grid(row=1,column=6,columnspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+
+        # Column Five
+        self.t3c5title = ttk.Label(self.tab3, anchor=tk.CENTER, text='Pic 5')
+        self.t3c5title.grid(row=1,column=8,columnspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+
+        # Column Six
+        self.t3sep56 = ttk.Separator(self.tab3, orient=tk.VERTICAL)
+        self.t3sep56.grid(row=1, column=10, rowspan=20,sticky=tk.N+tk.S+tk.E+tk.W, pady=5)
+        self.t3c6title = ttk.Label(self.tab3, anchor=tk.CENTER, text='To Submit')
+        self.t3c6title.grid(row=1,column=10,columnspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+
+
+
+
+
+
+        # TAB 4: AUTONOMOUS TARGET SUBMISSION ------------------------------------------------
+        self.tab4 = ttk.Frame(self.n)
+        self.n.add(self.tab4, text='Autonomous Target Submission')
 
         # Done with initialization
         self.initialized = True
