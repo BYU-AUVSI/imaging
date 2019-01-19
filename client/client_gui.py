@@ -48,7 +48,7 @@ from PIL import Image,ImageTk
 import cv2
 import numpy as np
 import time
-import client_rest
+from lib import client_rest
 import time
 import sys
 
