@@ -13,4 +13,4 @@ install:
   - pip install -r server/setup/internal/server-pip-requirements.txt
 # command to run tests
 script:
-  - cd server/src && python test.py
+  - ./test.sh

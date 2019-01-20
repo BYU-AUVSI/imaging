@@ -40,6 +40,6 @@ class StateTsHandler(Resource):
         state = dao.getStateByClosestTS(ts)
 
         if state is None:
-            return {'message': 'Failed to get closest state measurement by time_stamp. Either: a) the table is empty or b) the time_stampe is < all timestamps in the table'}
+            return {'message': 'Failed to get closest state measurement by time_stamp. Either: a) the table is empty or b) the time_stampe is < all timestamps in the table'}, 404
 
         return jsonify(state.toDict())

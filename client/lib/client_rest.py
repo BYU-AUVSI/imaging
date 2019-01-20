@@ -148,7 +148,7 @@ class StateMeasurement:
         """
         self.id = stateId
         self.roll = roll
-        self. pitch = pitch
+        self.pitch = pitch
         self.yaw = yaw
         self.time_stamp = ts
 
