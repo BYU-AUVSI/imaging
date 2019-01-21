@@ -184,8 +184,6 @@ class ManualClassification:
         d = self.toDict()
         return json.dumps(self.__dict__)
 
-
-
 class TargetSubmission:
     def __init__(self, crop_id=None, orientation=None, bg_color=None, alpha_color=None, desc=None):
         self.crop_id = crop_id
@@ -251,7 +249,6 @@ class ImagingInterface:
         except:
             return False
         return True
-
 
     def debug(self, printStr):
         """

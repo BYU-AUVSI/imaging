@@ -26,15 +26,15 @@ def setupClientRestTestDb():
     truncateTable('outgoing_autonomous')
 
     # figure out the absolute path to our raw test image:
-    rawImg = os.path.abspath(os.path.dirname(os.path.realpath(__file__)) + '/assets/rawFrame.jpg')
+    rawImg = os.path.abspath(os.path.dirname(os.path.realpath(__file__)) + '/test/assets/rawFrame.jpg')
     # figure out the path for our cropped test img
-    cropImg = os.path.abspath(os.path.dirname(os.path.realpath(__file__)) + '/assets/star.png')
+    cropImg = os.path.abspath(os.path.dirname(os.path.realpath(__file__)) + '/test/assets/star.png')
 
     # setup incoming image table first
     imageIds= setupIncomingImageTable(rawImg)
     # use ids from incoming_image to setup manual_cropped table
-    cropIds = setupManualCroppedTable(cropImg, imageIds)
-    setupManualOutgoingTable(cropIds)
+    # cropIds = setupManualCroppedTable(cropImg, imageIds)
+    # setupManualOutgoingTable(cropIds)
     setupIncomingGpsTable()
     setupIncomingStateTable()
 
