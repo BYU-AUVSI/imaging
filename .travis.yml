@@ -11,6 +11,7 @@ python:
 # command to install dependencies
 install:
   - pip install -r server/setup/internal/server-pip-requirements.txt
+  - pip install -r client/setup/internal/pip-requirements.txt
 # command to run tests
 script:
   - ./test.sh

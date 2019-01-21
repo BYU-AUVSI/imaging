@@ -69,8 +69,6 @@ class IncomingGpsDAO(BaseDAO):
             LIMIT 1;"""
 
         selectedGps = super(IncomingGpsDAO, self).basicTopSelect(selectGpsByTs, (ts,))
-
-        print("SELECT TS RETURN:: {}".format(selectedGps))
         
         if selectedGps is not None:
             return incoming_gps(selectedGps)
