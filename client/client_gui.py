@@ -287,9 +287,9 @@ class GuiClass(tk.Frame):
         self.n.add(self.tab3, text='Manual Target Submission')
 
         for x in range(12):
-            tk.Grid.columnconfigure(self.tab2,x,weight=1)
+            tk.Grid.columnconfigure(self.tab3,x,weight=1)
         for y in range(21):
-            tk.Grid.rowconfigure(self.tab2,y,weight=1)
+            tk.Grid.rowconfigure(self.tab3,y,weight=1)
 
         self.t3_default_np = self.get_image('assets/noClassifiedTargets.jpg')
         self.t3_default_im = self.np2im(self.t3_default_np)
@@ -309,9 +309,9 @@ class GuiClass(tk.Frame):
         # Column One
         self.t3c1title = ttk.Label(self.tab3, anchor=tk.CENTER, text='Pic 1')
         self.t3c1title.grid(row=1,column=0,columnspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t3c1i1_im = self.t3_default_im
-        self.t3c1i1_tk = self.t3_default_tk
-        self.org_width,self.org_height = self.img_im.size
+        self.t3c1i1_im = self.t3_default_im.copy()
+        self.t3c1i1_tk = self.im2tk(self.t3c1i1_im)
+        self.t3c1i1_org_width,self.t3c1i1_org_height = self.t3c1i1_im.size
         self.t3c1i1 = ttk.Label(self.tab3, anchor=tk.CENTER,image=self.t3c1i1_tk)
         self.t3c1i1.image = self.t3c1i1_tk
         self.t3c1i1.grid(row=3,column=0,rowspan=1,columnspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
@@ -319,29 +319,41 @@ class GuiClass(tk.Frame):
         # Column Two
         self.t3c2title = ttk.Label(self.tab3, anchor=tk.CENTER, text='Pic 2')
         self.t3c2title.grid(row=1,column=2,columnspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t3c2i1 = ttk.Label(self.tab3, anchor=tk.CENTER,image=self.t3_default_tk)
-        self.t3c2i1.image = self.t3_default_tk
+        self.t3c2i1_im = self.t3_default_im.copy()
+        self.t3c2i1_tk = self.im2tk(self.t3c2i1_im)
+        self.t3c2i1_org_width,self.t3c2i1_org_height = self.t3c2i1_im.size
+        self.t3c2i1 = ttk.Label(self.tab3, anchor=tk.CENTER,image=self.t3c2i1_tk)
+        self.t3c2i1.image = self.t3c2i1_tk
         self.t3c2i1.grid(row=3,column=2,rowspan=1,columnspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
 
         # Column Three
         self.t3c3title = ttk.Label(self.tab3, anchor=tk.CENTER, text='Pic 3')
         self.t3c3title.grid(row=1,column=4,columnspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t3c3i1 = ttk.Label(self.tab3, anchor=tk.CENTER,image=self.t3_default_tk)
-        self.t3c3i1.image = self.t3_default_tk
+        self.t3c3i1_im = self.t3_default_im.copy()
+        self.t3c3i1_tk = self.im2tk(self.t3c3i1_im)
+        self.t3c3i1_org_width,self.t3c3i1_org_height = self.t3c3i1_im.size
+        self.t3c3i1 = ttk.Label(self.tab3, anchor=tk.CENTER,image=self.t3c3i1_tk)
+        self.t3c3i1.image = self.t3c3i1_tk
         self.t3c3i1.grid(row=3,column=4,rowspan=1,columnspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
 
         # Column Four
         self.t3c4title = ttk.Label(self.tab3, anchor=tk.CENTER, text='Pic 4')
         self.t3c4title.grid(row=1,column=6,columnspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t3c4i1 = ttk.Label(self.tab3, anchor=tk.CENTER,image=self.t3_default_tk)
-        self.t3c4i1.image = self.t3_default_tk
+        self.t3c4i1_im = self.t3_default_im.copy()
+        self.t3c4i1_tk = self.im2tk(self.t3c4i1_im)
+        self.t3c4i1_org_width,self.t3c4i1_org_height = self.t3c4i1_im.size
+        self.t3c4i1 = ttk.Label(self.tab3, anchor=tk.CENTER,image=self.t3c4i1_tk)
+        self.t3c4i1.image = self.t3c4i1_tk
         self.t3c4i1.grid(row=3,column=6,rowspan=1,columnspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
 
         # Column Five
         self.t3c5title = ttk.Label(self.tab3, anchor=tk.CENTER, text='Pic 5')
         self.t3c5title.grid(row=1,column=8,columnspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t3c5i1 = ttk.Label(self.tab3, anchor=tk.CENTER,image=self.t3_default_tk)
-        self.t3c5i1.image = self.t3_default_tk
+        self.t3c5i1_im = self.t3_default_im.copy()
+        self.t3c5i1_tk = self.im2tk(self.t3c5i1_im)
+        self.t3c5i1_org_width,self.t3c5i1_org_height = self.t3c5i1_im.size
+        self.t3c5i1 = ttk.Label(self.tab3, anchor=tk.CENTER,image=self.t3c5i1_tk)
+        self.t3c5i1.image = self.t3c5i1_tk
         self.t3c5i1.grid(row=3,column=8,rowspan=1,columnspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
 
         # Column Six
@@ -349,8 +361,11 @@ class GuiClass(tk.Frame):
         self.t3sep56.grid(row=1, column=10, rowspan=20,sticky=tk.N+tk.S+tk.E+tk.W, pady=5)
         self.t3c6title = ttk.Label(self.tab3, anchor=tk.CENTER, text='To Submit')
         self.t3c6title.grid(row=1,column=10,columnspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t3c6i1 = ttk.Label(self.tab3, anchor=tk.CENTER,image=self.t3_default_tk)
-        self.t3c6i1.image = self.t3_default_tk
+        self.t3c6i1_im = self.t3_default_im.copy()
+        self.t3c6i1_tk = self.im2tk(self.t3c6i1_im)
+        self.t3c6i1_org_width,self.t3c6i1_org_height = self.t3c6i1_im.size
+        self.t3c6i1 = ttk.Label(self.tab3, anchor=tk.CENTER,image=self.t3c6i1_tk)
+        self.t3c6i1.image = self.t3c6i1_tk
         self.t3c6i1.grid(row=3,column=10,rowspan=1,columnspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
 
 
@@ -562,24 +577,47 @@ class GuiClass(tk.Frame):
         """
         if self.initialized and (time.time()-self.resize_counter_tab3) > 0.050:
             if self.t3c1i1.winfo_width() > 1:
-                pass
                 self.resize_counter_tab3 = time.time()
                 self.master.update()
                 # Col 1 Image
                 self.t3c1i1_width = self.t3c1i1.winfo_width()
                 self.t3c1i1_height = self.t3c1i1.winfo_height()
-                self.t3_resized_im = self.resizeIm(self.img_im,self.org_width,self.org_height,self.t3c1i1_width,self.t3c1i1_height)
-                self.t1c1i1_img_width,self.t1c1i1_img_height = self.resized_im.size
-                self.img_tk = self.im2tk(self.resized_im)
-                self.t1c1i1.configure(image=self.img_tk)
-                # cropped image
-                #self.t1c2i1_width = self.t1c2i1.winfo_width()
-                #self.t1c2i1_height = self.t1c2i1.winfo_height()
-                self.crop_preview_resized_im = self.resizeIm(self.crop_preview_im,self.crop_preview_width,self.crop_preview_height,self.t1c1i1_width*self.crop_preview_img_ratio,self.t1c1i1_height*self.crop_preview_img_ratio)
-                #self.t1c2i1_width,self.t1c2i1_height = self.crop_resized_im.size
-                self.crop_preview_tk = self.im2tk(self.crop_preview_resized_im)
-                self.t1c2i1.configure(image=self.crop_preview_tk)
-                '''
+                resized_im = self.resizeIm(self.t3c1i1_im,self.t3c1i1_org_width,self.t3c1i1_org_height,self.t3c1i1_width,self.t3c1i1_height)
+                self.t3c1i1_tk = self.im2tk(resized_im)
+                self.t3c1i1.configure(image=self.t3c1i1_tk)
+                # Col 2 Image
+                self.t3c2i1_width = self.t3c2i1.winfo_width()
+                self.t3c2i1_height = self.t3c2i1.winfo_height()
+                resized_im = self.resizeIm(self.t3c2i1_im,self.t3c2i1_org_width,self.t3c2i1_org_height,self.t3c2i1_width,self.t3c2i1_height)
+                self.t3c2i1_tk = self.im2tk(resized_im)
+                self.t3c2i1.configure(image=self.t3c2i1_tk)
+                # Col 3 Image
+                self.t3c3i1_width = self.t3c3i1.winfo_width()
+                self.t3c3i1_height = self.t3c3i1.winfo_height()
+                resized_im = self.resizeIm(self.t3c3i1_im,self.t3c3i1_org_width,self.t3c3i1_org_height,self.t3c3i1_width,self.t3c3i1_height)
+                self.t3c3i1_tk = self.im2tk(resized_im)
+                self.t3c3i1.configure(image=self.t3c3i1_tk)
+                # Col 4 Image
+                self.t3c4i1_width = self.t3c4i1.winfo_width()
+                self.t3c4i1_height = self.t3c4i1.winfo_height()
+                resized_im = self.resizeIm(self.t3c4i1_im,self.t3c4i1_org_width,self.t3c4i1_org_height,self.t3c4i1_width,self.t3c4i1_height)
+                self.t3c4i1_tk = self.im2tk(resized_im)
+                self.t3c4i1.configure(image=self.t3c4i1_tk)
+                # Col 3 Image
+                self.t3c5i1_width = self.t3c5i1.winfo_width()
+                self.t3c5i1_height = self.t3c5i1.winfo_height()
+                resized_im = self.resizeIm(self.t3c5i1_im,self.t3c5i1_org_width,self.t3c5i1_org_height,self.t3c5i1_width,self.t3c5i1_height)
+                self.t3c5i1_tk = self.im2tk(resized_im)
+                self.t3c5i1.configure(image=self.t3c5i1_tk)
+                # Col 3 Image
+                self.t3c6i1_width = self.t3c6i1.winfo_width()
+                self.t3c6i1_height = self.t3c6i1.winfo_height()
+                resized_im = self.resizeIm(self.t3c6i1_im,self.t3c6i1_org_width,self.t3c6i1_org_height,self.t3c6i1_width,self.t3c6i1_height)
+                self.t3c6i1_tk = self.im2tk(resized_im)
+                self.t3c6i1.configure(image=self.t3c6i1_tk)
+
+
+
 
     def resizeIm(self,image,image_width,image_height,width_restrict,height_restrict):
         """
@@ -808,8 +846,6 @@ class GuiClass(tk.Frame):
             print("server request = ",time1-time0,"gui = ",time2-time1)
 
 
-
-
     def submitClassification(self,event=None):
         """
         Submits classification of image to server
@@ -873,11 +909,11 @@ class GuiClass(tk.Frame):
             self.master.bind("<Escape>",self.close_window)
         elif active_tab == 3:
             self.resizeEventTab3()
-            self.master.unbind("<Right>")
-            self.master.unbind("<Left>")
+            self.master.bind("<Right>",self.nextClassified)
+            self.master.bind("<Left>",self.previousClassified)
             self.master.unbind("<d>")
             self.master.unbind("<a>")
-            self.master.unbind("<Configure>")
+            self.master.bind("<Configure>",self.resizeEventTab3)
             self.master.unbind("<Control-z>")
             self.master.unbind("<Return>")
             self.master.bind("<Escape>",self.close_window)
@@ -1045,12 +1081,50 @@ class GuiClass(tk.Frame):
             return True
 
     def updateManualSubmissionTab(self):
-        pendingList = self.interface.getPendingSubmissions(True)
+        self.pendingList = self.interface.getPendingSubmissions(True)
         # Debugging
-        print(pendingList)
-        print(len(pendingList))
-        self.t3_total_targets = len(pendingList)
+        print(self.pendingList)
+        print(len(self.pendingList))
+        self.t3_total_targets = len(self.pendingList)
         self.t3titleD.configure(text=self.t3_total_targets)
+        print(self.pendingList[0][0].shape)
+
+    def nextClassified(self,event):
+        """
+        Goes to next classified target group
+
+        @type  event: event
+        @param event: Right arrow event
+
+        @rtype:  None
+        @return: None
+        """
+        if self.serverConnected:
+            if self.t3_current_target < (len(self.pendingList) - 1):
+                self.t3_current_target += 1
+            elif len(self.pendingList) == 0:
+                self.t3_current_target = 0
+            else:
+                pass
+
+    def previousClassified(self,event):
+        """
+        Goes to previous classified target group
+
+        @type  event: event
+        @param event: Right arrow event
+
+        @rtype:  None
+        @return: None
+        """
+        if self.serverConnected:
+            if self.t3_current_target < (len(self.pendingList) - 1):
+                self.t3_current_target += 1
+            elif len(self.pendingList) == 0:
+                self.t3_current_target = 0
+            else:
+                pass
+
 
 
 if __name__ == "__main__":
