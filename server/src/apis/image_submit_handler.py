@@ -43,7 +43,7 @@ class PendingSubmissionHandler(Resource):
 
         jsonible = []
         for target in results:
-            jsonible.append([ classification.toDict(exclude=('id',)) for classification in target ])
+            jsonible.append([ classification.toDict() for classification in target ])
 
         return jsonify(jsonible)
 

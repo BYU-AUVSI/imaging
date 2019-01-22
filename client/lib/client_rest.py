@@ -831,8 +831,6 @@ class ImagingInterface:
                 pendingList[i].append(ManualClassification(
                     pendingList_j[i][j]['crop_id'],
                     pendingList_j[i][j]['type'],
-                    pendingList_j[i][j]['latitude'],
-                    pendingList_j[i][j]['longitude'],
                     pendingList_j[i][j]['orientation'],
                     pendingList_j[i][j]['shape'],
                     pendingList_j[i][j]['background_color'],
@@ -840,9 +838,10 @@ class ImagingInterface:
                     pendingList_j[i][j]['alphanumeric_color'],
                     pendingList_j[i][j]['submitted'],
                     pendingList_j[i][j]['description'],
-                    target=pendingList_j[i][j]['target'],
-                    latitude=pendingList_j[i][j]['latitude'],
-                    longitude=pendingList_j[i][j]['longitude']
+                    pendingList_j[i][j]['id'],
+                    pendingList_j[i][j]['target'],
+                    pendingList_j[i][j]['latitude'],
+                    pendingList_j[i][j]['longitude']
                 ))
         return pendingList
 
