@@ -153,19 +153,21 @@ class StateMeasurement:
         self.time_stamp = ts
 
 class ManualClassification:
-    def __init__(self, cropId, classType, latitude, longitude, orientation,
-                 shape, bgColor, alpha, alphaColor, submitted, desc, classId=-1, target=-1):
-        """
+    """
         classType = standard/Emergent
         lat/lon/submitted/
         desc = Description (None if not emergent)
-        """
+    """
+    def __init__(self, cropId, classType, orientation, shape, bgColor, alpha, alphaColor,
+                 submitted, desc, classId=None, target=None, latitude=None, longitude=None):
         self.id = classId
         self.crop_id = cropId
         self.target = target
         self.type = classType
-        self.latitude = float(latitude)
-        self.longitude = float(longitude)
+        if latitude is not None:
+            self.latitude = float(latitude)
+        if longitude is not None:
+            self.longitude = float(longitude)
         self.orientation = orientation
         self.shape = shape
         self.background_color = bgColor
@@ -175,10 +177,7 @@ class ManualClassification:
         self.description = desc
 
     def toDict(self):
-        d = self.__dict__
-        d.pop('id')
-        d.pop('target')
-        return d
+        return {k: v for k, v in self.__dict__.items() if v is not None}  # removes the values with None
 
     def toJson(self):
         d = self.toDict()
@@ -671,8 +670,6 @@ class ImagingInterface:
             info_j = json.loads(resp.content.decode('utf-8'))
             return ManualClassification(info_j['crop_id'],
                                         info_j['type'],
-                                        info_j['latitude'],
-                                        info_j['longitude'],
                                         info_j['orientation'],
                                         info_j['shape'],
                                         info_j['background_color'],
@@ -681,7 +678,9 @@ class ImagingInterface:
                                         info_j['submitted'],
                                         info_j['description'],
                                         info_j['id'],
-                                        info_j['target']
+                                        info_j['target'],
+                                        info_j['latitude'],
+                                        info_j['longitude']
                                         )
         else:
             print("Server returned status code {}".format(resp.status_code))
@@ -701,8 +700,6 @@ class ImagingInterface:
             manClassList.append(ManualClassification(
                                         manClassList_j[i]['crop_id'],
                                         manClassList_j[i]['type'],
-                                        manClassList_j[i]['latitude'],
-                                        manClassList_j[i]['longitude'],
                                         manClassList_j[i]['orientation'],
                                         manClassList_j[i]['shape'],
                                         manClassList_j[i]['background_color'],
@@ -711,7 +708,9 @@ class ImagingInterface:
                                         manClassList_j[i]['submitted'],
                                         manClassList_j[i]['description'],
                                         manClassList_j[i]['id'],
-                                        manClassList_j[i]['target']
+                                        manClassList_j[i]['target'],
+                                        manClassList_j[i]['latitude'],
+                                        manClassList_j[i]['longitude']
                                         ))
         return manClassList
 
@@ -773,8 +772,6 @@ class ImagingInterface:
             manClassList.append(ManualClassification(
                 manClassList_j[i]['crop_id'],
                 manClassList_j[i]['type'],
-                manClassList_j[i]['latitude'],
-                manClassList_j[i]['longitude'],
                 manClassList_j[i]['orientation'],
                 manClassList_j[i]['shape'],
                 manClassList_j[i]['background_color'],
@@ -782,7 +779,9 @@ class ImagingInterface:
                 manClassList_j[i]['alphanumeric_color'],
                 manClassList_j[i]['submitted'],
                 manClassList_j[i]['description'],
-                target=manClassList_j[i]['target']
+                target=manClassList_j[i]['target'],
+                latitude=manClassList_j[i]['latitude'],
+                longitude=manClassList_j[i]['longitude']
             ))
         return manClassList
 
@@ -809,7 +808,9 @@ class ImagingInterface:
                                         info_j['alphanumeric_color'],
                                         info_j['submitted'],
                                         info_j['description'],
-                                        target=info_j['target']
+                                        target=info_j['target'],
+                                        latitude=info_j['latitude'],
+                                        longitude=info_j['longitude']
                                         )
 
     def getPendingSubmissions(self, isManual):
@@ -839,7 +840,9 @@ class ImagingInterface:
                     pendingList_j[i][j]['alphanumeric_color'],
                     pendingList_j[i][j]['submitted'],
                     pendingList_j[i][j]['description'],
-                    target=pendingList_j[i][j]['target']
+                    target=pendingList_j[i][j]['target'],
+                    latitude=pendingList_j[i][j]['latitude'],
+                    longitude=pendingList_j[i][j]['longitude']
                 ))
         return pendingList
 
@@ -927,7 +930,7 @@ def testManualClassPost(interface, manClass):
 
 
 def postManClass(interface, cid, o, s, sc, a, ac):
-    manClass = ManualClassification(cid, "standard", 44.444, -88.888, o, s, sc, a, ac, "unsubmitted", "DescStr")
+    manClass = ManualClassification(cid, "standard", o, s, sc, a, ac, "unsubmitted", "DescStr")
     testManualClassPost(interface, manClass)
 
 
@@ -942,17 +945,21 @@ if __name__ == "__main__":
 
     # query = interface.getRawImage(5)
 
-    # manClass = ManualClassification(12, "standard", 44.444, -88.888, "E", "square", "red", "B", "white", "unsubmitted", "DescStr")
+    manClass = ManualClassification(12, "standard", "SE", "pentagon", "blue", "Z", "green", "unsubmitted", "DescStr")
     # testManualClassPost(interface, manClass)
 
-    # m = interface.getManualClass(13)
+    # m = interface.getManualClassById(13)
     # m_all = interface.getAllManualClass()
-    # r = interface.updateManualClass(13, manClass)
+    r = interface.updateManualClass(13, manClass)
 
     # r = interface.postSubmitAllTargets(True)
 
     # manList = interface.getAllSubmittedTargets(True)
     # m = interface.getSubmittedTargetById(True, 5)
     # p = interface.getPendingSubmissions(True)
+
+    # postManClass(interface, )
+
+    # Test long, lat is none
 
     print("Done")
