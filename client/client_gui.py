@@ -48,7 +48,7 @@ from PIL import Image,ImageTk
 import cv2
 import numpy as np
 import time
-import client_rest
+from lib import client_rest
 import time
 import sys
 
@@ -129,7 +129,7 @@ class GuiClass(tk.Frame):
         # Column Two
         #self.t0sep12 = ttk.Separator(self.tab0, orient=tk.VERTICAL)
         #self.t0sep12.grid(row=0, column=2, rowspan=10,sticky=tk.N+tk.S+tk.E+tk.W, pady=5)
-        self.logo_np = self.get_image('logo.png')
+        self.logo_np = self.get_image('assets/logo.png')
         self.logo_im = self.np2im(self.logo_np)
         self.logo_width,self.logo_height = self.logo_im.size
         self.logo_tk = self.im2tk(self.logo_im)
@@ -875,11 +875,11 @@ class GuiClass(tk.Frame):
         """
         self.serverConnected = self.interface.ping()
         if self.serverConnected:
-            self.org_np = self.get_image('instructions.jpg')
-            self.cropped_np = self.get_image('classify_instructions.jpg')
+            self.org_np = self.get_image('assets/instructions.jpg')
+            self.cropped_np = self.get_image('assets/classify_instructions.jpg')
         else:
-            self.org_np = self.get_image('server_error.jpg')
-            self.cropped_np = self.get_image('server_error.jpg')
+            self.org_np = self.get_image('assets/server_error.jpg')
+            self.cropped_np = self.get_image('assets/server_error.jpg')
 
     def noNextRaw(self):
         """
@@ -890,9 +890,9 @@ class GuiClass(tk.Frame):
         """
         self.serverConnected = self.interface.ping()
         if self.serverConnected:
-            self.org_np = self.get_image('noNextRaw.jpg')
+            self.org_np = self.get_image('assets/noNextRaw.jpg')
         else:
-            self.org_np = self.get_image('server_error.jpg')
+            self.org_np = self.get_image('assets/server_error.jpg')
 
     def noPreviousRaw(self):
         """
@@ -903,9 +903,9 @@ class GuiClass(tk.Frame):
         """
         self.serverConnected = self.interface.ping()
         if self.serverConnected:
-            self.org_np = self.get_image('noPreviousRaw.jpg')
+            self.org_np = self.get_image('assets/noPreviousRaw.jpg')
         else:
-            self.org_np = self.get_image('server_error.jpg')
+            self.org_np = self.get_image('assets/server_error.jpg')
 
     def noNextCropped(self):
         """
@@ -916,9 +916,9 @@ class GuiClass(tk.Frame):
         """
         self.serverConnected = self.interface.ping()
         if self.serverConnected:
-            self.cropped_np = self.get_image('noNextCropped.jpg')
+            self.cropped_np = self.get_image('assets/noNextCropped.jpg')
         else:
-            self.cropped_np = self.get_image('server_error.jpg')
+            self.cropped_np = self.get_image('assets/server_error.jpg')
 
     def noPreviousCropped(self):
         """
@@ -929,9 +929,9 @@ class GuiClass(tk.Frame):
         """
         self.serverConnected = self.interface.ping()
         if self.serverConnected:
-            self.cropped_np = self.get_image('noPreviousCropped.jpg')
+            self.cropped_np = self.get_image('assets/noPreviousCropped.jpg')
         else:
-            self.cropped_np = self.get_image('server_error.jpg')
+            self.cropped_np = self.get_image('assets/server_error.jpg')
 
     def disableEmergentDescription(self,*args):
         """

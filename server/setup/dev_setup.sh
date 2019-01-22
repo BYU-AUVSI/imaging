@@ -1,3 +1,4 @@
+#!/bin/bash
 # top-level script to setup everything needed for a dev environment
 
 # detect machine

@@ -1,3 +1,5 @@
+#!/bin/bash
+
 unameOut="$(uname -s)"
 case "${unameOut}" in
     Linux*)     machine=Linux;;
@@ -16,9 +18,9 @@ read -p "Install using conda? (Y/N): " confirm
 
 if [ $confirm = "Y" -o $confirm = "y" ]; then
     if [ ${machine} = "Mac" ]; then
-        conda env create -f conda-reqs-mac.yaml
+        conda env create -f internal/conda-reqs-mac.yaml
     elif [ ${machine} = "Linux" ]; then
-        conda env create -f conda-reqs-linux.yaml
+        conda env create -f internal/conda-reqs-linux.yaml
     else 
         echo "Sorry, I dont know how to properly install the dev stuff on your type of machine"
         exit 1
@@ -26,7 +28,7 @@ if [ $confirm = "Y" -o $confirm = "y" ]; then
     source activate image_gui
     $(which pip) install ttkthemes
 elif [ $confirm = "N" -o $confirm = "n" ]; then
-    pip3 install -r pip-requirements.txt
+    pip3 install -r internal/pip-requirements.txt
 else
     echo "Sorry, Im a stupid script who doesn't understand anything beyond exactly 'Y' or 'N'"
 fi

@@ -148,7 +148,7 @@ class StateMeasurement:
         """
         self.id = stateId
         self.roll = roll
-        self. pitch = pitch
+        self.pitch = pitch
         self.yaw = yaw
         self.time_stamp = ts
 
@@ -183,8 +183,6 @@ class ManualClassification:
     def toJson(self):
         d = self.toDict()
         return json.dumps(self.__dict__)
-
-
 
 class TargetSubmission:
     def __init__(self, crop_id=None, orientation=None, bg_color=None, alpha_color=None, desc=None):
@@ -251,7 +249,6 @@ class ImagingInterface:
         except:
             return False
         return True
-
 
     def debug(self, printStr):
         """

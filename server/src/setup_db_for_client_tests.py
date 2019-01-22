@@ -4,10 +4,17 @@ from test.test_helpers import truncateTable
 from dao.incoming_image_dao import IncomingImageDAO
 from dao.manual_cropped_dao import ManualCroppedDAO
 from dao.outgoing_manual_dao import OutgoingManualDAO
+from dao.incoming_gps_dao import IncomingGpsDAO
+from dao.incoming_state_dao import IncomingStateDAO
 from dao.model.incoming_image import incoming_image
 from dao.model.manual_cropped import manual_cropped
 from dao.model.outgoing_manual import outgoing_manual
+from dao.model.incoming_gps import incoming_gps
+from dao.model.incoming_state import incoming_state
 
+
+lowerTs = 1547453775.2
+upperTs = lowerTs + 10000
 
 def setupClientRestTestDb():
     # truncate all the tables:
@@ -19,15 +26,17 @@ def setupClientRestTestDb():
     truncateTable('outgoing_autonomous')
 
     # figure out the absolute path to our raw test image:
-    rawImg = os.path.abspath(os.path.dirname(os.path.realpath(__file__)) + '/assets/rawFrame.jpg')
+    rawImg = os.path.abspath(os.path.dirname(os.path.realpath(__file__)) + '/test/assets/rawFrame.jpg')
     # figure out the path for our cropped test img
-    cropImg = os.path.abspath(os.path.dirname(os.path.realpath(__file__)) + '/assets/star.png')
+    cropImg = os.path.abspath(os.path.dirname(os.path.realpath(__file__)) + '/test/assets/star.png')
 
     # setup incoming image table first
     imageIds= setupIncomingImageTable(rawImg)
     # use ids from incoming_image to setup manual_cropped table
-    cropIds = setupManualCroppedTable(cropImg, imageIds)
-    setupManualOutgoingTable(cropIds)
+    # cropIds = setupManualCroppedTable(cropImg, imageIds)
+    # setupManualOutgoingTable(cropIds)
+    setupIncomingGpsTable()
+    setupIncomingStateTable()
 
 
 def setupIncomingImageTable(rawImgPath):
@@ -92,3 +101,38 @@ def setupManualOutgoingTable(cropImgIds):
     testIns.background_color = 'blue'
     assert dao.addClassification(testIns) != -1
 
+def setupIncomingGpsTable():
+    model = incoming_gps()
+    model.time_stamp = lowerTs
+    model.lat = 40.111
+    model.lon = -111.222
+    model.alt = 1234.5
+
+    dao = IncomingGpsDAO(defaultConfigPath())
+    assert dao.addGps(model) != -1
+
+    model.time_stamp = upperTs
+    model.lat = 40.222
+    model.lon = -111.333
+    model.alt = 567.8
+    
+    assert dao.addGps(model) != -1
+
+def setupIncomingStateTable():
+    model = incoming_state()
+    model.time_stamp = lowerTs
+    model.roll = 40.111
+    model.pitch = 111.222
+    model.yaw = 12.3
+
+    dao = IncomingStateDAO(defaultConfigPath())
+    assert dao.addState(model) != -1
+
+    model.time_stamp = upperTs
+    model.roll = 40.222
+    model.pitch = 111.333
+    model.yaw = 34.5
+    assert dao.addState(model) != -1
+
+if __name__ == "__main__":
+    setupClientRestTestDb()
