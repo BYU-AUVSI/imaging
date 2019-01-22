@@ -107,10 +107,14 @@ class GuiClass(tk.Frame):
         self.resize_counter_tab0 = time.time()
         self.resize_counter_tab1 = time.time()
         self.resize_counter_tab2 = time.time()
+        self.resize_counter_tab3 = time.time()
         self.cropped = False
         self.cropped_im = self.np2im(self.cropped_np)
         self.cropped_width,self.cropped_height = self.cropped_im.size
         self.cropped_tk = self.im2tk(self.cropped_im)
+        # Tab 3 variables
+        self.t3_total_targets  = 0
+        self.t3_current_target = 0
 
 
         # Tab 0: SETTINGS ------------------------------------------------------
@@ -287,42 +291,67 @@ class GuiClass(tk.Frame):
         for y in range(21):
             tk.Grid.rowconfigure(self.tab2,y,weight=1)
 
+        self.t3_default_np = self.get_image('assets/noClassifiedTargets.jpg')
+        self.t3_default_im = self.np2im(self.t3_default_np)
+        self.t3_default_width,self.t3_default_height = self.t3_default_im.size
+        self.t3_default_tk = self.im2tk(self.t3_default_im)
+
         # Title
         self.t3titleA = ttk.Label(self.tab3, anchor=tk.CENTER, text='Target #')
         self.t3titleA.grid(row=0,column=4,columnspan=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t3titleB = ttk.Label(self.tab3, anchor=tk.CENTER, text='5')
+        self.t3titleB = ttk.Label(self.tab3, anchor=tk.CENTER, text=self.t3_current_target)
         self.t3titleB.grid(row=0,column=5,columnspan=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
         self.t3titleC = ttk.Label(self.tab3, anchor=tk.CENTER, text='Out of')
         self.t3titleC.grid(row=0,column=6,columnspan=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t3titleD = ttk.Label(self.tab3, anchor=tk.CENTER, text='20')
+        self.t3titleD = ttk.Label(self.tab3, anchor=tk.CENTER, text=self.t3_total_targets)
         self.t3titleD.grid(row=0,column=7,columnspan=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
 
         # Column One
         self.t3c1title = ttk.Label(self.tab3, anchor=tk.CENTER, text='Pic 1')
         self.t3c1title.grid(row=1,column=0,columnspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t3c1i1_im = self.t3_default_im
+        self.t3c1i1_tk = self.t3_default_tk
+        self.org_width,self.org_height = self.img_im.size
+        self.t3c1i1 = ttk.Label(self.tab3, anchor=tk.CENTER,image=self.t3c1i1_tk)
+        self.t3c1i1.image = self.t3c1i1_tk
+        self.t3c1i1.grid(row=3,column=0,rowspan=1,columnspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
 
         # Column Two
         self.t3c2title = ttk.Label(self.tab3, anchor=tk.CENTER, text='Pic 2')
         self.t3c2title.grid(row=1,column=2,columnspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t3c2i1 = ttk.Label(self.tab3, anchor=tk.CENTER,image=self.t3_default_tk)
+        self.t3c2i1.image = self.t3_default_tk
+        self.t3c2i1.grid(row=3,column=2,rowspan=1,columnspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
 
         # Column Three
         self.t3c3title = ttk.Label(self.tab3, anchor=tk.CENTER, text='Pic 3')
         self.t3c3title.grid(row=1,column=4,columnspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t3c3i1 = ttk.Label(self.tab3, anchor=tk.CENTER,image=self.t3_default_tk)
+        self.t3c3i1.image = self.t3_default_tk
+        self.t3c3i1.grid(row=3,column=4,rowspan=1,columnspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
 
         # Column Four
         self.t3c4title = ttk.Label(self.tab3, anchor=tk.CENTER, text='Pic 4')
         self.t3c4title.grid(row=1,column=6,columnspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t3c4i1 = ttk.Label(self.tab3, anchor=tk.CENTER,image=self.t3_default_tk)
+        self.t3c4i1.image = self.t3_default_tk
+        self.t3c4i1.grid(row=3,column=6,rowspan=1,columnspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
 
         # Column Five
         self.t3c5title = ttk.Label(self.tab3, anchor=tk.CENTER, text='Pic 5')
         self.t3c5title.grid(row=1,column=8,columnspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t3c5i1 = ttk.Label(self.tab3, anchor=tk.CENTER,image=self.t3_default_tk)
+        self.t3c5i1.image = self.t3_default_tk
+        self.t3c5i1.grid(row=3,column=8,rowspan=1,columnspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
 
         # Column Six
         self.t3sep56 = ttk.Separator(self.tab3, orient=tk.VERTICAL)
         self.t3sep56.grid(row=1, column=10, rowspan=20,sticky=tk.N+tk.S+tk.E+tk.W, pady=5)
         self.t3c6title = ttk.Label(self.tab3, anchor=tk.CENTER, text='To Submit')
         self.t3c6title.grid(row=1,column=10,columnspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-
+        self.t3c6i1 = ttk.Label(self.tab3, anchor=tk.CENTER,image=self.t3_default_tk)
+        self.t3c6i1.image = self.t3_default_tk
+        self.t3c6i1.grid(row=3,column=10,rowspan=1,columnspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
 
 
 
@@ -387,7 +416,6 @@ class GuiClass(tk.Frame):
         @rtype:  None
         @return: None
         """
-        print("click")
         #print(event.x,event.y)
         self.t1c1i1.bind("<ButtonRelease-1>",self.mouse_release)
         self.t1c1i1.bind("<Motion>",self.mouse_move)
@@ -405,7 +433,6 @@ class GuiClass(tk.Frame):
         @rtype:  None
         @return: None
         """
-        print("moving")
         self.t1c1i1.bind("<ButtonRelease-1>",self.mouse_release)
         self.x1 = event.x - self.offset_x
         self.y1 = event.y - self.offset_y
@@ -427,7 +454,6 @@ class GuiClass(tk.Frame):
         @rtype:  None
         @return: None
         """
-        print("released")
         if self.cropped:
             self.undoCrop()
         self.t1c1i1.unbind("<Motion>")
@@ -524,6 +550,36 @@ class GuiClass(tk.Frame):
                 self.cropped_resized_im = self.resizeIm(self.cropped_im,self.cropped_width,self.cropped_height,self.t2c2i1_width,self.t2c2i1_height)
                 self.cropped_tk = self.im2tk(self.cropped_resized_im)
                 self.t2c2i1.configure(image=self.cropped_tk)
+
+    def resizeEventTab3(self,event=None):
+        """
+        Resizes picture on Tab3
+        @type  event: event
+        @param event: resize window event
+
+        @rtype:  None
+        @return: None
+        """
+        if self.initialized and (time.time()-self.resize_counter_tab3) > 0.050:
+            if self.t3c1i1.winfo_width() > 1:
+                pass
+                self.resize_counter_tab3 = time.time()
+                self.master.update()
+                # Col 1 Image
+                self.t3c1i1_width = self.t3c1i1.winfo_width()
+                self.t3c1i1_height = self.t3c1i1.winfo_height()
+                self.t3_resized_im = self.resizeIm(self.img_im,self.org_width,self.org_height,self.t3c1i1_width,self.t3c1i1_height)
+                self.t1c1i1_img_width,self.t1c1i1_img_height = self.resized_im.size
+                self.img_tk = self.im2tk(self.resized_im)
+                self.t1c1i1.configure(image=self.img_tk)
+                # cropped image
+                #self.t1c2i1_width = self.t1c2i1.winfo_width()
+                #self.t1c2i1_height = self.t1c2i1.winfo_height()
+                self.crop_preview_resized_im = self.resizeIm(self.crop_preview_im,self.crop_preview_width,self.crop_preview_height,self.t1c1i1_width*self.crop_preview_img_ratio,self.t1c1i1_height*self.crop_preview_img_ratio)
+                #self.t1c2i1_width,self.t1c2i1_height = self.crop_resized_im.size
+                self.crop_preview_tk = self.im2tk(self.crop_preview_resized_im)
+                self.t1c2i1.configure(image=self.crop_preview_tk)
+                '''
 
     def resizeIm(self,image,image_width,image_height,width_restrict,height_restrict):
         """
@@ -771,8 +827,8 @@ class GuiClass(tk.Frame):
         alpha_color = self.t2c2l12_var.get()
         type = self.t2c2l14_var.get()
         description = self.t2c2l16.get()
-        print(shape,alphanumeric,orientation)
-        print(background_color,alpha_color,type,description)
+        classification = client_rest.ManualClassification(self.imageID,type,orientation,shape,background_color,alphanumeric,alpha_color,"unsubmitted",description)
+        self.interface.postManualClass(classification)
 
     def tabChanged(self,event):
         """
@@ -816,6 +872,7 @@ class GuiClass(tk.Frame):
             self.master.bind("<Return>",self.submitClassification)
             self.master.bind("<Escape>",self.close_window)
         elif active_tab == 3:
+            self.resizeEventTab3()
             self.master.unbind("<Right>")
             self.master.unbind("<Left>")
             self.master.unbind("<d>")
@@ -824,6 +881,17 @@ class GuiClass(tk.Frame):
             self.master.unbind("<Control-z>")
             self.master.unbind("<Return>")
             self.master.bind("<Escape>",self.close_window)
+            self.updateManualSubmissionTab()
+        elif active_tab == 4:
+            self.master.unbind("<Right>")
+            self.master.unbind("<Left>")
+            self.master.unbind("<d>")
+            self.master.unbind("<a>")
+            self.master.unbind("<Configure>")
+            self.master.unbind("<Control-z>")
+            self.master.unbind("<Return>")
+            self.master.bind("<Escape>",self.close_window)
+
         self.master.focus_set()
 
     def updateSettings(self,event=None):
@@ -975,6 +1043,15 @@ class GuiClass(tk.Frame):
                 return False
         else:
             return True
+
+    def updateManualSubmissionTab(self):
+        pendingList = self.interface.getPendingSubmissions(True)
+        # Debugging
+        print(pendingList)
+        print(len(pendingList))
+        self.t3_total_targets = len(pendingList)
+        self.t3titleD.configure(text=self.t3_total_targets)
+
 
 if __name__ == "__main__":
     root = tk.Tk()
