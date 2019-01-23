@@ -13,12 +13,29 @@ import torch.nn as nn
 import torch.optim as optim
 import numpy as np
 import torchvision
+from PIL import ImageFilter
 from torchvision import datasets, models, transforms
 import time
 import os
 import copy
 print("PyTorch Version: ",torch.__version__)
 print("Torchvision Version: ",torchvision.__version__)
+
+class RandomGaussianBlur(object):
+    """
+    Randomly blur the image by the range of pixels defined
+    """
+    def __init__(self, blurBounds):
+        self.blurBounds = blurBounds
+
+    def __call__(self, img):
+        # assert that it's a PIL image
+        # choose a random value between the blur bounds
+        # apply that random radius as a guassian blur filter
+        return img.filter(ImageFilter.GaussianBlur(randomRadius))
+
+    def __repr__(self):
+        return self.__class__.__name__ + '()'
 
 # Top level data directory. Here we assume the format of the directory conforms 
 #   to the ImageFolder structure
@@ -131,16 +148,6 @@ model_ft, input_size = initialize_model(num_classes, feature_extract, use_pretra
 
 # Print the model we just instantiated
 print(model_ft) 
-
-######################################################################
-# Load Data
-# ---------
-# 
-# Now that we know what the input size must be, we can initialize the data
-# transforms, image datasets, and the dataloaders. Notice, the models were
-# pretrained with the hard-coded normalization values, as described
-# `here <https://pytorch.org/docs/master/torchvision/models.html>`__.
-# 
 
 # Data augmentation and normalization for training
 # Just normalization for validation
