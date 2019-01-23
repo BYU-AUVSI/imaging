@@ -114,7 +114,7 @@ class GuiClass(tk.Frame):
         self.cropped_tk = self.im2tk(self.cropped_im)
         # Tab 3 variables
         self.t3_total_targets  = 0
-        self.t3_current_target = 0
+        self.t3_current_target = 1
 
 
         # Tab 0: SETTINGS ------------------------------------------------------
@@ -716,6 +716,7 @@ class GuiClass(tk.Frame):
         @rtype:  None
         @return: None
         """
+        self.pingServer()
         if self.serverConnected:
             time0 = time.time()
             query = self.interface.getNextRawImage()
@@ -750,6 +751,7 @@ class GuiClass(tk.Frame):
         @rtype:  None
         @return: None
         """
+        self.pingServer()
         if self.serverConnected:
             time0 = time.time()
             query = self.interface.getPrevRawImage()
@@ -801,6 +803,7 @@ class GuiClass(tk.Frame):
         @return: None
         """
         print("focus is on: ",self.tab2.focus_get())
+        self.pingServer()
         if self.serverConnected:
             time0 = time.time()
             query = self.interface.getNextCroppedImage()
@@ -828,6 +831,7 @@ class GuiClass(tk.Frame):
         @rtype:  None
         @return: None
         """
+        self.pingServer()
         if self.serverConnected:
             time0 = time.time()
             query = self.interface.getPrevCroppedImage()
@@ -1081,13 +1085,122 @@ class GuiClass(tk.Frame):
             return True
 
     def updateManualSubmissionTab(self):
-        self.pendingList = self.interface.getPendingSubmissions(True)
-        # Debugging
-        print(self.pendingList)
-        print(len(self.pendingList))
-        self.t3_total_targets = len(self.pendingList)
-        self.t3titleD.configure(text=self.t3_total_targets)
-        print(self.pendingList[0][0].shape)
+        self.serverConnected = self.interface.ping()
+        if self.serverConnected:
+            self.pendingList = self.interface.getPendingSubmissions(True)
+            ### Debugging
+            print(self.pendingList)
+            ###
+            if len(self.pendingList) == 0:
+                self.t3c1i1_im = self.t3_default_im.copy()
+                self.t3c1i1_tk = self.im2tk(self.t3c1i1_im)
+                self.t3c1i1_org_width,self.t3c1i1_org_height = self.t3c1i1_im.size
+                self.t3c1i1.configure(image=self.t3c1i1_tk)
+                self.t3c2i1_im = self.t3_default_im.copy()
+                self.t3c2i1_tk = self.im2tk(self.t3c2i1_im)
+                self.t3c2i1_org_width,self.t3c2i1_org_height = self.t3c2i1_im.size
+                self.t3c2i1.configure(image=self.t3c2i1_tk)
+                self.t3c3i1_im = self.t3_default_im.copy()
+                self.t3c3i1_tk = self.im2tk(self.t3c3i1_im)
+                self.t3c3i1_org_width,self.t3c3i1_org_height = self.t3c3i1_im.size
+                self.t3c3i1.configure(image=self.t3c3i1_tk)
+                self.t3c4i1_im = self.t3_default_im.copy()
+                self.t3c4i1_tk = self.im2tk(self.t3c4i1_im)
+                self.t3c4i1_org_width,self.t3c4i1_org_height = self.t3c4i1_im.size
+                self.t3c4i1.configure(image=self.t3c4i1_tk)
+                self.t3c5i1_im = self.t3_default_im.copy()
+                self.t3c5i1_tk = self.im2tk(self.t3c5i1_im)
+                self.t3c5i1_org_width,self.t3c5i1_org_height = self.t3c5i1_im.size
+                self.t3c5i1.configure(image=self.t3c5i1_tk)
+                self.t3c6i1_im = self.t3_default_im.copy()
+                self.t3c6i1_tk = self.im2tk(self.t3c6i1_im)
+                self.t3c6i1_org_width,self.t3c6i1_org_height = self.t3c6i1_im.size
+                self.t3c6i1.configure(image=self.t3c6i1_tk)
+                self.resizeEventTab3()
+            else:
+                self.t3_total_targets = len(self.pendingList)
+                self.t3titleD.configure(text=self.t3_total_targets)
+                self.t3titleB.configure(text=self.t3_current_target)
+                pics = len(self.pendingList[self.t3_current_target-1])
+                if pics > 5:
+                    pics = 5
+                if pics > 0:
+                    query = self.interface.getCroppedImage(self.pendingList[self.t3_current_target-1][0].crop_id)
+                    self.t3c1i1_im = query[0]
+                    self.t3c1i1_tk = self.im2tk(self.t3c1i1_im)
+                    self.t3c1i1.configure(image=self.t3c1i1_tk)
+                else:
+                    self.t3c1i1_im = self.t3_default_im.copy()
+                    self.t3c1i1_tk = self.im2tk(self.t3c1i1_im)
+                    self.t3c1i1.configure(image=self.t3c1i1_tk)
+                if pics > 1:
+                    query = self.interface.getCroppedImage(self.pendingList[self.t3_current_target-1][1].crop_id)
+                    self.t3c2i1_im = query[0]
+                    self.t3c2i1_tk = self.im2tk(self.t3c2i1_im)
+                    self.t3c2i1.configure(image=self.t3c2i1_tk)
+                else:
+                    self.t3c2i1_im = self.t3_default_im.copy()
+                    self.t3c2i1_tk = self.im2tk(self.t3c2i1_im)
+                    self.t3c2i1.configure(image=self.t3c2i1_tk)
+                if pics > 2:
+                    query = self.interface.getCroppedImage(self.pendingList[self.t3_current_target-1][2].crop_id)
+                    self.t3c3i1_im = query[0]
+                    self.t3c3i1_tk = self.im2tk(self.t3c3i1_im)
+                    self.t3c3i1.configure(image=self.t3c3i1_tk)
+                else:
+                    self.t3c3i1_im = self.t3_default_im.copy()
+                    self.t3c3i1_tk = self.im2tk(self.t3c3i1_im)
+                    self.t3c3i1.configure(image=self.t3c3i1_tk)
+                if pics > 3:
+                    query = self.interface.getCroppedImage(self.pendingList[self.t3_current_target-1][3].crop_id)
+                    self.t3c4i1_im = query[0]
+                    self.t3c4i1_tk = self.im2tk(self.t3c4i1_im)
+                    self.t3c4i1.configure(image=self.t3c4i1_tk)
+                else:
+                    self.t3c4i1_im = self.t3_default_im.copy()
+                    self.t3c4i1_tk = self.im2tk(self.t3c4i1_im)
+                    self.t3c4i1.configure(image=self.t3c4i1_tk)
+                if pics > 4:
+                    query = self.interface.getCroppedImage(self.pendingList[self.t3_current_target-1][4].crop_id)
+                    self.t3c5i1_im = query[0]
+                    self.t3c5i1_tk = self.im2tk(self.t3c5i1_im)
+                    self.t3c5i1.configure(image=self.t3c5i1_tk)
+                else:
+                    self.t3c5i1_im = self.t3_default_im.copy()
+                    self.t3c5i1_tk = self.im2tk(self.t3c5i1_im)
+                    self.t3c5i1.configure(image=self.t3c5i1_tk)
+                self.resizeEventTab3()
+
+
+
+        else:
+            error_np = self.get_image('assets/server_error.jpg')
+            error_im = self.np2im(error_np)
+            self.t3c1i1_im = error_im.copy()
+            self.t3c1i1_tk = self.im2tk(self.t3c1i1_im)
+            self.t3c1i1_org_width,self.t3c1i1_org_height = self.t3c1i1_im.size
+            self.t3c1i1.configure(image=self.t3c1i1_tk)
+            self.t3c2i1_im = error_im.copy()
+            self.t3c2i1_tk = self.im2tk(self.t3c2i1_im)
+            self.t3c2i1_org_width,self.t3c2i1_org_height = self.t3c2i1_im.size
+            self.t3c2i1.configure(image=self.t3c2i1_tk)
+            self.t3c3i1_im = error_im.copy()
+            self.t3c3i1_tk = self.im2tk(self.t3c3i1_im)
+            self.t3c3i1_org_width,self.t3c3i1_org_height = self.t3c3i1_im.size
+            self.t3c3i1.configure(image=self.t3c3i1_tk)
+            self.t3c4i1_im = error_im.copy()
+            self.t3c4i1_tk = self.im2tk(self.t3c4i1_im)
+            self.t3c4i1_org_width,self.t3c4i1_org_height = self.t3c4i1_im.size
+            self.t3c4i1.configure(image=self.t3c4i1_tk)
+            self.t3c5i1_im = error_im.copy()
+            self.t3c5i1_tk = self.im2tk(self.t3c5i1_im)
+            self.t3c5i1_org_width,self.t3c5i1_org_height = self.t3c5i1_im.size
+            self.t3c5i1.configure(image=self.t3c5i1_tk)
+            self.t3c6i1_im = error_im.copy()
+            self.t3c6i1_tk = self.im2tk(self.t3c6i1_im)
+            self.t3c6i1_org_width,self.t3c6i1_org_height = self.t3c6i1_im.size
+            self.t3c6i1.configure(image=self.t3c6i1_tk)
+            self.resizeEventTab3()
 
     def nextClassified(self,event):
         """
@@ -1099,13 +1212,16 @@ class GuiClass(tk.Frame):
         @rtype:  None
         @return: None
         """
+        self.updateManualSubmissionTab()
+        self.serverConnected = self.interface.ping()
         if self.serverConnected:
-            if self.t3_current_target < (len(self.pendingList) - 1):
+            if self.t3_current_target < len(self.pendingList):
                 self.t3_current_target += 1
             elif len(self.pendingList) == 0:
                 self.t3_current_target = 0
             else:
                 pass
+        self.updateManualSubmissionTab()
 
     def previousClassified(self,event):
         """
@@ -1117,13 +1233,16 @@ class GuiClass(tk.Frame):
         @rtype:  None
         @return: None
         """
+        self.updateManualSubmissionTab()
+        self.serverConnected = self.interface.ping()
         if self.serverConnected:
-            if self.t3_current_target < (len(self.pendingList) - 1):
-                self.t3_current_target += 1
+            if self.t3_current_target > 1:
+                self.t3_current_target -= 1
             elif len(self.pendingList) == 0:
                 self.t3_current_target = 0
             else:
                 pass
+        self.updateManualSubmissionTab()
 
 
 
