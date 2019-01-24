@@ -279,7 +279,7 @@ class ImagingInterface:
         if img.status_code == 200:
             return Image.open(BytesIO(img.content)), imageId
         else:
-            print("Server returned status code {}".format(img.status_code))
+            print("In getRawImage(), server returned status code {}".format(img.status_code))
             return None
 
     def getNextRawImage(self):
@@ -301,7 +301,7 @@ class ImagingInterface:
             self.debug("response code:: {}".format(img.status_code))
             if img.status_code != 200:
                 # if we didnt get a good status code
-                print("Server returned status code {}".format(img.status_code))
+                print("In getNextRawImage(), server returned status code {}".format(img.status_code))
                 return None
 
             imageId = int(img.headers['X-Image-Id'])
@@ -360,7 +360,7 @@ class ImagingInterface:
                             info_j['manual_tap'].lower() == 'true',
                             float(info_j['time_stamp']))
         else:
-            print("Server returned status code {}".format(imgInfoResp.status_code))
+            print("In getImageInfo(), server returned status code {}".format(imgInfoResp.status_code))
             return None
 
     def getCroppedImage(self, cropId):
@@ -378,7 +378,7 @@ class ImagingInterface:
         self.debug("response code:: {}".format(img.status_code))
         if img.status_code != 200:
             # if we didnt get a good status code
-            print("Server returned status code {}".format(img.status_code))
+            print("In getCroppedImage(), server returned status code {}".format(img.status_code))
             return None
         return Image.open(BytesIO(img.content)), cropId
 
@@ -397,7 +397,7 @@ class ImagingInterface:
             self.debug("response code:: {}".format(img.status_code))
             if img.status_code != 200:
                 # if we didnt get a good status code
-                print("Server returned status code {}".format(img.status_code))
+                print("In getNextCroppedImage() server returned status code {}".format(img.status_code))
                 return None
 
             cropId = int(img.headers['X-Crop-Id'])
@@ -457,7 +457,7 @@ class ImagingInterface:
                             info_j['tapped'],
                             float(info_j['time_stamp']))
         else:
-            print("Server returned status code {}".format(cropInfoResp.status_code))
+            print("In getCroppedImageInfo(), server returned status code {}".format(cropInfoResp.status_code))
             return None
 
     def getAllCroppedInfo(self):
@@ -471,7 +471,7 @@ class ImagingInterface:
         resp = requests.get(self.url + "/image/crop/all")
         if resp.status_code != 200:
             # if we didnt get a good status code
-            print("Server returned status code {}".format(resp.status_code))
+            print("In getAllCroppedInfo(), erver returned status code {}".format(resp.status_code))
             return None
         cropInfoList = []
         cropInfoList_j = json.loads(resp.content.decode('utf-8'))
@@ -537,7 +537,7 @@ class ImagingInterface:
         if resp.status_code == 200:
             return resp
         else:
-            print("Server returned status code {}".format(resp.status_code))
+            print("In postCroppedImage(), server returned status code {}".format(resp.status_code))
             return None
 
     def getGPSByTs(self, ts):
@@ -561,7 +561,7 @@ class ImagingInterface:
                                 info_j['longitude'],
                                 info_j['time_stamp'])
         else:
-            print("Server returned status code {}".format(gps.status_code))
+            print("In getGPSByTs(), server returned status code {}".format(gps.status_code))
             return None
 
     def getGPSById(self, gpsId):
@@ -585,7 +585,7 @@ class ImagingInterface:
                                 info_j['longitude'],
                                 info_j['time_stamp'])
         else:
-            print("Server returned status code {}".format(gps.status_code))
+            print("In getGPSById(), server returned status code {}".format(gps.status_code))
             return None
 
     def getStateByTs(self, ts):
@@ -610,7 +610,7 @@ class ImagingInterface:
                                     info_j['yaw'],
                                     info_j['time_stamp'])
         else:
-            print("Server returned status code {}".format(state.status_code))
+            print("In getStateByTs(), server returned status code {}".format(state.status_code))
             return None
 
     def getStateById(self, stateId):
@@ -634,7 +634,7 @@ class ImagingInterface:
                                     info_j['yaw'],
                                     info_j['time_stamp'])
         else:
-            print("Server returned status code {}".format(state.status_code))
+            print("In getStateById(), server returned status code {}".format(state.status_code))
             return None
 
     def postManualClass(self, manClass):
@@ -647,7 +647,7 @@ class ImagingInterface:
             self.debug("response code:: {}".format(resp.status_code))
             return resp
         else:
-            print("Server returned status code {}".format(resp.status_code))
+            print("In postManualClass(), server returned status code {}".format(resp.status_code))
             return None
 
     def updateManualClass(self, class_id, manClass):
@@ -659,7 +659,7 @@ class ImagingInterface:
             self.debug("response code:: {}".format(resp.status_code))
             return resp
         else:
-            print("Server returned status code {}".format(resp.status_code))
+            print("In updateManualClass(), server returned status code {}".format(resp.status_code))
             return None
 
     def getManualClassById(self, class_id):
@@ -683,7 +683,7 @@ class ImagingInterface:
                                         info_j['longitude']
                                         )
         else:
-            print("Server returned status code {}".format(resp.status_code))
+            print("In getManualClassById(), server returned status code {}".format(resp.status_code))
             return None
 
     def getAllManualClass(self):
@@ -692,7 +692,7 @@ class ImagingInterface:
         self.debug("response code:: {}".format(resp.status_code))
         if resp.status_code != 200:
             # if we didnt get a good status code
-            print("Server returned status code {} in getAllManualClass()".format(resp.status_code))
+            print("In getAllManualClass() server returned status code {} in getAllManualClass()".format(resp.status_code))
             return None
         manClassList = []
         manClassList_j = json.loads(resp.content.decode('utf-8'))
@@ -721,7 +721,7 @@ class ImagingInterface:
             self.debug("response code:: {}".format(resp.status_code))
             return resp
         else:
-            print("Server returned status code {} in deleteManualClass()".format(resp.status_code))
+            print("In deleteManualClass(), server returned status code {} in deleteManualClass()".format(resp.status_code))
             return None
 
     def postSubmitTargetById(self, targetId, isManual, submission=None):
@@ -738,7 +738,7 @@ class ImagingInterface:
             self.debug("response code:: {}".format(resp.status_code))
             return resp
         else:
-            print("Server returned status code {}".format(resp.status_code))
+            print("In postSubmitTargetById(), server returned status code {}".format(resp.status_code))
             return None
 
     def postSubmitAllTargets(self, isManual):
@@ -752,7 +752,7 @@ class ImagingInterface:
             self.debug("response code:: {}".format(resp.status_code))
             return resp
         else:
-            print("Server returned status code {}".format(resp.status_code))
+            print("In postSubmitAllTargets(), server returned status code {}".format(resp.status_code))
             return None
 
     def getAllSubmittedTargets(self, isManual):
@@ -764,7 +764,7 @@ class ImagingInterface:
 
         if resp.status_code != 200:
             # if we didnt get a good status code
-            print("Server returned status code {} in getAllManualClass()".format(resp.status_code))
+            print("In getAllSubmittedTargets(), server returned status code {} in getAllManualClass()".format(resp.status_code))
             return None
         manClassList = []
         manClassList_j = json.loads(resp.content.decode('utf-8'))
@@ -792,7 +792,7 @@ class ImagingInterface:
         resp = requests.get(url, headers=headers)
 
         if resp.status_code != 200:
-            print("Server returned status code {}".format(resp.status_code))
+            print("In getSubmittedTargetById(), server returned status code {}".format(resp.status_code))
             return None
         else:
             self.debug("response code:: {}".format(resp.status_code))
@@ -822,7 +822,7 @@ class ImagingInterface:
 
         if resp.status_code != 200:
             # if we didnt get a good status code
-            print("Server returned status code {} in getAllManualClass()".format(resp.status_code))
+            print("In getPendingSubmissions(), server returned status code {} in getAllManualClass()".format(resp.status_code))
             return None
         pendingList_j = json.loads(resp.content.decode('utf-8'))
         pendingList = [[] for x in range(len(pendingList_j))]
