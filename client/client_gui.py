@@ -9,11 +9,11 @@ pip3 install Pillow, opencv-python, ttkthemes
 
 '''
 TODO:
-Integration:
-    Submit classification
-    Geolocation
+
 All:
     *possible threading behind the scenese to autosize other tabs
+    use consistent naming patterns
+    change gui into multiple tabs/classes
 Tab0:
     add error handling if entries aren't in the right format
     add error handling if not connected to correct wifi
@@ -22,18 +22,23 @@ Tab1:
     If you try to crop off the picture have it go to edge of picture
     Add zooming feature
     Add panning feature
-    Fix bug of initial sizing
-Tab2:
+    Fix resizing
+Tab2
     Change crop picture only if focus is not on the entry widget
-    Change skipping the first and last when reaching the end of the line (server issue?)
     Change disable color
+    Remove emergent discription if it's disabled
     Add arrow showing N/E
-    Add classified Targets
-    Add classification queue
-    add error handling to fix what you enter
+    Rotate picture
 Tab3:
-    Make everything
-    Manual tender as well
+    Fix resizing issues
+    Add longitude
+    Add pending descriptions
+    Add checkboxes
+    Add functionality to choose certain aspect
+Tab4:
+    create everything
+
+
 
 KNOWN BUGS:
     Weird exit is bound to an event (doesn't do anything) when rerun in iPython3
@@ -112,6 +117,10 @@ class GuiClass(tk.Frame):
         self.cropped_im = self.np2im(self.cropped_np)
         self.cropped_width,self.cropped_height = self.cropped_im.size
         self.cropped_tk = self.im2tk(self.cropped_im)
+        # Tab 1 variables
+        self.t1_functional = False
+        # Tab 2 variables
+        self.t2_functional = False # prevent
         # Tab 3 variables
         self.t3_total_targets  = 0
         self.t3_current_target = 1
@@ -268,7 +277,9 @@ class GuiClass(tk.Frame):
 
         self.t2c2l15 = ttk.Label(self.tab2, anchor=tk.CENTER, text='Emergent Description')
         self.t2c2l15.grid(row=44,column=10,columnspan=2,rowspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t2c2l16 = ttk.Entry(self.tab2)
+        self.t2c2l16_var = tk.StringVar()
+        self.t2c2l16_var.set("")
+        self.t2c2l16 = ttk.Entry(self.tab2,textvariable=self.t2c2l16_var)
         self.t2c2l16.grid(row=46,column=10,columnspan=2,rowspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
         self.t2c2l17 = ttk.Button(self.tab2, text="Submit Classification",command=self.submitClassification)
         self.t2c2l17.grid(row=48,column=4,columnspan=8,rowspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
@@ -544,7 +555,7 @@ class GuiClass(tk.Frame):
         self.t3c6ar18.grid(row=18,column=10,columnspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
         # Submit button
         self.t3c6b1 = ttk.Button(self.tab3, text="Submit Target",command=self.submitTarget)
-        self.t3c6b1.grid(row=20,column=11,columnspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t3c6b1.grid(row=20,column=10,columnspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
 
 
 
@@ -898,8 +909,10 @@ class GuiClass(tk.Frame):
             time0 = time.time()
             query = self.interface.getNextRawImage()
             if query == None:
+                self.t1_functional = False
                 self.noNextRaw()
             else:
+                self.t1_functional = True
                 self.imageID = query[1]
                 self.org_np = np.array(query[0]) #self.get_image('frame0744.jpg')
             time1 = time.time()
@@ -934,7 +947,9 @@ class GuiClass(tk.Frame):
             query = self.interface.getPrevRawImage()
             if query == None:
                 self.noPreviousRaw()
+                self.t1_functional = False
             else:
+                self.t1_functional = True
                 self.imageID = query[1]
                 self.org_np = np.array(query[0]) #self.get_image('frame0744.jpg')
             time1 = time.time()
@@ -965,8 +980,9 @@ class GuiClass(tk.Frame):
         @rtype:  None
         @return: None
         """
-        self.interface.postCroppedImage(self.imageID,self.crop_preview_im,[self.cx0,self.cy0],[self.cx1,self.cy1])
-        (self.cx0,self.cy0,self.cx1,self.cy1)
+        if self.t1_functional:
+            self.interface.postCroppedImage(self.imageID,self.crop_preview_im,[self.cx0,self.cy0],[self.cx1,self.cy1])
+            (self.cx0,self.cy0,self.cx1,self.cy1)
 
 
     def nextCropped(self,event):
@@ -985,8 +1001,10 @@ class GuiClass(tk.Frame):
             time0 = time.time()
             query = self.interface.getNextCroppedImage()
             if query == None:
+                self.t2_functional = False
                 self.noNextCropped()
             else:
+                self.t2_functional = True
                 self.imageID = query[1]
                 self.cropped_np = np.array(query[0]) #self.get_image('frame0744.jpg')
             time1 = time.time()
@@ -1013,8 +1031,10 @@ class GuiClass(tk.Frame):
             time0 = time.time()
             query = self.interface.getPrevCroppedImage()
             if query == None:
+                self.t2_functional = False
                 self.noPreviousCropped()
             else:
+                self.t2_functional = True
                 self.imageID = query[1]
                 self.cropped_np = np.array(query[0]) #self.get_image('frame0744.jpg')
             time1 = time.time()
@@ -1037,15 +1057,16 @@ class GuiClass(tk.Frame):
         @rtype:  None
         @return: None
         """
-        shape = self.t2c2l2_var.get()
-        alphanumeric = self.t2c2l4.get()
-        orientation = self.t2c2l6_var.get()
-        background_color = self.t2c2l10_var.get()
-        alpha_color = self.t2c2l12_var.get()
-        type = self.t2c2l14_var.get()
-        description = self.t2c2l16.get()
-        classification = client_rest.ManualClassification(self.imageID,type,orientation,shape,background_color,alphanumeric,alpha_color,"unsubmitted",description)
-        self.interface.postManualClass(classification)
+        if self.t2_functional:
+            shape = self.t2c2l2_var.get()
+            alphanumeric = self.t2c2l4.get()
+            orientation = self.t2c2l6_var.get()
+            background_color = self.t2c2l10_var.get()
+            alpha_color = self.t2c2l12_var.get()
+            type = self.t2c2l14_var.get()
+            description = self.t2c2l16_var.get()
+            classification = client_rest.ManualClassification(self.imageID,type,orientation,shape,background_color,alphanumeric,alpha_color,"unsubmitted",description)
+            self.interface.postManualClass(classification)
 
     def tabChanged(self,event):
         """
@@ -1096,7 +1117,7 @@ class GuiClass(tk.Frame):
             self.master.unbind("<a>")
             self.master.bind("<Configure>",self.resizeEventTab3)
             self.master.unbind("<Control-z>")
-            self.master.unbind("<Return>")
+            self.master.bind("<Return>",)
             self.master.bind("<Escape>",self.close_window)
             self.updateManualSubmissionTab()
         elif active_tab == 4:
@@ -1106,7 +1127,7 @@ class GuiClass(tk.Frame):
             self.master.unbind("<a>")
             self.master.unbind("<Configure>")
             self.master.unbind("<Control-z>")
-            self.master.unbind("<Return>")
+            self.master.unbind("<Return>",self.submitTarget)
             self.master.bind("<Escape>",self.close_window)
 
         self.master.focus_set()
@@ -1228,7 +1249,10 @@ class GuiClass(tk.Frame):
         if self.t2c2l14_var.get() == 'emergent':
             self.t2c2l16.configure(state=tk.NORMAL)
         else:
+            print("This is happening")
+            self.t2c2l16_var.set("")
             self.t2c2l16.configure(state=tk.DISABLED)
+
 
     def alphanumericChanged(self,*args):
         """
@@ -1313,6 +1337,7 @@ class GuiClass(tk.Frame):
                 self.t3titleD.configure(text=self.t3_total_targets)
                 self.t3titleB.configure(text=self.t3_current_target)
                 pics = len(self.pendingList[self.t3_current_target-1])
+                self.target_id = self.pendingList[self.t3_current_target-1][0].target
                 if pics > 5:
                     pics = 5
                 # Because of the preceeding if/else statement there will always be at least 1 pic
@@ -1335,6 +1360,7 @@ class GuiClass(tk.Frame):
 
                 if pics > 1:
                     query = self.interface.getCroppedImage(self.pendingList[self.t3_current_target-1][1].crop_id)
+                    print("query")
                     self.t3c2i1_im = query[0]
                     self.t3c2i1_tk = self.im2tk(self.t3c2i1_im)
                     self.t3c2i1.configure(image=self.t3c2i1_tk)
@@ -1501,9 +1527,9 @@ class GuiClass(tk.Frame):
         self.updateManualSubmissionTab()
 
 
-    def submitCropped(self,event=None):
+    def submitTarget(self,event=None):
         """
-        Submits cropped image to server
+        Submits Target to server
 
         @type  event: event
         @param event: Enter press or button press event
@@ -1511,8 +1537,9 @@ class GuiClass(tk.Frame):
         @rtype:  None
         @return: None
         """
-        self.interface.postCroppedImage(self.imageID,self.crop_preview_im,[self.cx0,self.cy0],[self.cx1,self.cy1])
-        (self.cx0,self.cy0,self.cx1,self.cy1)
+        self.interface.postSubmitTargetById(self.target_id,True)
+        print(self.target_id)
+        self.updateManualSubmissionTab()
 
 
 
