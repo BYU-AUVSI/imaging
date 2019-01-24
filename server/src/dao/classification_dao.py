@@ -386,7 +386,10 @@ class ClassificationDAO(BaseDAO):
 
     def submitPendingTargetClass(self, modelGenerator, target, optionalSpecs=None):
         """
-        Changes the status to the given target id to 'submitted'
+        Changes the status to the given target id to 'submitted'. All classifications
+        that are apart of the target bin will change status to 'submitted'. Any 
+        classifications added to this target after the fact will then receive an
+        'inherited_submission' status
 
         @type modelGenerator: OutgoingManual or Autonomous DAO
         @param modelGenerator: a DAO with a 'newModelFromRow' method which takes a 
@@ -410,7 +413,7 @@ class ClassificationDAO(BaseDAO):
 
         # update all the other classifications for this target to be inherited_submission
         updateTargetClassifications =  'UPDATE ' + self.outgoingTableName + """
-            SET submitted = 'inherited_submission'
+            SET submitted = 'submitted'
             WHERE target = %s AND submitted = 'unsubmitted';"""
 
         claimedClassification = super(ClassificationDAO, self).getResultingId(claimClassificationToSubmit, (target,))
@@ -601,11 +604,13 @@ class ClassificationDAO(BaseDAO):
                     return None
         return None
             
-
     def assignTargetBin(self, id):
         """
-        Internal method used for determinging what target bin a particular row (specified
-        by the UID param should belong to)
+        Internal method used for determinging what target bin a particular 
+        classification/row (specified by the UID param) should belong to.
+
+        A classification's alphanumeric, shape and type determine what target
+        it belongs to.
 
         @type id: int
         @param id: the base classification id of the classification to bin into a target (aka the id column)
@@ -617,6 +622,8 @@ class ClassificationDAO(BaseDAO):
             FROM """ + self.outgoingTableName + """
             WHERE id = %s LIMIT 1;"""
 
+        # get this classification's alphanumeric, shape and type. We use these
+        # to specify what a target is
         classificationInfo = super(ClassificationDAO, self).basicTopSelect(getClassificationInfo, (id,))
         if classificationInfo is None or not classificationInfo:
             print("Failed to retrieve info for uid {}".format(id))
@@ -634,7 +641,7 @@ class ClassificationDAO(BaseDAO):
                 AND (shape = %s OR (shape IS NULL AND %s IS NULL)) 
                 AND (type  = %s OR (type  IS NULL AND %s IS NULL)) 
                 AND id != %s LIMIT 1;"""
-        # all this complicated stuff is for if one of these columns is NULL
+        # all this complicated WHERE clause stuff is for if one of these columns is NULL
 
         cur = self.conn.cursor()
         cur.execute(getPotentialTargetIds, (classificationInfo[1], classificationInfo[1], classificationInfo[2], classificationInfo[2], classificationInfo[3], classificationInfo[3], id))
