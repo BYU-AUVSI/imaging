@@ -20,10 +20,10 @@ rawImageModel = api.model('Raw Image Info', {
 })
 
 @api.route('/')
-@api.expect(rawParser)
 class RawImageHandler(Resource):
     @api.doc(description='Gets the next un-tapped raw image')
     @api.doc(responses={200:'OK', 404:'No image found'})
+    @api.expect(rawParser)
     @api.header('X-Image-Id', 'Raw Id of the image returned.')
     def get(self):
         # startTime = time.time()

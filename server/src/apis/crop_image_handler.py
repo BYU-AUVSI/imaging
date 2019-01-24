@@ -2,6 +2,8 @@ from flask import jsonify, make_response, send_file, abort, request
 from flask_restplus import Namespace, Resource, fields
 from dao.manual_cropped_dao import ManualCroppedDAO
 from dao.model.manual_cropped import manual_cropped
+from dao.model.incoming_image import incoming_image
+from dao.incoming_image_dao import IncomingImageDAO
 from dao.model.point import point
 from config import defaultConfigPath, defaultCroppedImgPath, allowedFileType
 from werkzeug.utils import secure_filename
@@ -78,10 +80,16 @@ class CroppedImageHandler(Resource):
         if 'crop_coordinate_br' in request.form:
             cropped.crop_coordinate_br = point(ptStr=request.form['crop_coordinate_br'])
 
-        # add to db
-        cropped.time_stamp = int(time.time())
+        dao = IncomingImageDAO(defaultConfigPath())
+        img = dao.getImage(cropped.image_id)
+        if img is not None:
+            cropped.time_stamp = img.time_stamp
+        else:
+            print("WARN:: failed to find incoming_image model at id {} X-Image-Id".format(cropped.image_id))
+            cropped.time_stamp = int(time.time())
         cropped.cropped_path = full_path
 
+        # add to db
         dao = ManualCroppedDAO(defaultConfigPath())
         # resultingId is the manual_cropped.id value given to this image (abstracted from client)
         resultingId = dao.upsertCropped(cropped)
