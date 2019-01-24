@@ -542,7 +542,9 @@ class GuiClass(tk.Frame):
         self.t3c6ar17.grid(row=17,column=10,columnspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
         self.t3c6ar18 = ttk.Label(self.tab3, anchor=tk.CENTER, text="N/A")
         self.t3c6ar18.grid(row=18,column=10,columnspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-
+        # Submit button
+        self.t3c6b1 = ttk.Button(self.tab3, text="Submit Target",command=self.submitTarget)
+        self.t3c6b1.grid(row=20,column=11,columnspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
 
 
 
@@ -1291,6 +1293,20 @@ class GuiClass(tk.Frame):
                 self.t3c6i1_tk = self.im2tk(self.t3c6i1_im)
                 self.t3c6i1_org_width,self.t3c6i1_org_height = self.t3c6i1_im.size
                 self.t3c6i1.configure(image=self.t3c6i1_tk)
+                self.t3c1br5.configure(text="N/A")
+                self.t3c1br7.configure(text="N/A")
+                self.t3c1br9.configure(text="N/A")
+                self.t3c1br11.configure(text="N/A")
+                self.t3c1br13.configure(text="N/A")
+                self.t3c1br15.configure(text="N/A")
+                self.t3c1ar18.configure(text="N/A")
+                self.t3c6br5.configure(text="N/A")
+                self.t3c6br7.configure(text="N/A")
+                self.t3c6br9.configure(text="N/A")
+                self.t3c6br11.configure(text="N/A")
+                self.t3c6br13.configure(text="N/A")
+                self.t3c6br15.configure(text="N/A")
+                self.t3c6ar18.configure(text="N/A")
                 self.resizeEventTab3()
             else:
                 self.t3_total_targets = len(self.pendingList)
@@ -1299,51 +1315,116 @@ class GuiClass(tk.Frame):
                 pics = len(self.pendingList[self.t3_current_target-1])
                 if pics > 5:
                     pics = 5
-                if pics > 0:
-                    query = self.interface.getCroppedImage(self.pendingList[self.t3_current_target-1][0].crop_id)
-                    self.t3c1i1_im = query[0]
-                    self.t3c1i1_tk = self.im2tk(self.t3c1i1_im)
-                    self.t3c1i1.configure(image=self.t3c1i1_tk)
-                else:
-                    self.t3c1i1_im = self.t3_default_im.copy()
-                    self.t3c1i1_tk = self.im2tk(self.t3c1i1_im)
-                    self.t3c1i1.configure(image=self.t3c1i1_tk)
+                # Because of the preceeding if/else statement there will always be at least 1 pic
+                query = self.interface.getCroppedImage(self.pendingList[self.t3_current_target-1][0].crop_id)
+                self.t3c1i1_im = query[0]
+                self.t3c1i1_tk = self.im2tk(self.t3c1i1_im)
+                self.t3c1i1.configure(image=self.t3c1i1_tk)
+                self.t3c1br5.configure(text=self.pendingList[self.t3_current_target-1][0].shape)
+                self.t3c1br7.configure(text=self.pendingList[self.t3_current_target-1][0].background_color)
+                self.t3c1br9.configure(text=self.pendingList[self.t3_current_target-1][0].alphanumeric)
+                self.t3c1br11.configure(text=self.pendingList[self.t3_current_target-1][0].alphanumeric_color)
+                self.t3c1br13.configure(text=self.pendingList[self.t3_current_target-1][0].orientation)
+                self.t3c1br15.configure(text=self.pendingList[self.t3_current_target-1][0].type)
+                self.t3c1ar18.configure(text=self.pendingList[self.t3_current_target-1][0].description)
+
+                # Possible Submission
+                self.t3c6i1_im = query[0]
+                self.t3c6i1_tk = self.im2tk(self.t3c6i1_im)
+                self.t3c6i1.configure(image=self.t3c6i1_tk)
+
                 if pics > 1:
                     query = self.interface.getCroppedImage(self.pendingList[self.t3_current_target-1][1].crop_id)
                     self.t3c2i1_im = query[0]
                     self.t3c2i1_tk = self.im2tk(self.t3c2i1_im)
                     self.t3c2i1.configure(image=self.t3c2i1_tk)
+                    self.t3c2br5.configure(text=self.pendingList[self.t3_current_target-1][1].shape)
+                    self.t3c2br7.configure(text=self.pendingList[self.t3_current_target-1][1].background_color)
+                    self.t3c2br9.configure(text=self.pendingList[self.t3_current_target-1][1].alphanumeric)
+                    self.t3c2br11.configure(text=self.pendingList[self.t3_current_target-1][1].alphanumeric_color)
+                    self.t3c2br13.configure(text=self.pendingList[self.t3_current_target-1][1].orientation)
+                    self.t3c2br15.configure(text=self.pendingList[self.t3_current_target-1][1].type)
+                    self.t3c2ar18.configure(text=self.pendingList[self.t3_current_target-1][1].description)
                 else:
                     self.t3c2i1_im = self.t3_default_im.copy()
                     self.t3c2i1_tk = self.im2tk(self.t3c2i1_im)
                     self.t3c2i1.configure(image=self.t3c2i1_tk)
+                    self.t3c2br5.configure(text="N/A")
+                    self.t3c2br7.configure(text="N/A")
+                    self.t3c2br9.configure(text="N/A")
+                    self.t3c2br11.configure(text="N/A")
+                    self.t3c2br13.configure(text="N/A")
+                    self.t3c2br15.configure(text="N/A")
+                    self.t3c2ar18.configure(text="N/A")
                 if pics > 2:
                     query = self.interface.getCroppedImage(self.pendingList[self.t3_current_target-1][2].crop_id)
                     self.t3c3i1_im = query[0]
                     self.t3c3i1_tk = self.im2tk(self.t3c3i1_im)
                     self.t3c3i1.configure(image=self.t3c3i1_tk)
+                    self.t3c3br5.configure(text=self.pendingList[self.t3_current_target-1][2].shape)
+                    self.t3c3br7.configure(text=self.pendingList[self.t3_current_target-1][2].background_color)
+                    self.t3c3br9.configure(text=self.pendingList[self.t3_current_target-1][2].alphanumeric)
+                    self.t3c3br11.configure(text=self.pendingList[self.t3_current_target-1][2].alphanumeric_color)
+                    self.t3c3br13.configure(text=self.pendingList[self.t3_current_target-1][2].orientation)
+                    self.t3c3br15.configure(text=self.pendingList[self.t3_current_target-1][2].type)
+                    self.t3c3ar18.configure(text=self.pendingList[self.t3_current_target-1][2].description)
                 else:
                     self.t3c3i1_im = self.t3_default_im.copy()
                     self.t3c3i1_tk = self.im2tk(self.t3c3i1_im)
                     self.t3c3i1.configure(image=self.t3c3i1_tk)
+                    self.t3c3br5.configure(text="N/A")
+                    self.t3c3br7.configure(text="N/A")
+                    self.t3c3br9.configure(text="N/A")
+                    self.t3c3br11.configure(text="N/A")
+                    self.t3c3br13.configure(text="N/A")
+                    self.t3c3br15.configure(text="N/A")
+                    self.t3c3ar18.configure(text="N/A")
                 if pics > 3:
                     query = self.interface.getCroppedImage(self.pendingList[self.t3_current_target-1][3].crop_id)
                     self.t3c4i1_im = query[0]
                     self.t3c4i1_tk = self.im2tk(self.t3c4i1_im)
                     self.t3c4i1.configure(image=self.t3c4i1_tk)
+                    self.t3c4br5.configure(text=self.pendingList[self.t3_current_target-1][3].shape)
+                    self.t3c4br7.configure(text=self.pendingList[self.t3_current_target-1][3].background_color)
+                    self.t3c4br9.configure(text=self.pendingList[self.t3_current_target-1][3].alphanumeric)
+                    self.t3c4br11.configure(text=self.pendingList[self.t3_current_target-1][3].alphanumeric_color)
+                    self.t3c4br13.configure(text=self.pendingList[self.t3_current_target-1][3].orientation)
+                    self.t3c4br15.configure(text=self.pendingList[self.t3_current_target-1][3].type)
+                    self.t3c4ar18.configure(text=self.pendingList[self.t3_current_target-1][3].description)
                 else:
                     self.t3c4i1_im = self.t3_default_im.copy()
                     self.t3c4i1_tk = self.im2tk(self.t3c4i1_im)
                     self.t3c4i1.configure(image=self.t3c4i1_tk)
+                    self.t3c4br5.configure(text="N/A")
+                    self.t3c4br7.configure(text="N/A")
+                    self.t3c4br9.configure(text="N/A")
+                    self.t3c4br11.configure(text="N/A")
+                    self.t3c4br13.configure(text="N/A")
+                    self.t3c4br15.configure(text="N/A")
+                    self.t3c4ar18.configure(text="N/A")
                 if pics > 4:
                     query = self.interface.getCroppedImage(self.pendingList[self.t3_current_target-1][4].crop_id)
                     self.t3c5i1_im = query[0]
                     self.t3c5i1_tk = self.im2tk(self.t3c5i1_im)
                     self.t3c5i1.configure(image=self.t3c5i1_tk)
+                    self.t3c5br5.configure(text=self.pendingList[self.t3_current_target-1][4].shape)
+                    self.t3c5br7.configure(text=self.pendingList[self.t3_current_target-1][4].background_color)
+                    self.t3c5br9.configure(text=self.pendingList[self.t3_current_target-1][4].alphanumeric)
+                    self.t3c5br11.configure(text=self.pendingList[self.t3_current_target-1][4].alphanumeric_color)
+                    self.t3c5br13.configure(text=self.pendingList[self.t3_current_target-1][4].orientation)
+                    self.t3c5br15.configure(text=self.pendingList[self.t3_current_target-1][4].type)
+                    self.t3c5ar18.configure(text=self.pendingList[self.t3_current_target-1][4].description)
                 else:
                     self.t3c5i1_im = self.t3_default_im.copy()
                     self.t3c5i1_tk = self.im2tk(self.t3c5i1_im)
                     self.t3c5i1.configure(image=self.t3c5i1_tk)
+                    self.t3c5br5.configure(text="N/A")
+                    self.t3c5br7.configure(text="N/A")
+                    self.t3c5br9.configure(text="N/A")
+                    self.t3c5br11.configure(text="N/A")
+                    self.t3c5br13.configure(text="N/A")
+                    self.t3c5br15.configure(text="N/A")
+                    self.t3c5ar18.configure(text="N/A")
                 self.resizeEventTab3()
 
 
@@ -1418,6 +1499,20 @@ class GuiClass(tk.Frame):
             else:
                 pass
         self.updateManualSubmissionTab()
+
+
+    def submitCropped(self,event=None):
+        """
+        Submits cropped image to server
+
+        @type  event: event
+        @param event: Enter press or button press event
+
+        @rtype:  None
+        @return: None
+        """
+        self.interface.postCroppedImage(self.imageID,self.crop_preview_im,[self.cx0,self.cy0],[self.cx1,self.cy1])
+        (self.cx0,self.cy0,self.cx1,self.cy1)
 
 
 
