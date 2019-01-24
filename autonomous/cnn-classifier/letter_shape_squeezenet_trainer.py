@@ -18,6 +18,7 @@ from torchvision import datasets, models, transforms
 import time
 import os
 import copy
+import random
 print("PyTorch Version: ",torch.__version__)
 print("Torchvision Version: ",torchvision.__version__)
 
@@ -25,13 +26,16 @@ class RandomGaussianBlur(object):
     """
     Randomly blur the image by the range of pixels defined
     """
-    def __init__(self, blurBounds):
-        self.blurBounds = blurBounds
-
     def __call__(self, img):
         # assert that it's a PIL image
         # choose a random value between the blur bounds
         # apply that random radius as a guassian blur filter
+        try:
+            img.verify()
+        except Exception:
+            print('Invalid image passed into Pytorch blur function')
+
+	randomRadius = random.randint(0,5)
         return img.filter(ImageFilter.GaussianBlur(randomRadius))
 
     def __repr__(self):
