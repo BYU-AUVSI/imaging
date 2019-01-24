@@ -35,7 +35,7 @@ class RandomGaussianBlur(object):
         except Exception:
             print('Invalid image passed into Pytorch blur function')
 
-	randomRadius = random.randint(0,5)
+        randomRadius = random.randint(0,3)
         return img.filter(ImageFilter.GaussianBlur(randomRadius))
 
     def __repr__(self):
@@ -157,6 +157,7 @@ print(model_ft)
 # Just normalization for validation
 data_transforms = {
     'train': transforms.Compose([
+        RandomGaussianBlur(),
         transforms.RandomRotation((0, 360), expand=True),
         transforms.Resize(input_size),
         transforms.RandomHorizontalFlip(),
@@ -164,6 +165,7 @@ data_transforms = {
         transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
     ]),
     'val': transforms.Compose([
+        RandomGaussianBlur(),
         transforms.RandomRotation((0, 360), expand=True),
         transforms.Resize(input_size),
         transforms.CenterCrop(input_size),
