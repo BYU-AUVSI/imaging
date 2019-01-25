@@ -26,7 +26,7 @@ Tab1:
 Tab2
     Change crop picture only if focus is not on the entry widget
     Change disable color
-    Remove emergent discription if it's disabled
+    Disable other Characteristics for emergent
     Add arrow showing N/E
     Rotate picture
 Tab3:
@@ -56,6 +56,7 @@ import time
 from lib import client_rest
 import time
 import sys
+import scipy.stats
 
 
 class GuiClass(tk.Frame):
@@ -754,6 +755,7 @@ class GuiClass(tk.Frame):
                 self.cropped_tk = self.im2tk(self.cropped_resized_im)
                 self.t2c2i1.configure(image=self.cropped_tk)
 
+
     def resizeEventTab3(self,event=None):
         """
         Resizes picture on Tab3
@@ -791,13 +793,13 @@ class GuiClass(tk.Frame):
                 resized_im = self.resizeIm(self.t3c4i1_im,self.t3c4i1_org_width,self.t3c4i1_org_height,self.t3c4i1_width,self.t3c4i1_height)
                 self.t3c4i1_tk = self.im2tk(resized_im)
                 self.t3c4i1.configure(image=self.t3c4i1_tk)
-                # Col 3 Image
+                # Col 5 Image
                 self.t3c5i1_width = self.t3c5i1.winfo_width()
                 self.t3c5i1_height = self.t3c5i1.winfo_height()
                 resized_im = self.resizeIm(self.t3c5i1_im,self.t3c5i1_org_width,self.t3c5i1_org_height,self.t3c5i1_width,self.t3c5i1_height)
                 self.t3c5i1_tk = self.im2tk(resized_im)
                 self.t3c5i1.configure(image=self.t3c5i1_tk)
-                # Col 3 Image
+                # Col 6 Image
                 self.t3c6i1_width = self.t3c6i1.winfo_width()
                 self.t3c6i1_height = self.t3c6i1.winfo_height()
                 resized_im = self.resizeIm(self.t3c6i1_im,self.t3c6i1_org_width,self.t3c6i1_org_height,self.t3c6i1_width,self.t3c6i1_height)
@@ -1117,7 +1119,7 @@ class GuiClass(tk.Frame):
             self.master.unbind("<a>")
             self.master.bind("<Configure>",self.resizeEventTab3)
             self.master.unbind("<Control-z>")
-            self.master.bind("<Return>",)
+            self.master.bind("<Return>",self.submitTarget)
             self.master.bind("<Escape>",self.close_window)
             self.updateManualSubmissionTab()
         elif active_tab == 4:
@@ -1289,9 +1291,8 @@ class GuiClass(tk.Frame):
         self.serverConnected = self.interface.ping()
         if self.serverConnected:
             self.pendingList = self.interface.getPendingSubmissions(True)
-            ### Debugging
-            print(self.pendingList)
-            ###
+
+
             if len(self.pendingList) == 0:
                 self.t3c1i1_im = self.t3_default_im.copy()
                 self.t3c1i1_tk = self.im2tk(self.t3c1i1_im)
@@ -1352,11 +1353,10 @@ class GuiClass(tk.Frame):
                 self.t3c1br13.configure(text=self.pendingList[self.t3_current_target-1][0].orientation)
                 self.t3c1br15.configure(text=self.pendingList[self.t3_current_target-1][0].type)
                 self.t3c1ar18.configure(text=self.pendingList[self.t3_current_target-1][0].description)
-
-                # Possible Submission
-                self.t3c6i1_im = query[0]
-                self.t3c6i1_tk = self.im2tk(self.t3c6i1_im)
-                self.t3c6i1.configure(image=self.t3c6i1_tk)
+                self.pending_bg_color = [self.pendingList[self.t3_current_target-1][0].background_color]
+                self.pending_alpha_color = [self.pendingList[self.t3_current_target-1][0].alphanumeric_color]
+                self.pending_orientation = [self.pendingList[self.t3_current_target-1][0].orientation]
+                self.pending_description = [self.pendingList[self.t3_current_target-1][0].description]
 
                 if pics > 1:
                     query = self.interface.getCroppedImage(self.pendingList[self.t3_current_target-1][1].crop_id)
@@ -1371,6 +1371,10 @@ class GuiClass(tk.Frame):
                     self.t3c2br13.configure(text=self.pendingList[self.t3_current_target-1][1].orientation)
                     self.t3c2br15.configure(text=self.pendingList[self.t3_current_target-1][1].type)
                     self.t3c2ar18.configure(text=self.pendingList[self.t3_current_target-1][1].description)
+                    self.pending_bg_color.append(self.pendingList[self.t3_current_target-1][1].background_color)
+                    self.pending_alpha_color.append(self.pendingList[self.t3_current_target-1][1].alphanumeric_color)
+                    self.pending_orientation.append(self.pendingList[self.t3_current_target-1][1].orientation)
+                    self.pending_description.append(self.pendingList[self.t3_current_target-1][1].description)
                 else:
                     self.t3c2i1_im = self.t3_default_im.copy()
                     self.t3c2i1_tk = self.im2tk(self.t3c2i1_im)
@@ -1394,6 +1398,10 @@ class GuiClass(tk.Frame):
                     self.t3c3br13.configure(text=self.pendingList[self.t3_current_target-1][2].orientation)
                     self.t3c3br15.configure(text=self.pendingList[self.t3_current_target-1][2].type)
                     self.t3c3ar18.configure(text=self.pendingList[self.t3_current_target-1][2].description)
+                    self.pending_bg_color.append(self.pendingList[self.t3_current_target-1][2].background_color)
+                    self.pending_alpha_color.append(self.pendingList[self.t3_current_target-1][2].alphanumeric_color)
+                    self.pending_orientation.append(self.pendingList[self.t3_current_target-1][2].orientation)
+                    self.pending_description.append(self.pendingList[self.t3_current_target-1][2].description)
                 else:
                     self.t3c3i1_im = self.t3_default_im.copy()
                     self.t3c3i1_tk = self.im2tk(self.t3c3i1_im)
@@ -1417,6 +1425,10 @@ class GuiClass(tk.Frame):
                     self.t3c4br13.configure(text=self.pendingList[self.t3_current_target-1][3].orientation)
                     self.t3c4br15.configure(text=self.pendingList[self.t3_current_target-1][3].type)
                     self.t3c4ar18.configure(text=self.pendingList[self.t3_current_target-1][3].description)
+                    self.pending_bg_color.append(self.pendingList[self.t3_current_target-1][3].background_color)
+                    self.pending_alpha_color.append(self.pendingList[self.t3_current_target-1][3].alphanumeric_color)
+                    self.pending_orientation.append(self.pendingList[self.t3_current_target-1][3].orientation)
+                    self.pending_description.append(self.pendingList[self.t3_current_target-1][3].description)
                 else:
                     self.t3c4i1_im = self.t3_default_im.copy()
                     self.t3c4i1_tk = self.im2tk(self.t3c4i1_im)
@@ -1440,6 +1452,10 @@ class GuiClass(tk.Frame):
                     self.t3c5br13.configure(text=self.pendingList[self.t3_current_target-1][4].orientation)
                     self.t3c5br15.configure(text=self.pendingList[self.t3_current_target-1][4].type)
                     self.t3c5ar18.configure(text=self.pendingList[self.t3_current_target-1][4].description)
+                    self.pending_bg_color.append(self.pendingList[self.t3_current_target-1][4].background_color)
+                    self.pending_alpha_color.append(self.pendingList[self.t3_current_target-1][4].alphanumeric_color)
+                    self.pending_orientation.append(self.pendingList[self.t3_current_target-1][4].orientation)
+                    self.pending_description.append(self.pendingList[self.t3_current_target-1][4].description)
                 else:
                     self.t3c5i1_im = self.t3_default_im.copy()
                     self.t3c5i1_tk = self.im2tk(self.t3c5i1_im)
@@ -1451,7 +1467,20 @@ class GuiClass(tk.Frame):
                     self.t3c5br13.configure(text="N/A")
                     self.t3c5br15.configure(text="N/A")
                     self.t3c5ar18.configure(text="N/A")
-                self.resizeEventTab3()
+                # Possible Submission
+                self.t3c6i1_im = self.t3c1i1_im.copy()
+                self.t3c6i1_tk = self.im2tk(self.t3c6i1_im)
+                self.t3c6i1.configure(image=self.t3c6i1_tk)
+                self.t3c6br5.configure(text=self.pendingList[self.t3_current_target-1][0].shape)
+                self.t3c6br7.configure(text=self.findMostCommonValue(self.pending_bg_color))
+                self.t3c6br9.configure(text=self.pendingList[self.t3_current_target-1][0].alphanumeric)
+                self.t3c6br11.configure(text=self.findMostCommonValue(self.pending_alpha_color))
+                self.t3c6br13.configure(text=self.findMostCommonValue(self.pending_orientation))
+                self.t3c6br15.configure(text=self.pendingList[self.t3_current_target-1][0].type)
+                self.t3c6ar18.configure(text=self.findMostCommonValue(self.pending_description))
+
+                for ii in range(5):
+                    self.resizeEventTab3()
 
 
 
@@ -1541,6 +1570,34 @@ class GuiClass(tk.Frame):
         print(self.target_id)
         self.updateManualSubmissionTab()
 
+    def findMostCommonValue(self, classifications):
+        """
+        Calculate the most common value in a specified column (useful for all the enum columns)
+
+        @type classifications: list of value lists (ie: from a cursor.fetchall())
+        @param classifications: database rows to use to calculate the average
+        @type clmnNun: int
+        @param clmnNum: Integer of the column to access in each row to get values for avg calculation
+        """
+
+        # dictionary keeps track of how many times we've seen a particular column value
+        # EX: {
+        #       "red": 2,
+        #        "white": 1}
+        valueCounts = {}
+        # for each classification in our list of classifications
+        # a classification here is a list
+        for classification in classifications:
+            if classification is not None:
+                # if the value at the classification has not been added to our dictionary yet
+                if classification not in valueCounts:
+                    valueCounts[classification] = 0
+                valueCounts[classification] += 1 # increment the particular value in the dict
+
+        if valueCounts: # if the dictionary isnt empty
+            mostCommon = max(valueCounts, key=valueCounts.get)
+            return mostCommon
+        return None # if there are no values for this particular field, return None
 
 
 if __name__ == "__main__":
