@@ -27,7 +27,7 @@ Tab2
     Change crop picture only if focus is not on the entry widget
     Change disable color
     Disable other Characteristics for emergent
-    Add arrow showing N/E
+    Resize compass
     Rotate picture
 Tab3:
     Fix resizing issues
@@ -289,8 +289,17 @@ class GuiClass(tk.Frame):
         # Column Three
         self.t2sep23 = ttk.Separator(self.tab2, orient=tk.VERTICAL)
         self.t2sep23.grid(row=0, column=12, rowspan=50,sticky=tk.N+tk.S+tk.E+tk.W, pady=5)
-        self.t2c2title = ttk.Label(self.tab2, anchor=tk.CENTER, text='                      ')
-        self.t2c2title.grid(row=0,column=12,columnspan=4,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t2c3title = ttk.Label(self.tab2, anchor=tk.CENTER, text='                      ')
+        self.t2c3title.grid(row=0,column=12,columnspan=4,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        t2c2i1_np = self.get_image('assets/compass.jpg')
+        self.t2c3i1_im = self.np2im(t2c2i1_np)
+        self.t2c3i1_default_width,self.t2c3i1_default_height = self.t2c3i1_im.size
+        self.t2c3i1_tk = self.im2tk(self.t2c3i1_im)
+        # place image
+        self.t2c3i1 = ttk.Label(self.tab2, anchor=tk.CENTER,image=self.t2c3i1_tk)
+        self.t2c3i1.image = self.t2c3i1_tk
+        self.t2c3i1.grid(row=2,column=12,rowspan=38,columnspan=4,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+
 
 
 
@@ -754,6 +763,12 @@ class GuiClass(tk.Frame):
                 self.cropped_resized_im = self.resizeIm(self.cropped_im,self.cropped_width,self.cropped_height,self.t2c2i1_width,self.t2c2i1_height)
                 self.cropped_tk = self.im2tk(self.cropped_resized_im)
                 self.t2c2i1.configure(image=self.cropped_tk)
+                # resize compass
+                self.t2c3i1_width = self.t2c3i1.winfo_width()
+                self.t2c3i1_height = self.t2c3i1.winfo_height()
+                resized_im = self.resizeIm(self.t2c3i1_im,self.t2c3i1_default_width,self.t2c3i1_default_height,self.t2c3i1_width,self.t2c3i1_height)
+                self.t2c3i1_tk = self.im2tk(resized_im)
+                self.t2c3i1.configure(image=self.t2c3i1_tk)
 
 
     def resizeEventTab3(self,event=None):
