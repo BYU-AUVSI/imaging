@@ -576,9 +576,17 @@ class ClassificationDAO(BaseDAO):
         @param clmnNum: Integer of the column to access in each row to get values for avg calculation
         """
 
+
+        # dictionary keeps track of how many times we've seen a particular column value
+        # EX: {
+        #       "red": 2,
+        #        "white": 1}
         valueCounts = {}
+        # for each classification in our list of classifications
+        # a classification here is a list
         for row in classifications:
             if row[clmnNum] is not None:
+                # if the value at the classification has not been added to our dictionary yet
                 if row[clmnNum] not in valueCounts:
                     valueCounts[row[clmnNum]] = 0
                 valueCounts[row[clmnNum]] += 1

@@ -109,6 +109,13 @@ CREATE TABLE "public"."outgoing_autonomous" (
   PRIMARY KEY ("id")
 );
 
+CREATE TABLE "public"."submitted_target" (
+  target_id int NOT NULL,
+  autonomous boolean NOT NULL,
+  crop_path text NOT NULL,
+  PRIMARY KEY("target_id", "autonomous")
+);
+
 ALTER DATABASE auvsi OWNER TO imaging_server;
 ALTER TABLE incoming_image OWNER TO imaging_server;
 ALTER TABLE incoming_gps OWNER TO imaging_server;

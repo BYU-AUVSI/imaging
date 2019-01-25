@@ -3,7 +3,6 @@ import rospy
 import cv2
 import numpy as np
 import os, time # for img saving
-import subprocess, sys # for starting roscore
 from config import defaultConfigPath, config
 from dao.incoming_image_dao import IncomingImageDAO
 from dao.incoming_gps_dao import IncomingGpsDAO
@@ -17,17 +16,19 @@ from dao.model.incoming_gps import incoming_gps
 from dao.model.incoming_image import incoming_image
 from dao.model.incoming_state import incoming_state
 
-class RosIngester:
+class RosImagingHandler:
     """
-    This script is the bridge between ROS and the rest of the imaging system. It's only objective
-    is listen to the ros network and save relevant information to the server's database.
-    Subscribes to the raw image, state and gps ros topics
+    This script is the bridge between ROS and the rest of the imaging system. 
+    It has two objectives:
+        - listen to the ROS network and save relevant information to the server's database
+        - take completed targets from the server's database and send them to interop over ROS
+    Subscribes to the raw image, state, gps and focal_length ros topics
     """
 
     STATE_SAVE_EVERY = 10 # save every 10th state messages (otherwise we get wayyy to many)
 
     def __init__(self):
-        print("Startup ros ingester...")
+        print("Startup ros imaging handler...")
         currentPath = os.path.dirname(os.path.realpath(__file__))
         configPath = rospy.get_param('~config_path', defaultConfigPath())
         startTs = str(int(time.time()))
@@ -47,7 +48,7 @@ class RosIngester:
 
         # focal length ingestion setup (we could roll with a custom msg to 
         # include it with the image msg, but IMO it's better to stick to standard msg types)
-        # to reduce dependency tracking.... But you may feel otherwise. Really there's no great solution here
+        # to reduce dependency tracking.... But you may feel otherwise. Really there's no perfect solution here
         self.fl_subscriber = rospy.Subscriber("/a6000_ros_node/img/focal_length", Float32, self.flCallback,  queue_size = 10)
 
         # state ingestion setup:
@@ -128,19 +129,16 @@ class RosIngester:
             print("ts: {}, path: {}, manual_tap: {}, autonomous_tap: {}".format(*self.img_msg_.insertValues()))
 
     def flCallback(self, msg):
+        # take the focal length published on the message and set it to our incoming_image
+        # model
         self.img_msg_.focal_length = msg.data
 
 def main():
-    # attempt to start the roscore
-    # print('Start roscore...')
-    # rosConf = config(defaultConfigPath(), 'ros')
-    # os.environ['ROS_MASTER_URI'] = rosConf['master']
-    # subprocess.check_call(['roscore'])
 
     # initialize the node
-    rospy.init_node('imaging_ingester')
+    rospy.init_node('imaging_handler')
 
-    subscriber = RosIngester()
+    subscriber = RosImagingHandler()
     # spin
     try:
         rospy.spin()
