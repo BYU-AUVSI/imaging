@@ -15,7 +15,7 @@ import random
 
 # TODO: make these arguments:
 DATASET_BASE_DIR_ = 'generated/'
-VAL_PERCENTAGE_ = 0.15 # ie: 20% of all current images for a class will be moved to validation
+VAL_PERCENTAGE_ = 0.15 # ie: 15% of all current images for a class will be moved to validation
 
 def get_immediate_subdirectories(a_dir):
     return [name for name in os.listdir(a_dir)
@@ -28,7 +28,6 @@ for classification in get_immediate_subdirectories(DATASET_BASE_DIR_ + 'train/')
     # create the validation class folder
     if not os.path.exists(valDir):
         os.makedirs(valDir)
-
 
     # files = 
     ttlNumInstances = len(os.listdir(trainDir))

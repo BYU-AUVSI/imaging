@@ -37,8 +37,8 @@ def getPolygonCoordinates(sides, radius, theta):
     return coordinates
 
 def drawSquare(imgDraw, fillColor):
-    h80 = int(HEIGHT_ * 0.8)
-    w80 = int(WIDTH_ *  0.8)
+    h80 = int(HEIGHT_ * 0.7)
+    w80 = int(WIDTH_ *  0.7)
     imgDraw.rectangle(((WIDTH_ - w80, HEIGHT_ - h80), (w80, h80)), fill=fillColor)
 
 def drawTallRect(imgDraw, fillColor):
@@ -204,7 +204,7 @@ fnt = ImageFont.truetype('/Library/Fonts/Arial.ttf', FONT_PT_)
 rotateSection = int(360 / ROTATE_STEPS_) # degree range for each rotation. ie: if ROTATE_STEPS_ == 8, then rotate step 1 will be anything from 0-45 deg, step 2 will be a random angle between 45 and 90, etc, etc
 pasteLayerWidth =  int(WIDTH_/1.5)
 pasteLayerHeight = int(HEIGHT_/1.5)
-COLOR_CHANGES_PER_COLOR = 1 # number of colors todo for each base color
+COLOR_CHANGES_PER_COLOR = 8 # number of colors todo for each base color
 ttlColors = len(COLOR_NAMES_) * COLOR_CHANGES_PER_COLOR
 ttlRotateSteps = ROTATE_STEPS_
 ttlShapeOptions = len(SHAPES_) 
@@ -212,13 +212,15 @@ currentPath = os.path.dirname(os.path.realpath(__file__))
 pbar = tqdm(total=ttlColors * len(ALPHABET_) * ttlRotateSteps * ttlShapeOptions)
 
 for letter in ALPHABET_:
-    savePath = BASE_PATH_ + letter + '/'
-    if not os.path.exists(currentPath + '/' + savePath):
-        os.makedirs(currentPath + '/' + savePath)
     for letterColor in range(len(COLOR_NAMES_)): # for each base color
         for subLetterColor in range(COLOR_CHANGES_PER_COLOR): # number of times todo a random color in base color array (ie: do 4 random 'oranges')
             for angleIter in range(1, ROTATE_STEPS_+1):
                 for shape in SHAPES_:
+
+                    # setup folder to save in if necessary
+                    savePath = BASE_PATH_ + letter + '-' + shape + '/'
+                    if not os.path.exists(currentPath + '/' + savePath):
+                        os.makedirs(currentPath + '/' + savePath)
 
                     shapeImg = Image.new('RGBA', (WIDTH_, HEIGHT_))
                     shapeDrawn = ImageDraw.Draw(shapeImg)
