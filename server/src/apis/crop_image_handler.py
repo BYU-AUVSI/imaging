@@ -1,7 +1,7 @@
 from flask import jsonify, make_response, send_file, abort, request
 from flask_restplus import Namespace, Resource, fields
-from dao.manual_cropped_dao import ManualCroppedDAO
-from dao.model.manual_cropped import manual_cropped
+from dao.cropped_manual_dao import CroppedManualDAO
+from dao.model.cropped_manual import cropped_manual
 from dao.model.incoming_image import incoming_image
 from dao.incoming_image_dao import IncomingImageDAO
 from dao.model.point import point
@@ -36,7 +36,7 @@ class CroppedImageHandler(Resource):
     @api.header('X-Crop-Id', 'Crop Id of the image returned. Not this is a unique from the base image_id')
     def get(self):
         # Get content:
-        dao = ManualCroppedDAO(defaultConfigPath())
+        dao = CroppedManualDAO(defaultConfigPath())
         image  = dao.getNextImage()
 
         # response validation
@@ -58,7 +58,7 @@ class CroppedImageHandler(Resource):
             abort(400, "Need to pass an image with the key 'cropped_image'")
         imageFile = request.files.get('cropped_image', '')
         
-        cropped = manual_cropped()
+        cropped = cropped_manual()
         if 'X-Image-Id' in request.headers:
             cropped.image_id = request.headers.get('X-Image-Id')
         else:
@@ -90,8 +90,8 @@ class CroppedImageHandler(Resource):
         cropped.cropped_path = full_path
 
         # add to db
-        dao = ManualCroppedDAO(defaultConfigPath())
-        # resultingId is the manual_cropped.id value given to this image (abstracted from client)
+        dao = CroppedManualDAO(defaultConfigPath())
+        # resultingId is the cropped_manual.id value given to this image (abstracted from client)
         resultingId = dao.upsertCropped(cropped)
         
         if resultingId == -1:
@@ -111,7 +111,7 @@ class SpecificCroppedImageHandler(Resource):
     @api.header('X-Crop-Id', 'Crop Id of the image returned. Will match id parameter image was found')
     def get(self, crop_id):
         # Get content:
-        dao = ManualCroppedDAO(defaultConfigPath())
+        dao = CroppedManualDAO(defaultConfigPath())
         image = dao.getImage(crop_id)
 
         # response validation:
@@ -129,7 +129,7 @@ class SpecificCroppedImageInfoHandler(Resource):
     @api.response(200, 'OK', croppedImageModel)
     @api.doc(responses={404: 'Failed to locate the given crop_id in the table'})
     def get(self, crop_id):
-        dao = ManualCroppedDAO(defaultConfigPath())
+        dao = CroppedManualDAO(defaultConfigPath())
         image = dao.getImage(crop_id)
 
         if image is None:
@@ -148,7 +148,7 @@ class SpecificCroppedImageInfoHandler(Resource):
         if 'id' in content:
             abort(400, "Updating the crop_id (id) is forbidden")
 
-        dao = ManualCroppedDAO(defaultConfigPath())
+        dao = CroppedManualDAO(defaultConfigPath())
         result = dao.updateImage(crop_id, content)
         if result is None:
             return {'message': 'No image with id {} found to update (or was there a server error?)'.format(crop_id)}, 404
@@ -161,7 +161,7 @@ class AllCroppedImagesHandler(Resource):
     @api.doc(description='Get info on all the cropped images currently in the queue')
     # support getting only tapped, and getting from list
     def get(self):
-        dao = ManualCroppedDAO(defaultConfigPath())
+        dao = CroppedManualDAO(defaultConfigPath())
         manualCroppedList = dao.getAll()
 
         if manualCroppedList == None or not manualCroppedList:

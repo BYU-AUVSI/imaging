@@ -17,4 +17,4 @@ class outgoing_manual(outgoing_classification):
         @type json: {object}
         @param json: Json dictionary of table values. Used by the REST API when receiving data
         """
-        pass
+        super(outgoing_manual, self).__init__(tableValues=tableValues, json=json)

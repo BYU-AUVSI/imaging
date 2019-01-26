@@ -44,84 +44,87 @@ class cropped_image(object):
             self.image_id = -1
             self.tapped = False
 
-    @property
-    def crop_id(self):
-        """
-        Unique table id. Auto generated on insertion. Classification tables reference
-        this id uniquely so that each classification is tied to a cropped image
-        """
-        return self._crop_id
+
+    crop_id = -1
+
+    image_id = -1
+
+    time_stamp = None
+
+    cropped_path = None
+
+    crop_coordinate_tl = None
     
-    @crop_id.setter
-    def crop_id(self, id):
-        self._crop_id = id
+    crop_coordinate_br = None
 
-    @property
-    def image_id(self):
-        """
-        Unique image_id, publicly exposed by the API and used to access information on the 
-        image in various states (raw, cropped, and classified)
-        """
-        return self._image_id
+    tapped = False
 
-    @image_id.setter
-    def image_id(self, image_id):
-        self._image_id = image_id
+    # @property
+    # def image_id(self):
+    #     """
+    #     Unique image_id, publicly exposed by the API and used to access information on the 
+    #     image in various states (raw, cropped, and classified)
+    #     """
+    #     return self._image_id
+
+    # @image_id.setter
+    # def image_id(self, image_id):
+    #     self._image_id = image_id
     
-    @property
-    def time_stamp(self):
-        """
-        UTC Unix epoch timestamp as float. Indicates when the cropped image was inserted.
-        """
-        return self._time_stamp
+    # @property
+    # def time_stamp(self):
+    #     """
+    #     UTC Unix epoch timestamp as float. Indicates when the cropped image was inserted.
+    #     """
+    #     return self._time_stamp
 
-    @time_stamp.setter
-    def time_stamp(self, time_stamp):
-        self._time_stamp = time_stamp
+    # @time_stamp.setter
+    # def time_stamp(self, time_stamp):
+    #     self._time_stamp = time_stamp
 
-    @property
-    def cropped_path(self):
-        """
-        Path to where the image is saved on the server filesystem
-        """
-        return self._cropped_path
+    # @property
+    # def cropped_path(self):
+    #     """
+    #     Path to where the image is saved on the server filesystem
+    #     """
+    #     return self._cropped_path
     
-    @cropped_path.setter
-    def cropped_path(self, cropped_path):
-        self._cropped_path = cropped_path
+    # @cropped_path.setter
+    # def cropped_path(self, cropped_path):
+    #     self._cropped_path = cropped_path
 
-    @property
-    def crop_coordinate_tl(self):
-        """
-        Point object specifying the top-left (tl) coordinate of where the raw image was cropped to produce this cropped image
-        """
-        return self._crop_coordinate_tl
+    # @property
+    # def crop_coordinate_tl(self):
+    #     """
+    #     Point object specifying the top-left (tl) coordinate of where the raw image was cropped to produce this cropped image
+    #     """
+    #     return self._crop_coordinate_tl
     
-    @crop_coordinate_tl.setter
-    def crop_coordinate_tl(self, crop_coordinate_tl):
-        self._crop_coordinate_tl = crop_coordinate_tl
+    # @crop_coordinate_tl.setter
+    # def crop_coordinate_tl(self, crop_coordinate_tl):
+    #     self._crop_coordinate_tl = crop_coordinate_tl
 
-    @property
-    def crop_coordinate_br(self):
-        """
-        Point object specifying the bottom-right (br) coordinate of where the raw image was cropped to produce this cropped image
-        """
-        return self._crop_coordinate_br
+    # @property
+    # def crop_coordinate_br(self):
+    #     """
+    #     Point object specifying the bottom-right (br) coordinate of where the raw image was cropped to produce this cropped image
+    #     """
+    #     return self._crop_coordinate_br
     
-    @crop_coordinate_br.setter
-    def crop_coordinate_br(self, crop_coordinate_br):
-        self._crop_coordinate_br = crop_coordinate_br
+    # @crop_coordinate_br.setter
+    # def crop_coordinate_br(self, crop_coordinate_br):
+    #     self._crop_coordinate_br = crop_coordinate_br
 
-    @property
-    def tapped(self):
-        """
-        Boolean to specify whether the cropped image has been tapped by the classifier
-        """
-        return self._tapped
+    # @property
+    # def tapped(self):
+    #     """
+    #     Boolean to specify whether the cropped image has been tapped by the classifier
+    #     """
+    #     return self._tapped
     
-    @tapped.setter
-    def tapped(self, tapped):
-        self._tapped = bool(tapped)
+    # @tapped.setter
+    # def tapped(self, tapped):
+    #     self._tapped = bool(tapped)
 
     # TODO: this is hacky and i hate it
     def allProps(self):
@@ -139,7 +142,7 @@ class cropped_image(object):
         """
         dict = {}
         for attr, value in self.__dict__.items():
-            corrected_name = attr[1:] # remove first underscore
+            corrected_name = attr # remove first underscore
             # add everything we weren't explicitly told to exclude
             if exclude is None or corrected_name not in exclude:
                 if corrected_name == 'crop_coordinate_tl' or corrected_name == 'crop_coordinate_br':

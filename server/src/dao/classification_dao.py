@@ -7,10 +7,9 @@ class ClassificationDAO(BaseDAO):
     Contains general database methods which work for both types.
     """
 
-    def __init__(self, configFilePath, outgoingTableName, modelGenerator):
+    def __init__(self, configFilePath, outgoingTableName):
         super(ClassificationDAO, self).__init__(configFilePath)
         self.outgoingTableName = outgoingTableName 
-        self.modelGenerator = modelGenerator
 
     def upsertClassification(self, classification):
         """
@@ -110,7 +109,7 @@ class ClassificationDAO(BaseDAO):
         selectedClass = super(ClassificationDAO, self).basicTopSelect(selectClsById, (id,))
         if selectedClass is None:
             return None
-        return self.modelGenerator(selectedClass)
+        return self.newModelFromRow(selectedClass)
 
     def getClassification(self, id):
         """
@@ -134,7 +133,7 @@ class ClassificationDAO(BaseDAO):
         selectedClass = super(ClassificationDAO, self).basicTopSelect(selectClsById, (id,))
         if selectedClass is None:
             return None
-        return self.modelGenerator(selectedClass)
+        return self.newModelFromRow(selectedClass)
 
     def removeClassification(self, id):
         """
@@ -173,7 +172,7 @@ class ClassificationDAO(BaseDAO):
         results = []
         if cur is not None:
             for row in cur:
-                outModel = self.modelGenerator(row)
+                outModel = self.newModelFromRow(row)
                 results.append(outModel)
 
         return results
@@ -227,6 +226,9 @@ class ClassificationDAO(BaseDAO):
         @rtype: outgoing_autonomous or outgoing_manual
         @return: The classification of the now updated uid row if successful. Otherwise None
         """
+        if updateJson is None:
+            return None
+
         updateStr = "UPDATE " + self.outgoingTableName + " SET "
 
         values = []
@@ -240,7 +242,7 @@ class ClassificationDAO(BaseDAO):
         
         updateStr = updateStr[:-2] # remove last space/comma
         updateStr += " WHERE crop_id = %s RETURNING class_id;"
-        values.append(id)
+        values.append(crop_id)
         resultId = super(ClassificationDAO, self).getResultingId(updateStr, values)
         self.assignTargetBin(resultId) # update could have potentially changed the target bin for this classification
         if resultId != -1:
@@ -278,7 +280,7 @@ class ClassificationDAO(BaseDAO):
         currentTarget = []
 
         for record in rawRecords:
-            model = self.modelGenerator.newModelFromRow(record)
+            model = self.newModelFromRow(record)
 
             if record[2] != lastTarget and lastTarget != -1:
                 # ie: if the target has changed
@@ -374,7 +376,7 @@ class ClassificationDAO(BaseDAO):
         allSubmitted = []
 
         for targetId in  unsubmittedTargetIds:
-            resultModel = self.submitPendingTargetClass(self.modelGenerator, targetId)
+            resultModel = self.submitPendingTarget(targetId)
             if resultModel is not None:
                 allSubmitted.append(resultModel)
         
@@ -384,7 +386,7 @@ class ClassificationDAO(BaseDAO):
 
         return allSubmitted
 
-    def submitPendingTargetClass(self, target, optionalSpecs=None):
+    def submitPendingTarget(self, target, optionalSpecs=None):
         """
         Changes the status to the given target id to 'submitted'. All classifications
         that are apart of the target bin will change status to 'submitted'. Any 
@@ -469,7 +471,7 @@ class ClassificationDAO(BaseDAO):
             print('Failed to retrieve submitted classification for target {}'.format(target))
             return None
         
-        finalModel = self.modelGenerator.newModelFromRow(result)
+        finalModel = self.newModelFromRow(result)
 
         cur = self.conn.cursor()
         cur.execute(getOtherClass, (target,))

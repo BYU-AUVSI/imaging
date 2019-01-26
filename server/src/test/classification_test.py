@@ -56,8 +56,7 @@ class TestAutonomousClassificationAdd(unittest.TestCase):
         dao = OutgoingAutonomousDAO(defaultConfigPath())
 
         testIns = outgoing_autonomous()
-        testIns.image_id = 123
-        testIns.crop_path = '/am/i/even/a/real/path/idk/anymore.jpg'
+        testIns.crop_id = 42
         testIns.shape = 'circle'
         testIns.background_color = 'white'
         testIns.alphanumeric = 'A'
@@ -65,9 +64,9 @@ class TestAutonomousClassificationAdd(unittest.TestCase):
         resultingId = dao.addClassification(testIns)
         self.assertNotEqual(resultingId, -1)
 
-        # should be able to insert a duplicate record
-        self.assertNotEqual(dao.addClassification(testIns), -1)
-        self.assertIsNotNone(dao.getClassificationByUID(resultingId))
+        # should not be able to insert a duplicate record
+        self.assertEqual(dao.addClassification(testIns), -1)
+        self.assertIsNotNone(dao.getClassification(resultingId))
 
 class TestManualClassificationTargetBinning(unittest.TestCase):
     def test(self):
@@ -107,7 +106,7 @@ class TestManualClassificationTargetBinning(unittest.TestCase):
         testIns.alphanumeric = 'C'
         testIns.submitted = 'unsubmitted'
         result = dao.updateClassificationByUID(testIns.crop_id, testIns.toDict())
-        self.assertNotEqual(result.id, -1)
+        self.assertNotEqual(result.class_id, -1)
         self.assertEqual(result.target, insResult3.target)
 
 class TestManualSubmitPendingTarget(unittest.TestCase):

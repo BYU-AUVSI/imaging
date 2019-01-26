@@ -9,7 +9,7 @@ class OutgoingManualDAO(ClassificationDAO):
     """
 
     def __init__(self, configFilePath):
-        super(OutgoingManualDAO, self).__init__(configFilePath, 'outgoing_manual', newModelFromRow)
+        super(OutgoingManualDAO, self).__init__(configFilePath, 'outgoing_manual')
     
     def getPendingTargets(self):
         """
@@ -18,12 +18,12 @@ class OutgoingManualDAO(ClassificationDAO):
         """
         return super(OutgoingManualDAO, self).getAllTargets(self, whereClause=" submitted = 'unsubmitted' ")
 
-def newModelFromRow(row, json=None):
-    """
-    Create a new outgoing_manual model object given a list of sql values from the table,
-    or a json dictionary
+    def newModelFromRow(self, row, json=None):
+        """
+        Create a new outgoing_manual model object given a list of sql values from the table,
+        or a json dictionary
 
-    @type row: [string]
-    @param row: List of ordered string values to be placed within an outgoing_manual object
-    """
-    return outgoing_manual(row, json=json)
+        @type row: [string]
+        @param row: List of ordered string values to be placed within an outgoing_manual object
+        """
+        return outgoing_manual(tableValues=row, json=json)

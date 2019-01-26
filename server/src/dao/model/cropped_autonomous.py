@@ -18,4 +18,4 @@ class cropped_autonomous(cropped_image):
         @type json: {object}
         @param json: Json dictionary of table values. Used by the REST API when receiving data
         """
-        pass
+        super(cropped_autonomous, self).__init__(tableValues=tableValues, json=json)

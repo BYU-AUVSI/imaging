@@ -9,7 +9,7 @@ class OutgoingAutonomousDAO(ClassificationDAO):
     """
 
     def __init__(self, configFilePath):
-        super(OutgoingAutonomousDAO, self).__init__(configFilePath, 'outgoing_autonomous', newModelFromRow)
+        super(OutgoingAutonomousDAO, self).__init__(configFilePath, 'outgoing_autonomous')
 
     def getPendingTargets(self):
         """
@@ -19,12 +19,12 @@ class OutgoingAutonomousDAO(ClassificationDAO):
         return super(OutgoingAutonomousDAO, self).getAllTargets(whereClause=" submitted = 'unsubmitted' ")
 
 
-def newModelFromRow(row, json=None):
-    """
-    Create a new outgoing_autonomous model object given a list of sql values from the table,
-    or a json dictionary
+    def newModelFromRow(self, row, json=None):
+        """
+        Create a new outgoing_autonomous model object given a list of sql values from the table,
+        or a json dictionary
 
-    @type row: [string]
-    @param row: List of ordered string values to be placed within an outgoing_autonomous object
-    """
-    return outgoing_autonomous(row, json=json)
+        @type row: [string]
+        @param row: List of ordered string values to be placed within an outgoing_autonomous object
+        """
+        return outgoing_autonomous(tableValues=row, json=json)

@@ -4,8 +4,8 @@ from dao.outgoing_manual_dao import OutgoingManualDAO
 from dao.outgoing_autonomous_dao import OutgoingAutonomousDAO
 from dao.model.outgoing_manual import outgoing_manual
 from dao.model.outgoing_autonomous import outgoing_autonomous
-from dao.manual_cropped_dao import ManualCroppedDAO
-from dao.model.manual_cropped import manual_cropped
+from dao.cropped_manual_dao import CroppedManualDAO
+from dao.model.cropped_manual import cropped_manual
 from dao.auvsi_odlc_file_dao import AuvsiOdlcDao
 from dao.model.submitted_target import submitted_target
 from config import defaultConfigPath
@@ -179,7 +179,7 @@ def writeTargetToODLCFile(target, manual):
     imagePath = None
     if manual:
         # then we need to get the cropped path
-        croppedDao = ManualCroppedDAO(defaultConfigPath())
+        croppedDao = CroppedManualDAO(defaultConfigPath())
         croppedInfo = croppedDao.getImage(target.crop_id)
 
         if croppedInfo is None:
