@@ -1,11 +1,23 @@
 import psycopg2
 from dao.base_dao import BaseDAO
-from dao.model.manual_cropped import manual_cropped
+from dao.model.manual_cropped import manual_image
 
-class ManualCroppedDAO(BaseDAO):
+class CroppedImageDAO(BaseDAO):
 
-    def __init__(self, configFilePath):
-        super(ManualCroppedDAO, self).__init__(configFilePath)
+    def __init__(self, configFilePath, croppedTableName, modelGenerator):
+        """
+        Initialize the cropped image dao, which holds common functionality for 
+        interaction with both the cropped_manual and cropped_autonomous table
+
+        @param modelGenerator: the class that can generate the proper model to 
+            represent a row from the resulting query. Generally this is a reference to 
+            some function in the child class (ie: cropped_manual_dao holds a function
+            that can be called to create a new cropped_manual object while cropped_autonomous_dao
+            holds a similar function that can create a cropped_autonomous object
+        """
+        super(CroppedImageDAO, self).__init__(configFilePath)
+        self.croppedTableName = croppedTableName
+        self.modelGenerator = modelGenerator
 
     def upsertCropped(self, manualCropped):
         """
@@ -21,7 +33,7 @@ class ManualCroppedDAO(BaseDAO):
         if manualCropped is None:
             return -1
 
-        insertImg = "INSERT INTO manual_cropped "
+        insertImg = "INSERT INTO " + self.croppedTableName
         updateCls = "UPDATE SET "
 
         insertValues = []
@@ -51,7 +63,7 @@ class ManualCroppedDAO(BaseDAO):
 
         insertImg += insertClmnNames + insertClmnValues + updateCls
 
-        return super(ManualCroppedDAO, self).getResultingId(insertImg, insertValues + insertValues)
+        return super(CroppedImageDAO, self).getResultingId(insertImg, insertValues + insertValues)
 
     def addImage(self, manualCropped):
         """
@@ -66,12 +78,12 @@ class ManualCroppedDAO(BaseDAO):
         if manualCropped is None:
             return -1
         
-        insertImg = """INSERT INTO manual_cropped
+        insertImg = """INSERT INTO """ + self.croppedTableName + """
             (image_id, time_stamp, cropped_path) 
             VALUES(%s, to_timestamp(%s) AT TIME ZONE 'UTC', %s) 
             RETURNING id;"""
 
-        return super(ManualCroppedDAO, self).getResultingId(insertImg, manualCropped.insertValues())
+        return super(CroppedImageDAO, self).getResultingId(insertImg, manualCropped.insertValues())
 
     def getImage(self, id):
         """
@@ -86,14 +98,14 @@ class ManualCroppedDAO(BaseDAO):
         @return: manual_cropped instance that was retrieved. If no image with that id exists, None
         """
         selectImgById = """SELECT id, image_id, date_part('epoch', time_stamp), cropped_path, crop_coordinate_tl, crop_coordinate_br, tapped
-            FROM manual_cropped
+            FROM """ + self.croppedTableName + """
             WHERE id = %s
             LIMIT 1;"""
-        selectedImage = super(ManualCroppedDAO, self).basicTopSelect(selectImgById, (id,))
+        selectedImage = super(CroppedImageDAO, self).basicTopSelect(selectImgById, (id,))
 
         if selectedImage is None:
             return None
-        return manual_cropped(selectedImage)
+        return self.modelGenerator(selectedImage)
 
     def getNextImage(self):
         """
@@ -105,11 +117,11 @@ class ManualCroppedDAO(BaseDAO):
         """
         # step 1: claim an image if possible
         # this gets the oldest (aka lowest) id with tapped = False
-        updateStmt = """UPDATE manual_cropped 
+        updateStmt = """UPDATE """ + self.croppedTableName + """ 
             SET tapped = TRUE 
             WHERE id = (
                 SELECT id 
-                FROM manual_cropped 
+                FROM """ + self.croppedTableName + """ 
                 WHERE tapped = FALSE 
                 ORDER BY id LIMIT 1
             ) RETURNING id;"""
@@ -132,17 +144,17 @@ class ManualCroppedDAO(BaseDAO):
         Get all the cropped image currently in the table
 
         @rtype: [outgoing_manual]
-        @return: List of all cropped images in the manual_cropped table. If the table is empty, an empty list
+        @return: List of all cropped images in a cropped image table. If the table is empty, an empty list
         """
         selectAllSql = """SELECT id, image_id, date_part('epoch', time_stamp), cropped_path, crop_coordinate_tl, crop_coordinate_br, tapped
-            FROM manual_cropped
+            FROM """ + self.croppedTableName + """
             ORDER BY id;"""
         
         cur = self.conn.cursor()
         cur.execute(selectAllSql)
         results = []
         for row in cur:
-            manualCroppedRow = manual_cropped(row)
+            manualCroppedRow = self.modelGenerator(row)
             results.append(manualCroppedRow)
 
         return results
@@ -161,8 +173,8 @@ class ManualCroppedDAO(BaseDAO):
         @rtype: manual_cropped
         @return: manual_cropped instance showing the current state of the now-updated row in the table. If the update fails, None
         """
-        img = manual_cropped(json=updateContent)
-        updateStr = "UPDATE manual_cropped SET "
+        img = self.modelGenerator(json=updateContent)
+        updateStr = "UPDATE " + self.croppedTableName + " SET "
 
         values = []
         for clmn, value in img.toDict().items():
@@ -178,7 +190,7 @@ class ManualCroppedDAO(BaseDAO):
         updateStr += " WHERE id = %s RETURNING id;"
         values.append(id)
         
-        resultId = super(ManualCroppedDAO, self).getResultingId(updateStr, values)
+        resultId = super(CroppedImageDAO, self).getResultingId(updateStr, values)
         if resultId != -1:
             return self.getImage(resultId)
         else:
