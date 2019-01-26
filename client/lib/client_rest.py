@@ -393,7 +393,7 @@ class ImagingInterface:
         self.cropIdIndex += 1
         if self.cropIdIndex > -1:
             self.cropIdIndex = 0
-            img = requests.get(self.url + "/image/crop/")
+            img = requests.get(self.url + "/image/crop/", headers={'X-Manual': str(self.isManual)})
             self.debug("response code:: {}".format(img.status_code))
             if img.status_code != 200:
                 # if we didnt get a good status code
@@ -445,7 +445,7 @@ class ImagingInterface:
             if it exists and connects to the server, otherwise None
         """
         self.debug("getCroppedImageInfo(id={})".format(cropId))
-        cropInfoResp = requests.get(self.url + "/image/crop/" + str(cropId) + "/info")
+        cropInfoResp = requests.get(self.url + "/image/crop/" + str(cropId) + "/info", headers={'X-Manual': str(self.isManual)})
         if cropInfoResp.status_code == 200:
             self.debug("response code:: {}".format(cropInfoResp.status_code))
             info_j = json.loads(cropInfoResp.content.decode('utf-8'))
@@ -468,16 +468,16 @@ class ImagingInterface:
         @return: a list of CropInfo objects of all of the cropped images if it connects to the server, otherwise None
         """
         self.debug("getAllCroppedInfo")
-        resp = requests.get(self.url + "/image/crop/all")
+        resp = requests.get(self.url + "/image/crop/all", headers={'X-Manual': str(self.isManual)})
         if resp.status_code != 200:
             # if we didnt get a good status code
-            print("In getAllCroppedInfo(), erver returned status code {}".format(resp.status_code))
+            print("In getAllCroppedInfo(), returned status code {}".format(resp.status_code))
             return None
         cropInfoList = []
         cropInfoList_j = json.loads(resp.content.decode('utf-8'))
         for i in range(len(cropInfoList_j)):
             cropInfoList.append(CropInfo(
-                                int(cropInfoList_j[i]['id']),
+                                int(cropInfoList_j[i]['crop_id']),
                                 int(cropInfoList_j[i]['image_id']),
                                 [cropInfoList_j[i]['crop_coordinate_tl.x'],
                                 cropInfoList_j[i]['crop_coordinate_tl.y']],
@@ -527,7 +527,7 @@ class ImagingInterface:
         """
         self.debug("postCroppedImage(imageId={})".format(imageId))
         url = self.url + "/image/crop/"
-        headers = {'X-Image_Id': str(imageId)}
+        headers = {'X-Image_Id': str(imageId), 'X-Manual': str(self.isManual)}
         tlStr = "(" + str(tl[0]) + ", " + str(tl[1]) + ")"
         brStr = "(" + str(br[0]) + ", " + str(br[1]) + ")"
 
