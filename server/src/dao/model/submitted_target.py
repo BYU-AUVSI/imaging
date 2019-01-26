@@ -1,6 +1,6 @@
 
 
-class outgoing_target:
+class submitted_target:
     """
     This model class helps represent the final form of an AUVSI target submission.
     Essentially just removes helper columns from outgoing_ classification models

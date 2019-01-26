@@ -7,7 +7,7 @@ from dao.model.outgoing_autonomous import outgoing_autonomous
 from dao.manual_cropped_dao import ManualCroppedDAO
 from dao.model.manual_cropped import manual_cropped
 from dao.auvsi_odlc_file_dao import AuvsiOdlcDao
-from dao.model.outgoing_target import outgoing_target
+from dao.model.submitted_target import submitted_target
 from config import defaultConfigPath
 from apis.helper_methods import checkXManual, getClassificationDAO
 
@@ -189,7 +189,7 @@ def writeTargetToODLCFile(target, manual):
         # autonomous we can just go
         imagePath = target.crop_path
 
-    prettyTargetOut = outgoing_target(target, manual)
+    prettyTargetOut = submitted_target(target, manual)
     auvsiDao = AuvsiOdlcDao()
     auvsiDao.addTarget(prettyTargetOut, imagePath)
     return prettyTargetOut

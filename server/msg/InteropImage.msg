@@ -4,8 +4,8 @@ float32 gps_lati
 float32 gps_longit
 string target_color
 string target_shape
-string symbol
-string symbol_color
-uint32 orientation
+string alphanumeric
+string alphanumeric_color
+string orientation
 string description
 bool autonomous
