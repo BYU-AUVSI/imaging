@@ -98,7 +98,6 @@ class TestAutonomousCroppedGetIdInfo(unittest.TestCase):
         self.assertEqual(resp.br[1], 236)
         self.assertFalse(resp.isTapped)
 
-
 class TestAutonomousCroppedGetAll(unittest.TestCase):
     def test(self):
         resetAutonomousDb()
