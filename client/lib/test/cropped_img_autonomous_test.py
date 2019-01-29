@@ -17,6 +17,7 @@ class TestAutonomousCroppedPost(unittest.TestCase):
 
         cropId = int(resp.headers['X-Crop-Id'])
         self.assertIsNotNone(cropId)
+        self.assertIsInstance(cropId, int)
         self.assertNotEqual(cropId, -1)
 
 class TestAutonomousCroppedGetNext(unittest.TestCase):

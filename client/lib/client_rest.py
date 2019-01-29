@@ -152,14 +152,14 @@ class StateMeasurement:
         self.yaw = yaw
         self.time_stamp = ts
 
-class ManualClassification:
+class Classification:
     """
-        classType = standard/Emergent
+        classType = standard/emergent/off_axis
         lat/lon/submitted/
         desc = Description (None if not emergent)
     """
     def __init__(self, cropId, classType, orientation, shape, bgColor, alpha, alphaColor,
-                 submitted, desc, classId=None, target=None, latitude=None, longitude=None):
+                 submitted=None, desc=None, classId=None, target=None, latitude=None, longitude=None):
         self.id = classId
         self.crop_id = cropId
         self.target = target
@@ -637,17 +637,22 @@ class ImagingInterface:
             print("In getStateById(), server returned status code {}".format(state.status_code))
             return None
 
-    def postManualClass(self, manClass):
-        self.debug("postManualClass()")
-        url = self.url + "/image/class/manual/"
+    def postClass(self, manClass):
+        """
+        Post a new classification to the server (autonomous or manual)
 
-        headers = {'X-Crop-Id': str(manClass.crop_id)}
+        @param manClass: A Classification object
+        """
+        self.debug("postManualClass()")
+        url = self.url + "/image/class/"
+
+        headers = {'X-Crop-Id': str(manClass.crop_id), 'X-Manual': str(self.isManual)}
         resp = requests.post(url, headers=headers, json=manClass.toDict())
         if resp.status_code == 200:
             self.debug("response code:: {}".format(resp.status_code))
             return resp
         else:
-            print("In postManualClass(), server returned status code {}".format(resp.status_code))
+            print("In postClass(), server returned status code {}".format(resp.status_code))
             return None
 
     def updateManualClass(self, class_id, manClass):
@@ -662,33 +667,33 @@ class ImagingInterface:
             print("In updateManualClass(), server returned status code {}".format(resp.status_code))
             return None
 
-    def getManualClassById(self, class_id):
-        self.debug("getManualClassById(id={})".format(class_id))
-        resp = requests.get(self.url + "/image/class/manual/" + str(class_id))
+    def getClassById(self, class_id):
+        self.debug("getClassById(id={})".format(class_id))
+        resp = requests.get(self.url + "/image/class/" + str(class_id), headers={'X-Manual': str(self.isManual)})
         if resp.status_code == 200:
             self.debug("response code:: {}".format(resp.status_code))
             info_j = json.loads(resp.content.decode('utf-8'))
-            return ManualClassification(info_j['crop_id'],
-                                        info_j['type'],
-                                        info_j['orientation'],
-                                        info_j['shape'],
-                                        info_j['background_color'],
-                                        info_j['alphanumeric'],
-                                        info_j['alphanumeric_color'],
-                                        info_j['submitted'],
-                                        info_j['description'],
-                                        info_j['id'],
-                                        info_j['target'],
-                                        info_j['latitude'],
-                                        info_j['longitude']
-                                        )
+            return Classification(info_j['crop_id'],
+                                    info_j['type'],
+                                    info_j['orientation'],
+                                    info_j['shape'],
+                                    info_j['background_color'],
+                                    info_j['alphanumeric'],
+                                    info_j['alphanumeric_color'],
+                                    info_j['submitted'],
+                                    info_j['description'],
+                                    info_j['class_id'],
+                                    info_j['target'],
+                                    info_j['latitude'],
+                                    info_j['longitude']
+                                    )
         else:
             print("In getManualClassById(), server returned status code {}".format(resp.status_code))
             return None
 
-    def getAllManualClass(self):
+    def getAllClass(self):
         self.debug("getAllManualClass()")
-        resp = requests.get(self.url + "/image/class/manual/all")
+        resp = requests.get(self.url + "/image/class/all", headers={'X-Manual': str(self.isManual)})
         self.debug("response code:: {}".format(resp.status_code))
         if resp.status_code != 200:
             # if we didnt get a good status code
@@ -697,7 +702,7 @@ class ImagingInterface:
         manClassList = []
         manClassList_j = json.loads(resp.content.decode('utf-8'))
         for i in range(len(manClassList_j)):
-            manClassList.append(ManualClassification(
+            manClassList.append(Classification(
                                         manClassList_j[i]['crop_id'],
                                         manClassList_j[i]['type'],
                                         manClassList_j[i]['orientation'],
@@ -707,7 +712,7 @@ class ImagingInterface:
                                         manClassList_j[i]['alphanumeric_color'],
                                         manClassList_j[i]['submitted'],
                                         manClassList_j[i]['description'],
-                                        manClassList_j[i]['id'],
+                                        manClassList_j[i]['class_id'],
                                         manClassList_j[i]['target'],
                                         manClassList_j[i]['latitude'],
                                         manClassList_j[i]['longitude']
