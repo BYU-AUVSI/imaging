@@ -1,13 +1,19 @@
 from flask import request, jsonify, abort, make_response
 from flask_restplus import Namespace, Resource, inputs, fields
 from dao.outgoing_manual_dao import OutgoingManualDAO
+from dao.outgoing_autonomous_dao import OutgoingAutonomousDAO
 from dao.model.outgoing_manual import outgoing_manual
 from config import defaultConfigPath
+from apis.helper_methods import checkXManual
 
 api = Namespace('image/class/manual', description='Image classification calls for manual clients route through here')
 
 cropIDParser = api.parser()
 cropIDParser.add_argument('X-Crop-Id', location='headers', type=int, required=True, help='The cropped_id this classification is associated with')
+cropIDParser.add_argument('X-Manual', location='headers', type=int, required=True, help='Specify whether this is a manual request (True) or autonomous (False)')
+
+xManParser = api.parser()
+xManParser.add_argument('X-Manual', location='headers', type=inputs.boolean, required=True, help='Specify whether this is a manual request (True) or autonomous (False)') 
 
 # for documentation purposes. Defines the response for some of the methods below
 classificationModel = api.model('Manual Classification', {
@@ -44,9 +50,13 @@ class AllClassificationsHandler(Resource):
     @api.doc(description='Get all the manual classifications currently on the server')
     @api.response(200, 'OK', [classificationModel])
     @api.doc(responses={404:'No classifications (table empty)'})
+    @api.expect(xManParser)
     def get(self):
+        # confirm that the X-Manual header was specified
+        manual = checkXManual(request)
+
         outgoingList = []
-        dao = OutgoingManualDAO(defaultConfigPath())
+        dao = OutgoingManualDAO(defaultConfigPath()) if manual else OutgoingAutonomousDAO(defaultConfigPath())
         outgoingList = dao.getAll()
 
         if not outgoingList:
@@ -60,8 +70,6 @@ class AllClassificationsHandler(Resource):
 class ClassifiedImageHandler(Resource):
     @api.doc(description='Automatically add a new classifcation to the server')
     @api.doc(responses={200:'OK', 400:'Improper image post', 500: 'Something failed server-side'})
-    # @api.doc(body=classificationModel)
-    # @api.expect(cropIDParser)
     @api.expect(classificationSubmission)
     @api.header('X-Class-Id', 'Classification ID of the image if successfully inserted. This WILL be different from the Crop-ID provided in the request')
     def post(self):
