@@ -1065,8 +1065,8 @@ class GuiClass(tk.Frame):
             alpha_color = self.t2c2l12_var.get()
             type = self.t2c2l14_var.get()
             description = self.t2c2l16_var.get()
-            classification = client_rest.ManualClassification(self.imageID,type,orientation,shape,background_color,alphanumeric,alpha_color,"unsubmitted",description)
-            self.interface.postManualClass(classification)
+            classification = client_rest.Classification(self.imageID,type,orientation,shape,background_color,alphanumeric,alpha_color,"unsubmitted",description)
+            self.interface.postClass(classification)
 
     def tabChanged(self,event):
         """
