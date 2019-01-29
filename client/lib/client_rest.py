@@ -655,11 +655,11 @@ class ImagingInterface:
             print("In postClass(), server returned status code {}".format(resp.status_code))
             return None
 
-    def updateManualClass(self, class_id, manClass):
+    def updateClass(self, class_id, manClass):
         self.debug("updateManualClass(id={})".format(class_id))
-        url = self.url + "/image/class/manual/" + str(class_id)
+        url = self.url + "/image/class/" + str(class_id)
 
-        resp = requests.put(url, json=manClass.toDict())
+        resp = requests.put(url, json=manClass.toDict(), headers={'X-Manual': str(self.isManual)})
         if resp.status_code == 200:
             self.debug("response code:: {}".format(resp.status_code))
             return resp
@@ -719,14 +719,14 @@ class ImagingInterface:
                                         ))
         return manClassList
 
-    def deleteManualClass(self, class_id):
-        self.debug("deleteManualClass(id={})".format(class_id))
-        resp = requests.delete(self.url + "/image/class/manual/" + str(class_id))
+    def deleteClass(self, class_id):
+        self.debug("deleteClass(id={})".format(class_id))
+        resp = requests.delete(self.url + "/image/class/" + str(class_id), headers={'X-Manual': str(self.isManual)})
         if resp.status_code == 200:
             self.debug("response code:: {}".format(resp.status_code))
             return resp
         else:
-            print("In deleteManualClass(), server returned status code {} in deleteManualClass()".format(resp.status_code))
+            print("In deleteClass(), server returned status code {} in deleteManualClass()".format(resp.status_code))
             return None
 
     def postSubmitTargetById(self, targetId, isManual, submission=None):
@@ -924,7 +924,7 @@ def testCropPost(interface, imgId):
 
 
 def testManualClassPost(interface, manClass):
-    resp = interface.postManualClass(manClass)
+    resp = interface.postClass(manClass)
     if resp is not None:
         print(resp.status_code)
         print(resp.text)
@@ -934,7 +934,7 @@ def testManualClassPost(interface, manClass):
 
 
 def postManClass(interface, cid, o, s, sc, a, ac):
-    manClass = ManualClassification(cid, "standard", o, s, sc, a, ac, "unsubmitted", "DescStr")
+    manClass = Classification(cid, "standard", o, s, sc, a, ac, "unsubmitted", "DescStr")
     testManualClassPost(interface, manClass)
 
 

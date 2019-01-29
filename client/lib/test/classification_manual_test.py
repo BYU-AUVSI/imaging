@@ -153,3 +153,74 @@ class TestManualClassificationGetAll(unittest.TestCase):
             self.fail()
         # check data integrity from our previous post
         
+class TestManualClassificationDelete(unittest.TestCase):
+    def test(self):
+        resetDb()
+
+        rest = ImagingInterface()
+        ret = rest.getNextRawImage()
+        self.assertIsNotNone(ret)
+
+        resp = rest.postCroppedImage(ret[1], ret[0], [22, 22], [236, 236])
+        self.assertIsNotNone(resp)
+        self.assertEqual(resp.status_code, 200) # assert successful post to cropped
+
+        cropId = int(resp.headers['X-Crop-Id'])
+
+        classToPost = Classification(cropId, 'standard', 'NE', 'circle', 'white', 'T', 'yellow')
+
+        resp = rest.postClass(classToPost)
+        self.assertIsNotNone(resp)
+        classId = resp.headers['X-Class-Id']
+        self.assertIsNotNone(classId)
+        self.assertNotEqual(int(classId), -1)
+
+        resp = rest.deleteClass(classId)
+        self.assertIsNotNone(resp)
+        self.assertEqual(resp.status_code, 200)
+
+        # we should fail to get the classification
+        self.assertIsNone(rest.getClassById(classId))
+
+class TestManualClassificationUpdate(unittest.TestCase):
+    def test(self):
+        resetDb()
+
+        rest = ImagingInterface()
+        ret = rest.getNextRawImage()
+        self.assertIsNotNone(ret)
+
+        resp = rest.postCroppedImage(ret[1], ret[0], [22, 22], [236, 236])
+        self.assertIsNotNone(resp)
+        self.assertEqual(resp.status_code, 200) # assert successful post to cropped
+
+        cropId = int(resp.headers['X-Crop-Id'])
+
+        classToPost = Classification(cropId, 'standard', 'NE', 'circle', 'white', 'T', 'yellow')
+
+        resp = rest.postClass(classToPost)
+        self.assertIsNotNone(resp)
+        classId = resp.headers['X-Class-Id']
+        self.assertIsNotNone(classId)
+        self.assertNotEqual(int(classId), -1)
+
+        # should fail to update stuff that doesn't exist
+        stuffToUpdate = Classification(None, None, "SE", "square", None, "Y", "purple")
+        self.assertIsNone(rest.updateClass(int(classId) + 20, stuffToUpdate))
+
+        resp = rest.updateClass(classId, stuffToUpdate)
+        
+        # confirm update claims success
+        self.assertIsNotNone(resp)
+        self.assertEqual(resp.status_code, 200)
+        
+        # confirm update was acutlaly successful
+        updated = rest.getClassById(classId)
+        self.assertIsNotNone(updated)
+        self.assertEqual(updated.crop_id, cropId)
+        self.assertEqual(updated.type, 'standard')
+        self.assertEqual(updated.orientation, 'SE')
+        self.assertEqual(updated.shape, 'square')
+        self.assertEqual(updated.background_color, 'white')
+        self.assertEqual(updated.alphanumeric, "Y")
+        self.assertEqual(updated.alphanumeric_color, "purple")
