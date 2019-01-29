@@ -7,3 +7,4 @@ server/images/
 .DS_Store
 *.idea/
 autonomous/generate_dataset/pics/*
+*.zip
