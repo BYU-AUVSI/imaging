@@ -4,7 +4,7 @@ Authors: D. Knowles, B. McBride, T. Miller
 Prereqs:
 python 3
 sudo apt install python3-tk
-pip3 install Pillow, opencv-python, ttkthemes
+pip3 install Pillow, opencv-python, ttkthemes, imutils
 '''
 
 '''
@@ -31,10 +31,9 @@ Tab2
     Rotate picture
 Tab3:
     Fix resizing issues
-    Add longitude
-    Add pending descriptions
     Add checkboxes
     Add functionality to choose certain aspect
+    Add functionalty to delete a classification
 Tab4:
     create everything
 
@@ -50,6 +49,7 @@ import tkinter as tk
 from tkinter import ttk
 from ttkthemes import ThemedStyle
 from PIL import Image,ImageTk
+import PIL
 import cv2
 import numpy as np
 import time
@@ -57,6 +57,7 @@ from lib import client_rest
 import time
 import sys
 import scipy.stats
+import imutils
 
 
 class GuiClass(tk.Frame):
@@ -764,12 +765,13 @@ class GuiClass(tk.Frame):
                 self.cropped_tk = self.im2tk(self.cropped_resized_im)
                 self.t2c2i1.configure(image=self.cropped_tk)
                 # resize compass
+                '''
                 self.t2c3i1_width = self.t2c3i1.winfo_width()
                 self.t2c3i1_height = self.t2c3i1.winfo_height()
                 resized_im = self.resizeIm(self.t2c3i1_im,self.t2c3i1_default_width,self.t2c3i1_default_height,self.t2c3i1_width,self.t2c3i1_height)
                 self.t2c3i1_tk = self.im2tk(resized_im)
                 self.t2c3i1.configure(image=self.t2c3i1_tk)
-
+                '''
 
     def resizeEventTab3(self,event=None):
         """
@@ -1023,7 +1025,9 @@ class GuiClass(tk.Frame):
             else:
                 self.t2_functional = True
                 self.imageID = query[1]
-                self.cropped_np = np.array(query[0]) #self.get_image('frame0744.jpg')
+                self.cropped_np = np.array(query[0])
+                yaw_angle = np.random.uniform(0,360)
+                self.cropped_np = imutils.rotate_bound(self.cropped_np,yaw_angle)
             time1 = time.time()
             self.cropped_im = self.np2im(self.cropped_np)
             self.cropped_width,self.cropped_height = self.cropped_im.size
@@ -1053,7 +1057,9 @@ class GuiClass(tk.Frame):
             else:
                 self.t2_functional = True
                 self.imageID = query[1]
-                self.cropped_np = np.array(query[0]) #self.get_image('frame0744.jpg')
+                self.cropped_np = np.array(query[0])
+                yaw_angle = np.random.uniform(0,360)
+                self.cropped_np = imutils.rotate_bound(self.cropped_np,yaw_angle)
             time1 = time.time()
             self.cropped_im = self.np2im(self.cropped_np)
             self.cropped_width,self.cropped_height = self.cropped_im.size
@@ -1266,7 +1272,6 @@ class GuiClass(tk.Frame):
         if self.t2c2l14_var.get() == 'emergent':
             self.t2c2l16.configure(state=tk.NORMAL)
         else:
-            print("This is happening")
             self.t2c2l16_var.set("")
             self.t2c2l16.configure(state=tk.DISABLED)
 
@@ -1359,6 +1364,9 @@ class GuiClass(tk.Frame):
                 # Because of the preceeding if/else statement there will always be at least 1 pic
                 query = self.interface.getCroppedImage(self.pendingList[self.t3_current_target-1][0].crop_id)
                 self.t3c1i1_im = query[0]
+                yaw_angle = np.random.uniform(0,360)
+                self.t3c1i1_im = self.t3c1i1_im.rotate(yaw_angle,expand=1)
+                self.t3c1i1_org_width,self.t3c1i1_org_height = self.t3c1i1_im.size
                 self.t3c1i1_tk = self.im2tk(self.t3c1i1_im)
                 self.t3c1i1.configure(image=self.t3c1i1_tk)
                 self.t3c1br5.configure(text=self.pendingList[self.t3_current_target-1][0].shape)
@@ -1377,6 +1385,9 @@ class GuiClass(tk.Frame):
                     query = self.interface.getCroppedImage(self.pendingList[self.t3_current_target-1][1].crop_id)
                     print("query")
                     self.t3c2i1_im = query[0]
+                    yaw_angle = np.random.uniform(0,360)
+                    self.t3c2i1_im = self.t3c2i1_im.rotate(yaw_angle,expand=1)
+                    self.t3c2i1_org_width,self.t3c2i1_org_height = self.t3c2i1_im.size
                     self.t3c2i1_tk = self.im2tk(self.t3c2i1_im)
                     self.t3c2i1.configure(image=self.t3c2i1_tk)
                     self.t3c2br5.configure(text=self.pendingList[self.t3_current_target-1][1].shape)
@@ -1392,6 +1403,7 @@ class GuiClass(tk.Frame):
                     self.pending_description.append(self.pendingList[self.t3_current_target-1][1].description)
                 else:
                     self.t3c2i1_im = self.t3_default_im.copy()
+                    self.t3c2i1_org_width,self.t3c2i1_org_height = self.t3c2i1_im.size
                     self.t3c2i1_tk = self.im2tk(self.t3c2i1_im)
                     self.t3c2i1.configure(image=self.t3c2i1_tk)
                     self.t3c2br5.configure(text="N/A")
@@ -1404,6 +1416,9 @@ class GuiClass(tk.Frame):
                 if pics > 2:
                     query = self.interface.getCroppedImage(self.pendingList[self.t3_current_target-1][2].crop_id)
                     self.t3c3i1_im = query[0]
+                    yaw_angle = np.random.uniform(0,360)
+                    self.t3c3i1_im = self.t3c3i1_im.rotate(yaw_angle,expand=1)
+                    self.t3c3i1_org_width,self.t3c3i1_org_height = self.t3c3i1_im.size
                     self.t3c3i1_tk = self.im2tk(self.t3c3i1_im)
                     self.t3c3i1.configure(image=self.t3c3i1_tk)
                     self.t3c3br5.configure(text=self.pendingList[self.t3_current_target-1][2].shape)
@@ -1419,6 +1434,7 @@ class GuiClass(tk.Frame):
                     self.pending_description.append(self.pendingList[self.t3_current_target-1][2].description)
                 else:
                     self.t3c3i1_im = self.t3_default_im.copy()
+                    self.t3c3i1_org_width,self.t3c3i1_org_height = self.t3c3i1_im.size
                     self.t3c3i1_tk = self.im2tk(self.t3c3i1_im)
                     self.t3c3i1.configure(image=self.t3c3i1_tk)
                     self.t3c3br5.configure(text="N/A")
@@ -1431,6 +1447,9 @@ class GuiClass(tk.Frame):
                 if pics > 3:
                     query = self.interface.getCroppedImage(self.pendingList[self.t3_current_target-1][3].crop_id)
                     self.t3c4i1_im = query[0]
+                    yaw_angle = np.random.uniform(0,360)
+                    self.t3c4i1_im = self.t3c4i1_im.rotate(yaw_angle,expand=1)
+                    self.t3c4i1_org_width,self.t3c4i1_org_height = self.t3c4i1_im.size
                     self.t3c4i1_tk = self.im2tk(self.t3c4i1_im)
                     self.t3c4i1.configure(image=self.t3c4i1_tk)
                     self.t3c4br5.configure(text=self.pendingList[self.t3_current_target-1][3].shape)
@@ -1446,6 +1465,7 @@ class GuiClass(tk.Frame):
                     self.pending_description.append(self.pendingList[self.t3_current_target-1][3].description)
                 else:
                     self.t3c4i1_im = self.t3_default_im.copy()
+                    self.t3c4i1_org_width,self.t3c4i1_org_height = self.t3c4i1_im.size
                     self.t3c4i1_tk = self.im2tk(self.t3c4i1_im)
                     self.t3c4i1.configure(image=self.t3c4i1_tk)
                     self.t3c4br5.configure(text="N/A")
@@ -1458,6 +1478,9 @@ class GuiClass(tk.Frame):
                 if pics > 4:
                     query = self.interface.getCroppedImage(self.pendingList[self.t3_current_target-1][4].crop_id)
                     self.t3c5i1_im = query[0]
+                    yaw_angle = np.random.uniform(0,360)
+                    self.t3c5i1_im = self.t3c5i1_im.rotate(yaw_angle,expand=1)
+                    self.t3c5i1_org_width,self.t3c5i1_org_height = self.t3c5i1_im.size
                     self.t3c5i1_tk = self.im2tk(self.t3c5i1_im)
                     self.t3c5i1.configure(image=self.t3c5i1_tk)
                     self.t3c5br5.configure(text=self.pendingList[self.t3_current_target-1][4].shape)
@@ -1473,6 +1496,7 @@ class GuiClass(tk.Frame):
                     self.pending_description.append(self.pendingList[self.t3_current_target-1][4].description)
                 else:
                     self.t3c5i1_im = self.t3_default_im.copy()
+                    self.t3c5i1_org_width,self.t3c5i1_org_height = self.t3c5i1_im.size
                     self.t3c5i1_tk = self.im2tk(self.t3c5i1_im)
                     self.t3c5i1.configure(image=self.t3c5i1_tk)
                     self.t3c5br5.configure(text="N/A")
@@ -1484,6 +1508,9 @@ class GuiClass(tk.Frame):
                     self.t3c5ar18.configure(text="N/A")
                 # Possible Submission
                 self.t3c6i1_im = self.t3c1i1_im.copy()
+                yaw_angle = np.random.uniform(0,360)
+                self.t3c6i1_im = self.t3c6i1_im.rotate(yaw_angle,expand=1)
+                self.t3c6i1_org_width,self.t3c6i1_org_height = self.t3c6i1_im.size
                 self.t3c6i1_tk = self.im2tk(self.t3c6i1_im)
                 self.t3c6i1.configure(image=self.t3c6i1_tk)
                 self.t3c6br5.configure(text=self.pendingList[self.t3_current_target-1][0].shape)
@@ -1538,7 +1565,7 @@ class GuiClass(tk.Frame):
         @rtype:  None
         @return: None
         """
-        self.updateManualSubmissionTab()
+        #self.updateManualSubmissionTab()
         self.serverConnected = self.interface.ping()
         if self.serverConnected:
             if self.t3_current_target < len(self.pendingList):
@@ -1559,7 +1586,7 @@ class GuiClass(tk.Frame):
         @rtype:  None
         @return: None
         """
-        self.updateManualSubmissionTab()
+        #self.updateManualSubmissionTab()
         self.serverConnected = self.interface.ping()
         if self.serverConnected:
             if self.t3_current_target > 1:
