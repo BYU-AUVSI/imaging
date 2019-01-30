@@ -426,28 +426,9 @@ class ClassificationDAO(BaseDAO):
         cur.execute(updateTargetClassifications, (target,))
         cur.close()
 
-        return self.getSubmittedClassification(target, optionalSpecs)
+        return self.createTargetToSubmitFromClassifications(target, optionalSpecs)
 
-    def getAllSubmittedClassification(self):
-        """
-        Get all classification values that are marked as submitted.
-        Note this uses #getSubmittedClassification(), so all it's implications
-        (described in its docs) hold here
-        """
-        submittedTargets = self.getAllTargetIDs(whereClause=" submitted = 'submitted' ")
-
-        if submittedTargets is None or not submittedTargets:
-            return []
-
-        submittedClassifications = []
-        for target in submittedTargets:
-            subClass = self.getSubmittedClassification(target)
-            if subClass is not None:
-                submittedClassifications.append(subClass)
-        
-        return submittedClassifications
-
-    def getSubmittedClassification(self, target, optionalSpecs=None):
+    def createTargetToSubmitFromClassifications(self, target, optionalSpecs=None):
         """
         Get the classification that was submitted for this target.
 

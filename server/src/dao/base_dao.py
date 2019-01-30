@@ -139,3 +139,35 @@ class BaseDAO(object):
         except (Exception) as error:
             print(error)
             return -1
+
+    def getResultsAsModelList(self, stmt, values):
+        """
+        Returns a list of results from a query as a list of model objects.
+        This is accomplished by calling the newModelFromRow method, which should
+        be defined in the child class that is calling this method
+
+        @rtype: [model object]
+        @return: A list of the model object returned by childClass.newModelFromRow if successful, otherwise None
+        """
+        try:
+            cur = self.conn.cursor()
+            cur.execute(stmt, values)
+
+            results = []
+            rawRecords = cur.fetchall()
+            cur.close()
+            
+            if rawRecords is None:
+                return None
+
+            for record in rawRecords:
+                target = self.newModelFromRow(record)
+                results.append(target)
+
+            if not results:
+                return None
+            
+            return results
+        except (Exception) as error:
+            print(error)
+            return None

@@ -1,5 +1,6 @@
 import json, os, shutil
 from config import defaultSubmittedImgDir
+from dao.model.submitted_target import submitted_target
 
 class AuvsiOdlcDao():
     """
@@ -8,7 +9,7 @@ class AuvsiOdlcDao():
     judges fails
     """
 
-    def addTarget(self, outgoingTarget, imgPath):
+    def addTarget(self, outgoingTarget):
         """ 
         Adds the given target classification to the ODLC backup folder.
 
@@ -42,8 +43,8 @@ class AuvsiOdlcDao():
             
         jsonFileOut = os.path.join(baseSubmittedPath, str(outgoingTarget.target) + '.json')
 
-        extension = imgPath.rsplit('.', 1)[1].lower()
-        fileName  = imgPath.rsplit('/', 1)[1]
+        extension = outgoingTarget.crop_path.rsplit('.', 1)[1].lower()
+        fileName  = outgoingTarget.crop_path.rsplit('/', 1)[1]
         newFileName = str(outgoingTarget.target) + '.' + extension
 
         # write target info to dictionary
@@ -51,7 +52,7 @@ class AuvsiOdlcDao():
             json.dump(outgoingTarget.toAuvsiJson(), f)
 
         # copy over
-        shutil.copy(imgPath, baseSubmittedPath)
+        shutil.copy(outgoingTarget.crop_path, baseSubmittedPath)
         
         # rename file
         dst_file = os.path.join(baseSubmittedPath, fileName)

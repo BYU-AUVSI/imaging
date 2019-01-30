@@ -1288,7 +1288,7 @@ class GuiClass(tk.Frame):
     def updateManualSubmissionTab(self):
         self.serverConnected = self.interface.ping()
         if self.serverConnected:
-            self.pendingList = self.interface.getPendingSubmissions(True)
+            self.pendingList = self.interface.getPendingSubmissions()
             ### Debugging
             print(self.pendingList)
             ###

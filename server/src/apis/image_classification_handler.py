@@ -32,7 +32,7 @@ classificationModel = api.model('Manual Classification', {
     'submitted': fields.String(required=False, description='Whether or not this particular classification has been submitted to the judges. Defaults to "unsubmitted". "submitted" indicates that this classification has been submitted to the judges. "inherited_submission" indicates that another classification for the same target (ie: another image of the same target) has already been submitted, and its therefore unnecessary to submit this one.', example='unsubmitted')
 })
 
-classificationSubmission = api.model('Submit Manual Classification', {
+classificationSubmission = api.model('Classification Post Info', {
     'type': fields.String(required=False, description='Classification type(standard, off_axis, or emergent)', example="standard"),
     'crop_id': fields.Integer(reqired=True, description='Id of the cropped image this classification originally comes from', example=123),
     'latitude': fields.Float(required=False, description='Latitude coordinate of object', example=40.246354),

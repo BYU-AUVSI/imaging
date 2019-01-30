@@ -59,7 +59,6 @@ class TestAutonomousClassificationGetId(unittest.TestCase):
         self.assertEqual(resp.description, '')
         self.assertIsNotNone(resp.target)
 
-
 class TestAutonomousClassificationGetAll(unittest.TestCase):
     def test(self):
         resetDb()

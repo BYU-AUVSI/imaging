@@ -236,6 +236,7 @@ class ImagingInterface:
         self.isDebug = isDebug
         self.isManual = isManual
 
+    ####### Helper Methods #######
     def ping(self):
         """
         Checks to see if the interface can contact the server.
@@ -262,6 +263,22 @@ class ImagingInterface:
         if self.isDebug:
             print(printStr)
 
+    def imageToBytes(self, img):
+        """
+        Takes an Image object and returns the bytes of the given image.
+
+        @type  img: Image
+        @param img: the image to convert into bytes
+
+        @rtype:  bytes
+        @return: bytes of the given image
+        """
+        imgByteArr = BytesIO()
+        img.save(imgByteArr, format='JPEG')
+        imgByteArr = imgByteArr.getvalue()
+        return imgByteArr
+
+    ####### image/raw/ endpoints #######
     def getRawImage(self, imageId):
         """
         Retrieves an image with the given imageId from the server.
@@ -363,6 +380,7 @@ class ImagingInterface:
             print("In getImageInfo(), server returned status code {}".format(imgInfoResp.status_code))
             return None
 
+    ####### image/crop/ endpoints #######
     def getCroppedImage(self, cropId):
         """
         Retrieves a cropped image of the image from the server given the imageId.
@@ -488,22 +506,6 @@ class ImagingInterface:
                                 float(cropInfoList_j[i]['time_stamp'])))
         return cropInfoList
 
-
-    def imageToBytes(self, img):
-        """
-        Takes an Image object and returns the bytes of the given image.
-
-        @type  img: Image
-        @param img: the image to convert into bytes
-
-        @rtype:  bytes
-        @return: bytes of the given image
-        """
-        imgByteArr = BytesIO()
-        img.save(imgByteArr, format='JPEG')
-        imgByteArr = imgByteArr.getvalue()
-        return imgByteArr
-
     def postCroppedImage(self, imageId, crop, tl, br):
         """
         Posts a cropped image to the server.
@@ -540,6 +542,7 @@ class ImagingInterface:
             print("In postCroppedImage(), server returned status code {}".format(resp.status_code))
             return None
 
+    ####### gps/ endpoints #######
     def getGPSByTs(self, ts):
         """
         Retrieves from the server the GPS measurement that is closest to the given timestamp.
@@ -588,6 +591,7 @@ class ImagingInterface:
             print("In getGPSById(), server returned status code {}".format(gps.status_code))
             return None
 
+    ####### state/ endpoints #######
     def getStateByTs(self, ts):
         """
         Retrieves from the server the state measurement that is closest to the given timestamp.
@@ -637,13 +641,14 @@ class ImagingInterface:
             print("In getStateById(), server returned status code {}".format(state.status_code))
             return None
 
+    ####### image/class/ endpoints #######
     def postClass(self, manClass):
         """
         Post a new classification to the server (autonomous or manual)
 
         @param manClass: A Classification object
         """
-        self.debug("postManualClass()")
+        self.debug("postClassClass()")
         url = self.url + "/image/class/"
 
         headers = {'X-Crop-Id': str(manClass.crop_id), 'X-Manual': str(self.isManual)}
@@ -729,11 +734,16 @@ class ImagingInterface:
             print("In deleteClass(), server returned status code {} in deleteManualClass()".format(resp.status_code))
             return None
 
-    def postSubmitTargetById(self, targetId, isManual, submission=None):
+    ####### image/submit/ endpoints #######
+    def postSubmitTargetById(self, targetId, submission=None):
+        """
+        Submit the target with the specified targetId to the judges via interop.
+        Currently, target submissions are irreversible
+        """
         self.debug("postSubmitTargetById(id={})".format(targetId))
         url = self.url + "/image/submit/{}".format(targetId)
 
-        headers = {'X-Manual': str(isManual)}
+        headers = {'X-Manual': str(self.isManual)}
         if submission is not None:
             resp = requests.post(url, headers=headers, json=submission.toDict())
         else:
@@ -746,11 +756,11 @@ class ImagingInterface:
             print("In postSubmitTargetById(), server returned status code {}".format(resp.status_code))
             return None
 
-    def postSubmitAllTargets(self, isManual):
+    def postSubmitAllTargets(self):
         self.debug("postSubmitAllTargets()")
         url = self.url + "/image/submit/all"
 
-        headers = {'X-Manual': str(isManual)}
+        headers = {'X-Manual': str(self.isManual)}
         resp = requests.post(url, headers=headers)
 
         if resp.status_code == 200:
@@ -760,10 +770,10 @@ class ImagingInterface:
             print("In postSubmitAllTargets(), server returned status code {}".format(resp.status_code))
             return None
 
-    def getAllSubmittedTargets(self, isManual):
-        self.debug("getAllSubmittedTargets(isManual={})".format(str(isManual)))
+    def getAllSubmittedTargets(self):
+        self.debug("getAllSubmittedTargets(isManual={})".format(str(self.isManual)))
         url = self.url + "/image/submit/all"
-        headers = {'X-Manual': str(isManual)}
+        headers = {'X-Manual': str(self.isManual)}
         resp = requests.get(url, headers=headers)
         self.debug("response code:: {}".format(resp.status_code))
 
@@ -774,7 +784,7 @@ class ImagingInterface:
         manClassList = []
         manClassList_j = json.loads(resp.content.decode('utf-8'))
         for i in range(len(manClassList_j)):
-            manClassList.append(ManualClassification(
+            manClassList.append(Classification(
                 manClassList_j[i]['crop_id'],
                 manClassList_j[i]['type'],
                 manClassList_j[i]['orientation'],
@@ -790,10 +800,10 @@ class ImagingInterface:
             ))
         return manClassList
 
-    def getSubmittedTargetById(self, isManual, targetId):
-        self.debug("getSubmittedTargetById(isManual={}, targetId={})".format(isManual, targetId))
+    def getSubmittedTargetById(self, targetId):
+        self.debug("getSubmittedTargetById(isManual={}, targetId={})".format(self.isManual, targetId))
         url = self.url + "/image/submit/" + str(targetId)
-        headers = {'X-Manual': str(isManual)}
+        headers = {'X-Manual': str(self.isManual)}
         resp = requests.get(url, headers=headers)
 
         if resp.status_code != 200:
@@ -802,26 +812,24 @@ class ImagingInterface:
         else:
             self.debug("response code:: {}".format(resp.status_code))
             info_j = json.loads(resp.content.decode('utf-8'))
-            return ManualClassification(info_j['crop_id'],
+            return Classification(info_j['crop_id'],
                                         info_j['type'],
-                                        info_j['latitude'],
-                                        info_j['longitude'],
                                         info_j['orientation'],
                                         info_j['shape'],
                                         info_j['background_color'],
                                         info_j['alphanumeric'],
                                         info_j['alphanumeric_color'],
-                                        info_j['submitted'],
-                                        info_j['description'],
+                                        submitted=info_j['submitted'],
+                                        desc=info_j['description'],
                                         target=info_j['target'],
                                         latitude=info_j['latitude'],
                                         longitude=info_j['longitude']
                                         )
 
-    def getPendingSubmissions(self, isManual):
-        self.debug("getPendingSubmissions(isManual={})".format(str(isManual)))
+    def getPendingSubmissions(self):
+        self.debug("getPendingSubmissions(isManual={})".format(str(self.isManual)))
         url = self.url + "/image/submit/pend"
-        headers = {'X-Manual': str(isManual)}
+        headers = {'X-Manual': str(self.isManual)}
         resp = requests.get(url, headers=headers)
         self.debug("response code:: {}".format(resp.status_code))
 
@@ -831,9 +839,10 @@ class ImagingInterface:
             return None
         pendingList_j = json.loads(resp.content.decode('utf-8'))
         pendingList = [[] for x in range(len(pendingList_j))]
+        # returns a list of lists of classifications
         for i in range(len(pendingList_j)):
             for j in range(len(pendingList_j[i])):
-                pendingList[i].append(ManualClassification(
+                pendingList[i].append(Classification(
                     pendingList_j[i][j]['crop_id'],
                     pendingList_j[i][j]['type'],
                     pendingList_j[i][j]['orientation'],
@@ -843,7 +852,7 @@ class ImagingInterface:
                     pendingList_j[i][j]['alphanumeric_color'],
                     pendingList_j[i][j]['submitted'],
                     pendingList_j[i][j]['description'],
-                    pendingList_j[i][j]['id'],
+                    pendingList_j[i][j]['class_id'],
                     pendingList_j[i][j]['target'],
                     pendingList_j[i][j]['latitude'],
                     pendingList_j[i][j]['longitude']

@@ -36,7 +36,8 @@ class TestManualAddClassification(unittest.TestCase):
         imgPath = os.path.dirname(os.path.realpath(__file__)) + '/assets/star.png'
         
         targetOut = submitted_target(outgoingManualOrAutonomous=classOut, autonomous=False)
+        targetOut.crop_path = imgPath
         auvsiDao = AuvsiOdlcDao()
-        auvsiDao.addTarget(targetOut, imgPath)
+        auvsiDao.addTarget(targetOut)
 
 

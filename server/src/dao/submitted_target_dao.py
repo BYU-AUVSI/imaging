@@ -49,28 +49,20 @@ class SubmittedTargetDAO(BaseDAO):
         getTarget = """SELECT * FROM submitted_target 
             WHERE autonomous = %s;"""
 
-        cur = self.conn.cursor()
-        if cur is None:
-            cur.close()
-            return None
+        return super(SubmittedTargetDAO, self).getResultsAsModelList(getTarget, (autonomous,))
 
-        cur.execute(getTarget, (autonomous,))
+    def getAllPendingTargets(self, autonomous):
+        getTarget = """SELECT * FROM submitted_target 
+            WHERE autonomous = %s AND submitted = 'pending';"""
 
-        targetList = []
-        rawRecords = cur.fetchall()
+        return super(SubmittedTargetDAO, self).getResultsAsModelList(getTarget, (autonomous,))
 
-        for record in rawRecords:
-            target = submitted_target(sqlRow=record)
-            targetList.append(target)
-
-        if not targetList:
-            return None
-
-        return targetList
-        
     def removeTarget(self, target, autonomous):
         removeSql = "DELETE FROM submitted_target WHERE target = %s and autonomous = %s;"
 
         rcount = super(SubmittedTargetDAO, self).getNumAffectedRows(removeSql, (target, autonomous))
 
         return rcount > 0
+
+    def newModelFromRow(self, row, json=None):
+        return submitted_target(sqlRow=row)
