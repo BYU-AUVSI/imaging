@@ -6,11 +6,12 @@ from dao.model.cropped_manual import cropped_manual
 from dao.model.cropped_autonomous import cropped_autonomous
 from dao.incoming_image_dao import IncomingImageDAO
 from dao.model.point import point
-from config import defaultConfigPath, defaultCroppedImgPath, allowedFileType
+from config import defaultConfigPath, defaultCroppedImgPath, allowedFileType, getFileExtension
 from werkzeug.utils import secure_filename
 from werkzeug.datastructures import FileStorage
 from apis.helper_methods import checkXManual
 import os, time
+from random import randint
 
 api  = Namespace('image/crop', description="All cropped image calls route through here")
 
@@ -83,11 +84,16 @@ class CroppedImageHandler(Resource):
 
         # make sure the filename wont make our computer explode:
         if imageFile.filename == '' or imageFile.filename == 'cropped_image':
-            imageFile.filename = str(int(time.time())) + '.jpg'
+            # if we didnt get a filename we assume jpg. why not....
+            extension = 'jpg'
         elif not allowedFileType(imageFile.filename):
-            abort(400, "Filename invalid!")
-        filename = secure_filename(imageFile.filename)
+            abort(400, "Filetype is not allowed!")
+        else:
+            extension = getFileExtension(imageFile.filename)
         
+        imageFile.filename = str(int(time.time())) + "-" + str(randint(0, 10000)) + '.' + extension
+        
+        filename = secure_filename(imageFile.filename)
         # save image
         full_path = os.path.join(defaultCroppedImgPath(), filename)
         imageFile.save(full_path)

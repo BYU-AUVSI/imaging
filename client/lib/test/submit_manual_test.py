@@ -161,3 +161,60 @@ class TestManualSubmitGetTargetId(unittest.TestCase):
         self.assertEqual(resp.alphanumeric, 'T')
         self.assertEqual(resp.alphanumeric_color, 'yellow')
         self.assertEqual(resp.submitted, 'pending')
+
+class TestManualSubmitGetAllSubmitted(unittest.TestCase):
+    def test(self):
+        resetDb()
+        rest = ImagingInterface()
+
+        # empty table
+        self.assertIsNone(rest.getAllSubmittedTargets())
+
+        # create one target
+        ret = rest.getNextRawImage()
+        self.assertIsNotNone(ret)
+        resp = rest.postCroppedImage(ret[1], ret[0], [22, 22], [236, 236])
+        self.assertIsNotNone(resp)
+        self.assertEqual(resp.status_code, 200) # assert successful post to cropped
+        cropId = int(resp.headers['X-Crop-Id'])
+        classToPost = Classification(cropId, 'standard', 'NE', 'circle', 'white', 'T', 'yellow')
+        resp = rest.postClass(classToPost)
+        self.assertIsNotNone(resp)
+        classId = int(resp.headers['X-Class-Id'])
+        modelResult = rest.getClassById(classId)
+        self.assertIsNotNone(modelResult)
+        targetId = modelResult.target
+
+        # post a second crop and classification which goes to a different target:
+        ret = rest.getNextRawImage()
+        resp = rest.postCroppedImage(ret[1], ret[0], [22, 22], [236, 236])
+        self.assertIsNotNone(resp)
+        self.assertEqual(resp.status_code, 200) # assert successful post to cropped
+        cropId2 = int(resp.headers['X-Crop-Id'])
+        # since it's shape is different, this should be a different target
+        classToPost = Classification(cropId2, 'off_axis', 'NE', 'square', 'orange', 'T', 'black')
+        resp = rest.postClass(classToPost)
+        self.assertIsNotNone(resp)
+        classId2 = int(resp.headers['X-Class-Id'])
+        modelResult = rest.getClassById(classId2)
+        self.assertIsNotNone(modelResult)
+        targetId2 = modelResult.target
+
+        self.assertNotEqual(targetId, targetId2)
+
+        self.assertIsNotNone(rest.postSubmitAllTargets())
+
+        resp = rest.getAllSubmittedTargets()
+        self.assertIsNotNone(resp)
+        self.assertEqual(len(resp), 2)
+
+        dictResult = [classification.toDict() for classification in resp]
+        print(dictResult)
+
+        if resp[0].target == targetId:
+            self.assertEqual(resp[0].crop_id, cropId)
+            self.assertEqual(resp[1].crop_id, cropId2)
+        elif resp[0].target == targetId2:
+            self.assertEqual(resp[0].crop_id, cropId2)
+        else:
+            self.fail(msg="errrmmm. One of the returned target ids does not match what we submitted")

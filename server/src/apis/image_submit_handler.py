@@ -212,6 +212,15 @@ class AllSubmissionHandler(Resource):
 
         resultingClassifications = [classification.toDict() for classification in resultingClassifications]
 
+        croppedDao = CroppedManualDAO(defaultConfigPath()) if manual else CroppedAutonomousDAO(defaultConfigPath())
+
+        for target in resultingClassifications:
+            # for each of these targets we need to try and get the crop_id for it from the crop_path
+            # crop_id is much more useful client-side than crop_path
+            croppedImg = croppedDao.getImageWithCropPath(target['crop_path'])
+            if croppedImg is not None:
+                target['crop_id'] = croppedImg.crop_id
+
         return jsonify(resultingClassifications)
 
 def writeTargetToODLCFile(target, manual):
