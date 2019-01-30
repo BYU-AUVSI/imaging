@@ -48,7 +48,7 @@ class AuvsiOdlcDao():
 
         # write target info to dictionary
         with open(jsonFileOut, 'w') as f:
-            json.dump(outgoingTarget.toJson(), f)
+            json.dump(outgoingTarget.toAuvsiJson(), f)
 
         # copy over
         shutil.copy(imgPath, baseSubmittedPath)

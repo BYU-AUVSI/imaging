@@ -16,7 +16,7 @@ class OutgoingManualDAO(ClassificationDAO):
         See classification_dao docs
         Get images grouped by distinct targets pending submission (ei: submitted = 'unsubmitted')
         """
-        return super(OutgoingManualDAO, self).getAllTargets(self, whereClause=" submitted = 'unsubmitted' ")
+        return super(OutgoingManualDAO, self).getAllTargets(whereClause=" submitted = 'unsubmitted' ")
 
     def newModelFromRow(self, row, json=None):
         """

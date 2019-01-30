@@ -6,13 +6,13 @@ from dao.outgoing_autonomous_dao import OutgoingAutonomousDAO
 from dao.model.outgoing_manual import outgoing_manual
 from dao.model.outgoing_autonomous import outgoing_autonomous
 
-class TestOutgoingManualConnection(unittest.TestCase):
+class TestOutgoingManualAConnection(unittest.TestCase):
     def test(self):
         dao = OutgoingManualDAO(defaultConfigPath())
         self.assertIsNotNone(dao)
         self.assertIsNotNone(dao.conn)
 
-class TestOutgoingAutonomousConnection(unittest.TestCase):
+class TestOutgoingAutonomousAConnection(unittest.TestCase):
     def test(self):
         dao = OutgoingAutonomousDAO(defaultConfigPath())
         self.assertIsNotNone(dao)

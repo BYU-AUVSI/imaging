@@ -83,6 +83,7 @@ CREATE TYPE color_t AS ENUM ('white', 'black', 'gray', 'red', 'blue', 'green', '
 CREATE TYPE shape_t AS ENUM ('circle', 'semicircle', 'quarter_circle', 'triangle', 'square', 'rectangle', 'trapezoid', 'pentagon', 'hexagon', 'heptagon', 'octagon', 'star', 'cross');
 CREATE TYPE orientation_t AS ENUM ('N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW');
 CREATE TYPE target_type_t AS ENUM ('standard', 'off_axis', 'emergent');
+CREATE TYPE target_submit_status AS ENUM ('pending', 'submitted');
 
 CREATE TABLE "public"."outgoing_manual" (
   class_id serial NOT NULL,
@@ -133,6 +134,7 @@ CREATE TABLE "public"."submitted_target" (
   alphanumeric text,
   alphanumeric_color color_t,
   description text default '',
+  submitted target_submit_status NOT NULL default 'pending',
   PRIMARY KEY("target", "autonomous")
 );
 
