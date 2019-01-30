@@ -15,9 +15,10 @@ class UtilDAO(BaseDAO):
         """
         truncateCropped = "DELETE FROM cropped_manual;"
         truncateClassification = "DELETE FROM outgoing_manual;"
+        truncateSubmitted = "DELETE FROM submitted_target;"
         updateIncoming = "UPDATE incoming_image SET manual_tap=FALSE WHERE manual_tap=TRUE;"
 
-        super(UtilDAO, self).executeStatements([truncateClassification, truncateCropped, updateIncoming])
+        super(UtilDAO, self).executeStatements([truncateClassification, truncateCropped, truncateSubmitted, updateIncoming])
 
     def resetAutonomousDB(self):
         """
@@ -26,6 +27,7 @@ class UtilDAO(BaseDAO):
         """
         truncateCropped = "DELETE FROM cropped_autonomous;"
         truncateClassification = "DELETE FROM outgoing_autonomous;"
+        truncateSubmitted = "DELETE FROM submitted_target;"
         updateIncoming = "UPDATE incoming_image SET autonomous_tap=FALSE WHERE autonomous_tap=TRUE;"
 
-        super(UtilDAO, self).executeStatements([truncateClassification, truncateCropped, updateIncoming])
+        super(UtilDAO, self).executeStatements([truncateClassification, truncateCropped, truncateSubmitted, updateIncoming])

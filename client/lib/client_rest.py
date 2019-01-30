@@ -958,12 +958,12 @@ if __name__ == "__main__":
 
     # query = interface.getRawImage(5)
 
-    manClass = ManualClassification(12, "standard", "SE", "pentagon", "blue", "Z", "green", "unsubmitted", "DescStr")
+    manClass = Classification(12, "standard", "SE", "pentagon", "blue", "Z", "green", "unsubmitted", "DescStr")
     # testManualClassPost(interface, manClass)
 
     # m = interface.getManualClassById(13)
     # m_all = interface.getAllManualClass()
-    r = interface.updateManualClass(13, manClass)
+    r = interface.updateClass(13, manClass)
 
     # r = interface.postSubmitAllTargets(True)
 

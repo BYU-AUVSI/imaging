@@ -19,10 +19,11 @@ class SubmittedTargetDAO(BaseDAO):
         insertClmnNames = '('
         insertClmnValues = ' VALUES('
         for clmn, value in targetModel.toDict().items():
-            insertClmnNames += clmn + ', '
-            insertClmnValues += '%s, '
-            updateCls += clmn + '= %s, '
-            insertValues.append(value.__str__())
+            if value is not None:
+                insertClmnNames += clmn + ', '
+                insertClmnValues += '%s, '
+                updateCls += clmn + '= %s, '
+                insertValues.append(value.__str__())
 
         # if there were no values to insert...
         if not insertValues:

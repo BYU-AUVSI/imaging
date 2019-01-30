@@ -69,8 +69,16 @@ class SubmissionHandler(Resource):
         resultTarget = dao.getTarget(target_id, (not manual))
         if resultTarget is None:
             return {'message': 'Failed to retrieve target {}'.format(target_id)}, 404
+
+        # get the crop id from the path the target is using.
+        # the crop_id is much more useful client-size than a crop_path
+        outDict = resultTarget.toDict()
+        croppedDao = CroppedManualDAO(defaultConfigPath()) if manual else CroppedAutonomousDAO(defaultConfigPath())
+        croppedImg = croppedDao.getImageWithCropPath(outDict['crop_path'])
+        if croppedImg is not None:
+            outDict['crop_id'] = croppedImg.crop_id
         
-        return jsonify(resultTarget.toDict())
+        return jsonify(outDict)
 
     @api.doc(description="""Submit the specified target. Returns that target information that was submitted 
         after averaging all the classification values for the target. The structure of the returned json depends
@@ -95,7 +103,7 @@ class SubmissionHandler(Resource):
         content = request.get_json(silent=True) #silence error throwing if no json present
 
         # do a bunch of checks before we even think about submitting a target
-        allTargetIds = dao.listTargetIds()
+        allTargetIds = dao.getAllTargetIDs()
 
         if allTargetIds is None or not allTargetIds:
             # is there even stuff in the table?
@@ -138,6 +146,7 @@ class SubmissionHandler(Resource):
         else:
             # send to interop via the submitted_target table
             try:
+                submittedTarget.submitted = None # get rid of classifications submission status
                 targetSubmitDao.upsertTarget(submittedTarget)
             except Exception as e:
                 dao.resetTargetSubmissionStatus(target_id)
@@ -177,6 +186,7 @@ class AllSubmissionHandler(Resource):
                     finalRet.append(submittedTarget.toAuvsiJson())
                     # add the target to our submitted_targets table where the ROS_handler 
                     # will grab it and ship it over to interop. Our work here is done :)
+                    submittedTarget.submitted = None # get rid of classifications submission status
                     targetSubmitDao.upsertTarget(submittedTarget)
             except (Exception) as e:
                 # something failed, make sure the target classifications are reset to 'unsubmitted'

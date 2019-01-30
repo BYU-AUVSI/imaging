@@ -151,6 +151,16 @@ class CroppedImageDAO(BaseDAO):
 
         return results
 
+    def getImageWithCropPath(self, cropPath):
+        selectImgById = """SELECT crop_id, image_id, date_part('epoch', time_stamp), cropped_path, crop_coordinate_tl, crop_coordinate_br, tapped
+            FROM """ + self.croppedTableName + """
+            WHERE cropped_path = %s
+            LIMIT 1;"""
+        selectedImage = super(CroppedImageDAO, self).basicTopSelect(selectImgById, (cropPath,))
+
+        if selectedImage is None:
+            return None
+        return self.newModelFromRow(selectedImage)
 
     def updateImage(self, id, updateJson):
         """

@@ -20,9 +20,7 @@ class TestManualSubmitPendingGet(unittest.TestCase):
         self.assertEqual(resp.status_code, 200) # assert successful post to cropped
 
         cropId = int(resp.headers['X-Crop-Id'])
-
         classToPost = Classification(cropId, 'standard', 'NE', 'circle', 'white', 'T', 'yellow')
-
         resp = rest.postClass(classToPost)
         self.assertIsNotNone(resp)
         classId = resp.headers['X-Class-Id']
@@ -80,3 +78,86 @@ class TestManualSubmitPendingGet(unittest.TestCase):
             self.assertEqual(resp[1][0].alphanumeric, 'T')
         else:
             self.fail(msg="one of the targets should have two classifications")
+
+class TestManualSubmitTargetId(unittest.TestCase):
+    def test(self):
+        resetDb()
+
+        rest = ImagingInterface()
+
+        # should get none when we try and post on empty table
+        self.assertIsNone(rest.postSubmitTargetById(100))
+
+        ret = rest.getNextRawImage()
+        self.assertIsNotNone(ret)
+        resp = rest.postCroppedImage(ret[1], ret[0], [22, 22], [236, 236])
+        self.assertIsNotNone(resp)
+        self.assertEqual(resp.status_code, 200) # assert successful post to cropped
+        cropId = int(resp.headers['X-Crop-Id'])
+        classToPost = Classification(cropId, 'standard', 'NE', 'circle', 'white', 'T', 'yellow')
+        resp = rest.postClass(classToPost)
+        self.assertIsNotNone(resp)
+        classId = int(resp.headers['X-Class-Id'])
+        modelResult = rest.getClassById(classId)
+        self.assertIsNotNone(modelResult)
+        targetId = modelResult.target
+
+        # trying to submit an id that doesn't exist should also fail
+        self.assertIsNone(rest.postSubmitTargetById(targetId + 20))
+
+        resp = rest.postSubmitTargetById(targetId)
+        self.assertIsNotNone(resp)
+        self.assertEqual(resp.status_code, 200)
+
+        # confirm that the classification's status has changed to submitted
+        modelResult = rest.getClassById(classId)
+        self.assertIsNotNone(modelResult)
+        self.assertIsNotNone(modelResult.target)
+        self.assertEqual(modelResult.submitted, 'submitted')
+
+        # trying to submit the same target again should fail:
+        self.assertIsNone(rest.postSubmitTargetById(targetId))
+
+class TestManualSubmitGetTargetId(unittest.TestCase):
+    def test(self):
+        resetDb()
+
+        rest = ImagingInterface()
+
+        # empty table
+        self.assertIsNone(rest.getSubmittedTargetById(100))
+
+        ret = rest.getNextRawImage()
+        self.assertIsNotNone(ret)
+        resp = rest.postCroppedImage(ret[1], ret[0], [22, 22], [236, 236])
+        self.assertIsNotNone(resp)
+        self.assertEqual(resp.status_code, 200) # assert successful post to cropped
+        cropId = int(resp.headers['X-Crop-Id'])
+        classToPost = Classification(cropId, 'standard', 'NE', 'circle', 'white', 'T', 'yellow')
+        resp = rest.postClass(classToPost)
+        self.assertIsNotNone(resp)
+        classId = int(resp.headers['X-Class-Id'])
+        modelResult = rest.getClassById(classId)
+        self.assertIsNotNone(modelResult)
+        targetId = modelResult.target
+
+        # should still be none since the target is unsubmitted
+        self.assertIsNone(rest.getSubmittedTargetById(targetId))
+
+        # submit the target
+        resp = rest.postSubmitTargetById(targetId)
+        self.assertIsNotNone(resp)
+
+        # now lets see if the getter works:
+        resp = rest.getSubmittedTargetById(targetId)
+        self.assertIsNotNone(resp)
+        self.assertIsInstance(resp, Classification)
+        self.assertEqual(resp.target, targetId)
+        self.assertEqual(resp.crop_id, cropId)
+        self.assertEqual(resp.type, 'standard')
+        self.assertEqual(resp.shape, 'circle')
+        self.assertEqual(resp.orientation, 'NE')
+        self.assertEqual(resp.background_color, 'white')
+        self.assertEqual(resp.alphanumeric, 'T')
+        self.assertEqual(resp.alphanumeric_color, 'yellow')
+        self.assertEqual(resp.submitted, 'pending')

@@ -192,9 +192,8 @@ class submitted_target:
     def toDict(self, exclude=None):
         dict = {}
         for attr, value in self.__dict__.items():
-            if value is not None:
-                corrected_name = attr[1:] # remove first underscore
-                dict[corrected_name] = value
+            corrected_name = attr[1:] # remove first underscore
+            dict[corrected_name] = value
         return dict
 
     def toAuvsiJson(self, exclude=None):
