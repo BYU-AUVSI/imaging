@@ -40,14 +40,14 @@ class SubmittedTargetDAO(BaseDAO):
         getTarget = """SELECT * FROM submitted_target 
             WHERE target = %s and autonomous = %s LIMIT 1;"""
 
-        selectedTarget = super(SubmittedTargetDAO, self).basicTopSelect(getTarget, (id, autonomous))
+        selectedTarget = super(SubmittedTargetDAO, self).basicTopSelect(getTarget, (target, autonomous))
         if selectedTarget is not None:
-            return submitted_target(selectedTarget)
+            return submitted_target(sqlRow=selectedTarget)
         return None
 
     def getAllTargets(self, autonomous):
         getTarget = """SELECT * FROM submitted_target 
-            WHERE autonomous = %s LIMIT 1;"""
+            WHERE autonomous = %s;"""
 
         cur = self.conn.cursor()
         if cur is None:
@@ -60,7 +60,11 @@ class SubmittedTargetDAO(BaseDAO):
         rawRecords = cur.fetchall()
 
         for record in rawRecords:
-            targetList.append(record)
+            target = submitted_target(sqlRow=record)
+            targetList.append(target)
+
+        if not targetList:
+            return None
 
         return targetList
         
