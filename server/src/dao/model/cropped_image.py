@@ -1,6 +1,6 @@
 from dao.model.point import point
 
-class manual_cropped:
+class cropped_image(object):
     """
     Model class for the manual_cropped table. Properties and helper
     methods for images cropped by the manual client
@@ -17,7 +17,7 @@ class manual_cropped:
         @param json: Json dictionary of table values. Used by the REST API when receiving data
         """
         if tableValues is not None:
-            self.id = tableValues[0]
+            self.crop_id = tableValues[0]
             self.image_id = tableValues[1]
             self.time_stamp = tableValues[2]
             self.cropped_path = tableValues[3]
@@ -40,20 +40,21 @@ class manual_cropped:
                 self.crop_coordinate_br = point(x=json['crop_coordinate_br.x'], y=json['crop_coordinate_br.y'])
         else:
             # defaults:
-            self.id = -1
+            self.crop_id = -1
             self.image_id = -1
             self.tapped = False
 
     @property
-    def id(self):
+    def crop_id(self):
         """
-        Table id. Internal to the dao, not exposed by the REST API
+        Unique crop id for a cropped image object. created when it's inserted
+        into the table
         """
-        return self._id
-    
-    @id.setter
-    def id(self, id):
-        self._id = id
+        return self._crop_id
+
+    @crop_id.setter
+    def crop_id(self, crop_id):
+        self._crop_id = crop_id
 
     @property
     def image_id(self):
@@ -120,11 +121,11 @@ class manual_cropped:
     
     @tapped.setter
     def tapped(self, tapped):
-        self._tapped = tapped
+        self._tapped = bool(tapped)
 
     # TODO: this is hacky and i hate it
     def allProps(self):
-        return ['id', 'image_id', 'time_stamp', 'cropped_path', 'crop_coordinate_tl', 'crop_coordinate_br', 'tapped']
+        return ['crop_id', 'image_id', 'time_stamp', 'cropped_path', 'crop_coordinate_tl', 'crop_coordinate_br', 'tapped']
 
     def toDict(self, exclude=None):
         """

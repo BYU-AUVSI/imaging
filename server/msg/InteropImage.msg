@@ -1,0 +1,11 @@
+sensor_msgs/Image image
+string type
+float32 latitude
+float32 longitude
+string orientation
+string shape
+string background_color
+string alphanumeric
+string alphanumeric_color
+string description
+bool autonomous

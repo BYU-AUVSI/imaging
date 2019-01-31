@@ -13,18 +13,21 @@ class UtilDAO(BaseDAO):
         Resets the database to an initial form as if a rosbag
         was just read in
         """
-        truncateCropped = "DELETE FROM manual_cropped;"
+        truncateCropped = "DELETE FROM cropped_manual;"
         truncateClassification = "DELETE FROM outgoing_manual;"
+        truncateSubmitted = "DELETE FROM submitted_target;"
         updateIncoming = "UPDATE incoming_image SET manual_tap=FALSE WHERE manual_tap=TRUE;"
 
-        super(UtilDAO, self).executeStatements([truncateClassification, truncateCropped, updateIncoming])
+        super(UtilDAO, self).executeStatements([truncateClassification, truncateCropped, truncateSubmitted, updateIncoming])
 
     def resetAutonomousDB(self):
         """
         Resets the database to an initial form as if a rosbag
         was just read in
         """
+        truncateCropped = "DELETE FROM cropped_autonomous;"
         truncateClassification = "DELETE FROM outgoing_autonomous;"
+        truncateSubmitted = "DELETE FROM submitted_target;"
         updateIncoming = "UPDATE incoming_image SET autonomous_tap=FALSE WHERE autonomous_tap=TRUE;"
 
-        super(UtilDAO, self).executeStatements([truncateClassification, updateIncoming])
+        super(UtilDAO, self).executeStatements([truncateClassification, truncateCropped, truncateSubmitted, updateIncoming])

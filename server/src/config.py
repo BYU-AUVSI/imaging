@@ -12,7 +12,10 @@ def allowedFileType(filename):
     # make sure:
     #   1) the filename even has a . to begin with
     #   2) stuff the the right of the furthest . (rsplit) is one of our allowed extensions
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+    return '.' in filename and getFileExtension(filename) in ALLOWED_EXTENSIONS
+
+def getFileExtension(filename):
+    return filename.rsplit('.', 1)[1].lower()
 
 def defaultConfigPath():
     return os.path.abspath(os.path.dirname(os.path.realpath(__file__)) + '/../conf/config.ini')

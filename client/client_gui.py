@@ -1187,8 +1187,8 @@ class GuiClass(tk.Frame):
             alpha_color = self.t2c2l12_var.get()
             type = self.t2c2l14_var.get()
             description = self.t2c2l16_var.get()
-            classification = client_rest.ManualClassification(self.imageID,type,orientation,shape,background_color,alphanumeric,alpha_color,"unsubmitted",description)
-            self.interface.postManualClass(classification)
+            classification = client_rest.Classification(self.imageID,type,orientation,shape,background_color,alphanumeric,alpha_color,"unsubmitted",description)
+            self.interface.postClass(classification)
 
     def tabChanged(self,event):
         """
@@ -1409,8 +1409,7 @@ class GuiClass(tk.Frame):
     def updateManualSubmissionTab(self):
         self.serverConnected = self.interface.ping()
         if self.serverConnected:
-            self.pendingList = self.interface.getPendingSubmissions(True)
-
+            self.pendingList = self.interface.getPendingSubmissions()
 
             if len(self.pendingList) == 0:
                 self.t3c1i1_im = self.t3_default_im.copy()
@@ -1705,7 +1704,7 @@ class GuiClass(tk.Frame):
         @rtype:  None
         @return: None
         """
-        self.interface.postSubmitTargetById(self.target_id,True)
+        self.interface.postSubmitTargetById(self.target_id)
         print(self.target_id)
         self.updateManualSubmissionTab()
 
@@ -1739,10 +1738,13 @@ class GuiClass(tk.Frame):
         return None # if there are no values for this particular field, return None
 
     def getYawAngle(self,imageID):
-        info = self.interface.getImageInfo(imageID)
-        image_state = self.interface.getStateByTs(info.time_stamp)
+        info = self.interface.getCroppedImageInfo(imageID)
+        image_state = None
+        if info is not None:
+            image_state = self.interface.getStateByTs(info.time_stamp)
         if image_state == None:
             #yaw_angle = 0.0
+            # todo: eventually remove this
             yaw = np.random.uniform(0,360)
         else:
             yaw = image_state.yaw

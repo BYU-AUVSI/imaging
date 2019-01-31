@@ -9,7 +9,6 @@ class TestGetNextRawImageManual(unittest.TestCase):
         resetManualDb()
 
         rest = ImagingInterface()
-
         ret = rest.getNextRawImage()
 
         self.assertIsNotNone(ret)
