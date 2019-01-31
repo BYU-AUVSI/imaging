@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(imaging_ros_ingester)
+project(imaging_ros_handler)
 
 find_package(catkin REQUIRED COMPONENTS
   rospy

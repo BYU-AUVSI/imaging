@@ -1,10 +1,12 @@
 <package format="2">
-    <name>imaging_ros_ingester</name>
+    <name>imaging_ros_handler</name>
     <version>0.0.1</version>
     <description>
-    Simple Node that subscribes to rostopics and passes their data to a postgres database
+    Simple Node that subscribes to rostopics and passes their data to a postgres database. 
+    It is also responsible for taking imaging data in its final form and publishing it on a topic
+    for interop to grab and submit to the AUVSI judges.
     </description>
-    <maintainer email="tm15@byu.edu">len0rd</maintainer>
+    <maintainer email="len0rd@github.com">len0rd</maintainer>
     <maintainer email="connordo@github.com">connordo</maintainer>
     <license>BSD</license>
 
