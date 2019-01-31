@@ -4,7 +4,7 @@ Authors: D. Knowles, B. McBride, T. Miller
 Prereqs:
 python 3
 sudo apt install python3-tk
-pip3 install Pillow, opencv-python, ttkthemes
+pip3 install Pillow, opencv-python, ttkthemes, imutils
 '''
 
 '''
@@ -14,6 +14,7 @@ All:
     *possible threading behind the scenese to autosize other tabs
     use consistent naming patterns
     change gui into multiple tabs/classes
+    change text font, size, color, etc.
 Tab0:
     add error handling if entries aren't in the right format
     add error handling if not connected to correct wifi
@@ -26,15 +27,19 @@ Tab1:
 Tab2
     Change crop picture only if focus is not on the entry widget
     Change disable color
-    Remove emergent discription if it's disabled
-    Add arrow showing N/E
-    Rotate picture
+    Disable other Characteristics for emergent
+    Resize compass
+    Verify rotating picture based on yaw angle
 Tab3:
     Fix resizing issues
-    Add longitude
-    Add pending descriptions
-    Add checkboxes
+    Disable radiobuttons for N/A images
+    Connect radiobuttons with choosing
+    Change color of labels
+    Change col 6 labels according to choice
+    Change submission if there is user input
+    Change stickness of corresponding labels
     Add functionality to choose certain aspect
+    Add functionalty to delete a classification
 Tab4:
     create everything
 
@@ -50,12 +55,15 @@ import tkinter as tk
 from tkinter import ttk
 from ttkthemes import ThemedStyle
 from PIL import Image,ImageTk
+import PIL
 import cv2
 import numpy as np
 import time
 from lib import client_rest
 import time
 import sys
+import scipy.stats
+import imutils
 
 
 class GuiClass(tk.Frame):
@@ -125,6 +133,13 @@ class GuiClass(tk.Frame):
         self.t3_total_targets  = 0
         self.t3_current_target = 1
 
+
+        '''
+        # new radiobutton Style
+        s = ttk.Style()
+        s.configure('Centered.TRadiobutton',width=30,justify=tk.CENTER)
+        s.configure('Centered.TRadiobutton',justify=tk.CENTER)
+        '''
 
         # Tab 0: SETTINGS ------------------------------------------------------
         self.tab0 = ttk.Frame(self.n)
@@ -288,8 +303,17 @@ class GuiClass(tk.Frame):
         # Column Three
         self.t2sep23 = ttk.Separator(self.tab2, orient=tk.VERTICAL)
         self.t2sep23.grid(row=0, column=12, rowspan=50,sticky=tk.N+tk.S+tk.E+tk.W, pady=5)
-        self.t2c2title = ttk.Label(self.tab2, anchor=tk.CENTER, text='                      ')
-        self.t2c2title.grid(row=0,column=12,columnspan=4,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t2c3title = ttk.Label(self.tab2, anchor=tk.CENTER, text='                      ')
+        self.t2c3title.grid(row=0,column=12,columnspan=4,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        t2c2i1_np = self.get_image('assets/compass.jpg')
+        self.t2c3i1_im = self.np2im(t2c2i1_np)
+        self.t2c3i1_default_width,self.t2c3i1_default_height = self.t2c3i1_im.size
+        self.t2c3i1_tk = self.im2tk(self.t2c3i1_im)
+        # place image
+        self.t2c3i1 = ttk.Label(self.tab2, anchor=tk.CENTER,image=self.t2c3i1_tk)
+        self.t2c3i1.image = self.t2c3i1_tk
+        self.t2c3i1.grid(row=2,column=12,rowspan=38,columnspan=4,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+
 
 
 
@@ -327,26 +351,42 @@ class GuiClass(tk.Frame):
         self.t3c1i1.image = self.t3c1i1_tk
         self.t3c1i1.grid(row=3,column=0,rowspan=1,columnspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
         # Characteristics
+        self.submissionImage = tk.IntVar()
+        self.t3c1r4 = tk.Radiobutton(self.tab3,value=1,variable=self.submissionImage)
+        self.t3c1r4.configure(foreground="#5c616c",background="#f5f6f7",highlightthickness=0,anchor=tk.N)
+        self.t3c1r4.grid(row=4,column=0,columnspan=2,sticky=tk.N+tk.E+tk.W+tk.S,padx=5,pady=5,ipadx=5,ipady=5)
         self.t3c1ar5 = ttk.Label(self.tab3, anchor=tk.CENTER, text="Shape:")
         self.t3c1ar5.grid(row=5,column=0,columnspan=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
         self.t3c1br5 = ttk.Label(self.tab3, anchor=tk.CENTER, text="N/A")
         self.t3c1br5.grid(row=5,column=1,columnspan=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t3c1ar7 = ttk.Label(self.tab3, anchor=tk.CENTER, text="Background Color:")
+        self.t3c1ar7 = ttk.Label(self.tab3, anchor=tk.S, text="Background Color:")
         self.t3c1ar7.grid(row=7,column=0,columnspan=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t3c1br7 = ttk.Label(self.tab3, anchor=tk.CENTER, text="N/A")
+        self.t3c1br7 = ttk.Label(self.tab3, anchor=tk.S, text="N/A")
         self.t3c1br7.grid(row=7,column=1,columnspan=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.submissionBackgroundColor = tk.IntVar()
+        self.t3c1r8 = tk.Radiobutton(self.tab3,value=1,variable=self.submissionBackgroundColor)
+        self.t3c1r8.configure(foreground="#5c616c",background="#f5f6f7",highlightthickness=0,anchor=tk.N)
+        self.t3c1r8.grid(row=8,column=0,columnspan=2,sticky=tk.N+tk.E+tk.W+tk.S,padx=5,pady=5,ipadx=5,ipady=5)
         self.t3c1ar9 = ttk.Label(self.tab3, anchor=tk.CENTER, text="Alphanumeric:")
         self.t3c1ar9.grid(row=9,column=0,columnspan=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
         self.t3c1br9 = ttk.Label(self.tab3, anchor=tk.CENTER, text="N/A")
         self.t3c1br9.grid(row=9,column=1,columnspan=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t3c1ar11 = ttk.Label(self.tab3, anchor=tk.CENTER, text="Alphanumeric Color:")
+        self.t3c1ar11 = ttk.Label(self.tab3, anchor=tk.S, text="Alphanumeric Color:")
         self.t3c1ar11.grid(row=11,column=0,columnspan=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t3c1br11 = ttk.Label(self.tab3, anchor=tk.CENTER, text="N/A")
+        self.t3c1br11 = ttk.Label(self.tab3, anchor=tk.S, text="N/A")
         self.t3c1br11.grid(row=11,column=1,columnspan=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t3c1ar13 = ttk.Label(self.tab3, anchor=tk.CENTER, text="Orientation:")
+        self.submissionAlphanumericColor = tk.IntVar()
+        self.t3c1r12 = tk.Radiobutton(self.tab3,value=1,variable=self.submissionAlphanumericColor)
+        self.t3c1r12.configure(foreground="#5c616c",background="#f5f6f7",highlightthickness=0,anchor=tk.N)
+        self.t3c1r12.grid(row=12,column=0,columnspan=2,sticky=tk.N+tk.E+tk.W+tk.S,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t3c1ar13 = ttk.Label(self.tab3, anchor=tk.S, text="Orientation:")
         self.t3c1ar13.grid(row=13,column=0,columnspan=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t3c1br13 = ttk.Label(self.tab3, anchor=tk.CENTER, text="N/A")
+        self.t3c1br13 = ttk.Label(self.tab3, anchor=tk.S, text="N/A")
         self.t3c1br13.grid(row=13,column=1,columnspan=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.submissionOrientation = tk.IntVar()
+        self.t3c1r14 = tk.Radiobutton(self.tab3,value=1,variable=self.submissionOrientation)
+        self.t3c1r14.configure(foreground="#5c616c",background="#f5f6f7",highlightthickness=0,anchor=tk.N)
+        self.t3c1r14.grid(row=14,column=0,columnspan=2,sticky=tk.N+tk.E+tk.W+tk.S,padx=5,pady=5,ipadx=5,ipady=5)
         self.t3c1ar15 = ttk.Label(self.tab3, anchor=tk.CENTER, text="Target Type:")
         self.t3c1ar15.grid(row=15,column=0,columnspan=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
         self.t3c1br15 = ttk.Label(self.tab3, anchor=tk.CENTER, text="N/A")
@@ -355,6 +395,12 @@ class GuiClass(tk.Frame):
         self.t3c1ar17.grid(row=17,column=0,columnspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
         self.t3c1ar18 = ttk.Label(self.tab3, anchor=tk.CENTER, text="N/A")
         self.t3c1ar18.grid(row=18,column=0,columnspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.submissionDescription = tk.IntVar()
+        self.t3c1r19 = tk.Radiobutton(self.tab3,value=1,variable=self.submissionDescription)
+        self.t3c1r19.configure(foreground="#5c616c",background="#f5f6f7",highlightthickness=0,anchor=tk.N)
+        self.t3c1r19.grid(row=19,column=0,columnspan=2,sticky=tk.N+tk.E+tk.W+tk.S,padx=5,pady=5,ipadx=5,ipady=5)
+
+
 
         # Column Two
         self.t3c2title = ttk.Label(self.tab3, anchor=tk.CENTER, text='Pic 2')
@@ -366,26 +412,38 @@ class GuiClass(tk.Frame):
         self.t3c2i1.image = self.t3c2i1_tk
         self.t3c2i1.grid(row=3,column=2,rowspan=1,columnspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
         # Characteristics
+        self.t3c2r4 = tk.Radiobutton(self.tab3,value=2,variable=self.submissionImage)
+        self.t3c2r4.configure(foreground="#5c616c",background="#f5f6f7",highlightthickness=0,anchor=tk.N)
+        self.t3c2r4.grid(row=4,column=2,columnspan=2,sticky=tk.N+tk.E+tk.W+tk.S,padx=5,pady=5,ipadx=5,ipady=5)
         self.t3c2ar5 = ttk.Label(self.tab3, anchor=tk.CENTER, text="Shape:")
         self.t3c2ar5.grid(row=5,column=2,columnspan=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
         self.t3c2br5 = ttk.Label(self.tab3, anchor=tk.CENTER, text="N/A")
         self.t3c2br5.grid(row=5,column=3,columnspan=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t3c2ar7 = ttk.Label(self.tab3, anchor=tk.CENTER, text="Background Color:")
+        self.t3c2ar7 = ttk.Label(self.tab3, anchor=tk.S, text="Background Color:")
         self.t3c2ar7.grid(row=7,column=2,columnspan=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t3c2br7 = ttk.Label(self.tab3, anchor=tk.CENTER, text="N/A")
+        self.t3c2br7 = ttk.Label(self.tab3, anchor=tk.S, text="N/A")
         self.t3c2br7.grid(row=7,column=3,columnspan=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t3c2r8 = tk.Radiobutton(self.tab3,value=2,variable=self.submissionBackgroundColor)
+        self.t3c2r8.configure(foreground="#5c616c",background="#f5f6f7",highlightthickness=0,anchor=tk.N)
+        self.t3c2r8.grid(row=8,column=2,columnspan=2,sticky=tk.N+tk.E+tk.W+tk.S,padx=5,pady=5,ipadx=5,ipady=5)
         self.t3c2ar9 = ttk.Label(self.tab3, anchor=tk.CENTER, text="Alphanumeric:")
         self.t3c2ar9.grid(row=9,column=2,columnspan=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
         self.t3c2br9 = ttk.Label(self.tab3, anchor=tk.CENTER, text="N/A")
         self.t3c2br9.grid(row=9,column=3,columnspan=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t3c2ar11 = ttk.Label(self.tab3, anchor=tk.CENTER, text="Alphanumeric Color:")
+        self.t3c2ar11 = ttk.Label(self.tab3, anchor=tk.S, text="Alphanumeric Color:")
         self.t3c2ar11.grid(row=11,column=2,columnspan=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t3c2br11 = ttk.Label(self.tab3, anchor=tk.CENTER, text="N/A")
+        self.t3c2br11 = ttk.Label(self.tab3, anchor=tk.S, text="N/A")
         self.t3c2br11.grid(row=11,column=3,columnspan=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t3c2ar13 = ttk.Label(self.tab3, anchor=tk.CENTER, text="Orientation:")
+        self.t3c2r12 = tk.Radiobutton(self.tab3,value=2,variable=self.submissionAlphanumericColor)
+        self.t3c2r12.configure(foreground="#5c616c",background="#f5f6f7",highlightthickness=0,anchor=tk.N)
+        self.t3c2r12.grid(row=12,column=2,columnspan=2,sticky=tk.N+tk.E+tk.W+tk.S,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t3c2ar13 = ttk.Label(self.tab3, anchor=tk.S, text="Orientation:")
         self.t3c2ar13.grid(row=13,column=2,columnspan=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t3c2br13 = ttk.Label(self.tab3, anchor=tk.CENTER, text="N/A")
+        self.t3c2br13 = ttk.Label(self.tab3, anchor=tk.S, text="N/A")
         self.t3c2br13.grid(row=13,column=3,columnspan=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t3c2r14 = tk.Radiobutton(self.tab3,value=2,variable=self.submissionOrientation)
+        self.t3c2r14.configure(foreground="#5c616c",background="#f5f6f7",highlightthickness=0,anchor=tk.N)
+        self.t3c2r14.grid(row=14,column=2,columnspan=2,sticky=tk.N+tk.E+tk.W+tk.S,padx=5,pady=5,ipadx=5,ipady=5)
         self.t3c2ar15 = ttk.Label(self.tab3, anchor=tk.CENTER, text="Target Type:")
         self.t3c2ar15.grid(row=15,column=2,columnspan=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
         self.t3c2br15 = ttk.Label(self.tab3, anchor=tk.CENTER, text="N/A")
@@ -394,6 +452,9 @@ class GuiClass(tk.Frame):
         self.t3c2ar17.grid(row=17,column=2,columnspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
         self.t3c2ar18 = ttk.Label(self.tab3, anchor=tk.CENTER, text="N/A")
         self.t3c2ar18.grid(row=18,column=2,columnspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t3c2r19 = tk.Radiobutton(self.tab3,value=2,variable=self.submissionDescription)
+        self.t3c2r19.configure(foreground="#5c616c",background="#f5f6f7",highlightthickness=0,anchor=tk.N)
+        self.t3c2r19.grid(row=19,column=2,columnspan=2,sticky=tk.N+tk.E+tk.W+tk.S,padx=5,pady=5,ipadx=5,ipady=5)
 
 
         # Column Three
@@ -406,26 +467,38 @@ class GuiClass(tk.Frame):
         self.t3c3i1.image = self.t3c3i1_tk
         self.t3c3i1.grid(row=3,column=4,rowspan=1,columnspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
         # Characteristics
+        self.t3c3r4 = tk.Radiobutton(self.tab3,value=3,variable=self.submissionImage)
+        self.t3c3r4.configure(foreground="#5c616c",background="#f5f6f7",highlightthickness=0,anchor=tk.N)
+        self.t3c3r4.grid(row=4,column=4,columnspan=2,sticky=tk.N+tk.E+tk.W+tk.S,padx=5,pady=5,ipadx=5,ipady=5)
         self.t3c3ar5 = ttk.Label(self.tab3, anchor=tk.CENTER, text="Shape:")
         self.t3c3ar5.grid(row=5,column=4,columnspan=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
         self.t3c3br5 = ttk.Label(self.tab3, anchor=tk.CENTER, text="N/A")
         self.t3c3br5.grid(row=5,column=5,columnspan=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t3c3ar7 = ttk.Label(self.tab3, anchor=tk.CENTER, text="Background Color:")
+        self.t3c3ar7 = ttk.Label(self.tab3, anchor=tk.S, text="Background Color:")
         self.t3c3ar7.grid(row=7,column=4,columnspan=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t3c3br7 = ttk.Label(self.tab3, anchor=tk.CENTER, text="N/A")
+        self.t3c3br7 = ttk.Label(self.tab3, anchor=tk.S, text="N/A")
         self.t3c3br7.grid(row=7,column=5,columnspan=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t3c3r8 = tk.Radiobutton(self.tab3,value=3,variable=self.submissionBackgroundColor)
+        self.t3c3r8.configure(foreground="#5c616c",background="#f5f6f7",highlightthickness=0,anchor=tk.N)
+        self.t3c3r8.grid(row=8,column=4,columnspan=2,sticky=tk.N+tk.E+tk.W+tk.S,padx=5,pady=5,ipadx=5,ipady=5)
         self.t3c3ar9 = ttk.Label(self.tab3, anchor=tk.CENTER, text="Alphanumeric:")
         self.t3c3ar9.grid(row=9,column=4,columnspan=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
         self.t3c3br9 = ttk.Label(self.tab3, anchor=tk.CENTER, text="N/A")
         self.t3c3br9.grid(row=9,column=5,columnspan=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t3c3ar11 = ttk.Label(self.tab3, anchor=tk.CENTER, text="Alphanumeric Color:")
+        self.t3c3ar11 = ttk.Label(self.tab3, anchor=tk.S, text="Alphanumeric Color:")
         self.t3c3ar11.grid(row=11,column=4,columnspan=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t3c3br11 = ttk.Label(self.tab3, anchor=tk.CENTER, text="N/A")
+        self.t3c3br11 = ttk.Label(self.tab3, anchor=tk.S, text="N/A")
         self.t3c3br11.grid(row=11,column=5,columnspan=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t3c3ar13 = ttk.Label(self.tab3, anchor=tk.CENTER, text="Orientation:")
+        self.t3c3r12 = tk.Radiobutton(self.tab3,value=3,variable=self.submissionAlphanumericColor)
+        self.t3c3r12.configure(foreground="#5c616c",background="#f5f6f7",highlightthickness=0,anchor=tk.N)
+        self.t3c3r12.grid(row=12,column=4,columnspan=2,sticky=tk.N+tk.E+tk.W+tk.S,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t3c3ar13 = ttk.Label(self.tab3, anchor=tk.S, text="Orientation:")
         self.t3c3ar13.grid(row=13,column=4,columnspan=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t3c3br13 = ttk.Label(self.tab3, anchor=tk.CENTER, text="N/A")
+        self.t3c3br13 = ttk.Label(self.tab3, anchor=tk.S, text="N/A")
         self.t3c3br13.grid(row=13,column=5,columnspan=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t3c3r14 = tk.Radiobutton(self.tab3,value=3,variable=self.submissionOrientation)
+        self.t3c3r14.configure(foreground="#5c616c",background="#f5f6f7",highlightthickness=0,anchor=tk.N)
+        self.t3c3r14.grid(row=14,column=4,columnspan=2,sticky=tk.N+tk.E+tk.W+tk.S,padx=5,pady=5,ipadx=5,ipady=5)
         self.t3c3ar15 = ttk.Label(self.tab3, anchor=tk.CENTER, text="Target Type:")
         self.t3c3ar15.grid(row=15,column=4,columnspan=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
         self.t3c3br15 = ttk.Label(self.tab3, anchor=tk.CENTER, text="N/A")
@@ -434,6 +507,10 @@ class GuiClass(tk.Frame):
         self.t3c3ar17.grid(row=17,column=4,columnspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
         self.t3c3ar18 = ttk.Label(self.tab3, anchor=tk.CENTER, text="N/A")
         self.t3c3ar18.grid(row=18,column=4,columnspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t3c3r19 = tk.Radiobutton(self.tab3,value=3,variable=self.submissionDescription)
+        self.t3c3r19.configure(foreground="#5c616c",background="#f5f6f7",highlightthickness=0,anchor=tk.N)
+        self.t3c3r19.grid(row=19,column=4,columnspan=2,sticky=tk.N+tk.E+tk.W+tk.S,padx=5,pady=5,ipadx=5,ipady=5)
+
 
         # Column Four
         self.t3c4title = ttk.Label(self.tab3, anchor=tk.CENTER, text='Pic 4')
@@ -445,26 +522,38 @@ class GuiClass(tk.Frame):
         self.t3c4i1.image = self.t3c4i1_tk
         self.t3c4i1.grid(row=3,column=6,rowspan=1,columnspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
         # Characteristics
+        self.t3c4r4 = tk.Radiobutton(self.tab3,value=4,variable=self.submissionImage)
+        self.t3c4r4.configure(foreground="#5c616c",background="#f5f6f7",highlightthickness=0,anchor=tk.N)
+        self.t3c4r4.grid(row=4,column=6,columnspan=2,sticky=tk.N+tk.E+tk.W+tk.S,padx=5,pady=5,ipadx=5,ipady=5)
         self.t3c4ar5 = ttk.Label(self.tab3, anchor=tk.CENTER, text="Shape:")
         self.t3c4ar5.grid(row=5,column=6,columnspan=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
         self.t3c4br5 = ttk.Label(self.tab3, anchor=tk.CENTER, text="N/A")
         self.t3c4br5.grid(row=5,column=7,columnspan=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t3c4ar7 = ttk.Label(self.tab3, anchor=tk.CENTER, text="Background Color:")
+        self.t3c4ar7 = ttk.Label(self.tab3, anchor=tk.S, text="Background Color:")
         self.t3c4ar7.grid(row=7,column=6,columnspan=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t3c4br7 = ttk.Label(self.tab3, anchor=tk.CENTER, text="N/A")
+        self.t3c4br7 = ttk.Label(self.tab3, anchor=tk.S, text="N/A")
         self.t3c4br7.grid(row=7,column=7,columnspan=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t3c4r8 = tk.Radiobutton(self.tab3,value=4,variable=self.submissionBackgroundColor)
+        self.t3c4r8.configure(foreground="#5c616c",background="#f5f6f7",highlightthickness=0,anchor=tk.N)
+        self.t3c4r8.grid(row=8,column=6,columnspan=2,sticky=tk.N+tk.E+tk.W+tk.S,padx=5,pady=5,ipadx=5,ipady=5)
         self.t3c4ar9 = ttk.Label(self.tab3, anchor=tk.CENTER, text="Alphanumeric:")
         self.t3c4ar9.grid(row=9,column=6,columnspan=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
         self.t3c4br9 = ttk.Label(self.tab3, anchor=tk.CENTER, text="N/A")
         self.t3c4br9.grid(row=9,column=7,columnspan=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t3c4ar11 = ttk.Label(self.tab3, anchor=tk.CENTER, text="Alphanumeric Color:")
+        self.t3c4ar11 = ttk.Label(self.tab3, anchor=tk.S, text="Alphanumeric Color:")
         self.t3c4ar11.grid(row=11,column=6,columnspan=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t3c4br11 = ttk.Label(self.tab3, anchor=tk.CENTER, text="N/A")
+        self.t3c4br11 = ttk.Label(self.tab3, anchor=tk.S, text="N/A")
         self.t3c4br11.grid(row=11,column=7,columnspan=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t3c4ar13 = ttk.Label(self.tab3, anchor=tk.CENTER, text="Orientation:")
+        self.t3c4r12 = tk.Radiobutton(self.tab3,value=4,variable=self.submissionAlphanumericColor)
+        self.t3c4r12.configure(foreground="#5c616c",background="#f5f6f7",highlightthickness=0,anchor=tk.N)
+        self.t3c4r12.grid(row=12,column=6,columnspan=2,sticky=tk.N+tk.E+tk.W+tk.S,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t3c4ar13 = ttk.Label(self.tab3, anchor=tk.S, text="Orientation:")
         self.t3c4ar13.grid(row=13,column=6,columnspan=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t3c4br13 = ttk.Label(self.tab3, anchor=tk.CENTER, text="N/A")
+        self.t3c4br13 = ttk.Label(self.tab3, anchor=tk.S, text="N/A")
         self.t3c4br13.grid(row=13,column=7,columnspan=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t3c4r14 = tk.Radiobutton(self.tab3,value=4,variable=self.submissionOrientation)
+        self.t3c4r14.configure(foreground="#5c616c",background="#f5f6f7",highlightthickness=0,anchor=tk.N)
+        self.t3c4r14.grid(row=14,column=6,columnspan=2,sticky=tk.N+tk.E+tk.W+tk.S,padx=5,pady=5,ipadx=5,ipady=5)
         self.t3c4ar15 = ttk.Label(self.tab3, anchor=tk.CENTER, text="Target Type:")
         self.t3c4ar15.grid(row=15,column=6,columnspan=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
         self.t3c4br15 = ttk.Label(self.tab3, anchor=tk.CENTER, text="N/A")
@@ -472,7 +561,12 @@ class GuiClass(tk.Frame):
         self.t3c4ar17 = ttk.Label(self.tab3, anchor=tk.CENTER, text="Description:")
         self.t3c4ar17.grid(row=17,column=6,columnspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
         self.t3c4ar18 = ttk.Label(self.tab3, anchor=tk.CENTER, text="N/A")
-        self.t3c4ar18.grid(row=18,column=7,columnspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t3c4ar18.grid(row=18,column=6,columnspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t3c4r19 = tk.Radiobutton(self.tab3,value=4,variable=self.submissionDescription)
+        self.t3c4r19.configure(foreground="#5c616c",background="#f5f6f7",highlightthickness=0,anchor=tk.N)
+        self.t3c4r19.grid(row=19,column=6,columnspan=2,sticky=tk.N+tk.E+tk.W+tk.S,padx=5,pady=5,ipadx=5,ipady=5)
+
+
 
         # Column Five
         self.t3c5title = ttk.Label(self.tab3, anchor=tk.CENTER, text='Pic 5')
@@ -484,26 +578,38 @@ class GuiClass(tk.Frame):
         self.t3c5i1.image = self.t3c5i1_tk
         self.t3c5i1.grid(row=3,column=8,rowspan=1,columnspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
         # Characteristics
+        self.t3c5r4 = tk.Radiobutton(self.tab3,value=5,variable=self.submissionImage)
+        self.t3c5r4.configure(foreground="#5c616c",background="#f5f6f7",highlightthickness=0,anchor=tk.N)
+        self.t3c5r4.grid(row=4,column=8,columnspan=2,sticky=tk.N+tk.E+tk.W+tk.S,padx=5,pady=5,ipadx=5,ipady=5)
         self.t3c5ar5 = ttk.Label(self.tab3, anchor=tk.CENTER, text="Shape:")
         self.t3c5ar5.grid(row=5,column=8,columnspan=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
         self.t3c5br5 = ttk.Label(self.tab3, anchor=tk.CENTER, text="N/A")
         self.t3c5br5.grid(row=5,column=9,columnspan=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t3c5ar7 = ttk.Label(self.tab3, anchor=tk.CENTER, text="Background Color:")
+        self.t3c5ar7 = ttk.Label(self.tab3, anchor=tk.S, text="Background Color:")
         self.t3c5ar7.grid(row=7,column=8,columnspan=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t3c5br7 = ttk.Label(self.tab3, anchor=tk.CENTER, text="N/A")
+        self.t3c5br7 = ttk.Label(self.tab3, anchor=tk.S, text="N/A")
         self.t3c5br7.grid(row=7,column=9,columnspan=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t3c5r8 = tk.Radiobutton(self.tab3,value=5,variable=self.submissionBackgroundColor)
+        self.t3c5r8.configure(foreground="#5c616c",background="#f5f6f7",highlightthickness=0,anchor=tk.N)
+        self.t3c5r8.grid(row=8,column=8,columnspan=2,sticky=tk.N+tk.E+tk.W+tk.S,padx=5,pady=5,ipadx=5,ipady=5)
         self.t3c5ar9 = ttk.Label(self.tab3, anchor=tk.CENTER, text="Alphanumeric:")
         self.t3c5ar9.grid(row=9,column=8,columnspan=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
         self.t3c5br9 = ttk.Label(self.tab3, anchor=tk.CENTER, text="N/A")
         self.t3c5br9.grid(row=9,column=9,columnspan=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t3c5ar11 = ttk.Label(self.tab3, anchor=tk.CENTER, text="Alphanumeric Color:")
+        self.t3c5ar11 = ttk.Label(self.tab3, anchor=tk.S, text="Alphanumeric Color:")
         self.t3c5ar11.grid(row=11,column=8,columnspan=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t3c5br11 = ttk.Label(self.tab3, anchor=tk.CENTER, text="N/A")
+        self.t3c5br11 = ttk.Label(self.tab3, anchor=tk.S, text="N/A")
         self.t3c5br11.grid(row=11,column=9,columnspan=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t3c5ar13 = ttk.Label(self.tab3, anchor=tk.CENTER, text="Orientation:")
+        self.t3c5r12 = tk.Radiobutton(self.tab3,value=5,variable=self.submissionAlphanumericColor)
+        self.t3c5r12.configure(foreground="#5c616c",background="#f5f6f7",highlightthickness=0,anchor=tk.N)
+        self.t3c5r12.grid(row=12,column=8,columnspan=2,sticky=tk.N+tk.E+tk.W+tk.S,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t3c5ar13 = ttk.Label(self.tab3, anchor=tk.S, text="Orientation:")
         self.t3c5ar13.grid(row=13,column=8,columnspan=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t3c5br13 = ttk.Label(self.tab3, anchor=tk.CENTER, text="N/A")
+        self.t3c5br13 = ttk.Label(self.tab3, anchor=tk.S, text="N/A")
         self.t3c5br13.grid(row=13,column=9,columnspan=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t3c5r14 = tk.Radiobutton(self.tab3,value=5,variable=self.submissionOrientation)
+        self.t3c5r14.configure(foreground="#5c616c",background="#f5f6f7",highlightthickness=0,anchor=tk.N)
+        self.t3c5r14.grid(row=14,column=8,columnspan=2,sticky=tk.N+tk.E+tk.W+tk.S,padx=5,pady=5,ipadx=5,ipady=5)
         self.t3c5ar15 = ttk.Label(self.tab3, anchor=tk.CENTER, text="Target Type:")
         self.t3c5ar15.grid(row=15,column=8,columnspan=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
         self.t3c5br15 = ttk.Label(self.tab3, anchor=tk.CENTER, text="N/A")
@@ -511,7 +617,11 @@ class GuiClass(tk.Frame):
         self.t3c5ar17 = ttk.Label(self.tab3, anchor=tk.CENTER, text="Description:")
         self.t3c5ar17.grid(row=17,column=8,columnspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
         self.t3c5ar18 = ttk.Label(self.tab3, anchor=tk.CENTER, text="N/A")
-        self.t3c5ar18.grid(row=18,column=9,columnspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t3c5ar18.grid(row=18,column=8,columnspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t3c5r19 = tk.Radiobutton(self.tab3,value=5,variable=self.submissionDescription)
+        self.t3c5r19.configure(foreground="#5c616c",background="#f5f6f7",highlightthickness=0,anchor=tk.N)
+        self.t3c5r19.grid(row=19,column=8,columnspan=2,sticky=tk.N+tk.E+tk.W+tk.S,padx=5,pady=5,ipadx=5,ipady=5)
+
 
         # Column Six
         self.t3sep56 = ttk.Separator(self.tab3, orient=tk.VERTICAL)
@@ -753,6 +863,14 @@ class GuiClass(tk.Frame):
                 self.cropped_resized_im = self.resizeIm(self.cropped_im,self.cropped_width,self.cropped_height,self.t2c2i1_width,self.t2c2i1_height)
                 self.cropped_tk = self.im2tk(self.cropped_resized_im)
                 self.t2c2i1.configure(image=self.cropped_tk)
+                # resize compass
+                '''
+                self.t2c3i1_width = self.t2c3i1.winfo_width()
+                self.t2c3i1_height = self.t2c3i1.winfo_height()
+                resized_im = self.resizeIm(self.t2c3i1_im,self.t2c3i1_default_width,self.t2c3i1_default_height,self.t2c3i1_width,self.t2c3i1_height)
+                self.t2c3i1_tk = self.im2tk(resized_im)
+                self.t2c3i1.configure(image=self.t2c3i1_tk)
+                '''
 
     def resizeEventTab3(self,event=None):
         """
@@ -791,13 +909,13 @@ class GuiClass(tk.Frame):
                 resized_im = self.resizeIm(self.t3c4i1_im,self.t3c4i1_org_width,self.t3c4i1_org_height,self.t3c4i1_width,self.t3c4i1_height)
                 self.t3c4i1_tk = self.im2tk(resized_im)
                 self.t3c4i1.configure(image=self.t3c4i1_tk)
-                # Col 3 Image
+                # Col 5 Image
                 self.t3c5i1_width = self.t3c5i1.winfo_width()
                 self.t3c5i1_height = self.t3c5i1.winfo_height()
                 resized_im = self.resizeIm(self.t3c5i1_im,self.t3c5i1_org_width,self.t3c5i1_org_height,self.t3c5i1_width,self.t3c5i1_height)
                 self.t3c5i1_tk = self.im2tk(resized_im)
                 self.t3c5i1.configure(image=self.t3c5i1_tk)
-                # Col 3 Image
+                # Col 6 Image
                 self.t3c6i1_width = self.t3c6i1.winfo_width()
                 self.t3c6i1_height = self.t3c6i1.winfo_height()
                 resized_im = self.resizeIm(self.t3c6i1_im,self.t3c6i1_org_width,self.t3c6i1_org_height,self.t3c6i1_width,self.t3c6i1_height)
@@ -1006,7 +1124,9 @@ class GuiClass(tk.Frame):
             else:
                 self.t2_functional = True
                 self.imageID = query[1]
-                self.cropped_np = np.array(query[0]) #self.get_image('frame0744.jpg')
+                self.cropped_np = np.array(query[0])
+                yaw_angle = self.getYawAngle(self.imageID)
+                self.cropped_np = imutils.rotate_bound(self.cropped_np,yaw_angle)
             time1 = time.time()
             self.cropped_im = self.np2im(self.cropped_np)
             self.cropped_width,self.cropped_height = self.cropped_im.size
@@ -1036,7 +1156,9 @@ class GuiClass(tk.Frame):
             else:
                 self.t2_functional = True
                 self.imageID = query[1]
-                self.cropped_np = np.array(query[0]) #self.get_image('frame0744.jpg')
+                self.cropped_np = np.array(query[0])
+                yaw_angle = self.getYawAngle(self.imageID)
+                self.cropped_np = imutils.rotate_bound(self.cropped_np,yaw_angle)
             time1 = time.time()
             self.cropped_im = self.np2im(self.cropped_np)
             self.cropped_width,self.cropped_height = self.cropped_im.size
@@ -1117,7 +1239,7 @@ class GuiClass(tk.Frame):
             self.master.unbind("<a>")
             self.master.bind("<Configure>",self.resizeEventTab3)
             self.master.unbind("<Control-z>")
-            self.master.bind("<Return>",)
+            self.master.bind("<Return>",self.submitTarget)
             self.master.bind("<Escape>",self.close_window)
             self.updateManualSubmissionTab()
         elif active_tab == 4:
@@ -1249,7 +1371,6 @@ class GuiClass(tk.Frame):
         if self.t2c2l14_var.get() == 'emergent':
             self.t2c2l16.configure(state=tk.NORMAL)
         else:
-            print("This is happening")
             self.t2c2l16_var.set("")
             self.t2c2l16.configure(state=tk.DISABLED)
 
@@ -1289,9 +1410,7 @@ class GuiClass(tk.Frame):
         self.serverConnected = self.interface.ping()
         if self.serverConnected:
             self.pendingList = self.interface.getPendingSubmissions()
-            ### Debugging
-            print(self.pendingList)
-            ###
+
             if len(self.pendingList) == 0:
                 self.t3c1i1_im = self.t3_default_im.copy()
                 self.t3c1i1_tk = self.im2tk(self.t3c1i1_im)
@@ -1343,6 +1462,9 @@ class GuiClass(tk.Frame):
                 # Because of the preceeding if/else statement there will always be at least 1 pic
                 query = self.interface.getCroppedImage(self.pendingList[self.t3_current_target-1][0].crop_id)
                 self.t3c1i1_im = query[0]
+                yaw_angle = self.getYawAngle(query[1])
+                self.t3c1i1_im = self.t3c1i1_im.rotate(yaw_angle,expand=1)
+                self.t3c1i1_org_width,self.t3c1i1_org_height = self.t3c1i1_im.size
                 self.t3c1i1_tk = self.im2tk(self.t3c1i1_im)
                 self.t3c1i1.configure(image=self.t3c1i1_tk)
                 self.t3c1br5.configure(text=self.pendingList[self.t3_current_target-1][0].shape)
@@ -1352,16 +1474,18 @@ class GuiClass(tk.Frame):
                 self.t3c1br13.configure(text=self.pendingList[self.t3_current_target-1][0].orientation)
                 self.t3c1br15.configure(text=self.pendingList[self.t3_current_target-1][0].type)
                 self.t3c1ar18.configure(text=self.pendingList[self.t3_current_target-1][0].description)
-
-                # Possible Submission
-                self.t3c6i1_im = query[0]
-                self.t3c6i1_tk = self.im2tk(self.t3c6i1_im)
-                self.t3c6i1.configure(image=self.t3c6i1_tk)
+                self.pending_bg_color = [self.pendingList[self.t3_current_target-1][0].background_color]
+                self.pending_alpha_color = [self.pendingList[self.t3_current_target-1][0].alphanumeric_color]
+                self.pending_orientation = [self.pendingList[self.t3_current_target-1][0].orientation]
+                self.pending_description = [self.pendingList[self.t3_current_target-1][0].description]
 
                 if pics > 1:
                     query = self.interface.getCroppedImage(self.pendingList[self.t3_current_target-1][1].crop_id)
                     print("query")
                     self.t3c2i1_im = query[0]
+                    yaw_angle = self.getYawAngle(query[1])
+                    self.t3c2i1_im = self.t3c2i1_im.rotate(yaw_angle,expand=1)
+                    self.t3c2i1_org_width,self.t3c2i1_org_height = self.t3c2i1_im.size
                     self.t3c2i1_tk = self.im2tk(self.t3c2i1_im)
                     self.t3c2i1.configure(image=self.t3c2i1_tk)
                     self.t3c2br5.configure(text=self.pendingList[self.t3_current_target-1][1].shape)
@@ -1371,8 +1495,13 @@ class GuiClass(tk.Frame):
                     self.t3c2br13.configure(text=self.pendingList[self.t3_current_target-1][1].orientation)
                     self.t3c2br15.configure(text=self.pendingList[self.t3_current_target-1][1].type)
                     self.t3c2ar18.configure(text=self.pendingList[self.t3_current_target-1][1].description)
+                    self.pending_bg_color.append(self.pendingList[self.t3_current_target-1][1].background_color)
+                    self.pending_alpha_color.append(self.pendingList[self.t3_current_target-1][1].alphanumeric_color)
+                    self.pending_orientation.append(self.pendingList[self.t3_current_target-1][1].orientation)
+                    self.pending_description.append(self.pendingList[self.t3_current_target-1][1].description)
                 else:
                     self.t3c2i1_im = self.t3_default_im.copy()
+                    self.t3c2i1_org_width,self.t3c2i1_org_height = self.t3c2i1_im.size
                     self.t3c2i1_tk = self.im2tk(self.t3c2i1_im)
                     self.t3c2i1.configure(image=self.t3c2i1_tk)
                     self.t3c2br5.configure(text="N/A")
@@ -1385,6 +1514,9 @@ class GuiClass(tk.Frame):
                 if pics > 2:
                     query = self.interface.getCroppedImage(self.pendingList[self.t3_current_target-1][2].crop_id)
                     self.t3c3i1_im = query[0]
+                    yaw_angle = self.getYawAngle(query[1])
+                    self.t3c3i1_im = self.t3c3i1_im.rotate(yaw_angle,expand=1)
+                    self.t3c3i1_org_width,self.t3c3i1_org_height = self.t3c3i1_im.size
                     self.t3c3i1_tk = self.im2tk(self.t3c3i1_im)
                     self.t3c3i1.configure(image=self.t3c3i1_tk)
                     self.t3c3br5.configure(text=self.pendingList[self.t3_current_target-1][2].shape)
@@ -1394,8 +1526,13 @@ class GuiClass(tk.Frame):
                     self.t3c3br13.configure(text=self.pendingList[self.t3_current_target-1][2].orientation)
                     self.t3c3br15.configure(text=self.pendingList[self.t3_current_target-1][2].type)
                     self.t3c3ar18.configure(text=self.pendingList[self.t3_current_target-1][2].description)
+                    self.pending_bg_color.append(self.pendingList[self.t3_current_target-1][2].background_color)
+                    self.pending_alpha_color.append(self.pendingList[self.t3_current_target-1][2].alphanumeric_color)
+                    self.pending_orientation.append(self.pendingList[self.t3_current_target-1][2].orientation)
+                    self.pending_description.append(self.pendingList[self.t3_current_target-1][2].description)
                 else:
                     self.t3c3i1_im = self.t3_default_im.copy()
+                    self.t3c3i1_org_width,self.t3c3i1_org_height = self.t3c3i1_im.size
                     self.t3c3i1_tk = self.im2tk(self.t3c3i1_im)
                     self.t3c3i1.configure(image=self.t3c3i1_tk)
                     self.t3c3br5.configure(text="N/A")
@@ -1408,6 +1545,9 @@ class GuiClass(tk.Frame):
                 if pics > 3:
                     query = self.interface.getCroppedImage(self.pendingList[self.t3_current_target-1][3].crop_id)
                     self.t3c4i1_im = query[0]
+                    yaw_angle = self.getYawAngle(query[1])
+                    self.t3c4i1_im = self.t3c4i1_im.rotate(yaw_angle,expand=1)
+                    self.t3c4i1_org_width,self.t3c4i1_org_height = self.t3c4i1_im.size
                     self.t3c4i1_tk = self.im2tk(self.t3c4i1_im)
                     self.t3c4i1.configure(image=self.t3c4i1_tk)
                     self.t3c4br5.configure(text=self.pendingList[self.t3_current_target-1][3].shape)
@@ -1417,8 +1557,13 @@ class GuiClass(tk.Frame):
                     self.t3c4br13.configure(text=self.pendingList[self.t3_current_target-1][3].orientation)
                     self.t3c4br15.configure(text=self.pendingList[self.t3_current_target-1][3].type)
                     self.t3c4ar18.configure(text=self.pendingList[self.t3_current_target-1][3].description)
+                    self.pending_bg_color.append(self.pendingList[self.t3_current_target-1][3].background_color)
+                    self.pending_alpha_color.append(self.pendingList[self.t3_current_target-1][3].alphanumeric_color)
+                    self.pending_orientation.append(self.pendingList[self.t3_current_target-1][3].orientation)
+                    self.pending_description.append(self.pendingList[self.t3_current_target-1][3].description)
                 else:
                     self.t3c4i1_im = self.t3_default_im.copy()
+                    self.t3c4i1_org_width,self.t3c4i1_org_height = self.t3c4i1_im.size
                     self.t3c4i1_tk = self.im2tk(self.t3c4i1_im)
                     self.t3c4i1.configure(image=self.t3c4i1_tk)
                     self.t3c4br5.configure(text="N/A")
@@ -1431,6 +1576,9 @@ class GuiClass(tk.Frame):
                 if pics > 4:
                     query = self.interface.getCroppedImage(self.pendingList[self.t3_current_target-1][4].crop_id)
                     self.t3c5i1_im = query[0]
+                    yaw_angle = self.getYawAngle(query[1])
+                    self.t3c5i1_im = self.t3c5i1_im.rotate(yaw_angle,expand=1)
+                    self.t3c5i1_org_width,self.t3c5i1_org_height = self.t3c5i1_im.size
                     self.t3c5i1_tk = self.im2tk(self.t3c5i1_im)
                     self.t3c5i1.configure(image=self.t3c5i1_tk)
                     self.t3c5br5.configure(text=self.pendingList[self.t3_current_target-1][4].shape)
@@ -1440,8 +1588,13 @@ class GuiClass(tk.Frame):
                     self.t3c5br13.configure(text=self.pendingList[self.t3_current_target-1][4].orientation)
                     self.t3c5br15.configure(text=self.pendingList[self.t3_current_target-1][4].type)
                     self.t3c5ar18.configure(text=self.pendingList[self.t3_current_target-1][4].description)
+                    self.pending_bg_color.append(self.pendingList[self.t3_current_target-1][4].background_color)
+                    self.pending_alpha_color.append(self.pendingList[self.t3_current_target-1][4].alphanumeric_color)
+                    self.pending_orientation.append(self.pendingList[self.t3_current_target-1][4].orientation)
+                    self.pending_description.append(self.pendingList[self.t3_current_target-1][4].description)
                 else:
                     self.t3c5i1_im = self.t3_default_im.copy()
+                    self.t3c5i1_org_width,self.t3c5i1_org_height = self.t3c5i1_im.size
                     self.t3c5i1_tk = self.im2tk(self.t3c5i1_im)
                     self.t3c5i1.configure(image=self.t3c5i1_tk)
                     self.t3c5br5.configure(text="N/A")
@@ -1451,7 +1604,21 @@ class GuiClass(tk.Frame):
                     self.t3c5br13.configure(text="N/A")
                     self.t3c5br15.configure(text="N/A")
                     self.t3c5ar18.configure(text="N/A")
-                self.resizeEventTab3()
+                # Possible Submission
+                self.t3c6i1_im = self.t3c1i1_im.copy()
+                self.t3c6i1_org_width,self.t3c6i1_org_height = self.t3c6i1_im.size
+                self.t3c6i1_tk = self.im2tk(self.t3c6i1_im)
+                self.t3c6i1.configure(image=self.t3c6i1_tk)
+                self.t3c6br5.configure(text=self.pendingList[self.t3_current_target-1][0].shape)
+                self.t3c6br7.configure(text=self.findMostCommonValue(self.pending_bg_color))
+                self.t3c6br9.configure(text=self.pendingList[self.t3_current_target-1][0].alphanumeric)
+                self.t3c6br11.configure(text=self.findMostCommonValue(self.pending_alpha_color))
+                self.t3c6br13.configure(text=self.findMostCommonValue(self.pending_orientation))
+                self.t3c6br15.configure(text=self.pendingList[self.t3_current_target-1][0].type)
+                self.t3c6ar18.configure(text=self.findMostCommonValue(self.pending_description))
+
+                for ii in range(5):
+                    self.resizeEventTab3()
 
 
 
@@ -1494,7 +1661,7 @@ class GuiClass(tk.Frame):
         @rtype:  None
         @return: None
         """
-        self.updateManualSubmissionTab()
+        #self.updateManualSubmissionTab()
         self.serverConnected = self.interface.ping()
         if self.serverConnected:
             if self.t3_current_target < len(self.pendingList):
@@ -1515,7 +1682,7 @@ class GuiClass(tk.Frame):
         @rtype:  None
         @return: None
         """
-        self.updateManualSubmissionTab()
+        #self.updateManualSubmissionTab()
         self.serverConnected = self.interface.ping()
         if self.serverConnected:
             if self.t3_current_target > 1:
@@ -1541,6 +1708,44 @@ class GuiClass(tk.Frame):
         print(self.target_id)
         self.updateManualSubmissionTab()
 
+    def findMostCommonValue(self, classifications):
+        """
+        Calculate the most common value in a specified column (useful for all the enum columns)
+
+        @type classifications: list of value lists (ie: from a cursor.fetchall())
+        @param classifications: database rows to use to calculate the average
+        @type clmnNun: int
+        @param clmnNum: Integer of the column to access in each row to get values for avg calculation
+        """
+
+        # dictionary keeps track of how many times we've seen a particular column value
+        # EX: {
+        #       "red": 2,
+        #        "white": 1}
+        valueCounts = {}
+        # for each classification in our list of classifications
+        # a classification here is a list
+        for classification in classifications:
+            if classification is not None:
+                # if the value at the classification has not been added to our dictionary yet
+                if classification not in valueCounts:
+                    valueCounts[classification] = 0
+                valueCounts[classification] += 1 # increment the particular value in the dict
+
+        if valueCounts: # if the dictionary isnt empty
+            mostCommon = max(valueCounts, key=valueCounts.get)
+            return mostCommon
+        return None # if there are no values for this particular field, return None
+
+    def getYawAngle(self,imageID):
+        info = self.interface.getImageInfo(imageID)
+        image_state = self.interface.getStateByTs(info.time_stamp)
+        if image_state == None:
+            #yaw_angle = 0.0
+            yaw = np.random.uniform(0,360)
+        else:
+            yaw = image_state.yaw
+        return(yaw)
 
 
 if __name__ == "__main__":
