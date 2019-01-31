@@ -1704,7 +1704,7 @@ class GuiClass(tk.Frame):
         @rtype:  None
         @return: None
         """
-        self.interface.postSubmitTargetById(self.target_id,True)
+        self.interface.postSubmitTargetById(self.target_id)
         print(self.target_id)
         self.updateManualSubmissionTab()
 
