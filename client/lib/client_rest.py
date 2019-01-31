@@ -603,6 +603,8 @@ class ImagingInterface:
         @rtype:  StateMeasurement
         @return: StateMeasurement object closest to the given timestamp if it connects to the server, otherwise None
         """
+        if ts is None:
+            return None
         self.debug("getStateByTs(ts={})".format(ts))
         state = requests.get(self.url + "/state/ts/" + str(ts))
         self.debug("response code:: {}".format(state.status_code))

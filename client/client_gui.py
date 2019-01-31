@@ -1738,10 +1738,13 @@ class GuiClass(tk.Frame):
         return None # if there are no values for this particular field, return None
 
     def getYawAngle(self,imageID):
-        info = self.interface.getImageInfo(imageID)
-        image_state = self.interface.getStateByTs(info.time_stamp)
+        info = self.interface.getCroppedImageInfo(imageID)
+        image_state = None
+        if info is not None:
+            image_state = self.interface.getStateByTs(info.time_stamp)
         if image_state == None:
             #yaw_angle = 0.0
+            # todo: eventually remove this
             yaw = np.random.uniform(0,360)
         else:
             yaw = image_state.yaw
