@@ -8,3 +8,4 @@ server/images/
 *.idea/
 autonomous/generate_dataset/pics/*
 postman_import.json
+*.zip

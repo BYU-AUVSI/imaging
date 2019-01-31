@@ -1,0 +1,297 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>geolocation</title><meta name="generator" content="MATLAB 9.2"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2019-01-23"><meta name="DC.source" content="geolocation.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#2">Initial Parameters</a></li><li><a href="#3">Test Data</a></li><li><a href="#4">Rotation Matrices</a></li><li><a href="#5">Geolocation Algorithm</a></li><li><a href="#6">Publish</a></li></ul></div><pre class="codeinput">clear
+clc
+</pre><h2 id="2">Initial Parameters</h2><p>These initial parameters represent data that will be readily accessible on the MAV. Pixel Array, Field of View angle are specifications of the camera, and the normalized line of sight vector (l_cusp_c)  will be determined by either the autonomous detection program, or the manual interface clients.</p><pre class="codeinput"><span class="comment">% The X and Y pixels denote the location of the target in the image plane</span>
+<span class="comment">% and are centered about the center of the image, with +x extending to the</span>
+<span class="comment">% 'right' and +y extending 'down'</span>
+x_pixel = 0;
+y_pixel = 0;
+
+M = 4000; <span class="comment">%square pixel array (width and height if square)</span>
+Ex = 2000; <span class="comment">%x_pixel/M; %X pixels, normalized</span>
+Ey = -2000; <span class="comment">%y_pixel/M; %Y pixels, normalized</span>
+fov_ang = 0.872665;<span class="comment">%sym('fov_ang'); %field of View angle --&gt; A6000 83* - 32* (in radians)</span>
+f = M/(2*tan(fov_ang/2)); <span class="comment">%focal length  in units of pixels</span>
+
+l_cusp_c = 1/sqrt(Ex^2 + Ey^2 + f^2) * [Ex;Ey;f];
+
+roll = 0; <span class="comment">%sym('roll'); %Radians</span>
+pitch = 0; <span class="comment">%sym('pitch'); %RadiansP</span>
+yaw = 0; <span class="comment">%sym('yaw'); %Radians</span>
+
+alpha_az = yaw;<span class="comment">%sym('az'); %Azmuth Angle: Should equal yaw.</span>
+alpha_el = -pi/2 + pitch;<span class="comment">%sym('el'); %Elevation Angle: "Pitch" of the gimbal</span>
+
+k_i = [0;0;1];
+
+<span class="comment">%P vector should be in Meters</span>
+Pn = 0;
+Pe = 0;
+Pd = -100;<span class="comment">%sym('Pd');</span>
+h = -Pd;<span class="comment">%;sym('h');</span>
+</pre><h2 id="3">Test Data</h2><p>These coordinates are used for testing the geolocation algorithm, and include the groundstation and two different MAV locations</p><pre class="codeinput">LatGroundStation = 40.174470;
+LonGroundStation = -111.654497;
+CoorGroundStation = [LatGroundStation, LonGroundStation];
+
+LatMav = 40.175606;
+LonMav = -111.652994;
+CoorMav = [LatMav, LonMav];
+
+LatMav2 = 40.174375;
+LonMav2 = -111.655704;
+CoorMav2 = [LatMav2, LonMav2];
+
+MavLocationData = GPStoMeters(LatGroundStation, LonGroundStation, LatMav2, LonMav2);
+
+Pn = MavLocationData(1);
+Pe = MavLocationData(2);
+</pre><h2 id="4">Rotation Matrices</h2><p>The location of the target is defined in the camera coordinate frame system, and must be transformed into the inertial frame to provide GPS coordinates. This transformation is done using three rotation matrices: Moving Camera frame to Gimbal coordinates; Gimbal coordinates to body frame; body frame to inertial frame</p><pre class="codeinput"><span class="comment">% R_b_to_i</span>
+<span class="comment">% Found on page 15 of Small Unmanned Aircraft</span>
+
+R_v_to_b = [cos(pitch)*cos(yaw) cos(pitch)*sin(yaw) -sin(pitch); <span class="keyword">...</span>
+    sin(roll)*sin(pitch)*cos(yaw)-cos(roll)*sin(yaw) <span class="keyword">...</span>
+    sin(roll)*sin(pitch)*sin(yaw)+cos(roll)*cos(yaw) sin(roll)*cos(pitch); <span class="keyword">...</span>
+    cos(roll)*sin(pitch)*cos(yaw)+sin(roll)*sin(yaw) <span class="keyword">...</span>
+    cos(roll)*sin(pitch)*sin(yaw)-sin(roll)*cos(yaw) cos(roll)*cos(pitch)];
+
+R_b_to_v = R_v_to_b'; <span class="comment">%R_v_b is a translation of R_i_b. It may work, but I may need one more step.</span>
+R_b_to_i = R_b_to_v;
+
+<span class="comment">% ------------------------------------------------------------------------</span>
+<span class="comment">% R_g_to_b</span>
+<span class="comment">% Found on page 227 of Small Unmanned Aircraft</span>
+R_b_to_g1 = [cos(alpha_az) sin(alpha_az) 0;<span class="keyword">...</span>
+    -sin(alpha_az) cos(alpha_az) 0;<span class="keyword">...</span>
+    0 0 1];
+
+R_g1_to_g = [cos(alpha_el) 0 -sin(alpha_el);<span class="keyword">...</span>
+    0 1 0;<span class="keyword">...</span>
+    sin(alpha_el) 0 cos(alpha_el)];
+
+R_b_to_g = R_g1_to_g*R_b_to_g1;
+R_g_to_b = R_b_to_g';
+
+<span class="comment">% ------------------------------------------------------------------------</span>
+<span class="comment">% R_c_to_g</span>
+<span class="comment">% Found on page 227 of Small Unmanned Aircraft</span>
+R_g_to_c = [0 1 0;<span class="keyword">...</span>
+    0 0 1;<span class="keyword">...</span>
+    1 0 0];
+R_c_to_g = R_g_to_c';
+
+<span class="comment">% For simplicity, the three Rotation matrices are combined into one below</span>
+RbiRbgRcg = R_b_to_i * R_g_to_b * R_c_to_g;
+</pre><h2 id="5">Geolocation Algorithm</h2><p>The algorithm uses the line of sight vector in the camera frame and rotates it into the inertial frame. There, it is multiplied by a scaler (height) and divided by the projection of the transformed line of sight vector onto the unit vector k_i in the inertial frame</p><pre class="codeinput">P_i_mav = [Pn;Pe;Pd];
+P_i_obj = P_i_mav + h*(RbiRbgRcg*l_cusp_c)/(dot(k_i,(RbiRbgRcg*l_cusp_c)));
+</pre><h2 id="6">Publish</h2><p>The coordinates of the groundstation are used as a reference for determining the relative position of the MAV, which is in turn used to find the relative position of the target. The coordinates for all three points are shown below.</p><pre class="codeinput">disp(<span class="string">"Groundstation Coordinates "</span>);
+fprintf(LatGroundStation + <span class="string">" "</span> + LonGroundStation + <span class="string">"\n\n"</span>);
+
+disp(<span class="string">"MAV Coordinates "</span>);
+fprintf(LatMav2 + <span class="string">" "</span> + LonMav2 + <span class="string">"\n\n"</span>);
+
+TargetCoordinates = MeterstoGPS(LatGroundStation, LonGroundStation, P_i_obj(1), P_i_obj(2));
+disp(<span class="string">"Target Coordinates "</span>);
+fprintf(TargetCoordinates(1)+<span class="string">", "</span>+TargetCoordinates(2) + <span class="string">"\n"</span>);
+</pre><pre class="codeoutput">Groundstation Coordinates 
+40.1745 -111.6545
+
+MAV Coordinates 
+40.1744 -111.6557
+
+Target Coordinates 
+40.1748, -111.6552
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2017a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+clear
+clc
+%% Initial Parameters
+% These initial parameters represent data that will be readily accessible
+% on the MAV. Pixel Array, Field of View angle are specifications of the
+% camera, and the normalized line of sight vector (l_cusp_c)  will be
+% determined by either the autonomous detection program, or the manual
+% interface clients.
+
+% The X and Y pixels denote the location of the target in the image plane
+% and are centered about the center of the image, with +x extending to the
+% 'right' and +y extending 'down'
+x_pixel = 0;
+y_pixel = 0;
+
+M = 4000; %square pixel array (width and height if square)
+Ex = 2000; %x_pixel/M; %X pixels, normalized
+Ey = -2000; %y_pixel/M; %Y pixels, normalized
+fov_ang = 0.872665;%sym('fov_ang'); %field of View angle REPLACE_WITH_DASH_DASH> A6000 83* - 32* (in radians)
+f = M/(2*tan(fov_ang/2)); %focal length  in units of pixels
+
+l_cusp_c = 1/sqrt(Ex^2 + Ey^2 + f^2) * [Ex;Ey;f];
+
+roll = 0; %sym('roll'); %Radians
+pitch = 0; %sym('pitch'); %RadiansP
+yaw = 0; %sym('yaw'); %Radians
+
+alpha_az = yaw;%sym('az'); %Azmuth Angle: Should equal yaw.
+alpha_el = -pi/2 + pitch;%sym('el'); %Elevation Angle: "Pitch" of the gimbal
+
+k_i = [0;0;1];
+
+%P vector should be in Meters
+Pn = 0;
+Pe = 0;
+Pd = -100;%sym('Pd');
+h = -Pd;%;sym('h');
+
+%% Test Data
+% These coordinates are used for testing the geolocation algorithm, and
+% include the groundstation and two different MAV locations
+LatGroundStation = 40.174470;
+LonGroundStation = -111.654497;
+CoorGroundStation = [LatGroundStation, LonGroundStation];
+
+LatMav = 40.175606;
+LonMav = -111.652994;
+CoorMav = [LatMav, LonMav];
+
+LatMav2 = 40.174375;
+LonMav2 = -111.655704;
+CoorMav2 = [LatMav2, LonMav2];
+
+MavLocationData = GPStoMeters(LatGroundStation, LonGroundStation, LatMav2, LonMav2);
+
+Pn = MavLocationData(1);
+Pe = MavLocationData(2);
+
+%% Rotation Matrices
+% The location of the target is defined in the camera coordinate frame
+% system, and must be transformed into the inertial frame to provide GPS
+% coordinates. This transformation is done using three rotation matrices:
+% Moving Camera frame to Gimbal coordinates; Gimbal coordinates to body
+% frame; body frame to inertial frame
+
+% R_b_to_i
+% Found on page 15 of Small Unmanned Aircraft
+
+R_v_to_b = [cos(pitch)*cos(yaw) cos(pitch)*sin(yaw) -sin(pitch); ...
+    sin(roll)*sin(pitch)*cos(yaw)-cos(roll)*sin(yaw) ...
+    sin(roll)*sin(pitch)*sin(yaw)+cos(roll)*cos(yaw) sin(roll)*cos(pitch); ...
+    cos(roll)*sin(pitch)*cos(yaw)+sin(roll)*sin(yaw) ...
+    cos(roll)*sin(pitch)*sin(yaw)-sin(roll)*cos(yaw) cos(roll)*cos(pitch)];
+
+R_b_to_v = R_v_to_b'; %R_v_b is a translation of R_i_b. It may work, but I may need one more step.
+R_b_to_i = R_b_to_v;
+
+% REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
+% R_g_to_b
+% Found on page 227 of Small Unmanned Aircraft
+R_b_to_g1 = [cos(alpha_az) sin(alpha_az) 0;...
+    -sin(alpha_az) cos(alpha_az) 0;...
+    0 0 1];
+
+R_g1_to_g = [cos(alpha_el) 0 -sin(alpha_el);...
+    0 1 0;...
+    sin(alpha_el) 0 cos(alpha_el)];
+
+R_b_to_g = R_g1_to_g*R_b_to_g1;
+R_g_to_b = R_b_to_g';
+
+% REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
+% R_c_to_g
+% Found on page 227 of Small Unmanned Aircraft
+R_g_to_c = [0 1 0;...
+    0 0 1;...
+    1 0 0];
+R_c_to_g = R_g_to_c';
+
+% For simplicity, the three Rotation matrices are combined into one below
+RbiRbgRcg = R_b_to_i * R_g_to_b * R_c_to_g;
+
+%% Geolocation Algorithm
+% The algorithm uses the line of sight vector in the camera frame and
+% rotates it into the inertial frame. There, it is multiplied by a scaler
+% (height) and divided by the projection of the transformed line of sight
+% vector onto the unit vector k_i in the inertial frame
+P_i_mav = [Pn;Pe;Pd];
+P_i_obj = P_i_mav + h*(RbiRbgRcg*l_cusp_c)/(dot(k_i,(RbiRbgRcg*l_cusp_c)));
+
+%% Publish
+% The coordinates of the groundstation are used as a reference for
+% determining the relative position of the MAV, which is in turn used to
+% find the relative position of the target. The coordinates for all three
+% points are shown below.
+disp("Groundstation Coordinates ");
+fprintf(LatGroundStation + " " + LonGroundStation + "\n\n");
+
+disp("MAV Coordinates ");
+fprintf(LatMav2 + " " + LonMav2 + "\n\n");
+
+TargetCoordinates = MeterstoGPS(LatGroundStation, LonGroundStation, P_i_obj(1), P_i_obj(2));
+disp("Target Coordinates ");
+fprintf(TargetCoordinates(1)+", "+TargetCoordinates(2) + "\n");
+##### SOURCE END #####
+--></body></html>
