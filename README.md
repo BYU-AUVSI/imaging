@@ -6,7 +6,7 @@ This package contains (most) all the code used by the imaging subsystem.
 
 `client/` Client code runs the manual classification client and autonomous monitor. This code is run on personal machines.
 
-`autonomous` Code used by the autonomous classifier
+`autonomous/` Code used by the autonomous classifier
 
 **What isn't included?**
 
