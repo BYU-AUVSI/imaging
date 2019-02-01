@@ -56,33 +56,33 @@ Here's how the imaging data moves from the plane to the AUVSI judge server
 
 ### Step 1: Plane to ground
 
-By streaming data over ROS, retrieve relevant imaging information (Images, state and gps data) and place it in the serve's database.
+By streaming data over ROS, retrieve relevant imaging information (Images, state and gps data) and place it in the server's database.
 
-Relevant code: ros_handler, incoming_image_dao incoming_state_dao, incoming_gps_dao
+*Relevant code: ros_handler, incoming_image_dao incoming_state_dao, incoming_gps_dao*
 
 ### Step 2: Crop
 
 Clients cycle through raw images retrieved from the server and crop relevant targets out. These cropped images are then posted to the server.
 
-Relevant code: raw_image_handler, crop_image_handler incoming_image_dao, cropped_image_dao
+*Relevant code: raw_image_handler, crop_image_handler incoming_image_dao, cropped_image_dao*
 
 ### Step 3: Classify
 
-This step encapsulates a few different processes. Once cropped images are created, geolocation, orientation and general target classification can take place. For all three of these processes, they generally get the cropped image from the crop_image table, or the classification table. Once their process is complete they post the classification updates back to the server, which then updates the classification information for the image. State and gps information come in use here for orientation and geolocation processes.
+This step encapsulates a few different processes. Once cropped images are created, geolocation, orientation and general target classification can take place. All three of these processes get the cropped image from the crop_image table, or the classification table. Once their process is complete they post the classification updates back to the server, which then updates the classification information for the image. State and gps information come in use here for orientation and geolocation processes.
 
-Relevant code: crop_image_handler, state_handler, gps_handler, image_classification_handler, cropped_image_dao, classification_dao, incoming_state_dao, incoming_gps_dao
+*Relevant code: crop_image_handler, state_handler, gps_handler, image_classification_handler, cropped_image_dao, classification_dao, incoming_state_dao, incoming_gps_dao*
 
 ### Step 4: Target Selection
 
-The server auto-bins classifications into different targets based on the classified **type, shape and alphanumeric**. Often multiple classifications will be completed for a single target. The target selection step allows the client to pick the best image and classification details for final submission to the judges.
+The server automatically bins classifications into different targets based on the classified **type, shape and alphanumeric**. Often multiple classifications will be completed for a single target. The target selection step allows the client to pick the best image and classification details for final submission to the judges.
 
-Relevant code: image_classification_handler, classification_dao, image_submit_handler, submitted_target_dao
+*Relevant code: image_classification_handler, classification_dao, image_submit_handler, submitted_target_dao*
 
 ### Step 5: Judge submission via interop
 
-Once the target is selected by the client, the final target is placed in a queue for ros_handler to publish back onto the ROS network. The published target is picked up by the interop_pkg where it is finally submitted to the judge's server.
+Once the target is selected by the client, the final target is placed in a queue for ros_handler to publish back onto the ROS network. The published target is picked up by the interop_pkg where it is finally submitted to the AUVSI judge server.
 
-Relevant code: submitted_target_dao, ros_handler
+*Relevant code: submitted_target_dao, ros_handler*
 
 ## Motivation
 
