@@ -33,8 +33,8 @@ Tab2
     Verify rotating picture based on yaw angle
 Tab3:
     Change submission if there is user input
-    Disable radiobuttons for N/A images
     Add functionalty to delete a classification
+    Show in blue which target it's pulling the "to submit" classificaiton from
     Fix resizing issues
     Change font of labels when I change them to match ttktheme
     Change radiobuttons to match ttktheme
@@ -1440,6 +1440,11 @@ class GuiClass(tk.Frame):
                 self.t3c1br13.configure(text="N/A")
                 self.t3c1br15.configure(text="N/A")
                 self.t3c1r18.configure(text="N/A")
+                self.t3c1r4.configure(state=tk.DISABLED)
+                self.t3c1r8.configure(state=tk.DISABLED)
+                self.t3c1r12.configure(state=tk.DISABLED)
+                self.t3c1r14.configure(state=tk.DISABLED)
+                self.t3c1r19.configure(state=tk.DISABLED)
                 self.t3c6br5.configure(text="N/A")
                 self.t3c6br7.configure(text="N/A")
                 self.t3c6br9.configure(text="N/A")
@@ -1475,6 +1480,12 @@ class GuiClass(tk.Frame):
                 self.pending_alpha_color = [self.pendingList[self.t3_current_target-1][0].alphanumeric_color]
                 self.pending_orientation = [self.pendingList[self.t3_current_target-1][0].orientation]
                 self.pending_description = [self.pendingList[self.t3_current_target-1][0].description]
+                self.t3c1r4.configure(state=tk.NORMAL)
+                self.t3c1r8.configure(state=tk.NORMAL)
+                self.t3c1r12.configure(state=tk.NORMAL)
+                self.t3c1r14.configure(state=tk.NORMAL)
+                self.t3c1r19.configure(state=tk.NORMAL)
+
 
                 if pics > 1:
                     query = self.interface.getCroppedImage(self.pendingList[self.t3_current_target-1][1].crop_id)
@@ -1496,6 +1507,11 @@ class GuiClass(tk.Frame):
                     self.pending_alpha_color.append(self.pendingList[self.t3_current_target-1][1].alphanumeric_color)
                     self.pending_orientation.append(self.pendingList[self.t3_current_target-1][1].orientation)
                     self.pending_description.append(self.pendingList[self.t3_current_target-1][1].description)
+                    self.t3c2r4.configure(state=tk.NORMAL)
+                    self.t3c2r8.configure(state=tk.NORMAL)
+                    self.t3c2r12.configure(state=tk.NORMAL)
+                    self.t3c2r14.configure(state=tk.NORMAL)
+                    self.t3c2r19.configure(state=tk.NORMAL)
                 else:
                     self.t3c2i1_im = self.t3_default_im.copy()
                     self.t3c2i1_org_width,self.t3c2i1_org_height = self.t3c2i1_im.size
@@ -1508,6 +1524,11 @@ class GuiClass(tk.Frame):
                     self.t3c2br13.configure(text="N/A")
                     self.t3c2br15.configure(text="N/A")
                     self.t3c2r18.configure(text="N/A")
+                    self.t3c2r4.configure(state=tk.DISABLED)
+                    self.t3c2r8.configure(state=tk.DISABLED)
+                    self.t3c2r12.configure(state=tk.DISABLED)
+                    self.t3c2r14.configure(state=tk.DISABLED)
+                    self.t3c2r19.configure(state=tk.DISABLED)
                 if pics > 2:
                     query = self.interface.getCroppedImage(self.pendingList[self.t3_current_target-1][2].crop_id)
                     self.t3c3i1_im = query[0]
@@ -1527,6 +1548,11 @@ class GuiClass(tk.Frame):
                     self.pending_alpha_color.append(self.pendingList[self.t3_current_target-1][2].alphanumeric_color)
                     self.pending_orientation.append(self.pendingList[self.t3_current_target-1][2].orientation)
                     self.pending_description.append(self.pendingList[self.t3_current_target-1][2].description)
+                    self.t3c3r4.configure(state=tk.NORMAL)
+                    self.t3c3r8.configure(state=tk.NORMAL)
+                    self.t3c3r12.configure(state=tk.NORMAL)
+                    self.t3c3r14.configure(state=tk.NORMAL)
+                    self.t3c3r19.configure(state=tk.NORMAL)
                 else:
                     self.t3c3i1_im = self.t3_default_im.copy()
                     self.t3c3i1_org_width,self.t3c3i1_org_height = self.t3c3i1_im.size
@@ -1539,6 +1565,11 @@ class GuiClass(tk.Frame):
                     self.t3c3br13.configure(text="N/A")
                     self.t3c3br15.configure(text="N/A")
                     self.t3c3r18.configure(text="N/A")
+                    self.t3c3r4.configure(state=tk.DISABLED)
+                    self.t3c3r8.configure(state=tk.DISABLED)
+                    self.t3c3r12.configure(state=tk.DISABLED)
+                    self.t3c3r14.configure(state=tk.DISABLED)
+                    self.t3c3r19.configure(state=tk.DISABLED)
                 if pics > 3:
                     query = self.interface.getCroppedImage(self.pendingList[self.t3_current_target-1][3].crop_id)
                     self.t3c4i1_im = query[0]
@@ -1558,6 +1589,11 @@ class GuiClass(tk.Frame):
                     self.pending_alpha_color.append(self.pendingList[self.t3_current_target-1][3].alphanumeric_color)
                     self.pending_orientation.append(self.pendingList[self.t3_current_target-1][3].orientation)
                     self.pending_description.append(self.pendingList[self.t3_current_target-1][3].description)
+                    self.t3c4r4.configure(state=tk.NORMAL)
+                    self.t3c4r8.configure(state=tk.NORMAL)
+                    self.t3c4r12.configure(state=tk.NORMAL)
+                    self.t3c4r14.configure(state=tk.NORMAL)
+                    self.t3c4r19.configure(state=tk.NORMAL)
                 else:
                     self.t3c4i1_im = self.t3_default_im.copy()
                     self.t3c4i1_org_width,self.t3c4i1_org_height = self.t3c4i1_im.size
@@ -1570,6 +1606,11 @@ class GuiClass(tk.Frame):
                     self.t3c4br13.configure(text="N/A")
                     self.t3c4br15.configure(text="N/A")
                     self.t3c4r18.configure(text="N/A")
+                    self.t3c4r4.configure(state=tk.DISABLED)
+                    self.t3c4r8.configure(state=tk.DISABLED)
+                    self.t3c4r12.configure(state=tk.DISABLED)
+                    self.t3c4r14.configure(state=tk.DISABLED)
+                    self.t3c4r19.configure(state=tk.DISABLED)
                 if pics > 4:
                     query = self.interface.getCroppedImage(self.pendingList[self.t3_current_target-1][4].crop_id)
                     self.t3c5i1_im = query[0]
@@ -1589,6 +1630,11 @@ class GuiClass(tk.Frame):
                     self.pending_alpha_color.append(self.pendingList[self.t3_current_target-1][4].alphanumeric_color)
                     self.pending_orientation.append(self.pendingList[self.t3_current_target-1][4].orientation)
                     self.pending_description.append(self.pendingList[self.t3_current_target-1][4].description)
+                    self.t3c5r4.configure(state=tk.NORMAL)
+                    self.t3c5r8.configure(state=tk.NORMAL)
+                    self.t3c5r12.configure(state=tk.NORMAL)
+                    self.t3c5r14.configure(state=tk.NORMAL)
+                    self.t3c5r19.configure(state=tk.NORMAL)
                 else:
                     self.t3c5i1_im = self.t3_default_im.copy()
                     self.t3c5i1_org_width,self.t3c5i1_org_height = self.t3c5i1_im.size
@@ -1601,6 +1647,11 @@ class GuiClass(tk.Frame):
                     self.t3c5br13.configure(text="N/A")
                     self.t3c5br15.configure(text="N/A")
                     self.t3c5r18.configure(text="N/A")
+                    self.t3c5r4.configure(state=tk.DISABLED)
+                    self.t3c5r8.configure(state=tk.DISABLED)
+                    self.t3c5r12.configure(state=tk.DISABLED)
+                    self.t3c5r14.configure(state=tk.DISABLED)
+                    self.t3c5r19.configure(state=tk.DISABLED)
                 # Possible Submission
                 self.t3c6i1_im = self.t3c1i1_im.copy()
                 self.t3c6i1_org_width,self.t3c6i1_org_height = self.t3c6i1_im.size
