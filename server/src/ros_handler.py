@@ -179,7 +179,7 @@ class RosImagingHandler:
             target_dao = SubmittedTargetDAO(self.configPath)
             # if there are targets waiting to be submitted to the judges
             if target_dao.areTargetsPending():
-
+                # then lets submit them
                 pending = target_dao.getAllPendingTargets()
                 if pending is not None and pending:
                     for target in pending:

@@ -1,1 +1,1 @@
-epydocs --config docs.conf -v
+epydoc --config docs.conf -v
