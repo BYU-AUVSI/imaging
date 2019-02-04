@@ -32,7 +32,6 @@ Tab2
     Resize compass
     Verify rotating picture based on yaw angle
 Tab3:
-    Unselect radiobutton when you move to a different tab
     Change submission if there is user input
     Disable radiobuttons for N/A images
     Add functionalty to delete a classification
@@ -1668,8 +1667,16 @@ class GuiClass(tk.Frame):
                 self.t3_current_target = 0
             else:
                 pass
-        #self.submissionBackgroundColor.set(None)
-        #self.selectBackgroundColor()
+        self.submissionBackgroundColor.set(None)
+        self.selectBackgroundColor()
+        self.submissionAlphanumericColor.set(None)
+        self.selectAlphanumericColor()
+        self.submissionOrientation.set(None)
+        self.selectOrientation()
+        self.submissionDescription.set(None)
+        self.selectDescription()
+        self.submissionImage.set(None)
+        self.selectImage()
         self.updateManualSubmissionTab()
 
     def previousClassified(self,event):
@@ -1691,6 +1698,16 @@ class GuiClass(tk.Frame):
                 self.t3_current_target = 0
             else:
                 pass
+        self.submissionBackgroundColor.set(None)
+        self.selectBackgroundColor()
+        self.submissionAlphanumericColor.set(None)
+        self.selectAlphanumericColor()
+        self.submissionOrientation.set(None)
+        self.selectOrientation()
+        self.submissionDescription.set(None)
+        self.selectDescription()
+        self.submissionImage.set(None)
+        self.selectImage()
         self.updateManualSubmissionTab()
 
 
@@ -1706,6 +1723,7 @@ class GuiClass(tk.Frame):
         """
         self.interface.postSubmitTargetById(self.target_id)
         print(self.target_id)
+
         self.updateManualSubmissionTab()
 
     def findMostCommonValue(self, classifications):
@@ -1751,8 +1769,10 @@ class GuiClass(tk.Frame):
         return(yaw)
 
     def selectBackgroundColor(self):
-        value = self.submissionBackgroundColor.get()
-        print(value)
+        try:
+            value = self.submissionBackgroundColor.get()
+        except Exception:
+            value = None
         self.t3c1ar7.configure(foreground='black')#,font=('normal','11'))
         self.t3c1br7.configure(foreground='black')
         self.t3c2ar7.configure(foreground='black')
@@ -1763,31 +1783,38 @@ class GuiClass(tk.Frame):
         self.t3c4br7.configure(foreground='black')
         self.t3c5ar7.configure(foreground='black')
         self.t3c5br7.configure(foreground='black')
-        self.t3c6ar7.configure(foreground='blue')
-        self.t3c6br7.configure(foreground='blue')
+        self.t3c6ar7.configure(foreground='black')
+        self.t3c6br7.configure(foreground='black')
 
-        if value == 1:
-            self.t3c1br7.configure(foreground='blue')
-            self.t3c1ar7.configure(foreground='blue')
-        elif value == 2:
-            self.t3c2ar7.configure(foreground='blue')
-            self.t3c2br7.configure(foreground='blue')
-        elif value == 3:
-            self.t3c3ar7.configure(foreground='blue')
-            self.t3c3br7.configure(foreground='blue')
-        elif value == 4:
-            self.t3c4ar7.configure(foreground='blue')
-            self.t3c4br7.configure(foreground='blue')
-        elif value == 5:
-            self.t3c5ar7.configure(foreground='blue')
-            self.t3c5br7.configure(foreground='blue')
-        else:
+        if value == None:
             pass
-        self.t3c6br7.configure(text=self.pendingList[self.t3_current_target-1][value-1].background_color)
+        else:
+            self.t3c6ar7.configure(foreground='blue')
+            self.t3c6br7.configure(foreground='blue')
+            if value == 1:
+                self.t3c1br7.configure(foreground='blue')
+                self.t3c1ar7.configure(foreground='blue')
+
+            elif value == 2:
+                self.t3c2ar7.configure(foreground='blue')
+                self.t3c2br7.configure(foreground='blue')
+            elif value == 3:
+                self.t3c3ar7.configure(foreground='blue')
+                self.t3c3br7.configure(foreground='blue')
+            elif value == 4:
+                self.t3c4ar7.configure(foreground='blue')
+                self.t3c4br7.configure(foreground='blue')
+            else:
+                self.t3c5ar7.configure(foreground='blue')
+                self.t3c5br7.configure(foreground='blue')
+            self.t3c6br7.configure(text=self.pendingList[self.t3_current_target-1][value-1].background_color)
 
 
     def selectAlphanumericColor(self):
-        value = self.submissionAlphanumericColor.get()
+        try:
+            value = self.submissionAlphanumericColor.get()
+        except Exception:
+            value = None
         self.t3c1ar11.configure(foreground='black')#,font=('normal','11'))
         self.t3c1br11.configure(foreground='black')
         self.t3c2ar11.configure(foreground='black')
@@ -1798,28 +1825,37 @@ class GuiClass(tk.Frame):
         self.t3c4br11.configure(foreground='black')
         self.t3c5ar11.configure(foreground='black')
         self.t3c5br11.configure(foreground='black')
-        self.t3c6ar11.configure(foreground='blue')
-        self.t3c6br11.configure(foreground='blue')
+        self.t3c6ar11.configure(foreground='black')
+        self.t3c6br11.configure(foreground='black')
 
-        if value == 1:
-            self.t3c1br11.configure(foreground='blue')
-            self.t3c1ar11.configure(foreground='blue')
-        elif value == 2:
-            self.t3c2ar11.configure(foreground='blue')
-            self.t3c2br11.configure(foreground='blue')
-        elif value == 3:
-            self.t3c3ar11.configure(foreground='blue')
-            self.t3c3br11.configure(foreground='blue')
-        elif value == 4:
-            self.t3c4ar11.configure(foreground='blue')
-            self.t3c4br11.configure(foreground='blue')
+        if value == None:
+            pass
         else:
-            self.t3c5ar11.configure(foreground='blue')
-            self.t3c5br11.configure(foreground='blue')
-        self.t3c6br11.configure(text=self.pendingList[self.t3_current_target-1][value-1].alphanumeric_color)
+            self.t3c6ar11.configure(foreground='blue')
+            self.t3c6br11.configure(foreground='blue')
+            if value == 1:
+                self.t3c1br11.configure(foreground='blue')
+                self.t3c1ar11.configure(foreground='blue')
+            elif value == 2:
+                self.t3c2ar11.configure(foreground='blue')
+                self.t3c2br11.configure(foreground='blue')
+            elif value == 3:
+                self.t3c3ar11.configure(foreground='blue')
+                self.t3c3br11.configure(foreground='blue')
+            elif value == 4:
+                self.t3c4ar11.configure(foreground='blue')
+                self.t3c4br11.configure(foreground='blue')
+            else:
+                self.t3c5ar11.configure(foreground='blue')
+                self.t3c5br11.configure(foreground='blue')
+            self.t3c6br11.configure(text=self.pendingList[self.t3_current_target-1][value-1].alphanumeric_color)
 
     def selectOrientation(self):
-        value = self.submissionOrientation.get()
+        try:
+            value = self.submissionOrientation.get()
+        except Exception:
+            value = None
+
         self.t3c1ar13.configure(foreground='black')#,font=('normal','11'))
         self.t3c1br13.configure(foreground='black')
         self.t3c2ar13.configure(foreground='black')
@@ -1830,28 +1866,36 @@ class GuiClass(tk.Frame):
         self.t3c4br13.configure(foreground='black')
         self.t3c5ar13.configure(foreground='black')
         self.t3c5br13.configure(foreground='black')
-        self.t3c6ar13.configure(foreground='blue')
-        self.t3c6br13.configure(foreground='blue')
+        self.t3c6ar13.configure(foreground='black')
+        self.t3c6br13.configure(foreground='black')
 
-        if value == 1:
-            self.t3c1br13.configure(foreground='blue')
-            self.t3c1ar13.configure(foreground='blue')
-        elif value == 2:
-            self.t3c2ar13.configure(foreground='blue')
-            self.t3c2br13.configure(foreground='blue')
-        elif value == 3:
-            self.t3c3ar13.configure(foreground='blue')
-            self.t3c3br13.configure(foreground='blue')
-        elif value == 4:
-            self.t3c4ar13.configure(foreground='blue')
-            self.t3c4br13.configure(foreground='blue')
+        if value == None:
+            pass
         else:
-            self.t3c5ar13.configure(foreground='blue')
-            self.t3c5br13.configure(foreground='blue')
-        self.t3c6br13.configure(text=self.pendingList[self.t3_current_target-1][value-1].orientation)
+            self.t3c6ar13.configure(foreground='blue')
+            self.t3c6br13.configure(foreground='blue')
+            if value == 1:
+                self.t3c1br13.configure(foreground='blue')
+                self.t3c1ar13.configure(foreground='blue')
+            elif value == 2:
+                self.t3c2ar13.configure(foreground='blue')
+                self.t3c2br13.configure(foreground='blue')
+            elif value == 3:
+                self.t3c3ar13.configure(foreground='blue')
+                self.t3c3br13.configure(foreground='blue')
+            elif value == 4:
+                self.t3c4ar13.configure(foreground='blue')
+                self.t3c4br13.configure(foreground='blue')
+            else:
+                self.t3c5ar13.configure(foreground='blue')
+                self.t3c5br13.configure(foreground='blue')
+            self.t3c6br13.configure(text=self.pendingList[self.t3_current_target-1][value-1].orientation)
 
     def selectDescription(self):
-        value = self.submissionDescription.get()
+        try:
+            value = self.submissionDescription.get()
+        except Exception:
+            value = None
         self.t3c1r17.configure(foreground='black')#,font=('normal','11'))
         self.t3c1r18.configure(foreground='black')
         self.t3c2r17.configure(foreground='black')
@@ -1862,42 +1906,54 @@ class GuiClass(tk.Frame):
         self.t3c4r18.configure(foreground='black')
         self.t3c5r17.configure(foreground='black')
         self.t3c5r18.configure(foreground='black')
-        self.t3c6r17.configure(foreground='blue')
-        self.t3c6r18.configure(foreground='blue')
+        self.t3c6r17.configure(foreground='black')
+        self.t3c6r18.configure(foreground='black')
 
-        if value == 1:
-            self.t3c1r18.configure(foreground='blue')
-            self.t3c1r17.configure(foreground='blue')
-        elif value == 2:
-            self.t3c2r17.configure(foreground='blue')
-            self.t3c2r18.configure(foreground='blue')
-        elif value == 3:
-            self.t3c3r17.configure(foreground='blue')
-            self.t3c3r18.configure(foreground='blue')
-        elif value == 4:
-            self.t3c4r17.configure(foreground='blue')
-            self.t3c4r18.configure(foreground='blue')
+        if value == None:
+            pass
         else:
-            self.t3c5r17.configure(foreground='blue')
-            self.t3c5r18.configure(foreground='blue')
-        self.t3c6r18.configure(text=self.pendingList[self.t3_current_target-1][value-1].description)
+            self.t3c6r17.configure(foreground='blue')
+            self.t3c6r18.configure(foreground='blue')
+            if value == 1:
+                self.t3c1r18.configure(foreground='blue')
+                self.t3c1r17.configure(foreground='blue')
+            elif value == 2:
+                self.t3c2r17.configure(foreground='blue')
+                self.t3c2r18.configure(foreground='blue')
+            elif value == 3:
+                self.t3c3r17.configure(foreground='blue')
+                self.t3c3r18.configure(foreground='blue')
+            elif value == 4:
+                self.t3c4r17.configure(foreground='blue')
+                self.t3c4r18.configure(foreground='blue')
+            else:
+                self.t3c5r17.configure(foreground='blue')
+                self.t3c5r18.configure(foreground='blue')
+            self.t3c6r18.configure(text=self.pendingList[self.t3_current_target-1][value-1].description)
 
 
     def selectImage(self):
-        value = self.submissionImage.get()
-        if value == 1:
-            self.t3c6i1_im = self.t3c1i1_im.copy()
-        elif value == 2:
-            self.t3c6i1_im = self.t3c2i1_im.copy()
-        elif value == 3:
-            self.t3c6i1_im = self.t3c3i1_im.copy()
-        elif value == 4:
-            self.t3c6i1_im = self.t3c4i1_im.copy()
+        try:
+            value = self.submissionImage.get()
+        except Exception:
+            value = None
+
+        if value == None:
+            pass
         else:
-            self.t3c6i1_im = self.t3c5i1_im.copy()
-        self.t3c6i1_org_width,self.t3c6i1_org_height = self.t3c6i1_im.size
-        self.t3c6i1_tk = self.im2tk(self.t3c6i1_im)
-        self.t3c6i1.configure(image=self.t3c6i1_tk)
+            if value == 1:
+                self.t3c6i1_im = self.t3c1i1_im.copy()
+            elif value == 2:
+                self.t3c6i1_im = self.t3c2i1_im.copy()
+            elif value == 3:
+                self.t3c6i1_im = self.t3c3i1_im.copy()
+            elif value == 4:
+                self.t3c6i1_im = self.t3c4i1_im.copy()
+            else:
+                self.t3c6i1_im = self.t3c5i1_im.copy()
+            self.t3c6i1_org_width,self.t3c6i1_org_height = self.t3c6i1_im.size
+            self.t3c6i1_tk = self.im2tk(self.t3c6i1_im)
+            self.t3c6i1.configure(image=self.t3c6i1_tk)
 
 
 if __name__ == "__main__":
