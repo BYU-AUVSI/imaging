@@ -27,3 +27,5 @@ This package relies on a few other BYU-Auvsi packages. Changes to them could hav
 - [BYU-AUVSI/rosplane/rosplane_msgs/msg/State.msg](https://github.com/BYU-AUVSI/rosplane/blob/RC1.0/rosplane_msgs/msg/State.msg)
 
 - [BYU-AUVSI/inertial_sense_ros/GPS/GPS.msg](https://github.com/BYU-AUVSI/inertial_sense_ros)
+
+- [BYU-AUVSI/uav_msgs/msg/InteropImage.msg](https://github.com/BYU-AUVSI/uav_msgs)
