@@ -185,6 +185,8 @@ class RosImagingHandler:
                     for target in pending:
                         imageMsg = self.targetToInteropMsg(target)
                         self.target_pub_.publish(imageMsg)
+
+                        target_dao.setTargetSubmitted(target.target, target.autonomous)
                         
             else: # some debug printing
                 print("no targets pending")

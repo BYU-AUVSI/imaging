@@ -39,7 +39,7 @@ class SubmittedTargetDAO(BaseDAO):
 
     def getTarget(self, target, autonomous):
         getTarget = """SELECT * FROM submitted_target 
-            WHERE target = %s and autonomous = %s LIMIT 1;"""
+            WHERE target = %s AND autonomous = %s LIMIT 1;"""
 
         selectedTarget = super(SubmittedTargetDAO, self).basicTopSelect(getTarget, (target, autonomous))
         if selectedTarget is not None:
@@ -74,6 +74,12 @@ class SubmittedTargetDAO(BaseDAO):
         getTarget += ";"
 
         return super(SubmittedTargetDAO, self).getResultsAsModelList(getTarget, inputParams)
+
+    def setTargetSubmitted(self, target_id, autonomous):
+        updateTarget = """UPDATE submitted_target SET submitted = 'submitted'
+            WHERE target = %s AND autonomous = %s RETURNING target;"""
+
+        return -1 != super(SubmittedTargetDAO, self).getResultingId(updateTarget, (target_id, autonomous))
 
     def removeTarget(self, target, autonomous):
         removeSql = "DELETE FROM submitted_target WHERE target = %s and autonomous = %s;"
