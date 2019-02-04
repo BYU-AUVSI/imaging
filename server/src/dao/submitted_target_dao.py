@@ -52,11 +52,28 @@ class SubmittedTargetDAO(BaseDAO):
 
         return super(SubmittedTargetDAO, self).getResultsAsModelList(getTarget, (autonomous,))
 
-    def getAllPendingTargets(self, autonomous):
-        getTarget = """SELECT * FROM submitted_target 
-            WHERE autonomous = %s AND submitted = 'pending';"""
+    def getAllPendingTargets(self, autonomous=None):
+        """
+        Get a list of all targets (autonomous or manual) that are currently
+        pending submission 
 
-        return super(SubmittedTargetDAO, self).getResultsAsModelList(getTarget, (autonomous,))
+        @type autonomous: boolean
+        @param autonomous: Optional param to specify whether only autonomous or 
+            only manual targets should be retrieved. If not specified, both will
+            be returned
+        """
+        getTarget = """SELECT * FROM submitted_target 
+            WHERE submitted = 'pending'"""
+
+        inputParams = None
+
+        if autonomous is not None:
+            inputParams = (autonomous,)
+            getTarget += " AND autonomous = %s"
+        
+        getTarget += ";"
+
+        return super(SubmittedTargetDAO, self).getResultsAsModelList(getTarget, inputParams)
 
     def removeTarget(self, target, autonomous):
         removeSql = "DELETE FROM submitted_target WHERE target = %s and autonomous = %s;"
@@ -64,6 +81,17 @@ class SubmittedTargetDAO(BaseDAO):
         rcount = super(SubmittedTargetDAO, self).getNumAffectedRows(removeSql, (target, autonomous))
 
         return rcount > 0
+
+    def areTargetsPending(self):
+        """
+        Returns boolean as to whether there are targets currently pending 
+        submission in the table
+        """
+        checkForPending = """SELECT * FROM submitted_target
+            WHERE submitted = 'pending' LIMIT 1;"""
+
+        selectedTarget = super(SubmittedTargetDAO, self).basicTopSelect(checkForPending, None)
+        return selectedTarget is not None and selectedTarget
 
     def newModelFromRow(self, row, json=None):
         return submitted_target(sqlRow=row)
