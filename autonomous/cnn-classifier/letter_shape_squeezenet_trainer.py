@@ -182,6 +182,8 @@ image_datasets = {x: datasets.ImageFolder(os.path.join(data_dir, x), data_transf
 dataloaders_dict = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=batch_size, shuffle=True, num_workers=4) for x in ['train', 'val']}
 
 # Detect if we have a GPU available
+if torch.cuda.is_available():
+    print("USING CUDA")
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 # Send the model to GPU
