@@ -76,8 +76,7 @@ class submitted_target:
     def toDict(self, exclude=None):
         dict = {}
         for attr, value in self.__dict__.items():
-            if value is not None:
-                dict[attr] = value
+            dict[attr] = value
         return dict
 
     def toAuvsiJson(self, exclude=None):
@@ -85,11 +84,11 @@ class submitted_target:
         if hasattr(self, 'type') and self.type == 'emergent':
             # generate an emergent target output
             for attr, value in self.__dict__.items():
-                if attr in self.EMERGENT_KEYS_TO_INCLUDE and value is not None:
+                if attr in self.EMERGENT_KEYS_TO_INCLUDE:
                     dict[attr] = value
         else:
             for attr, value in self.__dict__.items():
-                if attr not in self.KEYS_TO_EXCLUDE and value is not None:
+                if attr not in self.KEYS_TO_EXCLUDE:
                     dict[attr] = value            
         
         if exclude is not None:
