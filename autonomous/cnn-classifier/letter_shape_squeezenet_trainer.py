@@ -46,7 +46,7 @@ class RandomGaussianBlur(object):
 data_dir = "./dataset"
 
 # Number of classes in the dataset
-num_classes = 26
+num_classes = 339 # 13 shapes * 26 letters + 1 no target class
 
 # Batch size for training (change depending on how much memory you have)
 batch_size = 8
