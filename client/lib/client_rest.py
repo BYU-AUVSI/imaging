@@ -160,7 +160,7 @@ class Classification:
     """
     def __init__(self, cropId, classType, orientation, shape, bgColor, alpha, alphaColor,
                  submitted=None, desc=None, classId=None, target=None, latitude=None, longitude=None):
-        self.id = classId
+        self.class_id = classId
         self.crop_id = cropId
         self.target = target
         self.type = classType
