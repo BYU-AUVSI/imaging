@@ -66,6 +66,11 @@ RUN git clone https://github.com/BYU-AUVSI/inertial_sense_ros.git ins && \
     cd ins && \
     git submodule update --init --recursive
 
+# Get package dependencies. The InteropImage msg from uav_msgs
+# is used to transport targets in their final form to the interop_pkg
+# for final submission to judges
+RUN git clone https://github.com/BYU-AUVSI/uav_msgs.git uav_msgs
+
 # copy over our actual server code
 COPY server /opt/catkin_ws/src/server
 
@@ -85,6 +90,7 @@ RUN pip install -r internal/pip-requirements.txt
 
 # run our postgres setup script
 USER postgres
+RUN echo "There will likely be 4-5 errors about the `imaging_server` role not existing. This is OK. For more info on these errors see internal/setup_database.sql"
 RUN /etc/init.d/postgresql start \
     && psql -f /opt/catkin_ws/src/server/setup/internal/setup_database.sql
 

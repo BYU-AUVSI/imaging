@@ -1,8 +1,5 @@
 /*
  * Postgresql: Setup Auvsi Imaging database
- * NOTE: this script assumes you're starting from
- *       a fresh install of postgres, and may cause
- *       cause errors other wise
  */
 
  

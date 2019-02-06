@@ -17,6 +17,7 @@
     <depend>image_transport</depend>
     <depend>sensor_msgs</depend>
     <depend>cv_bridge</depend>
+    <depend>uav_msgs</depend>
     <!-- To subscribe to gps data: -->
     <depend>inertial_sense</depend>
 

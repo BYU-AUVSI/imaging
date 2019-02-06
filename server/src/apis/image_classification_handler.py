@@ -7,7 +7,7 @@ from dao.model.outgoing_autonomous import outgoing_autonomous
 from config import defaultConfigPath
 from apis.helper_methods import checkXManual
 
-api = Namespace('image/class/', description='Image classification calls for manual clients route through here')
+api = Namespace('image/class/', description='Image classification calls route through here')
 
 cropIDParser = api.parser()
 cropIDParser.add_argument('X-Crop-Id', location='headers', type=int, required=True, help='The cropped_id this classification is associated with')
