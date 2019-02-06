@@ -31,7 +31,7 @@ class TestAutonomousSubmitPendingGet(unittest.TestCase):
         self.assertIsNotNone(resp)
         self.assertEqual(len(resp), 1)
         self.assertEqual(len(resp[0]), 1)
-        self.assertEqual(resp[0][0].id, int(classId))
+        self.assertEqual(resp[0][0].class_id, int(classId))
         self.assertEqual(resp[0][0].crop_id, int(cropId))
 
         # post a second crop and classification which goes to a different target:
@@ -70,10 +70,10 @@ class TestAutonomousSubmitPendingGet(unittest.TestCase):
             self.assertEqual(resp[0][1].type, 'standard')
             self.assertEqual(resp[0][1].shape, 'square')
             self.assertEqual(resp[0][0].alphanumeric, 'T')
-            self.assertEqual(resp[1][0].id, int(classId))
+            self.assertEqual(resp[1][0].class_id, int(classId))
             self.assertEqual(resp[1][0].crop_id, int(cropId))
         elif len(resp[1]) == 2:
-            self.assertEqual(resp[0][0].id, int(classId))
+            self.assertEqual(resp[0][0].class_id, int(classId))
             self.assertEqual(resp[0][0].crop_id, int(cropId))
             self.assertEqual(resp[1][1].type, 'standard')
             self.assertEqual(resp[1][1].shape, 'square')

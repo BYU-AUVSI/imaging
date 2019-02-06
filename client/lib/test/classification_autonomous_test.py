@@ -48,7 +48,7 @@ class TestAutonomousClassificationGetId(unittest.TestCase):
         self.assertIsInstance(resp, Classification)
         # check data integrity from our previous post
         self.assertEqual(resp.crop_id, cropId)
-        self.assertEqual(resp.id, classId)
+        self.assertEqual(resp.class_id, classId)
         self.assertEqual(resp.type, 'off_axis')
         self.assertEqual(resp.orientation, 'NE')
         self.assertEqual(resp.shape, 'square')
@@ -97,10 +97,10 @@ class TestAutonomousClassificationGetAll(unittest.TestCase):
         modelA = resp[0]
         modelB = resp[1]
 
-        if modelA.id == classId:
+        if modelA.class_id == classId:
             #check model A
             self.assertEqual(modelA.crop_id, cropId)
-            self.assertEqual(modelA.id, classId)
+            self.assertEqual(modelA.class_id, classId)
             self.assertEqual(modelA.type, 'standard')
             self.assertEqual(modelA.orientation, 'NE')
             self.assertEqual(modelA.shape, 'circle')
@@ -113,7 +113,7 @@ class TestAutonomousClassificationGetAll(unittest.TestCase):
 
             # check model B
             self.assertEqual(modelB.crop_id, cropId2)
-            self.assertEqual(modelB.id, classId2)
+            self.assertEqual(modelB.class_id, classId2)
             self.assertEqual(modelB.type, 'off_axis')
             self.assertEqual(modelB.orientation, 'NE')
             self.assertEqual(modelB.shape, 'square')
@@ -123,10 +123,10 @@ class TestAutonomousClassificationGetAll(unittest.TestCase):
             self.assertEqual(modelB.submitted, 'unsubmitted')
             self.assertEqual(modelB.description, '')
             self.assertIsNotNone(modelB.target)
-        elif modelA.id == classId2:
+        elif modelA.class_id == classId2:
             #check model B
             self.assertEqual(modelB.crop_id, cropId)
-            self.assertEqual(modelB.id, classId)
+            self.assertEqual(modelB.class_id, classId)
             self.assertEqual(modelB.type, 'standard')
             self.assertEqual(modelB.orientation, 'NE')
             self.assertEqual(modelB.shape, 'circle')
@@ -139,7 +139,7 @@ class TestAutonomousClassificationGetAll(unittest.TestCase):
 
             # check model A
             self.assertEqual(modelA.crop_id, cropId2)
-            self.assertEqual(modelA.id, classId2)
+            self.assertEqual(modelA.class_id, classId2)
             self.assertEqual(modelA.type, 'off_axis')
             self.assertEqual(modelA.orientation, 'NE')
             self.assertEqual(modelA.shape, 'square')
