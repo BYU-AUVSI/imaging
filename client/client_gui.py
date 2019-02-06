@@ -45,7 +45,7 @@ Tab4:
 
 KNOWN BUGS:
     Weird exit is bound to an event (doesn't do anything) when rerun in iPython3
-    When you click on the 2nd tab right at the beginning, and then use the left/intruder_height
+    When you click on the 2nd tab right at the beginning, and then use the left/right
         buttons, it moves one tab, then unbinds like it's supposed to.
 '''
 
@@ -1718,6 +1718,14 @@ class GuiClass(tk.Frame):
                 self.t3_current_target = 0
             else:
                 pass
+
+        #reset submission variables
+        self.submit_crop_id = None
+        self.submit_orientation = None
+        self.submit_bg_color = None
+        self.submit_alpha_color = None
+        self.submit_desc = None
+
         self.submissionBackgroundColor.set(None)
         self.selectBackgroundColor()
         self.submissionAlphanumericColor.set(None)
@@ -1729,6 +1737,7 @@ class GuiClass(tk.Frame):
         self.submissionImage.set(None)
         self.selectImage()
         self.updateManualSubmissionTab()
+
 
     def previousClassified(self,event):
         """
@@ -1749,6 +1758,14 @@ class GuiClass(tk.Frame):
                 self.t3_current_target = 0
             else:
                 pass
+
+        #reset submission variables
+        self.submit_crop_id = None
+        self.submit_orientation = None
+        self.submit_bg_color = None
+        self.submit_alpha_color = None
+        self.submit_desc = None
+
         self.submissionBackgroundColor.set(None)
         self.selectBackgroundColor()
         self.submissionAlphanumericColor.set(None)
@@ -1772,9 +1789,25 @@ class GuiClass(tk.Frame):
         @rtype:  None
         @return: None
         """
-        self.interface.postSubmitTargetById(self.target_id)
-        print(self.target_id)
-
+        print(self.submit_crop_id)
+        print(self.submit_orientation)
+        print(self.submit_bg_color)
+        print(self.submit_alpha_color)
+        print(self.submit_desc)
+        submission = client_rest.TargetSubmission(self.submit_crop_id,self.submit_orientation,self.submit_bg_color,self.submit_alpha_color,self.submit_desc)
+        self.interface.postSubmitTargetById(self.target_id,submission)
+        if self.t3_current_target == self.t3_total_targets:
+            self.t3_current_target -= 1
+        self.submissionBackgroundColor.set(None)
+        self.selectBackgroundColor()
+        self.submissionAlphanumericColor.set(None)
+        self.selectAlphanumericColor()
+        self.submissionOrientation.set(None)
+        self.selectOrientation()
+        self.submissionDescription.set(None)
+        self.selectDescription()
+        self.submissionImage.set(None)
+        self.selectImage()
         self.updateManualSubmissionTab()
 
     def findMostCommonValue(self, classifications):
@@ -1845,7 +1878,6 @@ class GuiClass(tk.Frame):
             if value == 1:
                 self.t3c1br7.configure(foreground='blue')
                 self.t3c1ar7.configure(foreground='blue')
-
             elif value == 2:
                 self.t3c2ar7.configure(foreground='blue')
                 self.t3c2br7.configure(foreground='blue')
@@ -1859,7 +1891,7 @@ class GuiClass(tk.Frame):
                 self.t3c5ar7.configure(foreground='blue')
                 self.t3c5br7.configure(foreground='blue')
             self.t3c6br7.configure(text=self.pendingList[self.t3_current_target-1][value-1].background_color)
-
+            self.submit_bg_color = self.pendingList[self.t3_current_target-1][value-1].class_id
 
     def selectAlphanumericColor(self):
         try:
@@ -1900,6 +1932,7 @@ class GuiClass(tk.Frame):
                 self.t3c5ar11.configure(foreground='blue')
                 self.t3c5br11.configure(foreground='blue')
             self.t3c6br11.configure(text=self.pendingList[self.t3_current_target-1][value-1].alphanumeric_color)
+            self.submit_alpha_color = self.pendingList[self.t3_current_target-1][value-1].class_id
 
     def selectOrientation(self):
         try:
@@ -1941,6 +1974,7 @@ class GuiClass(tk.Frame):
                 self.t3c5ar13.configure(foreground='blue')
                 self.t3c5br13.configure(foreground='blue')
             self.t3c6br13.configure(text=self.pendingList[self.t3_current_target-1][value-1].orientation)
+            self.submit_orientation = self.pendingList[self.t3_current_target-1][value-1].class_id
 
     def selectDescription(self):
         try:
@@ -1981,7 +2015,7 @@ class GuiClass(tk.Frame):
                 self.t3c5r17.configure(foreground='blue')
                 self.t3c5r18.configure(foreground='blue')
             self.t3c6r18.configure(text=self.pendingList[self.t3_current_target-1][value-1].description)
-
+            self.submit_desc = self.pendingList[self.t3_current_target-1][value-1].class_id
 
     def selectImage(self):
         try:
@@ -2005,7 +2039,7 @@ class GuiClass(tk.Frame):
             self.t3c6i1_org_width,self.t3c6i1_org_height = self.t3c6i1_im.size
             self.t3c6i1_tk = self.im2tk(self.t3c6i1_im)
             self.t3c6i1.configure(image=self.t3c6i1_tk)
-
+            self.submit_crop_id = self.pendingList[self.t3_current_target-1][value-1].class_id
 
 if __name__ == "__main__":
     root = tk.Tk()
