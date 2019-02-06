@@ -1789,11 +1789,6 @@ class GuiClass(tk.Frame):
         @rtype:  None
         @return: None
         """
-        print(self.submit_crop_id)
-        print(self.submit_orientation)
-        print(self.submit_bg_color)
-        print(self.submit_alpha_color)
-        print(self.submit_desc)
         submission = client_rest.TargetSubmission(self.submit_crop_id,self.submit_orientation,self.submit_bg_color,self.submit_alpha_color,self.submit_desc)
         self.interface.postSubmitTargetById(self.target_id,submission)
         if self.t3_current_target == self.t3_total_targets:
@@ -1857,18 +1852,18 @@ class GuiClass(tk.Frame):
             value = self.submissionBackgroundColor.get()
         except Exception:
             value = None
-        self.t3c1ar7.configure(foreground='black')#,font=('normal','11'))
-        self.t3c1br7.configure(foreground='black')
-        self.t3c2ar7.configure(foreground='black')
-        self.t3c2br7.configure(foreground='black')
-        self.t3c3ar7.configure(foreground='black')
-        self.t3c3br7.configure(foreground='black')
-        self.t3c4ar7.configure(foreground='black')
-        self.t3c4br7.configure(foreground='black')
-        self.t3c5ar7.configure(foreground='black')
-        self.t3c5br7.configure(foreground='black')
-        self.t3c6ar7.configure(foreground='black')
-        self.t3c6br7.configure(foreground='black')
+        self.t3c1ar7.configure(foreground='#636363')#,font=('normal','11'))
+        self.t3c1br7.configure(foreground='#636363')
+        self.t3c2ar7.configure(foreground='#636363')
+        self.t3c2br7.configure(foreground='#636363')
+        self.t3c3ar7.configure(foreground='#636363')
+        self.t3c3br7.configure(foreground='#636363')
+        self.t3c4ar7.configure(foreground='#636363')
+        self.t3c4br7.configure(foreground='#636363')
+        self.t3c5ar7.configure(foreground='#636363')
+        self.t3c5br7.configure(foreground='#636363')
+        self.t3c6ar7.configure(foreground='#636363')
+        self.t3c6br7.configure(foreground='#636363')
 
         if value == None:
             pass
@@ -1898,18 +1893,18 @@ class GuiClass(tk.Frame):
             value = self.submissionAlphanumericColor.get()
         except Exception:
             value = None
-        self.t3c1ar11.configure(foreground='black')#,font=('normal','11'))
-        self.t3c1br11.configure(foreground='black')
-        self.t3c2ar11.configure(foreground='black')
-        self.t3c2br11.configure(foreground='black')
-        self.t3c3ar11.configure(foreground='black')
-        self.t3c3br11.configure(foreground='black')
-        self.t3c4ar11.configure(foreground='black')
-        self.t3c4br11.configure(foreground='black')
-        self.t3c5ar11.configure(foreground='black')
-        self.t3c5br11.configure(foreground='black')
-        self.t3c6ar11.configure(foreground='black')
-        self.t3c6br11.configure(foreground='black')
+        self.t3c1ar11.configure(foreground='#636363')#,font=('normal','11'))
+        self.t3c1br11.configure(foreground='#636363')
+        self.t3c2ar11.configure(foreground='#636363')
+        self.t3c2br11.configure(foreground='#636363')
+        self.t3c3ar11.configure(foreground='#636363')
+        self.t3c3br11.configure(foreground='#636363')
+        self.t3c4ar11.configure(foreground='#636363')
+        self.t3c4br11.configure(foreground='#636363')
+        self.t3c5ar11.configure(foreground='#636363')
+        self.t3c5br11.configure(foreground='#636363')
+        self.t3c6ar11.configure(foreground='#636363')
+        self.t3c6br11.configure(foreground='#636363')
 
         if value == None:
             pass
@@ -1940,18 +1935,18 @@ class GuiClass(tk.Frame):
         except Exception:
             value = None
 
-        self.t3c1ar13.configure(foreground='black')#,font=('normal','11'))
-        self.t3c1br13.configure(foreground='black')
-        self.t3c2ar13.configure(foreground='black')
-        self.t3c2br13.configure(foreground='black')
-        self.t3c3ar13.configure(foreground='black')
-        self.t3c3br13.configure(foreground='black')
-        self.t3c4ar13.configure(foreground='black')
-        self.t3c4br13.configure(foreground='black')
-        self.t3c5ar13.configure(foreground='black')
-        self.t3c5br13.configure(foreground='black')
-        self.t3c6ar13.configure(foreground='black')
-        self.t3c6br13.configure(foreground='black')
+        self.t3c1ar13.configure(foreground='#636363')#,font=('normal','11'))
+        self.t3c1br13.configure(foreground='#636363')
+        self.t3c2ar13.configure(foreground='#636363')
+        self.t3c2br13.configure(foreground='#636363')
+        self.t3c3ar13.configure(foreground='#636363')
+        self.t3c3br13.configure(foreground='#636363')
+        self.t3c4ar13.configure(foreground='#636363')
+        self.t3c4br13.configure(foreground='#636363')
+        self.t3c5ar13.configure(foreground='#636363')
+        self.t3c5br13.configure(foreground='#636363')
+        self.t3c6ar13.configure(foreground='#636363')
+        self.t3c6br13.configure(foreground='#636363')
 
         if value == None:
             pass
@@ -1981,18 +1976,18 @@ class GuiClass(tk.Frame):
             value = self.submissionDescription.get()
         except Exception:
             value = None
-        self.t3c1r17.configure(foreground='black')#,font=('normal','11'))
-        self.t3c1r18.configure(foreground='black')
-        self.t3c2r17.configure(foreground='black')
-        self.t3c2r18.configure(foreground='black')
-        self.t3c3r17.configure(foreground='black')
-        self.t3c3r18.configure(foreground='black')
-        self.t3c4r17.configure(foreground='black')
-        self.t3c4r18.configure(foreground='black')
-        self.t3c5r17.configure(foreground='black')
-        self.t3c5r18.configure(foreground='black')
-        self.t3c6r17.configure(foreground='black')
-        self.t3c6r18.configure(foreground='black')
+        self.t3c1r17.configure(foreground='#636363')#,font=('normal','11'))
+        self.t3c1r18.configure(foreground='#636363')
+        self.t3c2r17.configure(foreground='#636363')
+        self.t3c2r18.configure(foreground='#636363')
+        self.t3c3r17.configure(foreground='#636363')
+        self.t3c3r18.configure(foreground='#636363')
+        self.t3c4r17.configure(foreground='#636363')
+        self.t3c4r18.configure(foreground='#636363')
+        self.t3c5r17.configure(foreground='#636363')
+        self.t3c5r18.configure(foreground='#636363')
+        self.t3c6r17.configure(foreground='#636363')
+        self.t3c6r18.configure(foreground='#636363')
 
         if value == None:
             pass
