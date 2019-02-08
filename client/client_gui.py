@@ -293,8 +293,14 @@ class GuiClass(tk.Frame):
         self.t2c2l16_var.set("")
         self.t2c2l16 = ttk.Entry(self.tab2,textvariable=self.t2c2l16_var)
         self.t2c2l16.grid(row=46,column=10,columnspan=2,rowspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+
+        self.t2c2r48a = ttk.Label(self.tab2, anchor=tk.E, text='Submission Status: ')
+        self.t2c2r48a.grid(row=48,column=4,columnspan=2,rowspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t2c2lr48b = ttk.Label(self.tab2, anchor=tk.W, text='N/A')
+        self.t2c2lr48b.grid(row=48,column=6,columnspan=2,rowspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+
         self.t2c2l17 = ttk.Button(self.tab2, text="Submit Classification",command=self.submitClassification)
-        self.t2c2l17.grid(row=48,column=4,columnspan=8,rowspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t2c2l17.grid(row=48,column=8,columnspan=4,rowspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
         self.disableEmergentDescription()
 
         # Column Three
@@ -1134,12 +1140,18 @@ class GuiClass(tk.Frame):
                 self.cropped_np = np.array(query[0])
                 yaw_angle = self.getYawAngle(self.imageID)
                 self.cropped_np = imutils.rotate_bound(self.cropped_np,yaw_angle)
+                status = query[2]
+                if status:
+                    self.t2c2lr48b.configure(text='submitted',foreground='green')
+                else:
+                    self.t2c2lr48b.configure(text='unsubmitted',foreground='red')
             time1 = time.time()
             self.cropped_im = self.np2im(self.cropped_np)
             self.cropped_width,self.cropped_height = self.cropped_im.size
             self.cropped_resized_im = self.resizeIm(self.cropped_im,self.cropped_width,self.cropped_height,self.t2c2i1_width,self.t2c2i1_height)
             self.cropped_tk = self.im2tk(self.cropped_resized_im)
             self.t2c2i1.configure(image=self.cropped_tk)
+
             time2 = time.time()
             print("server request = ",time1-time0,"gui = ",time2-time1)
 
@@ -1166,6 +1178,11 @@ class GuiClass(tk.Frame):
                 self.cropped_np = np.array(query[0])
                 yaw_angle = self.getYawAngle(self.imageID)
                 self.cropped_np = imutils.rotate_bound(self.cropped_np,yaw_angle)
+                status = query[2]
+                if status:
+                    self.t2c2lr48b.configure(text='submitted',foreground='green')
+                else:
+                    self.t2c2lr48b.configure(text='unsubmitted',foreground='red')
             time1 = time.time()
             self.cropped_im = self.np2im(self.cropped_np)
             self.cropped_width,self.cropped_height = self.cropped_im.size
@@ -1353,8 +1370,10 @@ class GuiClass(tk.Frame):
         self.serverConnected = self.interface.ping()
         if self.serverConnected:
             self.cropped_np = self.get_image('assets/noNextCropped.jpg')
+            self.t2c2lr48b.configure(text='N/A',foreground='#636363')
         else:
             self.cropped_np = self.get_image('assets/server_error.jpg')
+            self.t2c2lr48b.configure(text='N/A',foreground='#636363')
 
     def noPreviousCropped(self):
         """
@@ -1366,8 +1385,10 @@ class GuiClass(tk.Frame):
         self.serverConnected = self.interface.ping()
         if self.serverConnected:
             self.cropped_np = self.get_image('assets/noPreviousCropped.jpg')
+            self.t2c2lr48b.configure(text='N/A',foreground='#636363')
         else:
             self.cropped_np = self.get_image('assets/server_error.jpg')
+            self.t2c2lr48b.configure(text='N/A',foreground='#636363')
 
     def disableEmergentDescription(self,*args):
         """
