@@ -204,7 +204,7 @@ class ImagingInterface:
     def __init__(self,
                  host="127.0.0.1",
                  port="5000",
-                 numIdsStored=50,
+                 numIdsStored=250,
                  isDebug=False,
                  isManual=True):
         """
@@ -230,6 +230,7 @@ class ImagingInterface:
         self.url = "http://" + self.host + ":" + self.port
         self.rawIds = []
         self.cropIds = []
+        self.isCropSubmitted = []
         self.rawIdIndex = 0
         self.cropIdIndex = 0
         self.numIdsStored = numIdsStored
@@ -398,7 +399,7 @@ class ImagingInterface:
             # if we didnt get a good status code
             print("In getCroppedImage(), server returned status code {}".format(img.status_code))
             return None
-        return Image.open(BytesIO(img.content)), cropId
+        return Image.open(BytesIO(img.content)), cropId, self.isCropSubmitted[self.cropIdIndex]
 
     def getNextCroppedImage(self):
         """
@@ -421,10 +422,12 @@ class ImagingInterface:
             cropId = int(img.headers['X-Crop-Id'])
             if len(self.cropIds) >= self.numIdsStored:
                 self.cropIds.pop(0)
+                self.isCropSubmitted.pop(0)
 
             self.cropIds.append(cropId)
+            self.isCropSubmitted.append(False)
             self.debug("Crop ID:: {}".format(cropId))
-            return Image.open(BytesIO(img.content)), cropId
+            return Image.open(BytesIO(img.content)), cropId, False
         else:
             return self.getCroppedImage(self.cropIds[self.cropIdIndex])
 
@@ -753,6 +756,7 @@ class ImagingInterface:
 
         if resp.status_code == 200:
             self.debug("response code:: {}".format(resp.status_code))
+            self.isCropSubmitted[self.cropIdIndex] = True
             return resp
         else:
             print("In postSubmitTargetById(), server returned status code {}".format(resp.status_code))
