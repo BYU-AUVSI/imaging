@@ -3,6 +3,8 @@
 
 from PIL import Image, ImageFont, ImageDraw, ImageFilter
 from tqdm import tqdm
+from skimage.util import random_noise
+import numpy as np
 import math
 import os
 from random import randint
@@ -12,12 +14,12 @@ from random import randint
 DIM_ = 200
 HEIGHT_ = DIM_ # things will probably break if it isnt a square img??
 WIDTH_  = DIM_
-FONT_PT_ = 44
+FONT_PT_ = 52
 X_CENTER_ = WIDTH_  * 0.5
 Y_CENTER_ = HEIGHT_ * 0.5
 ROTATE_STEPS_ = 8 # Number of rotation steps to make. should be divisibile by 360
 # that's right, in our world, you define the alphabet
-ALPHABET_ = list("A") #DEFGHIJKLMNOPQRSTUVWXYZ
+ALPHABET_ = list("A") #BCDEFGHIJKLMNOPQRSTUVWXYZ
 BASE_PATH_ = 'generated/' #path to store the images in, relative to this 
 
 def getPolygonCoordinates(sides, radius, theta):
@@ -48,7 +50,7 @@ def drawTallRect(imgDraw, fillColor):
 
 def drawSemiCircle(imgDraw, fillColor):
     coordinates = [] # list of tuples for coordinates to draw 
-    radius = DIM_*0.45
+    radius = DIM_*0.3
     r2 = (4*(radius)) / (3 * math.pi)
 
     iter = 1000
@@ -131,7 +133,7 @@ def drawHeptagon(imgDraw, fillColor):
 
 def drawOctagon(imgDraw, fillColor):
     imgDraw.polygon(getPolygonCoordinates(8, DIM_*0.25, 0), fill=fillColor)
-    
+
 COLOR_NAMES_ = ["white", "black", "gray", "red", "green", "blue", "yellow", "brown", "purple", "orange"]
 
 # rgb values, list of color lists for each color listed above
@@ -200,7 +202,8 @@ SHAPES_ = {
 }
 
 # intermediate helper variable calculation:
-fnt = ImageFont.truetype('/Library/Fonts/Arial.ttf', FONT_PT_)
+# NOTE: you probably need to change font location depending on your OS
+fnt = ImageFont.truetype('/Library/Fonts/Arial Bold.ttf', FONT_PT_)
 rotateSection = int(360 / ROTATE_STEPS_) # degree range for each rotation. ie: if ROTATE_STEPS_ == 8, then rotate step 1 will be anything from 0-45 deg, step 2 will be a random angle between 45 and 90, etc, etc
 pasteLayerWidth =  int(WIDTH_/1.5)
 pasteLayerHeight = int(HEIGHT_/1.5)
@@ -213,7 +216,7 @@ pbar = tqdm(total=ttlColors * len(ALPHABET_) * ttlRotateSteps * ttlShapeOptions)
 
 for letter in ALPHABET_:
     for letterColor in range(len(COLOR_NAMES_)): # for each base color
-        for subLetterColor in range(COLOR_CHANGES_PER_COLOR): # number of times todo a random color in base color array (ie: do 4 random 'oranges')
+        for subLetterColor in range(COLOR_CHANGES_PER_COLOR): # number of times todo a random color in base color array (ie: do 4 random 'orange' letters)
             for angleIter in range(1, ROTATE_STEPS_+1):
                 for shape in SHAPES_:
 
@@ -226,16 +229,26 @@ for letter in ALPHABET_:
                     shapeDrawn = ImageDraw.Draw(shapeImg)
                     # make the shape a random color that isnt the same as the current letter color
                     randColor = randint(0, len(COLORS_)-1)
-                    while randColor == letterColor:
-                        randColor = randint(0, len(COLORS_)-1)
 
                     randLetterColorIndex = randint(0, len(COLORS_[letterColor])-1)
 
                     randShapeColorIndex = randint(0, len(COLORS_[randColor])-1)
+                    while randColor == letterColor and randShapeColorIndex == randLetterColorIndex:
+                        # just make sure we aren't using the EXACT same color for both shape and letter
+                        randShapeColorIndex = randint(0, len(COLORS_[randColor])-1)
+
                     randRotation = randint(0, 359) # for shape we do a purely random rotation every time
 
                     # draw the actual shape
                     SHAPES_[shape](shapeDrawn, COLORS_[randColor][randShapeColorIndex])
+                    
+                    # apply random noise
+                    # shape_im_arr = np.frombuffer(shapeImg.tobytes(), dtype=np.uint8)
+                    # shape_im_arr = shape_im_arr.reshape((shapeImg.size[1], shapeImg.size[0], 4))    
+                    # shape_im_arr = random_noise(shape_im_arr, mode='localvar', seed=None, clip=True)
+                    # shapeImg = Image.fromarray(255*shape_im_arr.astype('uint8'), 'RGBA') # convert back to PIL image
+                    # shapeImg = shapeImg.filter(ImageFilter.GaussianBlur(radius=2)) # blur the noise so it looks normal
+
                     # shapeImg = shapeImg.rotate(randRotation, expand=1)
                     wShape, hShape = shapeImg.size
 
