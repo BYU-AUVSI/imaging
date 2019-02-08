@@ -230,7 +230,7 @@ class ImagingInterface:
         self.url = "http://" + self.host + ":" + self.port
         self.rawIds = []
         self.cropIds = []
-        self.isCropSubmitted = []
+        self.isCropSubmitted = {} # state of whether a cropped image has a classification submitted (True/False)
         self.rawIdIndex = 0
         self.cropIdIndex = 0
         self.numIdsStored = numIdsStored
@@ -399,7 +399,7 @@ class ImagingInterface:
             # if we didnt get a good status code
             print("In getCroppedImage(), server returned status code {}".format(img.status_code))
             return None
-        return Image.open(BytesIO(img.content)), cropId, self.isCropSubmitted[self.cropIdIndex]
+        return Image.open(BytesIO(img.content)), cropId, cropId in self.isCropSubmitted and self.isCropSubmitted[cropId]
 
     def getNextCroppedImage(self):
         """
@@ -421,11 +421,11 @@ class ImagingInterface:
 
             cropId = int(img.headers['X-Crop-Id'])
             if len(self.cropIds) >= self.numIdsStored:
+                del self.isCropSubmitted[self.cropIds[0]]
                 self.cropIds.pop(0)
-                self.isCropSubmitted.pop(0)
 
             self.cropIds.append(cropId)
-            self.isCropSubmitted.append(False)
+            self.isCropSubmitted[cropId] = False
             self.debug("Crop ID:: {}".format(cropId))
             return Image.open(BytesIO(img.content)), cropId, False
         else:
@@ -659,7 +659,7 @@ class ImagingInterface:
         headers = {'X-Crop-Id': str(manClass.crop_id), 'X-Manual': str(self.isManual)}
         resp = requests.post(url, headers=headers, json=manClass.toDict())
         if resp.status_code == 200:
-            self.isCropSubmitted[self.cropIdIndex] = True
+            self.isCropSubmitted[manClass.crop_id] = True
             self.debug("response code:: {}".format(resp.status_code))
             return resp
         else:

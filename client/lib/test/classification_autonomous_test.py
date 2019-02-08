@@ -3,7 +3,7 @@ from client_rest import ImagingInterface
 from client_rest import Classification
 from test.test_helpers import resetAutonomousDb as resetDb
 
-class TestAutonomousCroppedPost(unittest.TestCase):
+class TestAutonomousClassificationPost(unittest.TestCase):
     def test(self):
         resetDb()
 
@@ -15,7 +15,7 @@ class TestAutonomousCroppedPost(unittest.TestCase):
         self.assertIsNotNone(resp)
         self.assertEqual(resp.status_code, 200) # assert successful post to cropped
 
-        cropId = int(resp.headers['X-Crop-Id'])
+        _, cropId, _ = rest.getNextCroppedImage() # get the cropId as they would in the gui
 
         classToPost = Classification(cropId, 'standard', 'NE', 'circle', 'white', 'T', 'yellow')
 
@@ -37,7 +37,7 @@ class TestAutonomousClassificationGetId(unittest.TestCase):
         resp = rest.postCroppedImage(ret[1], ret[0], [22, 22], [236, 236])
         self.assertIsNotNone(resp)
         self.assertEqual(resp.status_code, 200) # assert successful post to cropped
-        cropId = int(resp.headers['X-Crop-Id'])
+        _, cropId, _ = rest.getNextCroppedImage() # get the cropId 
         classToPost = Classification(cropId, 'off_axis', 'NE', 'square', 'orange', 'T', 'black')
         resp = rest.postClass(classToPost)
         self.assertIsNotNone(resp)
@@ -71,7 +71,7 @@ class TestAutonomousClassificationGetAll(unittest.TestCase):
         resp = rest.postCroppedImage(ret[1], ret[0], [22, 22], [236, 236])
         self.assertIsNotNone(resp)
         self.assertEqual(resp.status_code, 200) # assert successful post to cropped
-        cropId = int(resp.headers['X-Crop-Id'])
+        _, cropId, _ = rest.getNextCroppedImage() # get the cropId 
         classToPost = Classification(cropId, 'standard', 'NE', 'circle', 'white', 'T', 'yellow')
         resp = rest.postClass(classToPost)
         self.assertIsNotNone(resp)
@@ -81,7 +81,7 @@ class TestAutonomousClassificationGetAll(unittest.TestCase):
         resp = rest.postCroppedImage(ret[1], ret[0], [22, 22], [236, 236])
         self.assertIsNotNone(resp)
         self.assertEqual(resp.status_code, 200) # assert successful post to cropped
-        cropId2 = int(resp.headers['X-Crop-Id'])
+        _, cropId2, _ = rest.getNextCroppedImage() # get the cropId 
         classToPost = Classification(cropId2, 'off_axis', 'NE', 'square', 'orange', 'T', 'black')
         resp = rest.postClass(classToPost)
         self.assertIsNotNone(resp)
@@ -164,7 +164,7 @@ class TestAutonomousClassificationDelete(unittest.TestCase):
         self.assertIsNotNone(resp)
         self.assertEqual(resp.status_code, 200) # assert successful post to cropped
 
-        cropId = int(resp.headers['X-Crop-Id'])
+        _, cropId, _ = rest.getNextCroppedImage() # get the cropId 
 
         classToPost = Classification(cropId, 'standard', 'NE', 'circle', 'white', 'T', 'yellow')
 
@@ -193,7 +193,7 @@ class TestAutonomousClassificationUpdate(unittest.TestCase):
         self.assertIsNotNone(resp)
         self.assertEqual(resp.status_code, 200) # assert successful post to cropped
 
-        cropId = int(resp.headers['X-Crop-Id'])
+        _, cropId, _ = rest.getNextCroppedImage() # get the cropId 
 
         classToPost = Classification(cropId, 'standard', 'NE', 'circle', 'white', 'T', 'yellow')
 

@@ -15,7 +15,7 @@ class TestManualClassificationPost(unittest.TestCase):
         self.assertIsNotNone(resp)
         self.assertEqual(resp.status_code, 200) # assert successful post to cropped
 
-        cropId = int(resp.headers['X-Crop-Id'])
+        _, cropId, _ = rest.getNextCroppedImage() # get the cropId as they would in the gui
 
         classToPost = Classification(cropId, 'standard', 'NE', 'circle', 'white', 'T', 'yellow')
 
@@ -37,7 +37,7 @@ class TestManualClassificationGetId(unittest.TestCase):
         resp = rest.postCroppedImage(ret[1], ret[0], [22, 22], [236, 236])
         self.assertIsNotNone(resp)
         self.assertEqual(resp.status_code, 200) # assert successful post to cropped
-        cropId = int(resp.headers['X-Crop-Id'])
+        _, cropId, _ = rest.getNextCroppedImage() # get the cropId as they would in the gui
         classToPost = Classification(cropId, 'standard', 'NE', 'circle', 'white', 'T', 'yellow')
         resp = rest.postClass(classToPost)
         self.assertIsNotNone(resp)
@@ -71,7 +71,7 @@ class TestManualClassificationGetAll(unittest.TestCase):
         resp = rest.postCroppedImage(ret[1], ret[0], [22, 22], [236, 236])
         self.assertIsNotNone(resp)
         self.assertEqual(resp.status_code, 200) # assert successful post to cropped
-        cropId = int(resp.headers['X-Crop-Id'])
+        _, cropId, _ = rest.getNextCroppedImage() # get the cropId as they would in the gui
         classToPost = Classification(cropId, 'standard', 'NE', 'circle', 'white', 'T', 'yellow')
         resp = rest.postClass(classToPost)
         self.assertIsNotNone(resp)
@@ -81,7 +81,7 @@ class TestManualClassificationGetAll(unittest.TestCase):
         resp = rest.postCroppedImage(ret[1], ret[0], [22, 22], [236, 236])
         self.assertIsNotNone(resp)
         self.assertEqual(resp.status_code, 200) # assert successful post to cropped
-        cropId2 = int(resp.headers['X-Crop-Id'])
+        _, cropId2, _ = rest.getNextCroppedImage() # get the cropId as they would in the gui
         classToPost = Classification(cropId2, 'off_axis', 'NE', 'square', 'orange', 'T', 'black')
         resp = rest.postClass(classToPost)
         self.assertIsNotNone(resp)
@@ -165,7 +165,7 @@ class TestManualClassificationDelete(unittest.TestCase):
         self.assertIsNotNone(resp)
         self.assertEqual(resp.status_code, 200) # assert successful post to cropped
 
-        cropId = int(resp.headers['X-Crop-Id'])
+        _, cropId, _ = rest.getNextCroppedImage() # get the cropId as they would in the gui
 
         classToPost = Classification(cropId, 'standard', 'NE', 'circle', 'white', 'T', 'yellow')
 
@@ -194,7 +194,7 @@ class TestManualClassificationUpdate(unittest.TestCase):
         self.assertIsNotNone(resp)
         self.assertEqual(resp.status_code, 200) # assert successful post to cropped
 
-        cropId = int(resp.headers['X-Crop-Id'])
+        _, cropId, _ = rest.getNextCroppedImage() # get the cropId as they would in the gui
 
         classToPost = Classification(cropId, 'standard', 'NE', 'circle', 'white', 'T', 'yellow')
 
