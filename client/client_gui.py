@@ -26,18 +26,17 @@ Tab1:
     Add panning feature
     Fix resizing
 Tab2
-    Change crop picture only if focus is not on the entry widget
+    Change crop picture only if focus is not on the entry widget (i.e. annoying
+        arrow button problem when inserting text)
     Change disable color
     Disable other Characteristics for emergent
-    Resize compass
     Verify rotating picture based on yaw angle
 Tab3:
-    Change submission if there is user input
     Add functionalty to delete a classification
     Show in blue which target it's pulling the "to submit" classificaiton from
-    Fix resizing issues
-    Change font of labels when I change them to match ttktheme
     Change radiobuttons to match ttktheme
+    Disable other Characteristics for emergent
+    Fix resizing issues
 Tab4:
     create everything
 
@@ -396,6 +395,8 @@ class GuiClass(tk.Frame):
         self.t3c1r19 = tk.Radiobutton(self.tab3,value=1,variable=self.submissionDescription,command=self.selectDescription)
         self.t3c1r19.configure(foreground="#5c616c",background="#f5f6f7",highlightthickness=0,anchor=tk.N)
         self.t3c1r19.grid(row=19,column=0,columnspan=2,sticky=tk.N+tk.E+tk.W+tk.S,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t3c1b1 = ttk.Button(self.tab3, text="Delete Classification",command=self.deleteClassification1)
+        self.t3c1b1.grid(row=20,column=0,columnspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
 
 
 
@@ -452,6 +453,8 @@ class GuiClass(tk.Frame):
         self.t3c2r19 = tk.Radiobutton(self.tab3,value=2,variable=self.submissionDescription,command=self.selectDescription)
         self.t3c2r19.configure(foreground="#5c616c",background="#f5f6f7",highlightthickness=0,anchor=tk.N)
         self.t3c2r19.grid(row=19,column=2,columnspan=2,sticky=tk.N+tk.E+tk.W+tk.S,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t3c2b1 = ttk.Button(self.tab3, text="Delete Classification",command=self.deleteClassification2)
+        self.t3c2b1.grid(row=20,column=2,columnspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
 
 
         # Column Three
@@ -507,6 +510,8 @@ class GuiClass(tk.Frame):
         self.t3c3r19 = tk.Radiobutton(self.tab3,value=3,variable=self.submissionDescription,command=self.selectDescription)
         self.t3c3r19.configure(foreground="#5c616c",background="#f5f6f7",highlightthickness=0,anchor=tk.N)
         self.t3c3r19.grid(row=19,column=4,columnspan=2,sticky=tk.N+tk.E+tk.W+tk.S,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t3c3b1 = ttk.Button(self.tab3, text="Delete Classification",command=self.deleteClassification3)
+        self.t3c3b1.grid(row=20,column=4,columnspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
 
 
         # Column Four
@@ -562,6 +567,8 @@ class GuiClass(tk.Frame):
         self.t3c4r19 = tk.Radiobutton(self.tab3,value=4,variable=self.submissionDescription,command=self.selectDescription)
         self.t3c4r19.configure(foreground="#5c616c",background="#f5f6f7",highlightthickness=0,anchor=tk.N)
         self.t3c4r19.grid(row=19,column=6,columnspan=2,sticky=tk.N+tk.E+tk.W+tk.S,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t3c4b1 = ttk.Button(self.tab3, text="Delete Classification",command=self.deleteClassification4)
+        self.t3c4b1.grid(row=20,column=6,columnspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
 
 
 
@@ -618,6 +625,8 @@ class GuiClass(tk.Frame):
         self.t3c5r19 = tk.Radiobutton(self.tab3,value=5,variable=self.submissionDescription,command=self.selectDescription)
         self.t3c5r19.configure(foreground="#5c616c",background="#f5f6f7",highlightthickness=0,anchor=tk.N)
         self.t3c5r19.grid(row=19,column=8,columnspan=2,sticky=tk.N+tk.E+tk.W+tk.S,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t3c5b1 = ttk.Button(self.tab3, text="Delete Classification",command=self.deleteClassification5)
+        self.t3c5b1.grid(row=20,column=8,columnspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
 
 
         # Column Six
@@ -1445,6 +1454,7 @@ class GuiClass(tk.Frame):
                 self.t3c1r12.configure(state=tk.DISABLED)
                 self.t3c1r14.configure(state=tk.DISABLED)
                 self.t3c1r19.configure(state=tk.DISABLED)
+                self.t3c1b1.configure(state=tk.DISABLED)
                 self.t3c6br5.configure(text="N/A")
                 self.t3c6br7.configure(text="N/A")
                 self.t3c6br9.configure(text="N/A")
@@ -1485,6 +1495,7 @@ class GuiClass(tk.Frame):
                 self.t3c1r12.configure(state=tk.NORMAL)
                 self.t3c1r14.configure(state=tk.NORMAL)
                 self.t3c1r19.configure(state=tk.NORMAL)
+                self.t3c1b1.configure(state=tk.NORMAL)
 
 
                 if pics > 1:
@@ -1512,6 +1523,7 @@ class GuiClass(tk.Frame):
                     self.t3c2r12.configure(state=tk.NORMAL)
                     self.t3c2r14.configure(state=tk.NORMAL)
                     self.t3c2r19.configure(state=tk.NORMAL)
+                    self.t3c2b1.configure(state=tk.NORMAL)
                 else:
                     self.t3c2i1_im = self.t3_default_im.copy()
                     self.t3c2i1_org_width,self.t3c2i1_org_height = self.t3c2i1_im.size
@@ -1529,6 +1541,8 @@ class GuiClass(tk.Frame):
                     self.t3c2r12.configure(state=tk.DISABLED)
                     self.t3c2r14.configure(state=tk.DISABLED)
                     self.t3c2r19.configure(state=tk.DISABLED)
+                    self.t3c2b1.configure(state=tk.DISABLED)
+
                 if pics > 2:
                     query = self.interface.getCroppedImage(self.pendingList[self.t3_current_target-1][2].crop_id)
                     self.t3c3i1_im = query[0]
@@ -1553,6 +1567,7 @@ class GuiClass(tk.Frame):
                     self.t3c3r12.configure(state=tk.NORMAL)
                     self.t3c3r14.configure(state=tk.NORMAL)
                     self.t3c3r19.configure(state=tk.NORMAL)
+                    self.t3c3b1.configure(state=tk.NORMAL)
                 else:
                     self.t3c3i1_im = self.t3_default_im.copy()
                     self.t3c3i1_org_width,self.t3c3i1_org_height = self.t3c3i1_im.size
@@ -1570,6 +1585,8 @@ class GuiClass(tk.Frame):
                     self.t3c3r12.configure(state=tk.DISABLED)
                     self.t3c3r14.configure(state=tk.DISABLED)
                     self.t3c3r19.configure(state=tk.DISABLED)
+                    self.t3c3b1.configure(state=tk.DISABLED)
+
                 if pics > 3:
                     query = self.interface.getCroppedImage(self.pendingList[self.t3_current_target-1][3].crop_id)
                     self.t3c4i1_im = query[0]
@@ -1594,6 +1611,7 @@ class GuiClass(tk.Frame):
                     self.t3c4r12.configure(state=tk.NORMAL)
                     self.t3c4r14.configure(state=tk.NORMAL)
                     self.t3c4r19.configure(state=tk.NORMAL)
+                    self.t3c4b1.configure(state=tk.NORMAL)
                 else:
                     self.t3c4i1_im = self.t3_default_im.copy()
                     self.t3c4i1_org_width,self.t3c4i1_org_height = self.t3c4i1_im.size
@@ -1611,6 +1629,8 @@ class GuiClass(tk.Frame):
                     self.t3c4r12.configure(state=tk.DISABLED)
                     self.t3c4r14.configure(state=tk.DISABLED)
                     self.t3c4r19.configure(state=tk.DISABLED)
+                    self.t3c4b1.configure(state=tk.DISABLED)
+
                 if pics > 4:
                     query = self.interface.getCroppedImage(self.pendingList[self.t3_current_target-1][4].crop_id)
                     self.t3c5i1_im = query[0]
@@ -1635,6 +1655,7 @@ class GuiClass(tk.Frame):
                     self.t3c5r12.configure(state=tk.NORMAL)
                     self.t3c5r14.configure(state=tk.NORMAL)
                     self.t3c5r19.configure(state=tk.NORMAL)
+                    self.t3c5b1.configure(state=tk.NORMAL)
                 else:
                     self.t3c5i1_im = self.t3_default_im.copy()
                     self.t3c5i1_org_width,self.t3c5i1_org_height = self.t3c5i1_im.size
@@ -1652,6 +1673,7 @@ class GuiClass(tk.Frame):
                     self.t3c5r12.configure(state=tk.DISABLED)
                     self.t3c5r14.configure(state=tk.DISABLED)
                     self.t3c5r19.configure(state=tk.DISABLED)
+                    self.t3c5b1.configure(state=tk.DISABLED)
                 # Possible Submission
                 self.t3c6i1_im = self.t3c1i1_im.copy()
                 self.t3c6i1_org_width,self.t3c6i1_org_height = self.t3c6i1_im.size
@@ -2035,6 +2057,37 @@ class GuiClass(tk.Frame):
             self.t3c6i1_tk = self.im2tk(self.t3c6i1_im)
             self.t3c6i1.configure(image=self.t3c6i1_tk)
             self.submit_crop_id = self.pendingList[self.t3_current_target-1][value-1].class_id
+
+    def deleteClassification1(self):
+        print("1")
+        classification_id = self.pendingList[self.t3_current_target-1][0].class_id
+        self.interface.deleteClass(classification_id)
+        self.updateManualSubmissionTab()
+
+
+    def deleteClassification2(self):
+        print("2")
+        classification_id = self.pendingList[self.t3_current_target-1][1].class_id
+        self.interface.deleteClass(classification_id)
+        self.updateManualSubmissionTab()
+
+    def deleteClassification3(self):
+        print("3")
+        classification_id = self.pendingList[self.t3_current_target-1][2].class_id
+        self.interface.deleteClass(classification_id)
+        self.updateManualSubmissionTab()
+
+    def deleteClassification4(self):
+        print("4")
+        classification_id = self.pendingList[self.t3_current_target-1][3].class_id
+        self.interface.deleteClass(classification_id)
+        self.updateManualSubmissionTab()
+
+    def deleteClassification5(self):
+        print("5")
+        classification_id = self.pendingList[self.t3_current_target-1][4].class_id
+        self.interface.deleteClass(classification_id)
+        self.updateManualSubmissionTab()
 
 if __name__ == "__main__":
     root = tk.Tk()
