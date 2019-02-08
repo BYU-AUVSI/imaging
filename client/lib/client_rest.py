@@ -659,6 +659,7 @@ class ImagingInterface:
         headers = {'X-Crop-Id': str(manClass.crop_id), 'X-Manual': str(self.isManual)}
         resp = requests.post(url, headers=headers, json=manClass.toDict())
         if resp.status_code == 200:
+            self.isCropSubmitted[self.cropIdIndex] = True
             self.debug("response code:: {}".format(resp.status_code))
             return resp
         else:
@@ -756,7 +757,6 @@ class ImagingInterface:
 
         if resp.status_code == 200:
             self.debug("response code:: {}".format(resp.status_code))
-            self.isCropSubmitted[self.cropIdIndex] = True
             return resp
         else:
             print("In postSubmitTargetById(), server returned status code {}".format(resp.status_code))

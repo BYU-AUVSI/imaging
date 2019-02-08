@@ -26,7 +26,7 @@ Tab1:
     Add panning feature
     Fix resizing
 Tab2
-    Give user input of when a target is submitted
+    Fix bug of moving to previous shows same image after 1 classification
     Change crop picture only if focus is not on the entry widget (i.e. annoying
         arrow button problem when inserting text)
     Change disable color
@@ -1126,7 +1126,7 @@ class GuiClass(tk.Frame):
         @rtype:  None
         @return: None
         """
-        print("focus is on: ",self.tab2.focus_get())
+        #print("focus is on: ",self.tab2.focus_get())
         self.pingServer()
         if self.serverConnected:
             time0 = time.time()
@@ -1137,10 +1137,12 @@ class GuiClass(tk.Frame):
             else:
                 self.t2_functional = True
                 self.imageID = query[1]
+                print(self.imageID)
                 self.cropped_np = np.array(query[0])
                 yaw_angle = self.getYawAngle(self.imageID)
                 self.cropped_np = imutils.rotate_bound(self.cropped_np,yaw_angle)
                 status = query[2]
+                print(status)
                 if status:
                     self.t2c2lr48b.configure(text='submitted',foreground='green')
                 else:
@@ -1175,10 +1177,12 @@ class GuiClass(tk.Frame):
             else:
                 self.t2_functional = True
                 self.imageID = query[1]
+                print(self.imageID)
                 self.cropped_np = np.array(query[0])
                 yaw_angle = self.getYawAngle(self.imageID)
                 self.cropped_np = imutils.rotate_bound(self.cropped_np,yaw_angle)
                 status = query[2]
+                print(status)
                 if status:
                     self.t2c2lr48b.configure(text='submitted',foreground='green')
                 else:
