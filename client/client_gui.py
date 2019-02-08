@@ -26,13 +26,14 @@ Tab1:
     Add panning feature
     Fix resizing
 Tab2
+    Give user input of when a target is submitted
     Change crop picture only if focus is not on the entry widget (i.e. annoying
         arrow button problem when inserting text)
     Change disable color
     Disable other Characteristics for emergent
     Verify rotating picture based on yaw angle
+    Show past classifications on the left with autofill option
 Tab3:
-    Add functionalty to delete a classification
     Show in blue which target it's pulling the "to submit" classificaiton from
     Change radiobuttons to match ttktheme
     Disable other Characteristics for emergent
@@ -1109,7 +1110,7 @@ class GuiClass(tk.Frame):
             (self.cx0,self.cy0,self.cx1,self.cy1)
 
 
-    def nextCropped(self,event):
+    def nextCropped(self,event=None):
         """
         Requests and displays next cropped image
 
@@ -1195,6 +1196,7 @@ class GuiClass(tk.Frame):
             description = self.t2c2l16_var.get()
             classification = client_rest.Classification(self.imageID,type,orientation,shape,background_color,alphanumeric,alpha_color,"unsubmitted",description)
             self.interface.postClass(classification)
+            self.nextCropped()
 
     def tabChanged(self,event):
         """
@@ -1255,7 +1257,7 @@ class GuiClass(tk.Frame):
             self.master.unbind("<a>")
             self.master.unbind("<Configure>")
             self.master.unbind("<Control-z>")
-            self.master.unbind("<Return>",self.submitTarget)
+            self.master.unbind("<Return>")
             self.master.bind("<Escape>",self.close_window)
 
         self.master.focus_set()
@@ -2059,32 +2061,26 @@ class GuiClass(tk.Frame):
             self.submit_crop_id = self.pendingList[self.t3_current_target-1][value-1].class_id
 
     def deleteClassification1(self):
-        print("1")
         classification_id = self.pendingList[self.t3_current_target-1][0].class_id
         self.interface.deleteClass(classification_id)
         self.updateManualSubmissionTab()
 
-
     def deleteClassification2(self):
-        print("2")
         classification_id = self.pendingList[self.t3_current_target-1][1].class_id
         self.interface.deleteClass(classification_id)
         self.updateManualSubmissionTab()
 
     def deleteClassification3(self):
-        print("3")
         classification_id = self.pendingList[self.t3_current_target-1][2].class_id
         self.interface.deleteClass(classification_id)
         self.updateManualSubmissionTab()
 
     def deleteClassification4(self):
-        print("4")
         classification_id = self.pendingList[self.t3_current_target-1][3].class_id
         self.interface.deleteClass(classification_id)
         self.updateManualSubmissionTab()
 
     def deleteClassification5(self):
-        print("5")
         classification_id = self.pendingList[self.t3_current_target-1][4].class_id
         self.interface.deleteClass(classification_id)
         self.updateManualSubmissionTab()
