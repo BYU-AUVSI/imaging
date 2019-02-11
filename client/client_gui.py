@@ -20,6 +20,7 @@ Tab0:
     add error handling if entries aren't in the right format
     add error handling if not connected to correct wifi
 Tab1:
+    Show user submission status
     Don't crop if you single click
     If you try to crop off the picture have it go to edge of picture
     Add zooming feature
@@ -34,6 +35,7 @@ Tab2
     Verify rotating picture based on yaw angle
     Show past classifications on the left with autofill option
 Tab3:
+    Fix bug of going straight to page and out of range
     Show in blue which target it's pulling the "to submit" classificaiton from
     Change radiobuttons to match ttktheme
     Disable other Characteristics for emergent
@@ -205,12 +207,13 @@ class GuiClass(tk.Frame):
         # Allows everthing to be resized
         tk.Grid.rowconfigure(self.tab1,0,weight=7)
         tk.Grid.rowconfigure(self.tab1,1,weight=1)
-        tk.Grid.columnconfigure(self.tab1,0,weight=7)
+        tk.Grid.columnconfigure(self.tab1,0,weight=14)
         tk.Grid.columnconfigure(self.tab1,1,weight=1)
+        tk.Grid.columnconfigure(self.tab1,2,weight=1)
 
         self.t1c1i1 = ttk.Label(self.tab1, anchor=tk.CENTER,image=self.img_tk)
         self.t1c1i1.image = self.img_tk
-        self.t1c1i1.grid(row=0,column=0,rowspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t1c1i1.grid(row=0,column=0,rowspan=3,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
         self.t1c1i1.bind("<Button-1>",self.mouse_click)
         self.t1c1i1_width = self.t1c1i1.winfo_width()
         self.t1c1i1_height = self.t1c1i1.winfo_height()
@@ -218,12 +221,17 @@ class GuiClass(tk.Frame):
         self.crop_preview_img_ratio = 1/7.
         self.t1c2i1 = ttk.Label(self.tab1, anchor=tk.CENTER,image=self.crop_preview_tk)
         self.t1c2i1.image = self.crop_preview_tk
-        self.t1c2i1.grid(row=0,column=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t1c2i1.grid(row=0,column=1,columnspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
         #self.t1c2i1_width = self.t1c2i1.winfo_width()
         #self.t1c2i1_height = self.t1c2i1.winfo_height()
 
+        self.t1c2r1a = ttk.Label(self.tab1, anchor=tk.E, text='Submission Status: ')
+        self.t1c2r1a.grid(row=1,column=1,columnspan=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t1c2r1b = ttk.Label(self.tab1, anchor=tk.W, text='N/A')
+        self.t1c2r1b.grid(row=1,column=2,columnspan=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+
         self.t1c2b1 = ttk.Button(self.tab1, text="Submit Crop",command=self.submitCropped)
-        self.t1c2b1.grid(row=1,column=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t1c2b1.grid(row=2,column=1,columnspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
 
 
 
@@ -797,6 +805,7 @@ class GuiClass(tk.Frame):
         # Crop Image
         self.cropImage(int(sr*self.x0),int(sr*self.y0),int(sr*self.x1),int(sr*self.y1))
         self.cropped = True
+        self.t1c2r1b.configure(text="unsubmitted",foreground="red")
 
     def close_window(self,event):
         """
@@ -1061,6 +1070,7 @@ class GuiClass(tk.Frame):
             self.t1c2i1.configure(image=self.crop_preview_tk)
             time2 = time.time()
             print("server request = ",time1-time0,"gui = ",time2-time1)
+            self.t1c2r1b.configure(text="unsubmitted",foreground="red")
 
     def previousRaw(self,event):
         """
@@ -1099,6 +1109,7 @@ class GuiClass(tk.Frame):
             self.t1c2i1.configure(image=self.crop_preview_tk)
             time2 = time.time()
             print("server request = ",time1-time0,"gui = ",time2-time1)
+            self.t1c2r1b.configure(text="unsubmitted",foreground="red")
 
 
     def submitCropped(self,event=None):
@@ -1114,6 +1125,7 @@ class GuiClass(tk.Frame):
         if self.t1_functional:
             self.interface.postCroppedImage(self.imageID,self.crop_preview_im,[self.cx0,self.cy0],[self.cx1,self.cy1])
             (self.cx0,self.cy0,self.cx1,self.cy1)
+            self.t1c2r1b.configure(text="submitted",foreground="green")
 
 
     def nextCropped(self,event=None):
@@ -1137,12 +1149,11 @@ class GuiClass(tk.Frame):
             else:
                 self.t2_functional = True
                 self.imageID = query[1]
-                print(self.imageID)
+                print("ImageID=",self.imageID)
                 self.cropped_np = np.array(query[0])
                 yaw_angle = self.getYawAngle(self.imageID)
                 self.cropped_np = imutils.rotate_bound(self.cropped_np,yaw_angle)
                 status = query[2]
-                print(status)
                 if status:
                     self.t2c2lr48b.configure(text='submitted',foreground='green')
                 else:
@@ -1177,7 +1188,7 @@ class GuiClass(tk.Frame):
             else:
                 self.t2_functional = True
                 self.imageID = query[1]
-                print(self.imageID)
+                print("ImageID=",self.imageID)
                 self.cropped_np = np.array(query[0])
                 yaw_angle = self.getYawAngle(self.imageID)
                 self.cropped_np = imutils.rotate_bound(self.cropped_np,yaw_angle)
@@ -1350,6 +1361,7 @@ class GuiClass(tk.Frame):
             self.org_np = self.get_image('assets/noNextRaw.jpg')
         else:
             self.org_np = self.get_image('assets/server_error.jpg')
+        self.t1c2r1b.configure(text="N/A",foreground="#636363")
 
     def noPreviousRaw(self):
         """
@@ -1363,6 +1375,7 @@ class GuiClass(tk.Frame):
             self.org_np = self.get_image('assets/noPreviousRaw.jpg')
         else:
             self.org_np = self.get_image('assets/server_error.jpg')
+        self.t1c2r1b.configure(text="N/A",foreground="#636363")
 
     def noNextCropped(self):
         """
