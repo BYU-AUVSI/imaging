@@ -158,7 +158,7 @@ class Classification:
         lat/lon/submitted/
         desc = Description (None if not emergent)
     """
-    def __init__(self, cropId, classType, orientation, shape, bgColor, alpha, alphaColor,
+    def __init__(self, cropId, classType, orientation=None, shape=None, bgColor=None, alpha=None, alphaColor=None,
                  submitted=None, desc=None, classId=None, target=None, latitude=None, longitude=None):
         self.class_id = classId
         self.crop_id = cropId
