@@ -11,7 +11,7 @@ pip3 install Pillow, opencv-python, ttkthemes, imutils
 TODO:
 
 All:
-    *possible threading behind the scenese to autosize other tabs
+    possible threading behind the scenese to autosize other tabs
     use consistent naming patterns
     change gui into multiple tabs/classes
     change text font, size, color, etc.
@@ -20,25 +20,23 @@ Tab0:
     add error handling if entries aren't in the right format
     add error handling if not connected to correct wifi
 Tab1:
-    Show user submission status
     Don't crop if you single click
-    If you try to crop off the picture have it go to edge of picture
     Add zooming feature
     Add panning feature
     Fix resizing
 Tab2
-    Fix bug of moving to previous shows same image after 1 classification
-    Change crop picture only if focus is not on the entry widget (i.e. annoying
+    **Fix bug of moving to previous shows same image after 1 classification
+    **Change crop picture only if focus is not on the entry widget (i.e. annoying
         arrow button problem when inserting text)
     Change disable color
-    Disable other Characteristics for emergent
+    **Disable other Characteristics for emergent
     Verify rotating picture based on yaw angle
     Show past classifications on the left with autofill option
 Tab3:
     Fix bug of going straight to page and out of range
     Show in blue which target it's pulling the "to submit" classificaiton from
     Change radiobuttons to match ttktheme
-    Disable other Characteristics for emergent
+    **Disable other Characteristics for emergent
     Fix resizing issues
 Tab4:
     create everything
@@ -757,6 +755,14 @@ class GuiClass(tk.Frame):
         self.offset_y = int((self.t1c1i1_height - self.t1c1i1_img_height)/2.0)
         self.x0 = event.x - self.offset_x
         self.y0 = event.y - self.offset_y
+        if self.x0 > self.resized_im.size[0]:
+            self.x0 = self.resized_im.size[0]
+        elif self.x0 < 0:
+            self.x0 = 0
+        if self.y0 > self.resized_im.size[1]:
+            self.y0 = self.resized_im.size[1]
+        elif self.y0 < 0:
+            self.y0 = 0
 
     def mouse_move(self,event):
         """
@@ -770,6 +776,14 @@ class GuiClass(tk.Frame):
         self.t1c1i1.bind("<ButtonRelease-1>",self.mouse_release)
         self.x1 = event.x - self.offset_x
         self.y1 = event.y - self.offset_y
+        if self.x1 > self.resized_im.size[0]:
+            self.x1 = self.resized_im.size[0]
+        elif self.x1 < 0:
+            self.x1 = 0
+        if self.y1 > self.resized_im.size[1]:
+            self.y1 = self.resized_im.size[1]
+        elif self.y1 < 0:
+            self.y1 = 0
         disp_width,disp_height = self.resized_im.size
         sr = (self.org_width/disp_width + self.org_height/disp_height)/2.0
         self.draw_np = np.copy(self.org_np)
@@ -794,6 +808,14 @@ class GuiClass(tk.Frame):
         self.t1c1i1.unbind("<ButtonRelease-1>")
         self.x1 = event.x - self.offset_x
         self.y1 = event.y - self.offset_y
+        if self.x1 > self.resized_im.size[0]:
+            self.x1 = self.resized_im.size[0]
+        elif self.x1 < 0:
+            self.x1 = 0
+        if self.y1 > self.resized_im.size[1]:
+            self.y1 = self.resized_im.size[1]
+        elif self.y1 < 0:
+            self.y1 = 0
         disp_width,disp_height = self.resized_im.size
         sr = (self.org_width/disp_width + self.org_height/disp_height)/2.0
         self.draw_np = np.copy(self.org_np)
