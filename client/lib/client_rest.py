@@ -232,7 +232,7 @@ class ImagingInterface:
         self.cropIds = []
         self.isCropSubmitted = {} # state of whether a cropped image has a classification submitted (True/False)
         self.rawIdIndex = 0
-        self.cropIdIndex = 0
+        self.cropIdIndex = -1
         self.numIdsStored = numIdsStored
         self.isDebug = isDebug
         self.isManual = isManual
@@ -313,12 +313,12 @@ class ImagingInterface:
         """
         self.debug("getNextRawImage(isManual={})".format(self.isManual))
         self.rawIdIndex += 1
-        if self.rawIdIndex > -1:
-            self.rawIdIndex = 0
+        if self.rawIdIndex >= len(self.rawIds):
             img = requests.get(self.url + "/image/raw/", headers={'X-Manual': str(self.isManual)})
             self.debug("response code:: {}".format(img.status_code))
             if img.status_code != 200:
                 # if we didnt get a good status code
+                self.rawIdIndex = len(self.rawIds)
                 print("In getNextRawImage(), server returned status code {}".format(img.status_code))
                 return None
 
@@ -345,8 +345,8 @@ class ImagingInterface:
         if len(self.rawIds) > 0:
             # if there is no more previous images, get the last image
             self.rawIdIndex -= 1
-            if abs(self.rawIdIndex) > len(self.rawIds):
-                self.rawIdIndex = -1 * (len(self.rawIds)+1)
+            if self.rawIdIndex <= -1:
+                self.rawIdIndex = -1
                 return None
             else: # else get the previous
                 imageId = self.rawIds[self.rawIdIndex]
@@ -410,19 +410,19 @@ class ImagingInterface:
         """
         self.debug("getNextCroppedImage()")
         self.cropIdIndex += 1
-        if self.cropIdIndex > -1:
-            self.cropIdIndex = 0
+        if self.cropIdIndex >= len(self.cropIds):
             img = requests.get(self.url + "/image/crop/", headers={'X-Manual': str(self.isManual)})
             self.debug("response code:: {}".format(img.status_code))
             if img.status_code != 200:
                 # if we didnt get a good status code
+                self.cropIdIndex = len(self.cropIds)
                 print("In getNextCroppedImage() server returned status code {}".format(img.status_code))
                 return None
 
             cropId = int(img.headers['X-Crop-Id'])
             if len(self.cropIds) >= self.numIdsStored:
+                self.isCropSubmitted.pop(0)
                 del self.isCropSubmitted[self.cropIds[0]]
-                self.cropIds.pop(0)
 
             self.cropIds.append(cropId)
             self.isCropSubmitted[cropId] = False
@@ -444,8 +444,8 @@ class ImagingInterface:
         if len(self.cropIds) > 0:
             # if there is no more previous images, get the last image
             self.cropIdIndex -= 1
-            if abs(self.cropIdIndex) > len(self.cropIds):
-                self.cropIdIndex = -1 * (len(self.cropIds)+1)
+            if self.cropIdIndex <= -1:
+                self.cropIdIndex = -1
                 return None
             else: # else get the previous
                 cropId = self.cropIds[self.cropIdIndex]
