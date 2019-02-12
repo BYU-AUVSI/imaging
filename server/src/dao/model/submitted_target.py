@@ -86,11 +86,15 @@ class submitted_target:
             for attr, value in self.__dict__.items():
                 if attr in self.EMERGENT_KEYS_TO_INCLUDE:
                     dict[attr] = value
+                else:
+                    dict[attr] = None
         else:
             for attr, value in self.__dict__.items():
                 if attr not in self.KEYS_TO_EXCLUDE:
-                    dict[attr] = value            
-        
+                    dict[attr] = value
+                else:
+                    dict[attr] = None
+
         if exclude is not None:
             for keyToExclude in exclude:
                 if keyToExclude in dict:

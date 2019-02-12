@@ -15,7 +15,9 @@ from inertial_sense.msg import GPS
 from rosplane_msgs.msg import State
 from sensor_msgs.msg import CompressedImage
 from std_msgs.msg import Float32
-from uav_msgs.msg import InteropImage
+# submit image service
+import rosservice
+from uav_msgs.srv import SubmitImage
 # model classes for the dao
 from dao.model.incoming_gps import incoming_gps
 from dao.model.incoming_image import incoming_image
@@ -65,10 +67,6 @@ class RosImagingHandler:
         self.state_msg_ = incoming_state()
         self.state_interval_ = 0
 
-        # publish for completed targets. Once a target has gone through the entire
-        # system, the server puts the finished target in a table and marks it ready for submission
-        self.target_pub_ = rospy.Publisher('imaging/target', InteropImage, queue_size=10)
-        
         basePath = os.path.abspath(currentPath + '/../images/' + startTs)
         print("Base dir for images:: {}".format(basePath))
 
@@ -76,7 +74,11 @@ class RosImagingHandler:
         # create paths for where raw images will be dumped
         if not os.path.exists(self.raw_path_):
             os.makedirs(self.raw_path_)
-        print("Ingester is all setup!")
+        print("ROS subscribers are all setup!")
+
+        # service for completed targets. Once a target has gone through the entire
+        # system, the server puts the finished target in a table and marks it ready for submission
+        self.submit_image_ = None
 
     def gpsCallback(self, msg):
         """
@@ -151,47 +153,53 @@ class RosImagingHandler:
         returns an InteropImage msg ready for publishing
         """
 
-        msgOut = InteropImage()
-
-        #figure out the image part of the message
+        img = None
+        # figure out the image part of the message
         if hasattr(target, 'crop_path'):
             cv_img = cv2.imread(target.crop_path)
             try:
-                msgOut.image = self.bridge.cv2_to_imgmsg(cv_img, "bgr8")
+                img = self.bridge.cv2_to_imgmsg(cv_img, "bgr8")
             except CvBridgeError as e:
                 print(e)
 
         # this dictionary will hold all the values that we care about
         # pushing into the message for whatever target type we're dealing with
-        # if stuff is none in the final target, then this will also deal with 
-        # checking for that
-        targetDict = target.toAuvsiJson()
-        
-        for key, value in targetDict.items():
-            if hasattr(msgOut, key):
-                setattr(msgOut, key, value)
+        # ie: for emergent it sets irrelevant values to none, to ensure they arent
+        # posted to the judges
+        targetDict  = target.toAuvsiJson()
+        targetDict["image"] = img
 
-        return msgOut
+        return targetDict
 
-    def publishPendingTargets(self):
+    def submitPendingTargets(self):
         # if there are people actually subscribed to this topic
-        if self.target_pub_.get_num_connections() > 0:
-            target_dao = SubmittedTargetDAO(self.configPath)
-            # if there are targets waiting to be submitted to the judges
-            if target_dao.areTargetsPending():
-                # then lets submit them
-                pending = target_dao.getAllPendingTargets()
-                if pending is not None and pending:
-                    for target in pending:
-                        imageMsg = self.targetToInteropMsg(target)
-                        self.target_pub_.publish(imageMsg)
+        if '/imaging/target' not in rosservice.get_service_list():
+            print("Submission service not yet published")
+            return
 
-                        target_dao.setTargetSubmitted(target.target, target.autonomous)
-                        
-            else: # some debug printing
-                print("no targets pending")
-        else:
-            print("nothing subbed to targets")
+        # if the service exists on the network
+        if self.submit_image_ is None:
+            # if this is our first time connecting to the image submit service
+            self.submit_image_ = rospy.ServiceProxy('/imaging/target', SubmitImage)
+        
+        target_dao = SubmittedTargetDAO(self.configPath)
+        # if there are targets waiting to be submitted to the judges
+        if not target_dao.areTargetsPending():
+            print("no targets pending")
+            return
+        
+        # then lets submit them
+        pending = target_dao.getAllPendingTargets()
+        if pending is None or not pending:
+            return
+        
+        for target in pending:
+            imageMsg = self.targetToInteropMsg(target)
+            resp = self.submit_image_(**imageMsg) # map dictionary into function args for submit_image
+
+            if resp.success:
+                # only set a target as submitted if interop says it was successful
+                target_dao.setTargetSubmitted(target.target, target.autonomous)
 
     def run(self):
         # as per (this very old thread): http://ros-users.122217.n3.nabble.com/ros-spinOnce-equivalent-for-rospy-td2317347.html
@@ -199,9 +207,8 @@ class RosImagingHandler:
         # meaning we dont need to worry about spinning to respond to subscriber callbacks
 
         while not rospy.is_shutdown():
-            self.publishPendingTargets() # see if there's anything to publish
+            self.submitPendingTargets() # see if there's anything to publish
             rospy.sleep(1)  # sleep for one second
-                
 
 def main():
 
