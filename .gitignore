@@ -7,4 +7,5 @@ server/images/
 .DS_Store
 *.idea/
 autonomous/generate_dataset/pics/*
+postman_import.json
 *.zip

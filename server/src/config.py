@@ -1,5 +1,7 @@
-import os
+import os, time
 from configparser import ConfigParser
+import time;
+ts = time.time()
 
 ALLOWED_EXTENSIONS = set(['jpg', 'jpeg', 'png'])
 
@@ -10,34 +12,55 @@ def allowedFileType(filename):
     # make sure:
     #   1) the filename even has a . to begin with
     #   2) stuff the the right of the furthest . (rsplit) is one of our allowed extensions
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+    return '.' in filename and getFileExtension(filename) in ALLOWED_EXTENSIONS
+
+def getFileExtension(filename):
+    return filename.rsplit('.', 1)[1].lower()
 
 def defaultConfigPath():
-    return os.path.dirname(os.path.realpath(__file__))  + '/../conf/config.ini'
+    return os.path.abspath(os.path.dirname(os.path.realpath(__file__)) + '/../conf/config.ini')
 
 def getLatestBaseImgDir():
     # root image dir:
-    rootImgDir = os.path.dirname(os.path.realpath(__file__)) +  '/../images/'
-    imgDirs = [d for d in os.listdir(rootImgDir) if os.path.isdir(rootImgDir + d)]
-    imgDirs = [rootImgDir + dirname for dirname in imgDirs]
-    latestSubDir = max(imgDirs, key=os.path.getmtime)
+    rootImgDir = os.path.abspath(os.path.dirname(os.path.realpath(__file__)) + '/../images/')
+    if not os.path.isdir(rootImgDir):
+        os.makedirs(rootImgDir)
+    latestSubDir = rootImgDir
+
+    imgDirs = [d for d in os.listdir(rootImgDir) if os.path.isdir(os.path.join(rootImgDir, d))]
+    imgDirs = [os.path.join(rootImgDir, dirname) for dirname in imgDirs]
+    if not imgDirs:
+        # if the directory is empty, create a folder with the current timestamp
+        ts = str(int(time.time())) + '/'
+        os.makedirs(os.path.join(rootImgDir, ts))
+        latestSubDir = os.path.join(latestSubDir, ts)
+    else:
+        # get the newest (aka largest unix time) folder
+        latestSubDir = max(imgDirs, key=os.path.getmtime)
     return latestSubDir
 
 #TODO: still not totally sold on this...
 def defaultCroppedImgPath():
     latestSubDir = getLatestBaseImgDir()
-    latestSubDir += '/crop/'
+    latestSubDir = os.path.join(latestSubDir, 'crop')
     if not os.path.exists(latestSubDir):
         os.makedirs(latestSubDir)
     return latestSubDir
 
 def defaultRawImgPath():
     latestSubDir = getLatestBaseImgDir()
-    latestSubDir += '/raw/'
+    latestSubDir = os.path.join(latestSubDir, 'raw')
     if not os.path.exists(latestSubDir):
         os.makedirs(latestSubDir)
     return latestSubDir
  
+def defaultSubmittedImgDir():
+    latestSubDir = getLatestBaseImgDir()
+    latestSubDir = os.path.join(latestSubDir, 'submitted')
+    if not os.path.exists(latestSubDir):
+        os.makedirs(latestSubDir)
+    return latestSubDir
+
 def config(filename='config.ini', section='postgresql'):
     parser = ConfigParser() # create parser
     parser.read(filename) # read config file

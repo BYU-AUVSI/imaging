@@ -1,10 +1,23 @@
 from dao.model.point import point
 
-class manual_cropped:
+class cropped_image(object):
+    """
+    Model class for the manual_cropped table. Properties and helper
+    methods for images cropped by the manual client
+    """
 
     def __init__(self, tableValues=None, json=None):
+        """
+        Accepts various formats to instantiate this model object
+
+        @type tableValues: [object]
+        @param tableValues: List of table values, in table column order
+
+        @type json: {object}
+        @param json: Json dictionary of table values. Used by the REST API when receiving data
+        """
         if tableValues is not None:
-            self.id = tableValues[0]
+            self.crop_id = tableValues[0]
             self.image_id = tableValues[1]
             self.time_stamp = tableValues[2]
             self.cropped_path = tableValues[3]
@@ -27,20 +40,28 @@ class manual_cropped:
                 self.crop_coordinate_br = point(x=json['crop_coordinate_br.x'], y=json['crop_coordinate_br.y'])
         else:
             # defaults:
-            self.id = -1
+            self.crop_id = -1
             self.image_id = -1
             self.tapped = False
 
     @property
-    def id(self):    
-        return self._id
-    
-    @id.setter
-    def id(self, id):
-        self._id = id
+    def crop_id(self):
+        """
+        Unique crop id for a cropped image object. created when it's inserted
+        into the table
+        """
+        return self._crop_id
+
+    @crop_id.setter
+    def crop_id(self, crop_id):
+        self._crop_id = crop_id
 
     @property
     def image_id(self):
+        """
+        Unique image_id, publicly exposed by the API and used to access information on the 
+        image in various states (raw, cropped, and classified)
+        """
         return self._image_id
 
     @image_id.setter
@@ -48,7 +69,10 @@ class manual_cropped:
         self._image_id = image_id
     
     @property
-    def time_stamp(self):    
+    def time_stamp(self):
+        """
+        UTC Unix epoch timestamp as float. Indicates when the cropped image was inserted.
+        """
         return self._time_stamp
 
     @time_stamp.setter
@@ -57,6 +81,9 @@ class manual_cropped:
 
     @property
     def cropped_path(self):
+        """
+        Path to where the image is saved on the server filesystem
+        """
         return self._cropped_path
     
     @cropped_path.setter
@@ -65,6 +92,9 @@ class manual_cropped:
 
     @property
     def crop_coordinate_tl(self):
+        """
+        Point object specifying the top-left (tl) coordinate of where the raw image was cropped to produce this cropped image
+        """
         return self._crop_coordinate_tl
     
     @crop_coordinate_tl.setter
@@ -73,6 +103,9 @@ class manual_cropped:
 
     @property
     def crop_coordinate_br(self):
+        """
+        Point object specifying the bottom-right (br) coordinate of where the raw image was cropped to produce this cropped image
+        """
         return self._crop_coordinate_br
     
     @crop_coordinate_br.setter
@@ -81,26 +114,52 @@ class manual_cropped:
 
     @property
     def tapped(self):
+        """
+        Boolean to specify whether the cropped image has been tapped by the classifier
+        """
         return self._tapped
     
     @tapped.setter
     def tapped(self, tapped):
-        self._tapped = tapped
+        self._tapped = bool(tapped)
 
     # TODO: this is hacky and i hate it
     def allProps(self):
-        return ['id', 'image_id', 'time_stamp', 'cropped_path', 'crop_coordinate_tl', 'crop_coordinate_br', 'tapped']
+        return ['crop_id', 'image_id', 'time_stamp', 'cropped_path', 'crop_coordinate_tl', 'crop_coordinate_br', 'tapped']
 
     def toDict(self, exclude=None):
+        """
+        Return attributes contained in this model as a dictionary
+
+        @type exclude: (string)
+        @param exclude: Attribute names to exclude from the generated result
+
+        @rtype: {string}
+        @return: String dictionary of cropped image properties
+        """
         dict = {}
         for attr, value in self.__dict__.items():
             corrected_name = attr[1:] # remove first underscore
             # add everything we weren't explicitly told to exclude
             if exclude is None or corrected_name not in exclude:
-                dict[corrected_name] = value.__str__()
+                if corrected_name == 'crop_coordinate_tl' or corrected_name == 'crop_coordinate_br':
+                    dict[corrected_name] = value.__str__()
+                else:
+                    dict[corrected_name] = value
         return dict
 
     def toJsonResponse(self, exclude=None):
+        """
+        Produce a dictionary of this cropped instance. This is very similar to the 
+        toDict method, but adds a few values to the json to separate crop coordinates
+        into x and y
+
+        @type exclude: (string)
+        @param exclude: Attribute names to exclude from the generated result
+
+        @rtype: {object}
+        @return: Dictionary of attributes stored in this instance, not including those attributes specified in exclude.
+        """
         dict = self.toDict(exclude)
         
         # add crop point values independently:
@@ -118,4 +177,13 @@ class manual_cropped:
         return dict
 
     def insertValues(self):
-        return [self.image_id, self.time_stamp, self.cropped_path, self.tapped]
+        """
+        Get the cropped image as an object list.
+        The properties are ordered as they would be for a
+        barebones table insert. (In many cases crop coordinates are provided for the
+        initial insert, so this method isn't used)
+
+        @rtype: [object]
+        @return: Ordered object list - image_id, time_stamp, cropped_path, tapped
+        """
+        return [self.image_id, self.time_stamp, self.cropped_path]

@@ -3,57 +3,27 @@ from dao.classification_dao import ClassificationDAO
 from dao.model.outgoing_manual import outgoing_manual
 
 class OutgoingManualDAO(ClassificationDAO):
+    """
+    Outgoing_manual wrapper for the ClassificationDAO. Most of the core
+    functionality here happens in the ClassificationDAO
+    """
 
     def __init__(self, configFilePath):
         super(OutgoingManualDAO, self).__init__(configFilePath, 'outgoing_manual')
-
-
-    def checkedReturn(self, rawResponse):
-        if rawResponse is None:
-            return None
-
-        return outgoing_manual(rawResponse)
-
-    def getClassificationByUID(self, id):
+    
+    def getPendingTargets(self):
         """
-        See classification_dao docs. Here we're just making sure we cast the final object 
-        to the proper outgoing classification model type
+        See classification_dao docs
+        Get images grouped by distinct targets pending submission (ei: submitted = 'unsubmitted')
         """
-        selectedClass = super(OutgoingManualDAO, self).getClassificationByUID(id)
-        return self.checkedReturn(selectedClass)
+        return super(OutgoingManualDAO, self).getAllTargets(whereClause=" submitted = 'unsubmitted' ")
 
-    def getAll(self):
+    def newModelFromRow(self, row, json=None):
         """
-        See classification_dao docs. Here we're just making sure we cast the final object 
-        to the proper outgoing classification model type
-        """
-        cur = super(OutgoingManualDAO, self).getAll()
+        Create a new outgoing_manual model object given a list of sql values from the table,
+        or a json dictionary
 
-        results = []
-        if cur is not None:
-            for row in cur:
-                outManualRow = outgoing_manual(row)
-                results.append(outManualRow)
-
-            cur.close() # dont forget to close the cursor
-        
-        return results
-
-    def getClassification(self, id):
+        @type row: [string]
+        @param row: List of ordered string values to be placed within an outgoing_manual object
         """
-        See classification_dao docs. Here we're just making sure we cast the final object 
-        to the proper outgoing classification model type
-        """
-        selectedClass = super(OutgoingManualDAO, self).getClassification(id)
-        return self.checkedReturn(selectedClass)
-
-    def updateClassificationByUID(self, id, updateClass):
-        """
-        See classification_dao docs. Here we're just making sure we cast the final object 
-        to the proper outgoing classification model type. We're also properly setting up the 
-        initial model of stuff to update before passing it to super
-        """
-
-        updateModel = outgoing_manual(json=updateClass)
-        selectedClass = super(OutgoingManualDAO, self).updateClassificationByUID(id, updateModel)
-        return selectedClass # the above getClassification handle putting this into the proper object
+        return outgoing_manual(tableValues=row, json=json)

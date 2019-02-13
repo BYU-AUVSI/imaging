@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, json
 from apis import api
 import argparse
 
@@ -9,7 +9,7 @@ def main():
 
     args = parser.parse_args()
 
-    hostname = "127.0.0.1"
+    hostname = "0.0.0.0"
     if args.host is not None:
         hostname = args.host
 

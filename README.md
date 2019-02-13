@@ -1,4 +1,4 @@
-# Imaging
+# Imaging [![Build Status](https://travis-ci.com/BYU-AUVSI/imaging.svg)](https://travis-ci.com/BYU-AUVSI/imaging)
 
 This package contains (most) all the code used by the imaging subsystem.
 
@@ -6,7 +6,7 @@ This package contains (most) all the code used by the imaging subsystem.
 
 `client/` Client code runs the manual classification client and autonomous monitor. This code is run on personal machines.
 
-`autonomous` Code used by the autonomous classifier
+`autonomous/` Code used by the autonomous classifier
 
 **What isn't included?**
 
@@ -27,3 +27,5 @@ This package relies on a few other BYU-Auvsi packages. Changes to them could hav
 - [BYU-AUVSI/rosplane/rosplane_msgs/msg/State.msg](https://github.com/BYU-AUVSI/rosplane/blob/RC1.0/rosplane_msgs/msg/State.msg)
 
 - [BYU-AUVSI/inertial_sense_ros/GPS/GPS.msg](https://github.com/BYU-AUVSI/inertial_sense_ros)
+
+- [BYU-AUVSI/uav_msgs/msg/InteropImage.msg](https://github.com/BYU-AUVSI/uav_msgs)
