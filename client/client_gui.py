@@ -1241,14 +1241,17 @@ class GuiClass(tk.Frame):
         @return: None
         """
         if self.t2_functional:
-            shape = self.t2c2l2_var.get()
-            alphanumeric = self.t2c2l4.get()
-            orientation = self.t2c2l6_var.get()
-            background_color = self.t2c2l10_var.get()
-            alpha_color = self.t2c2l12_var.get()
             type = self.t2c2l14_var.get()
-            description = self.t2c2l16_var.get()
-            classification = client_rest.Classification(self.imageID,type,orientation,shape,background_color,alphanumeric,alpha_color,"unsubmitted",description)
+            if type == 'emergent':
+                description = self.t2c2l16_var.get()
+                classification = client_rest.Classification(self.imageID,type,desc = description)
+            else:
+                shape = self.t2c2l2_var.get()
+                alphanumeric = self.t2c2l4.get()
+                orientation = self.t2c2l6_var.get()
+                background_color = self.t2c2l10_var.get()
+                alpha_color = self.t2c2l12_var.get()
+                classification = client_rest.Classification(self.imageID,type,orientation=orientation,shape=shape,bgColor=background_color,alpha=alphanumeric,alphaColor=alpha_color)
             self.interface.postClass(classification)
             self.nextCropped()
 
@@ -1438,9 +1441,19 @@ class GuiClass(tk.Frame):
         """
         if self.t2c2l14_var.get() == 'emergent':
             self.t2c2l16.configure(state=tk.NORMAL)
+            self.t2c2l2.configure(state=tk.DISABLED)
+            self.t2c2l4.configure(state=tk.DISABLED)
+            self.t2c2l6.configure(state=tk.DISABLED)
+            self.t2c2l10.configure(state=tk.DISABLED)
+            self.t2c2l12.configure(state=tk.DISABLED)
         else:
             self.t2c2l16_var.set("")
             self.t2c2l16.configure(state=tk.DISABLED)
+            self.t2c2l2.configure(state=tk.NORMAL)
+            self.t2c2l4.configure(state=tk.NORMAL)
+            self.t2c2l6.configure(state=tk.NORMAL)
+            self.t2c2l10.configure(state=tk.NORMAL)
+            self.t2c2l12.configure(state=tk.NORMAL)
 
 
     def alphanumericChanged(self,*args):
