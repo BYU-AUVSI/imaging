@@ -1491,7 +1491,7 @@ class GuiClass(tk.Frame):
         if self.serverConnected:
             self.pendingList = self.interface.getPendingSubmissions()
 
-            if len(self.pendingList) == 0:
+            if self.pendingList == None:
                 self.t3c1i1_im = self.t3_default_im.copy()
                 self.t3c1i1_tk = self.im2tk(self.t3c1i1_im)
                 self.t3c1i1_org_width,self.t3c1i1_org_height = self.t3c1i1_im.size
@@ -1840,7 +1840,7 @@ class GuiClass(tk.Frame):
         if self.serverConnected:
             if self.t3_current_target < len(self.pendingList):
                 self.t3_current_target += 1
-            elif len(self.pendingList) == 0:
+            elif self.pendingList == None:
                 self.t3_current_target = 0
             else:
                 pass
@@ -1880,7 +1880,7 @@ class GuiClass(tk.Frame):
         if self.serverConnected:
             if self.t3_current_target > 1:
                 self.t3_current_target -= 1
-            elif len(self.pendingList) == 0:
+            elif self.pendingList == None:
                 self.t3_current_target = 0
             else:
                 pass
