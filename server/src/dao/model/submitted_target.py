@@ -16,6 +16,8 @@ class submitted_target:
     # for emergent target type
     EMERGENT_KEYS_TO_INCLUDE = ['latitude', 'longitude', 'description', 'autonomous']
 
+    HELPER_VALUES = ['target', 'submitted']
+
     def __init__(self, sqlRow=None, outgoingManualOrAutonomous=None, autonomous=None):
         
         # initialize all the attributes to None
@@ -86,13 +88,13 @@ class submitted_target:
             for attr, value in self.__dict__.items():
                 if attr in self.EMERGENT_KEYS_TO_INCLUDE:
                     dict[attr] = value
-                else:
+                elif attr not in self.HELPER_VALUES:
                     dict[attr] = None
         else:
             for attr, value in self.__dict__.items():
                 if attr not in self.KEYS_TO_EXCLUDE:
                     dict[attr] = value
-                else:
+                elif attr not in self.HELPER_VALUES:
                     dict[attr] = None
 
         if exclude is not None:
