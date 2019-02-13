@@ -13,9 +13,9 @@ Coordinates % Load in the Test GPS Points
 MAV_HEIGHT = 16;
 X_PIXEL = -15;
 Y_PIXEL = 1028;
-ROLL = 0;
-PITCH = 0.523599;
-YAW = pi/2;
+ROLL_INPUT = 0; %in degrees
+PITCH_INPUT = 60; %in degrees
+YAW_INPUT = 90; %in degrees
 MAV_Coordinates = C.skybridge;
 GroundStation_Coordinates = C.TestGroundStation;
 
@@ -27,12 +27,12 @@ f = M/(2*tan(fov_ang/2)); %focal length  in units of pixels
 
 l_cusp_c = 1/sqrt(Ex^2 + Ey^2 + f^2) * [Ex;Ey;f];
 
-roll = ROLL; %sym('roll'); %Radians
-pitch = PITCH;%-0.523599; %sym('pitch'); %RadiansP
-yaw = YAW;%pi/2; %sym('yaw'); %Radians
+roll = ROLL_INPUT*pi/180; %sym('roll'); %Radians
+pitch = PITCH_INPUT*pi/180;%-0.523599; %sym('pitch'); %RadiansP
+yaw = YAW_INPUT*pi/180;%pi/2; %sym('yaw'); %Radians
 
 alpha_az = 0;%sym('az'); %Azmuth Angle: Should equal yaw.
-alpha_el = -pi/2 + pitch;%sym('el'); %Elevation Angle: "Pitch" of the gimbal
+alpha_el = -pi/2;%-(-pi/2 + pitch);%sym('el'); %Elevation Angle: "Pitch" of the gimbal
 
 k_i = [0;0;1];
 
@@ -49,16 +49,24 @@ h = -Pd;%;sym('h');
 % coordinates. This transformation is done using three rotation matrices:
 % Moving Camera frame to Gimbal coordinates; Gimbal coordinates to body
 % frame; body frame to inertial frame
+sphi = sin(roll);
+cphi = cos(roll);
+stheta = sin(pitch);
+ctheta = cos(pitch);
+spsi = sin(yaw);
+cpsi = cos(yaw);
 
 % R_b_to_i
 % Found on page 15 of Small Unmanned Aircraft
 
-R_v_to_b = [cos(pitch)*cos(yaw) cos(pitch)*sin(yaw) -sin(pitch); ...
-    sin(roll)*sin(pitch)*cos(yaw)-cos(roll)*sin(yaw) ...
-    sin(roll)*sin(pitch)*sin(yaw)+cos(roll)*cos(yaw) sin(roll)*cos(pitch); ...
-    cos(roll)*sin(pitch)*cos(yaw)+sin(roll)*sin(yaw) ...
-    cos(roll)*sin(pitch)*sin(yaw)-sin(roll)*cos(yaw) cos(roll)*cos(pitch)];
-
+% R_v_to_b = [cos(pitch)*cos(yaw) cos(pitch)*sin(yaw) -sin(pitch); ...
+%     sin(roll)*sin(pitch)*cos(yaw)-cos(roll)*sin(yaw) ...
+%     sin(roll)*sin(pitch)*sin(yaw)+cos(roll)*cos(yaw) sin(roll)*cos(pitch); ...
+%     cos(roll)*sin(pitch)*cos(yaw)+sin(roll)*sin(yaw) ...
+%     cos(roll)*sin(pitch)*sin(yaw)-sin(roll)*cos(yaw) cos(roll)*cos(pitch)];
+R_v_to_b = [ctheta*cpsi ctheta*spsi -stheta;...
+    sphi*stheta*cpsi-cphi*spsi sphi*stheta*spsi+cphi*cpsi sphi*ctheta;...
+    cphi*stheta*cpsi+sphi*spsi cphi*stheta*spsi-sphi*cpsi cphi*ctheta];
 R_b_to_v = R_v_to_b'; %R_v_b is a translation of R_i_b. It may work, but I may need one more step.
 R_b_to_i = R_b_to_v;
 
@@ -81,7 +89,8 @@ R_g_to_b = R_b_to_g';
 % Found on page 227 of Small Unmanned Aircraft
 R_g_to_c = [0 1 0;...
     0 0 1;...
-    1 0 0];
+	1 0 0;...
+    ];
 R_c_to_g = R_g_to_c';
 
 % For simplicity, the three Rotation matrices are combined into one below
@@ -106,6 +115,6 @@ fprintf(MavGPSData(1) + " " + MavGPSData(2) + "\n\n");
 disp("MAV Coordinates ");
 fprintf(MavGPSData(3) + " " + MavGPSData(4) + "\n\n");
 
-TargetCoordinates = MeterstoGPS(LatTestGroundStation, LonTestGroundStation, P_i_obj(1), P_i_obj(2));
+TargetCoordinates = MeterstoGPS(GroundStation_Coordinates(1), GroundStation_Coordinates(2), P_i_obj(1), P_i_obj(2));
 disp("Target Coordinates ");
 fprintf(TargetCoordinates(1)+", "+TargetCoordinates(2) + "\n");
