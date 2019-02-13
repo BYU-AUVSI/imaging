@@ -287,7 +287,7 @@ class GuiClass(tk.Frame):
         self.t2c2l13 = ttk.Label(self.tab2, anchor=tk.CENTER, text='Target Type')
         self.t2c2l13.grid(row=44,column=8,columnspan=2,rowspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
         self.t2c2l14_var = tk.StringVar(self.master)
-        target_options = ('standard','emergent','off-axis')
+        target_options = ('standard','emergent','off_axis')
         self.t2c2l14 = ttk.OptionMenu(self.tab2,self.t2c2l14_var,target_options[0],*target_options)
         self.t2c2l14.grid(row=46,column=8,columnspan=2,rowspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
         self.t2c2l14_var.trace("w",self.disableEmergentDescription)
