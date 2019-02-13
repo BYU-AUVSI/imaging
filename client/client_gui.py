@@ -25,17 +25,16 @@ Tab1:
     Add panning feature
     Fix resizing
 Tab2
-    **Fix bug of moving to previous shows same image after 1 classification
     **Change crop picture only if focus is not on the entry widget (i.e. annoying
         arrow button problem when inserting text)
     Change disable color
     Verify rotating picture based on yaw angle
     Show past classifications on the left with autofill option
 Tab3:
+    **Bug where it doesn't show that you deleted the last image
     Fix bug of going straight to page and out of range
     Show in blue which target it's pulling the "to submit" classificaiton from
     Change radiobuttons to match ttktheme
-    **Show "N/A" for other Characteristics for emergent
     Fix resizing issues
 Tab4:
     create everything
@@ -295,7 +294,7 @@ class GuiClass(tk.Frame):
         self.t2c2l15 = ttk.Label(self.tab2, anchor=tk.CENTER, text='Emergent Description')
         self.t2c2l15.grid(row=44,column=10,columnspan=2,rowspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
         self.t2c2l16_var = tk.StringVar()
-        self.t2c2l16_var.set("")
+        self.t2c2l16_var.set(None)
         self.t2c2l16 = ttk.Entry(self.tab2,textvariable=self.t2c2l16_var)
         self.t2c2l16.grid(row=46,column=10,columnspan=2,rowspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
 
@@ -1446,7 +1445,7 @@ class GuiClass(tk.Frame):
             self.t2c2l10.configure(state=tk.DISABLED)
             self.t2c2l12.configure(state=tk.DISABLED)
         else:
-            self.t2c2l16_var.set("")
+            self.t2c2l16_var.set(None)
             self.t2c2l16.configure(state=tk.DISABLED)
             self.t2c2l2.configure(state=tk.NORMAL)
             self.t2c2l4.configure(state=tk.NORMAL)
@@ -1579,7 +1578,7 @@ class GuiClass(tk.Frame):
                 else:
                     self.t3c1br13.configure(text="N/A")
                 display_decription = self.pendingList[self.t3_current_target-1][0].description
-                if display_decription != None:
+                if display_decription != "":
                     self.t3c1r18.configure(text=display_decription)
                 else:
                     self.t3c1r18.configure(text="N/A")
@@ -1605,13 +1604,37 @@ class GuiClass(tk.Frame):
                     self.t3c2i1_org_width,self.t3c2i1_org_height = self.t3c2i1_im.size
                     self.t3c2i1_tk = self.im2tk(self.t3c2i1_im)
                     self.t3c2i1.configure(image=self.t3c2i1_tk)
-                    self.t3c2br5.configure(text=self.pendingList[self.t3_current_target-1][1].shape)
-                    self.t3c2br7.configure(text=self.pendingList[self.t3_current_target-1][1].background_color)
-                    self.t3c2br9.configure(text=self.pendingList[self.t3_current_target-1][1].alphanumeric)
-                    self.t3c2br11.configure(text=self.pendingList[self.t3_current_target-1][1].alphanumeric_color)
-                    self.t3c2br13.configure(text=self.pendingList[self.t3_current_target-1][1].orientation)
+                    display_shape = self.pendingList[self.t3_current_target-1][1].shape
+                    if display_shape != None:
+                        self.t3c2br5.configure(text=display_shape)
+                    else:
+                        self.t3c2br5.configure(text="N/A")
+                    display_bg_color = self.pendingList[self.t3_current_target-1][1].background_color
+                    if display_bg_color != None:
+                        self.t3c2br7.configure(text=display_bg_color)
+                    else:
+                        self.t3c2br7.configure(text="N/A")
+                    display_alphanumeric = self.pendingList[self.t3_current_target-1][1].alphanumeric
+                    if display_alphanumeric != None:
+                        self.t3c2br9.configure(text=display_alphanumeric)
+                    else:
+                        self.t3c2br9.configure(text="N/A")
+                    display_alpha_color = self.pendingList[self.t3_current_target-1][1].alphanumeric_color
+                    if display_alpha_color != None:
+                        self.t3c2br11.configure(text=display_alpha_color)
+                    else:
+                        self.t3c2br11.configure(text="N/A")
+                    display_orientation = self.pendingList[self.t3_current_target-1][1].orientation
+                    if display_orientation != None:
+                        self.t3c2br13.configure(text=display_orientation)
+                    else:
+                        self.t3c2br13.configure(text="N/A")
+                    display_decription = self.pendingList[self.t3_current_target-1][1].description
+                    if display_decription != "":
+                        self.t3c2r18.configure(text=display_decription)
+                    else:
+                        self.t3c2r18.configure(text="N/A")
                     self.t3c2br15.configure(text=self.pendingList[self.t3_current_target-1][1].type)
-                    self.t3c2r18.configure(text=self.pendingList[self.t3_current_target-1][1].description)
                     self.pending_bg_color.append(self.pendingList[self.t3_current_target-1][1].background_color)
                     self.pending_alpha_color.append(self.pendingList[self.t3_current_target-1][1].alphanumeric_color)
                     self.pending_orientation.append(self.pendingList[self.t3_current_target-1][1].orientation)
@@ -1649,13 +1672,37 @@ class GuiClass(tk.Frame):
                     self.t3c3i1_org_width,self.t3c3i1_org_height = self.t3c3i1_im.size
                     self.t3c3i1_tk = self.im2tk(self.t3c3i1_im)
                     self.t3c3i1.configure(image=self.t3c3i1_tk)
-                    self.t3c3br5.configure(text=self.pendingList[self.t3_current_target-1][2].shape)
-                    self.t3c3br7.configure(text=self.pendingList[self.t3_current_target-1][2].background_color)
-                    self.t3c3br9.configure(text=self.pendingList[self.t3_current_target-1][2].alphanumeric)
-                    self.t3c3br11.configure(text=self.pendingList[self.t3_current_target-1][2].alphanumeric_color)
-                    self.t3c3br13.configure(text=self.pendingList[self.t3_current_target-1][2].orientation)
+                    display_shape = self.pendingList[self.t3_current_target-1][2].shape
+                    if display_shape != None:
+                        self.t3c3br5.configure(text=display_shape)
+                    else:
+                        self.t3c3br5.configure(text="N/A")
+                    display_bg_color = self.pendingList[self.t3_current_target-1][2].background_color
+                    if display_bg_color != None:
+                        self.t3c3br7.configure(text=display_bg_color)
+                    else:
+                        self.t3c3br7.configure(text="N/A")
+                    display_alphanumeric = self.pendingList[self.t3_current_target-1][2].alphanumeric
+                    if display_alphanumeric != None:
+                        self.t3c3br9.configure(text=display_alphanumeric)
+                    else:
+                        self.t3c3br9.configure(text="N/A")
+                    display_alpha_color = self.pendingList[self.t3_current_target-1][2].alphanumeric_color
+                    if display_alpha_color != None:
+                        self.t3c3br11.configure(text=display_alpha_color)
+                    else:
+                        self.t3c3br11.configure(text="N/A")
+                    display_orientation = self.pendingList[self.t3_current_target-1][2].orientation
+                    if display_orientation != None:
+                        self.t3c3br13.configure(text=display_orientation)
+                    else:
+                        self.t3c3br13.configure(text="N/A")
+                    display_decription = self.pendingList[self.t3_current_target-1][2].description
+                    if display_decription != "":
+                        self.t3c3r18.configure(text=display_decription)
+                    else:
+                        self.t3c3r18.configure(text="N/A")
                     self.t3c3br15.configure(text=self.pendingList[self.t3_current_target-1][2].type)
-                    self.t3c3r18.configure(text=self.pendingList[self.t3_current_target-1][2].description)
                     self.pending_bg_color.append(self.pendingList[self.t3_current_target-1][2].background_color)
                     self.pending_alpha_color.append(self.pendingList[self.t3_current_target-1][2].alphanumeric_color)
                     self.pending_orientation.append(self.pendingList[self.t3_current_target-1][2].orientation)
@@ -1693,13 +1740,37 @@ class GuiClass(tk.Frame):
                     self.t3c4i1_org_width,self.t3c4i1_org_height = self.t3c4i1_im.size
                     self.t3c4i1_tk = self.im2tk(self.t3c4i1_im)
                     self.t3c4i1.configure(image=self.t3c4i1_tk)
-                    self.t3c4br5.configure(text=self.pendingList[self.t3_current_target-1][3].shape)
-                    self.t3c4br7.configure(text=self.pendingList[self.t3_current_target-1][3].background_color)
-                    self.t3c4br9.configure(text=self.pendingList[self.t3_current_target-1][3].alphanumeric)
-                    self.t3c4br11.configure(text=self.pendingList[self.t3_current_target-1][3].alphanumeric_color)
-                    self.t3c4br13.configure(text=self.pendingList[self.t3_current_target-1][3].orientation)
+                    display_shape = self.pendingList[self.t3_current_target-1][3].shape
+                    if display_shape != None:
+                        self.t3c4br5.configure(text=display_shape)
+                    else:
+                        self.t3c4br5.configure(text="N/A")
+                    display_bg_color = self.pendingList[self.t3_current_target-1][3].background_color
+                    if display_bg_color != None:
+                        self.t3c4br7.configure(text=display_bg_color)
+                    else:
+                        self.t3c4br7.configure(text="N/A")
+                    display_alphanumeric = self.pendingList[self.t3_current_target-1][3].alphanumeric
+                    if display_alphanumeric != None:
+                        self.t3c4br9.configure(text=display_alphanumeric)
+                    else:
+                        self.t3c4br9.configure(text="N/A")
+                    display_alpha_color = self.pendingList[self.t3_current_target-1][3].alphanumeric_color
+                    if display_alpha_color != None:
+                        self.t3c4br11.configure(text=display_alpha_color)
+                    else:
+                        self.t3c4br11.configure(text="N/A")
+                    display_orientation = self.pendingList[self.t3_current_target-1][3].orientation
+                    if display_orientation != None:
+                        self.t3c4br13.configure(text=display_orientation)
+                    else:
+                        self.t3c4br13.configure(text="N/A")
+                    display_decription = self.pendingList[self.t3_current_target-1][3].description
+                    if display_decription != "":
+                        self.t3c4r18.configure(text=display_decription)
+                    else:
+                        self.t3c4r18.configure(text="N/A")
                     self.t3c4br15.configure(text=self.pendingList[self.t3_current_target-1][3].type)
-                    self.t3c4r18.configure(text=self.pendingList[self.t3_current_target-1][3].description)
                     self.pending_bg_color.append(self.pendingList[self.t3_current_target-1][3].background_color)
                     self.pending_alpha_color.append(self.pendingList[self.t3_current_target-1][3].alphanumeric_color)
                     self.pending_orientation.append(self.pendingList[self.t3_current_target-1][3].orientation)
@@ -1737,13 +1808,37 @@ class GuiClass(tk.Frame):
                     self.t3c5i1_org_width,self.t3c5i1_org_height = self.t3c5i1_im.size
                     self.t3c5i1_tk = self.im2tk(self.t3c5i1_im)
                     self.t3c5i1.configure(image=self.t3c5i1_tk)
-                    self.t3c5br5.configure(text=self.pendingList[self.t3_current_target-1][4].shape)
-                    self.t3c5br7.configure(text=self.pendingList[self.t3_current_target-1][4].background_color)
-                    self.t3c5br9.configure(text=self.pendingList[self.t3_current_target-1][4].alphanumeric)
-                    self.t3c5br11.configure(text=self.pendingList[self.t3_current_target-1][4].alphanumeric_color)
-                    self.t3c5br13.configure(text=self.pendingList[self.t3_current_target-1][4].orientation)
+                    display_shape = self.pendingList[self.t3_current_target-1][4].shape
+                    if display_shape != None:
+                        self.t3c5br5.configure(text=display_shape)
+                    else:
+                        self.t3c5br5.configure(text="N/A")
+                    display_bg_color = self.pendingList[self.t3_current_target-1][4].background_color
+                    if display_bg_color != None:
+                        self.t3c5br7.configure(text=display_bg_color)
+                    else:
+                        self.t3c5br7.configure(text="N/A")
+                    display_alphanumeric = self.pendingList[self.t3_current_target-1][4].alphanumeric
+                    if display_alphanumeric != None:
+                        self.t3c5br9.configure(text=display_alphanumeric)
+                    else:
+                        self.t3c5br9.configure(text="N/A")
+                    display_alpha_color = self.pendingList[self.t3_current_target-1][4].alphanumeric_color
+                    if display_alpha_color != None:
+                        self.t3c5br11.configure(text=display_alpha_color)
+                    else:
+                        self.t3c5br11.configure(text="N/A")
+                    display_orientation = self.pendingList[self.t3_current_target-1][4].orientation
+                    if display_orientation != None:
+                        self.t3c5br13.configure(text=display_orientation)
+                    else:
+                        self.t3c5br13.configure(text="N/A")
+                    display_decription = self.pendingList[self.t3_current_target-1][4].description
+                    if display_decription != "":
+                        self.t3c5r18.configure(text=display_decription)
+                    else:
+                        self.t3c5r18.configure(text="N/A")
                     self.t3c5br15.configure(text=self.pendingList[self.t3_current_target-1][4].type)
-                    self.t3c5r18.configure(text=self.pendingList[self.t3_current_target-1][4].description)
                     self.pending_bg_color.append(self.pendingList[self.t3_current_target-1][4].background_color)
                     self.pending_alpha_color.append(self.pendingList[self.t3_current_target-1][4].alphanumeric_color)
                     self.pending_orientation.append(self.pendingList[self.t3_current_target-1][4].orientation)
@@ -1777,20 +1872,37 @@ class GuiClass(tk.Frame):
                 self.t3c6i1_org_width,self.t3c6i1_org_height = self.t3c6i1_im.size
                 self.t3c6i1_tk = self.im2tk(self.t3c6i1_im)
                 self.t3c6i1.configure(image=self.t3c6i1_tk)
+                display_shape = self.pendingList[self.t3_current_target-1][0].shape
                 if display_shape != None:
                     self.t3c6br5.configure(text=display_shape)
                 else:
-                    self.t3c1br5.configure(text="N/A")
-                self.t3c6br7.configure(text=self.findMostCommonValue(self.pending_bg_color))
+                    self.t3c6br5.configure(text="N/A")
+                display_alphanumeric = self.pendingList[self.t3_current_target-1][0].alphanumeric
                 if display_alphanumeric != None:
                     self.t3c6br9.configure(text=display_alphanumeric)
                 else:
                     self.t3c6br9.configure(text="N/A")
-                self.t3c6br11.configure(text=self.findMostCommonValue(self.pending_alpha_color))
-                self.t3c6br13.configure(text=self.findMostCommonValue(self.pending_orientation))
                 self.t3c6br15.configure(text=self.pendingList[self.t3_current_target-1][0].type)
-                self.t3c6r18.configure(text=self.findMostCommonValue(self.pending_description))
-
+                display_bg_color = self.findMostCommonValue(self.pending_bg_color)
+                if display_bg_color != None:
+                    self.t3c6br7.configure(text=display_bg_color)
+                else:
+                    self.t3c6br7.configure(text="N/A")
+                display_alpha_color = self.findMostCommonValue(self.pending_alpha_color)
+                if display_alpha_color != None:
+                    self.t3c6br11.configure(text=display_alpha_color)
+                else:
+                    self.t3c6br11.configure(text="N/A")
+                display_orientation = self.findMostCommonValue(self.pending_orientation)
+                if display_orientation != None:
+                    self.t3c6br13.configure(text=display_orientation)
+                else:
+                    self.t3c6br13.configure(text="N/A")
+                display_description = self.findMostCommonValue(self.pending_description)
+                if display_description != "":
+                    self.t3c6r18.configure(text=display_description)
+                else:
+                    self.t3c6r18.configure(text="N/A")
                 for ii in range(5):
                     self.resizeEventTab3()
 
