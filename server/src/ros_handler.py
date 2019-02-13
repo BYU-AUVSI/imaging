@@ -17,7 +17,7 @@ from sensor_msgs.msg import CompressedImage
 from std_msgs.msg import Float32
 # submit image service
 import rosservice
-from uav_msgs.srv import SubmitImage
+from uav_msgs.srv import SubmitImage, SubmitImageResponse
 # model classes for the dao
 from dao.model.incoming_gps import incoming_gps
 from dao.model.incoming_image import incoming_image

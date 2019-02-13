@@ -16,7 +16,7 @@ class submitted_target:
     # for emergent target type
     EMERGENT_KEYS_TO_INCLUDE = ['latitude', 'longitude', 'description', 'autonomous']
 
-    HELPER_VALUES = ['target', 'submitted']
+    HELPER_VALUES = ['target', 'submitted', 'crop_path']
 
     def __init__(self, sqlRow=None, outgoingManualOrAutonomous=None, autonomous=None):
         
