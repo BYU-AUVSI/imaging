@@ -24,7 +24,7 @@ There are two main scripts that are run here:
 
 Here's the basic database setup
 
-![../docs/img/sqlTableRelations.png](Database table relations)
+![Database table relations](../docs/img/sqlTableRelations.png)
 
 Arrows represent hard relations to the corresponding (ie: an image_id in the cropped_manual will match an image_id in the incoming_image table).
 
