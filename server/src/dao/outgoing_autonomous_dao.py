@@ -3,57 +3,28 @@ from dao.classification_dao import ClassificationDAO
 from dao.model.outgoing_autonomous import outgoing_autonomous
 
 class OutgoingAutonomousDAO(ClassificationDAO):
+    """
+    Outgoing_autonomous wrapper for the ClassificationDAO. Most of the core
+    functionality here happens in the ClassificationDAO
+    """
 
     def __init__(self, configFilePath):
         super(OutgoingAutonomousDAO, self).__init__(configFilePath, 'outgoing_autonomous')
 
-
-    def checkedReturn(self, rawResponse):
-        if rawResponse is None:
-            return None
-
-        return outgoing_autonomous(rawResponse)
-
-    def getClassificationByUID(self, id):
+    def getPendingTargets(self):
         """
-        See classification_dao docs. Here we're just making sure we cast the final object 
-        to the proper outgoing classification model type
+        See classification_dao docs
+        Get images grouped by distinct targets pending submission (ei: submitted = false)
         """
-        selectedClass = super(OutgoingAutonomousDAO, self).getClassificationByUID(id)
-        return self.checkedReturn(selectedClass)
+        return super(OutgoingAutonomousDAO, self).getAllTargets(whereClause=" submitted = 'unsubmitted' ")
 
-    def getAll(self):
-        """
-        See classification_dao docs. Here we're just making sure we cast the final object 
-        to the proper outgoing classification model type
-        """
-        cur = super(OutgoingAutonomousDAO, self).getAll()
 
-        results = []
-        if cur is not None:
-            for row in cur:
-                outManualRow = outgoing_autonomous(row)
-                results.append(outManualRow)
-
-            cur.close() # dont forget to close the cursor
-        
-        return results
-
-    def getClassification(self, id):
+    def newModelFromRow(self, row, json=None):
         """
-        See classification_dao docs. Here we're just making sure we cast the final object 
-        to the proper outgoing classification model type
-        """
-        selectedClass = super(OutgoingAutonomousDAO, self).getClassification(id)
-        return self.checkedReturn(selectedClass)
+        Create a new outgoing_autonomous model object given a list of sql values from the table,
+        or a json dictionary
 
-    def updateClassificationByUID(self, id, updateClass):
+        @type row: [string]
+        @param row: List of ordered string values to be placed within an outgoing_autonomous object
         """
-        See classification_dao docs. Here we're just making sure we cast the final object 
-        to the proper outgoing classification model type. We're also properly setting up the 
-        initial model of stuff to update before passing it to super
-        """
-
-        updateModel = outgoing_autonomous(json=updateClass)
-        selectedClass = super(OutgoingAutonomousDAO, self).updateClassificationByUID(id, updateModel)
-        return selectedClass
+        return outgoing_autonomous(tableValues=row, json=json)

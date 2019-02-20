@@ -1,4 +1,8 @@
 class incoming_gps:
+    """
+    Model class for the Gps table. Properties and helper methods
+    for gps measurements.
+    """
 
     def __init__(self, tableValues=None):
         if tableValues is not None:
@@ -10,6 +14,9 @@ class incoming_gps:
 
     @property
     def id(self):
+        """
+        Table id for this measurement. Empty when inserting.
+        """
         return self._id
 
     @id.setter
@@ -18,6 +25,9 @@ class incoming_gps:
 
     @property
     def time_stamp(self):
+        """
+        UTC Unix epoch timestamp as float.
+        """
         return self._time_stamp
 
     @time_stamp.setter
@@ -26,6 +36,9 @@ class incoming_gps:
 
     @property
     def lat(self):
+        """
+        Measurement latitude as a float
+        """
         return self._lat
 
     @lat.setter
@@ -34,6 +47,9 @@ class incoming_gps:
 
     @property
     def lon(self):
+        """
+        Measurement longitude as a float
+        """
         return self._lon
 
     @lon.setter
@@ -42,6 +58,9 @@ class incoming_gps:
 
     @property
     def alt(self):
+        """
+        Measurement altitude as a float
+        """
         return self._alt
 
     @alt.setter
@@ -49,9 +68,23 @@ class incoming_gps:
         self._alt = alt
 
     def insertValues(self):
+        """
+        Get the gps measurement as an object list.
+        The properties are ordered as they would be for a
+        normal table insert
+
+        @rtype: [object]
+        @return: Ordered object list - time_stamp, lat, lon, alt
+        """
         return [self.time_stamp, self.lat, self.lon, self.alt]
 
     def toDict(self):
+        """
+        Return properties contained in this measurement as a dictionary
+
+        @rtype: {object}
+        @return: Object dictionary of gps measurement properties
+        """
         dict = {}
         dict['id'] = self.id
         dict['time_stamp'] = self.time_stamp
@@ -61,6 +94,9 @@ class incoming_gps:
         return dict
 
     def __str__(self):
+        """
+        Debug convenience method to get this instance as a string
+        """
         return """IncomingGps:\n
             \tid: {}\n
             \ttime_stamp: {}\n

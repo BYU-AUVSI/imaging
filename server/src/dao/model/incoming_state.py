@@ -1,4 +1,8 @@
 class incoming_state:
+    """
+    Model class for the State table. Properties and helper methods
+    for state measurements.
+    """
 
     def __init__(self, tableValues=None):
         if tableValues is not None:
@@ -10,6 +14,9 @@ class incoming_state:
 
     @property
     def id(self):
+        """
+        Table id for this measurement. Empty when inserting a new measurement.
+        """
         return self._id
 
     @id.setter
@@ -18,6 +25,9 @@ class incoming_state:
 
     @property
     def time_stamp(self):
+        """
+        UTC Unix epoch timestamp as float.
+        """
         return self._time_stamp
 
     @time_stamp.setter
@@ -26,6 +36,9 @@ class incoming_state:
 
     @property
     def roll(self):
+        """
+        Measurement roll as a float
+        """
         return self._roll
 
     @roll.setter
@@ -34,6 +47,9 @@ class incoming_state:
 
     @property
     def pitch(self):
+        """
+        Measurement pitch as a float
+        """
         return self._pitch
 
     @pitch.setter
@@ -42,6 +58,9 @@ class incoming_state:
 
     @property
     def yaw(self):
+        """
+        Measurement yaw as a float
+        """
         return self._yaw
 
     @yaw.setter
@@ -49,9 +68,23 @@ class incoming_state:
         self._yaw = yaw
 
     def insertValues(self):
+        """
+        Get the gps measurement as an object list.
+        The properties are ordered as they would be for a
+        normal table insert
+
+        @rtype: [object]
+        @return: Ordered object list - time_stamp, roll, pitch, yaw
+        """
         return [self.time_stamp, self.roll, self.pitch, self.yaw]
 
     def toDict(self):
+        """
+        Return properties contained in this measurement as a dictionary
+
+        @rtype: {object}
+        @return: Object dictionary of state measurement properties
+        """
         dict = {}
         dict['id'] = self.id
         dict['time_stamp'] = self.time_stamp
@@ -61,6 +94,9 @@ class incoming_state:
         return dict
 
     def __str__(self):
+        """
+        Debug convenience method to get this instance as a string
+        """
         return """IncomingState:\n
             \tid: {}\n
             \ttime_stamp: {}\n

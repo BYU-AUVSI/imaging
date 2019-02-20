@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(imaging_ros_ingester)
+project(imaging_ros_handler)
 
 find_package(catkin REQUIRED COMPONENTS
   rospy
@@ -7,15 +7,13 @@ find_package(catkin REQUIRED COMPONENTS
   image_transport
   cv_bridge
   inertial_sense
+  uav_msgs
 )
 
 find_package(OpenCV REQUIRED)
 
 catkin_package(
-#  INCLUDE_DIRS include
-#  LIBRARIES sniper_cam
-  CATKIN_DEPENDS rospy inertial_sense sensor_msgs image_transport cv_bridge 
-#  DEPENDS system_lib
+  CATKIN_DEPENDS rospy inertial_sense sensor_msgs image_transport cv_bridge uav_msgs
 )
 
 
