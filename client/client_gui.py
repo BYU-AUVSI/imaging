@@ -20,15 +20,16 @@ Tab0:
     add error handling if entries aren't in the right format
     add error handling if not connected to correct wifi
 Tab1:
+    ** Go to next cropped image if you go to the tab??
     Don't crop if you single click
     Add zooming feature
     Add panning feature
     Fix resizing
 Tab2
+    ** show not only submission status, but what you submitted??
     Change disable color
     Verify rotating picture based on yaw angle
     Show past classifications on the left with autofill option
-    **Prevent submitting a standard with a blank alphanumeric
 Tab3:
     **Bug where it doesn't show that you deleted the last image
         this happened when target #1 was emergent and deleted target #2 standard
@@ -1240,16 +1241,20 @@ class GuiClass(tk.Frame):
             if type == 'emergent':
                 description = self.t2c2l16_var.get()
                 classification = client_rest.Classification(self.imageID,type,desc = description)
+                self.interface.postClass(classification)
+                self.entry_focus_out()
+                self.nextCropped()
             else:
-                shape = self.t2c2l2_var.get()
                 alphanumeric = self.t2c2l4.get()
-                orientation = self.t2c2l6_var.get()
-                background_color = self.t2c2l10_var.get()
-                alpha_color = self.t2c2l12_var.get()
-                classification = client_rest.Classification(self.imageID,type,orientation=orientation,shape=shape,bgColor=background_color,alpha=alphanumeric,alphaColor=alpha_color)
-            self.interface.postClass(classification)
-            self.entry_focus_out()
-            self.nextCropped()
+                if alphanumeric != "":
+                    shape = self.t2c2l2_var.get()
+                    orientation = self.t2c2l6_var.get()
+                    background_color = self.t2c2l10_var.get()
+                    alpha_color = self.t2c2l12_var.get()
+                    classification = client_rest.Classification(self.imageID,type,orientation=orientation,shape=shape,bgColor=background_color,alpha=alphanumeric,alphaColor=alpha_color)
+                    self.interface.postClass(classification)
+                    self.entry_focus_out()
+                    self.nextCropped()
 
     def tabChanged(self,event):
         """
