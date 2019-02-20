@@ -25,13 +25,13 @@ Tab1:
     Add panning feature
     Fix resizing
 Tab2
-    **Change crop picture only if focus is not on the entry widget (i.e. annoying
-        arrow button problem when inserting text)
     Change disable color
     Verify rotating picture based on yaw angle
     Show past classifications on the left with autofill option
+    **Prevent submitting a standard with a blank alphanumeric
 Tab3:
     **Bug where it doesn't show that you deleted the last image
+        this happened when target #1 was emergent and deleted target #2 standard
     Fix bug of going straight to page and out of range
     Show in blue which target it's pulling the "to submit" classificaiton from
     Change radiobuttons to match ttktheme
@@ -39,10 +39,7 @@ Tab3:
 Tab4:
     create everything
 
-
-
 KNOWN BUGS:
-    Weird exit is bound to an event (doesn't do anything) when rerun in iPython3
     When you click on the 2nd tab right at the beginning, and then use the left/right
         buttons, it moves one tab, then unbinds like it's supposed to.
 '''
@@ -124,6 +121,7 @@ class GuiClass(tk.Frame):
         self.t1_functional = False
         # Tab 2 variables
         self.t2_functional = False # prevent
+        self.t2_entry_focus = False
         # Tab 3 variables
         self.t3_total_targets  = 0
         self.t3_current_target = 1
@@ -1158,35 +1156,34 @@ class GuiClass(tk.Frame):
         @rtype:  None
         @return: None
         """
-        #print("focus is on: ",self.tab2.focus_get())
-        self.pingServer()
-        if self.serverConnected:
-            time0 = time.time()
-            query = self.interface.getNextCroppedImage()
-            if query == None:
-                self.t2_functional = False
-                self.noNextCropped()
-            else:
-                self.t2_functional = True
-                self.imageID = query[1]
-                print("ImageID=",self.imageID)
-                self.cropped_np = np.array(query[0])
-                yaw_angle = self.getYawAngle(self.imageID)
-                self.cropped_np = imutils.rotate_bound(self.cropped_np,yaw_angle)
-                status = query[2]
-                if status:
-                    self.t2c2lr48b.configure(text='submitted',foreground='green')
+        if not(self.t2_entry_focus):
+            self.pingServer()
+            if self.serverConnected:
+                time0 = time.time()
+                query = self.interface.getNextCroppedImage()
+                if query == None:
+                    self.t2_functional = False
+                    self.noNextCropped()
                 else:
-                    self.t2c2lr48b.configure(text='unsubmitted',foreground='red')
-            time1 = time.time()
-            self.cropped_im = self.np2im(self.cropped_np)
-            self.cropped_width,self.cropped_height = self.cropped_im.size
-            self.cropped_resized_im = self.resizeIm(self.cropped_im,self.cropped_width,self.cropped_height,self.t2c2i1_width,self.t2c2i1_height)
-            self.cropped_tk = self.im2tk(self.cropped_resized_im)
-            self.t2c2i1.configure(image=self.cropped_tk)
+                    self.t2_functional = True
+                    self.imageID = query[1]
+                    self.cropped_np = np.array(query[0])
+                    yaw_angle = self.getYawAngle(self.imageID)
+                    self.cropped_np = imutils.rotate_bound(self.cropped_np,yaw_angle)
+                    status = query[2]
+                    if status:
+                        self.t2c2lr48b.configure(text='submitted',foreground='green')
+                    else:
+                        self.t2c2lr48b.configure(text='unsubmitted',foreground='red')
+                time1 = time.time()
+                self.cropped_im = self.np2im(self.cropped_np)
+                self.cropped_width,self.cropped_height = self.cropped_im.size
+                self.cropped_resized_im = self.resizeIm(self.cropped_im,self.cropped_width,self.cropped_height,self.t2c2i1_width,self.t2c2i1_height)
+                self.cropped_tk = self.im2tk(self.cropped_resized_im)
+                self.t2c2i1.configure(image=self.cropped_tk)
 
-            time2 = time.time()
-            print("server request = ",time1-time0,"gui = ",time2-time1)
+                time2 = time.time()
+                #print("server request = ",time1-time0,"gui = ",time2-time1)
 
     def previousCropped(self,event):
         """
@@ -1198,34 +1195,34 @@ class GuiClass(tk.Frame):
         @rtype:  None
         @return: None
         """
-        self.pingServer()
-        if self.serverConnected:
-            time0 = time.time()
-            query = self.interface.getPrevCroppedImage()
-            if query == None:
-                self.t2_functional = False
-                self.noPreviousCropped()
-            else:
-                self.t2_functional = True
-                self.imageID = query[1]
-                print("ImageID=",self.imageID)
-                self.cropped_np = np.array(query[0])
-                yaw_angle = self.getYawAngle(self.imageID)
-                self.cropped_np = imutils.rotate_bound(self.cropped_np,yaw_angle)
-                status = query[2]
-                print(status)
-                if status:
-                    self.t2c2lr48b.configure(text='submitted',foreground='green')
+        if not(self.t2_entry_focus):
+            focus = self.tab2.focus_get()
+            self.pingServer()
+            if self.serverConnected:
+                time0 = time.time()
+                query = self.interface.getPrevCroppedImage()
+                if query == None:
+                    self.t2_functional = False
+                    self.noPreviousCropped()
                 else:
-                    self.t2c2lr48b.configure(text='unsubmitted',foreground='red')
-            time1 = time.time()
-            self.cropped_im = self.np2im(self.cropped_np)
-            self.cropped_width,self.cropped_height = self.cropped_im.size
-            self.cropped_resized_im = self.resizeIm(self.cropped_im,self.cropped_width,self.cropped_height,self.t2c2i1_width,self.t2c2i1_height)
-            self.cropped_tk = self.im2tk(self.cropped_resized_im)
-            self.t2c2i1.configure(image=self.cropped_tk)
-            time2 = time.time()
-            print("server request = ",time1-time0,"gui = ",time2-time1)
+                    self.t2_functional = True
+                    self.imageID = query[1]
+                    self.cropped_np = np.array(query[0])
+                    yaw_angle = self.getYawAngle(self.imageID)
+                    self.cropped_np = imutils.rotate_bound(self.cropped_np,yaw_angle)
+                    status = query[2]
+                    if status:
+                        self.t2c2lr48b.configure(text='submitted',foreground='green')
+                    else:
+                        self.t2c2lr48b.configure(text='unsubmitted',foreground='red')
+                time1 = time.time()
+                self.cropped_im = self.np2im(self.cropped_np)
+                self.cropped_width,self.cropped_height = self.cropped_im.size
+                self.cropped_resized_im = self.resizeIm(self.cropped_im,self.cropped_width,self.cropped_height,self.t2c2i1_width,self.t2c2i1_height)
+                self.cropped_tk = self.im2tk(self.cropped_resized_im)
+                self.t2c2i1.configure(image=self.cropped_tk)
+                time2 = time.time()
+                #print("server request = ",time1-time0,"gui = ",time2-time1)
 
 
     def submitClassification(self,event=None):
@@ -1251,6 +1248,7 @@ class GuiClass(tk.Frame):
                 alpha_color = self.t2c2l12_var.get()
                 classification = client_rest.Classification(self.imageID,type,orientation=orientation,shape=shape,bgColor=background_color,alpha=alphanumeric,alphaColor=alpha_color)
             self.interface.postClass(classification)
+            self.entry_focus_out()
             self.nextCropped()
 
     def tabChanged(self,event):
@@ -1274,6 +1272,9 @@ class GuiClass(tk.Frame):
             self.master.unbind("<Control-z>")
             self.master.bind("<Return>",self.updateSettings)
             self.master.bind("<Escape>",self.close_window)
+            self.t2c2l16.unbind("<FocusIn>")
+            self.t2c2l16.unbind("<FocusOut>")
+            self.t2c2l16.unbind("<Leave>")
         if active_tab == 1:
             self.resizeEventTab1()
             self.master.bind("<Right>",self.nextRaw)
@@ -1284,6 +1285,9 @@ class GuiClass(tk.Frame):
             self.master.bind("<Control-z>",self.undoCrop)
             self.master.bind("<Return>",self.submitCropped)
             self.master.bind("<Escape>",self.close_window)
+            self.t2c2l16.unbind("<FocusIn>")
+            self.t2c2l16.unbind("<FocusOut>")
+            self.t2c2l16.unbind("<Leave>")
         elif active_tab == 2:
             self.resizeEventTab2()
             self.master.bind("<Right>",self.nextCropped)
@@ -1294,6 +1298,9 @@ class GuiClass(tk.Frame):
             self.master.unbind("<Control-z>")
             self.master.bind("<Return>",self.submitClassification)
             self.master.bind("<Escape>",self.close_window)
+            self.t2c2l16.bind("<FocusIn>",self.entry_focus_in)
+            self.t2c2l16.bind("<FocusOut>",self.entry_focus_out)
+            self.t2c2l16.bind("<Leave>",self.entry_focus_out)
         elif active_tab == 3:
             self.resizeEventTab3()
             self.master.bind("<Right>",self.nextClassified)
@@ -1304,6 +1311,9 @@ class GuiClass(tk.Frame):
             self.master.unbind("<Control-z>")
             self.master.bind("<Return>",self.submitTarget)
             self.master.bind("<Escape>",self.close_window)
+            self.t2c2l16.unbind("<FocusIn>")
+            self.t2c2l16.unbind("<FocusOut>")
+            self.t2c2l16.unbind("<Leave>")
             self.updateManualSubmissionTab()
         elif active_tab == 4:
             self.master.unbind("<Right>")
@@ -1314,7 +1324,9 @@ class GuiClass(tk.Frame):
             self.master.unbind("<Control-z>")
             self.master.unbind("<Return>")
             self.master.bind("<Escape>",self.close_window)
-
+            self.t2c2l16.unbind("<FocusIn>")
+            self.t2c2l16.unbind("<FocusOut>")
+            self.t2c2l16.unbind("<Leave>")
         self.master.focus_set()
 
     def updateSettings(self,event=None):
@@ -1597,7 +1609,6 @@ class GuiClass(tk.Frame):
 
                 if pics > 1:
                     query = self.interface.getCroppedImage(self.pendingList[self.t3_current_target-1][1].crop_id)
-                    print("query")
                     self.t3c2i1_im = query[0]
                     yaw_angle = self.getYawAngle(query[1])
                     self.t3c2i1_im = self.t3c2i1_im.rotate(yaw_angle,expand=1)
@@ -2298,6 +2309,14 @@ class GuiClass(tk.Frame):
         classification_id = self.pendingList[self.t3_current_target-1][4].class_id
         self.interface.deleteClass(classification_id)
         self.updateManualSubmissionTab()
+
+    def entry_focus_in(self,event=None):
+        self.t2_entry_focus = True
+
+    def entry_focus_out(self,event=None):
+        self.t2_entry_focus = False
+        # set focus onto image (away from entry widget)
+        self.t2c2i1.focus_set()
 
 if __name__ == "__main__":
     root = tk.Tk()
