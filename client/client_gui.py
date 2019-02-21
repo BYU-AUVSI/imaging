@@ -12,7 +12,8 @@ TODO:
 
 All:
     possible threading behind the scenese to autosize other tabs
-    use consistent naming patterns
+    use consistent naming patterns (camel case, snake case)
+    use consistent commenting pattern and placement
     change gui into multiple tabs/classes
     change text font, size, color, etc.
     organize functions into a logical order
@@ -29,7 +30,9 @@ Tab2
     Change disable color
     Verify rotating picture based on yaw angle
     Show past classifications on the left with autofill option
+    Bug tabbing into emergent description and trying to leave w/o subbmitting
 Tab3:
+    **Disable description radiobutton if emergent and vice versa
     **Bug where it doesn't show that you deleted the last image
         this happened when target #1 was emergent and deleted target #2 standard
     Show in blue which target it's pulling the "to submit" classificaiton from
@@ -120,12 +123,21 @@ class GuiClass(tk.Frame):
         self.cropped_tk = self.im2tk(self.cropped_im)
         # Tab 1 variables
         self.t1_functional = False
+        self.x0 = None
+        self.y0 = None
+        self.x1 = None
+        self.y1 = None
         # Tab 2 variables
         self.t2_functional = False # prevent
         self.t2_entry_focus = False
         # Tab 3 variables
         self.t3_total_targets  = 0
         self.t3_current_target = 1
+        self.submit_crop_id = None
+        self.submit_orientation = None
+        self.submit_bg_color = None
+        self.submit_alpha_color = None
+        self.submit_desc = None
 
 
         '''
@@ -750,16 +762,41 @@ class GuiClass(tk.Frame):
         self.t1c1i1.bind("<Motion>",self.mouse_move)
         self.offset_x = int((self.t1c1i1_width - self.t1c1i1_img_width )/2.0)
         self.offset_y = int((self.t1c1i1_height - self.t1c1i1_img_height)/2.0)
-        self.x0 = event.x - self.offset_x
-        self.y0 = event.y - self.offset_y
-        if self.x0 > self.resized_im.size[0]:
-            self.x0 = self.resized_im.size[0]
-        elif self.x0 < 0:
-            self.x0 = 0
-        if self.y0 > self.resized_im.size[1]:
-            self.y0 = self.resized_im.size[1]
-        elif self.y0 < 0:
-            self.y0 = 0
+        x0 = event.x - self.offset_x
+        y0 = event.y - self.offset_y
+
+        self.new_crop = True
+        # check if there has been a rectangle drawn yet
+        if self.x0 != None and self.x1 != None:
+            # check if clicked inside the previous rectangle
+            if self.x0 < self.x1 and self.y0 < self.y1:
+                if x0 > self.x0 and x0 < self.x1 and y0 > self.y0 and y0 < self.y1:
+                    self.new_crop = False
+            if self.x0 < self.x1 and self.y0 > self.y1:
+                if x0 > self.x0 and x0 < self.x1 and y0 < self.y0 and y0 > self.y1:
+                    self.new_crop = False
+            if self.x0 > self.x1 and self.y0 < self.y1:
+                if x0 < self.x0 and x0 > self.x1 and y0 > self.y0 and y0 < self.y1:
+                    self.new_crop = False
+            if self.x0 > self.x1 and self.y0 > self.y1:
+                if x0 < self.x0 and x0 > self.x1 and y0 < self.y0 and y0 > self.y1:
+                    self.new_crop = False
+
+        if self.new_crop:
+            self.x0 = x0
+            self.y0 = y0
+            if self.x0 > self.resized_im.size[0]:
+                self.x0 = self.resized_im.size[0]
+            elif self.x0 < 0:
+                self.x0 = 0
+            if self.y0 > self.resized_im.size[1]:
+                self.y0 = self.resized_im.size[1]
+            elif self.y0 < 0:
+                self.y0 = 0
+        else:
+            self.pan_x0 = x0
+            self.pan_y0 = y0
+
 
     def mouse_move(self,event):
         """
@@ -771,20 +808,37 @@ class GuiClass(tk.Frame):
         @return: None
         """
         self.t1c1i1.bind("<ButtonRelease-1>",self.mouse_release)
-        self.x1 = event.x - self.offset_x
-        self.y1 = event.y - self.offset_y
-        if self.x1 > self.resized_im.size[0]:
-            self.x1 = self.resized_im.size[0]
-        elif self.x1 < 0:
-            self.x1 = 0
-        if self.y1 > self.resized_im.size[1]:
-            self.y1 = self.resized_im.size[1]
-        elif self.y1 < 0:
-            self.y1 = 0
         disp_width,disp_height = self.resized_im.size
         sr = (self.org_width/disp_width + self.org_height/disp_height)/2.0
+        print("sr =",sr)
         self.draw_np = np.copy(self.org_np)
-        cv2.rectangle(self.draw_np,(int(sr*self.x0),int(sr*self.y0)),(int(sr*self.x1),int(sr*self.y1)),(255,0,0),2)
+
+        x1 = event.x - self.offset_x
+        y1 = event.y - self.offset_y
+        if x1 > self.resized_im.size[0]:
+            x1 = self.resized_im.size[0]
+        elif x1 < 0:
+            x1 = 0
+        if y1 > self.resized_im.size[1]:
+            y1 = self.resized_im.size[1]
+        elif y1 < 0:
+            y1 = 0
+        if self.new_crop:
+            self.x1 = x1
+            self.y1 = y1
+            cv2.rectangle(self.draw_np,(int(sr*self.x0),int(sr*self.y0)),(int(sr*self.x1),int(sr*self.y1)),(255,0,0),2)
+        else:
+            self.pan_x1 = x1
+            self.pan_y1 = y1
+            xdif = int((self.pan_x1 - self.pan_x0)/(sr/2.))
+            ydif = int((self.pan_y1 - self.pan_y0)/(sr/2.))
+            self.x0_hat = self.x0 + xdif
+            self.y0_hat = self.y0 + ydif
+            self.x1_hat = self.x1 + xdif
+            self.y1_hat = self.y1 + ydif
+            cv2.rectangle(self.draw_np,(int(sr*self.x0_hat),int(sr*self.y0_hat)),(int(sr*self.x1_hat),int(sr*self.y1_hat)),(255,0,0),2)
+
+
         self.img_im = self.np2im(self.draw_np)
         self.resized_im = self.resizeIm(self.img_im,self.org_width,self.org_height,self.t1c1i1_width,self.t1c1i1_height)
         self.img_tk = self.im2tk(self.resized_im)
@@ -803,26 +857,42 @@ class GuiClass(tk.Frame):
             self.undoCrop()
         self.t1c1i1.unbind("<Motion>")
         self.t1c1i1.unbind("<ButtonRelease-1>")
-        self.x1 = event.x - self.offset_x
-        self.y1 = event.y - self.offset_y
-        if self.x1 > self.resized_im.size[0]:
-            self.x1 = self.resized_im.size[0]
-        elif self.x1 < 0:
-            self.x1 = 0
-        if self.y1 > self.resized_im.size[1]:
-            self.y1 = self.resized_im.size[1]
-        elif self.y1 < 0:
-            self.y1 = 0
         disp_width,disp_height = self.resized_im.size
         sr = (self.org_width/disp_width + self.org_height/disp_height)/2.0
         self.draw_np = np.copy(self.org_np)
-        cv2.rectangle(self.draw_np,(int(sr*self.x0),int(sr*self.y0)),(int(sr*self.x1),int(sr*self.y1)),(255,0,0),2)
+
+        x1 = event.x - self.offset_x
+        y1 = event.y - self.offset_y
+        if x1 > self.resized_im.size[0]:
+            x1 = self.resized_im.size[0]
+        elif x1 < 0:
+            x1 = 0
+        if y1 > self.resized_im.size[1]:
+            y1 = self.resized_im.size[1]
+        elif y1 < 0:
+            y1 = 0
+        if self.new_crop:
+            self.x1 = x1
+            self.y1 = y1
+            cv2.rectangle(self.draw_np,(int(sr*self.x0),int(sr*self.y0)),(int(sr*self.x1),int(sr*self.y1)),(255,0,0),2)
+            self.cropImage(int(sr*self.x0),int(sr*self.y0),int(sr*self.x1),int(sr*self.y1))
+        else:
+            self.pan_x1 = x1
+            self.pan_y1 = y1
+            xdif = int((self.pan_x1 - self.pan_x0)/(sr/2.))
+            ydif = int((self.pan_y1 - self.pan_y0)/(sr/2.))
+            self.x0_hat = self.x0 + xdif
+            self.y0_hat = self.y0 + ydif
+            self.x1_hat = self.x1 + xdif
+            self.y1_hat = self.y1 + ydif
+            cv2.rectangle(self.draw_np,(int(sr*self.x0_hat),int(sr*self.y0_hat)),(int(sr*self.x1_hat),int(sr*self.y1_hat)),(255,0,0),2)
+            self.cropImage(int(sr*self.x0_hat),int(sr*self.y0_hat),int(sr*self.x1_hat),int(sr*self.y1_hat))
+
         self.img_im = self.np2im(self.draw_np)
         self.resized_im = self.resizeIm(self.img_im,self.org_width,self.org_height,self.t1c1i1_width,self.t1c1i1_height)
         self.img_tk = self.im2tk(self.resized_im)
         self.t1c1i1.configure(image=self.img_tk)
         # Crop Image
-        self.cropImage(int(sr*self.x0),int(sr*self.y0),int(sr*self.x1),int(sr*self.y1))
         self.cropped = True
         self.t1c2r1b.configure(text="unsubmitted",foreground="red")
 
