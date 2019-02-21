@@ -20,29 +20,29 @@ Tab0:
     add error handling if entries aren't in the right format
     add error handling if not connected to correct wifi
 Tab1:
-    ** Go to next cropped image if you go to the tab??
     Don't crop if you single click
     Add zooming feature
     Add panning feature
     Fix resizing
 Tab2
-    ** show not only submission status, but what you submitted??
+    show not only submission status, but what you submitted??
     Change disable color
     Verify rotating picture based on yaw angle
     Show past classifications on the left with autofill option
 Tab3:
     **Bug where it doesn't show that you deleted the last image
         this happened when target #1 was emergent and deleted target #2 standard
-    Fix bug of going straight to page and out of range
     Show in blue which target it's pulling the "to submit" classificaiton from
     Change radiobuttons to match ttktheme
     Fix resizing issues
+    Possibly auto updating? (if other people are pushing classifications)
 Tab4:
     create everything
 
 KNOWN BUGS:
     When you click on the 2nd tab right at the beginning, and then use the left/right
         buttons, it moves one tab, then unbinds like it's supposed to.
+    Going straight to tab3 when no submissions (handles 0 poorly...)
 '''
 
 import tkinter as tk
@@ -1508,6 +1508,9 @@ class GuiClass(tk.Frame):
             self.pendingList = self.interface.getPendingSubmissions()
 
             if self.pendingList == None:
+                pics = 0
+                self.t3titleB.configure(text=0)
+                self.t3titleD.configure(text=0)
                 self.t3c1i1_im = self.t3_default_im.copy()
                 self.t3c1i1_tk = self.im2tk(self.t3c1i1_im)
                 self.t3c1i1_org_width,self.t3c1i1_org_height = self.t3c1i1_im.size
@@ -1554,6 +1557,8 @@ class GuiClass(tk.Frame):
                 self.t3c6r18.configure(text="N/A")
                 self.resizeEventTab3()
             else:
+                if self.t3_current_target == 0:
+                    self.t3_current_target = 1
                 self.t3_total_targets = len(self.pendingList)
                 self.t3titleD.configure(text=self.t3_total_targets)
                 self.t3titleB.configure(text=self.t3_current_target)
@@ -1612,277 +1617,279 @@ class GuiClass(tk.Frame):
                 self.t3c1b1.configure(state=tk.NORMAL)
 
 
-                if pics > 1:
-                    query = self.interface.getCroppedImage(self.pendingList[self.t3_current_target-1][1].crop_id)
-                    self.t3c2i1_im = query[0]
-                    yaw_angle = self.getYawAngle(query[1])
-                    self.t3c2i1_im = self.t3c2i1_im.rotate(yaw_angle,expand=1)
-                    self.t3c2i1_org_width,self.t3c2i1_org_height = self.t3c2i1_im.size
-                    self.t3c2i1_tk = self.im2tk(self.t3c2i1_im)
-                    self.t3c2i1.configure(image=self.t3c2i1_tk)
-                    display_shape = self.pendingList[self.t3_current_target-1][1].shape
-                    if display_shape != None:
-                        self.t3c2br5.configure(text=display_shape)
-                    else:
-                        self.t3c2br5.configure(text="N/A")
-                    display_bg_color = self.pendingList[self.t3_current_target-1][1].background_color
-                    if display_bg_color != None:
-                        self.t3c2br7.configure(text=display_bg_color)
-                    else:
-                        self.t3c2br7.configure(text="N/A")
-                    display_alphanumeric = self.pendingList[self.t3_current_target-1][1].alphanumeric
-                    if display_alphanumeric != None:
-                        self.t3c2br9.configure(text=display_alphanumeric)
-                    else:
-                        self.t3c2br9.configure(text="N/A")
-                    display_alpha_color = self.pendingList[self.t3_current_target-1][1].alphanumeric_color
-                    if display_alpha_color != None:
-                        self.t3c2br11.configure(text=display_alpha_color)
-                    else:
-                        self.t3c2br11.configure(text="N/A")
-                    display_orientation = self.pendingList[self.t3_current_target-1][1].orientation
-                    if display_orientation != None:
-                        self.t3c2br13.configure(text=display_orientation)
-                    else:
-                        self.t3c2br13.configure(text="N/A")
-                    display_decription = self.pendingList[self.t3_current_target-1][1].description
-                    if display_decription != "":
-                        self.t3c2r18.configure(text=display_decription)
-                    else:
-                        self.t3c2r18.configure(text="N/A")
-                    self.t3c2br15.configure(text=self.pendingList[self.t3_current_target-1][1].type)
-                    self.pending_bg_color.append(self.pendingList[self.t3_current_target-1][1].background_color)
-                    self.pending_alpha_color.append(self.pendingList[self.t3_current_target-1][1].alphanumeric_color)
-                    self.pending_orientation.append(self.pendingList[self.t3_current_target-1][1].orientation)
-                    self.pending_description.append(self.pendingList[self.t3_current_target-1][1].description)
-                    self.t3c2r4.configure(state=tk.NORMAL)
-                    self.t3c2r8.configure(state=tk.NORMAL)
-                    self.t3c2r12.configure(state=tk.NORMAL)
-                    self.t3c2r14.configure(state=tk.NORMAL)
-                    self.t3c2r19.configure(state=tk.NORMAL)
-                    self.t3c2b1.configure(state=tk.NORMAL)
+            if pics > 1:
+                query = self.interface.getCroppedImage(self.pendingList[self.t3_current_target-1][1].crop_id)
+                self.t3c2i1_im = query[0]
+                yaw_angle = self.getYawAngle(query[1])
+                self.t3c2i1_im = self.t3c2i1_im.rotate(yaw_angle,expand=1)
+                self.t3c2i1_org_width,self.t3c2i1_org_height = self.t3c2i1_im.size
+                self.t3c2i1_tk = self.im2tk(self.t3c2i1_im)
+                self.t3c2i1.configure(image=self.t3c2i1_tk)
+                display_shape = self.pendingList[self.t3_current_target-1][1].shape
+                if display_shape != None:
+                    self.t3c2br5.configure(text=display_shape)
                 else:
-                    self.t3c2i1_im = self.t3_default_im.copy()
-                    self.t3c2i1_org_width,self.t3c2i1_org_height = self.t3c2i1_im.size
-                    self.t3c2i1_tk = self.im2tk(self.t3c2i1_im)
-                    self.t3c2i1.configure(image=self.t3c2i1_tk)
                     self.t3c2br5.configure(text="N/A")
+                display_bg_color = self.pendingList[self.t3_current_target-1][1].background_color
+                if display_bg_color != None:
+                    self.t3c2br7.configure(text=display_bg_color)
+                else:
                     self.t3c2br7.configure(text="N/A")
+                display_alphanumeric = self.pendingList[self.t3_current_target-1][1].alphanumeric
+                if display_alphanumeric != None:
+                    self.t3c2br9.configure(text=display_alphanumeric)
+                else:
                     self.t3c2br9.configure(text="N/A")
+                display_alpha_color = self.pendingList[self.t3_current_target-1][1].alphanumeric_color
+                if display_alpha_color != None:
+                    self.t3c2br11.configure(text=display_alpha_color)
+                else:
                     self.t3c2br11.configure(text="N/A")
+                display_orientation = self.pendingList[self.t3_current_target-1][1].orientation
+                if display_orientation != None:
+                    self.t3c2br13.configure(text=display_orientation)
+                else:
                     self.t3c2br13.configure(text="N/A")
-                    self.t3c2br15.configure(text="N/A")
+                display_decription = self.pendingList[self.t3_current_target-1][1].description
+                if display_decription != "":
+                    self.t3c2r18.configure(text=display_decription)
+                else:
                     self.t3c2r18.configure(text="N/A")
-                    self.t3c2r4.configure(state=tk.DISABLED)
-                    self.t3c2r8.configure(state=tk.DISABLED)
-                    self.t3c2r12.configure(state=tk.DISABLED)
-                    self.t3c2r14.configure(state=tk.DISABLED)
-                    self.t3c2r19.configure(state=tk.DISABLED)
-                    self.t3c2b1.configure(state=tk.DISABLED)
+                self.t3c2br15.configure(text=self.pendingList[self.t3_current_target-1][1].type)
+                self.pending_bg_color.append(self.pendingList[self.t3_current_target-1][1].background_color)
+                self.pending_alpha_color.append(self.pendingList[self.t3_current_target-1][1].alphanumeric_color)
+                self.pending_orientation.append(self.pendingList[self.t3_current_target-1][1].orientation)
+                self.pending_description.append(self.pendingList[self.t3_current_target-1][1].description)
+                self.t3c2r4.configure(state=tk.NORMAL)
+                self.t3c2r8.configure(state=tk.NORMAL)
+                self.t3c2r12.configure(state=tk.NORMAL)
+                self.t3c2r14.configure(state=tk.NORMAL)
+                self.t3c2r19.configure(state=tk.NORMAL)
+                self.t3c2b1.configure(state=tk.NORMAL)
+            else:
+                self.t3c2i1_im = self.t3_default_im.copy()
+                self.t3c2i1_org_width,self.t3c2i1_org_height = self.t3c2i1_im.size
+                self.t3c2i1_tk = self.im2tk(self.t3c2i1_im)
+                self.t3c2i1.configure(image=self.t3c2i1_tk)
+                self.t3c2br5.configure(text="N/A")
+                self.t3c2br7.configure(text="N/A")
+                self.t3c2br9.configure(text="N/A")
+                self.t3c2br11.configure(text="N/A")
+                self.t3c2br13.configure(text="N/A")
+                self.t3c2br15.configure(text="N/A")
+                self.t3c2r18.configure(text="N/A")
+                self.t3c2r4.configure(state=tk.DISABLED)
+                self.t3c2r8.configure(state=tk.DISABLED)
+                self.t3c2r12.configure(state=tk.DISABLED)
+                self.t3c2r14.configure(state=tk.DISABLED)
+                self.t3c2r19.configure(state=tk.DISABLED)
+                self.t3c2b1.configure(state=tk.DISABLED)
 
-                if pics > 2:
-                    query = self.interface.getCroppedImage(self.pendingList[self.t3_current_target-1][2].crop_id)
-                    self.t3c3i1_im = query[0]
-                    yaw_angle = self.getYawAngle(query[1])
-                    self.t3c3i1_im = self.t3c3i1_im.rotate(yaw_angle,expand=1)
-                    self.t3c3i1_org_width,self.t3c3i1_org_height = self.t3c3i1_im.size
-                    self.t3c3i1_tk = self.im2tk(self.t3c3i1_im)
-                    self.t3c3i1.configure(image=self.t3c3i1_tk)
-                    display_shape = self.pendingList[self.t3_current_target-1][2].shape
-                    if display_shape != None:
-                        self.t3c3br5.configure(text=display_shape)
-                    else:
-                        self.t3c3br5.configure(text="N/A")
-                    display_bg_color = self.pendingList[self.t3_current_target-1][2].background_color
-                    if display_bg_color != None:
-                        self.t3c3br7.configure(text=display_bg_color)
-                    else:
-                        self.t3c3br7.configure(text="N/A")
-                    display_alphanumeric = self.pendingList[self.t3_current_target-1][2].alphanumeric
-                    if display_alphanumeric != None:
-                        self.t3c3br9.configure(text=display_alphanumeric)
-                    else:
-                        self.t3c3br9.configure(text="N/A")
-                    display_alpha_color = self.pendingList[self.t3_current_target-1][2].alphanumeric_color
-                    if display_alpha_color != None:
-                        self.t3c3br11.configure(text=display_alpha_color)
-                    else:
-                        self.t3c3br11.configure(text="N/A")
-                    display_orientation = self.pendingList[self.t3_current_target-1][2].orientation
-                    if display_orientation != None:
-                        self.t3c3br13.configure(text=display_orientation)
-                    else:
-                        self.t3c3br13.configure(text="N/A")
-                    display_decription = self.pendingList[self.t3_current_target-1][2].description
-                    if display_decription != "":
-                        self.t3c3r18.configure(text=display_decription)
-                    else:
-                        self.t3c3r18.configure(text="N/A")
-                    self.t3c3br15.configure(text=self.pendingList[self.t3_current_target-1][2].type)
-                    self.pending_bg_color.append(self.pendingList[self.t3_current_target-1][2].background_color)
-                    self.pending_alpha_color.append(self.pendingList[self.t3_current_target-1][2].alphanumeric_color)
-                    self.pending_orientation.append(self.pendingList[self.t3_current_target-1][2].orientation)
-                    self.pending_description.append(self.pendingList[self.t3_current_target-1][2].description)
-                    self.t3c3r4.configure(state=tk.NORMAL)
-                    self.t3c3r8.configure(state=tk.NORMAL)
-                    self.t3c3r12.configure(state=tk.NORMAL)
-                    self.t3c3r14.configure(state=tk.NORMAL)
-                    self.t3c3r19.configure(state=tk.NORMAL)
-                    self.t3c3b1.configure(state=tk.NORMAL)
+            if pics > 2:
+                query = self.interface.getCroppedImage(self.pendingList[self.t3_current_target-1][2].crop_id)
+                self.t3c3i1_im = query[0]
+                yaw_angle = self.getYawAngle(query[1])
+                self.t3c3i1_im = self.t3c3i1_im.rotate(yaw_angle,expand=1)
+                self.t3c3i1_org_width,self.t3c3i1_org_height = self.t3c3i1_im.size
+                self.t3c3i1_tk = self.im2tk(self.t3c3i1_im)
+                self.t3c3i1.configure(image=self.t3c3i1_tk)
+                display_shape = self.pendingList[self.t3_current_target-1][2].shape
+                if display_shape != None:
+                    self.t3c3br5.configure(text=display_shape)
                 else:
-                    self.t3c3i1_im = self.t3_default_im.copy()
-                    self.t3c3i1_org_width,self.t3c3i1_org_height = self.t3c3i1_im.size
-                    self.t3c3i1_tk = self.im2tk(self.t3c3i1_im)
-                    self.t3c3i1.configure(image=self.t3c3i1_tk)
                     self.t3c3br5.configure(text="N/A")
+                display_bg_color = self.pendingList[self.t3_current_target-1][2].background_color
+                if display_bg_color != None:
+                    self.t3c3br7.configure(text=display_bg_color)
+                else:
                     self.t3c3br7.configure(text="N/A")
+                display_alphanumeric = self.pendingList[self.t3_current_target-1][2].alphanumeric
+                if display_alphanumeric != None:
+                    self.t3c3br9.configure(text=display_alphanumeric)
+                else:
                     self.t3c3br9.configure(text="N/A")
+                display_alpha_color = self.pendingList[self.t3_current_target-1][2].alphanumeric_color
+                if display_alpha_color != None:
+                    self.t3c3br11.configure(text=display_alpha_color)
+                else:
                     self.t3c3br11.configure(text="N/A")
+                display_orientation = self.pendingList[self.t3_current_target-1][2].orientation
+                if display_orientation != None:
+                    self.t3c3br13.configure(text=display_orientation)
+                else:
                     self.t3c3br13.configure(text="N/A")
-                    self.t3c3br15.configure(text="N/A")
+                display_decription = self.pendingList[self.t3_current_target-1][2].description
+                if display_decription != "":
+                    self.t3c3r18.configure(text=display_decription)
+                else:
                     self.t3c3r18.configure(text="N/A")
-                    self.t3c3r4.configure(state=tk.DISABLED)
-                    self.t3c3r8.configure(state=tk.DISABLED)
-                    self.t3c3r12.configure(state=tk.DISABLED)
-                    self.t3c3r14.configure(state=tk.DISABLED)
-                    self.t3c3r19.configure(state=tk.DISABLED)
-                    self.t3c3b1.configure(state=tk.DISABLED)
+                self.t3c3br15.configure(text=self.pendingList[self.t3_current_target-1][2].type)
+                self.pending_bg_color.append(self.pendingList[self.t3_current_target-1][2].background_color)
+                self.pending_alpha_color.append(self.pendingList[self.t3_current_target-1][2].alphanumeric_color)
+                self.pending_orientation.append(self.pendingList[self.t3_current_target-1][2].orientation)
+                self.pending_description.append(self.pendingList[self.t3_current_target-1][2].description)
+                self.t3c3r4.configure(state=tk.NORMAL)
+                self.t3c3r8.configure(state=tk.NORMAL)
+                self.t3c3r12.configure(state=tk.NORMAL)
+                self.t3c3r14.configure(state=tk.NORMAL)
+                self.t3c3r19.configure(state=tk.NORMAL)
+                self.t3c3b1.configure(state=tk.NORMAL)
+            else:
+                self.t3c3i1_im = self.t3_default_im.copy()
+                self.t3c3i1_org_width,self.t3c3i1_org_height = self.t3c3i1_im.size
+                self.t3c3i1_tk = self.im2tk(self.t3c3i1_im)
+                self.t3c3i1.configure(image=self.t3c3i1_tk)
+                self.t3c3br5.configure(text="N/A")
+                self.t3c3br7.configure(text="N/A")
+                self.t3c3br9.configure(text="N/A")
+                self.t3c3br11.configure(text="N/A")
+                self.t3c3br13.configure(text="N/A")
+                self.t3c3br15.configure(text="N/A")
+                self.t3c3r18.configure(text="N/A")
+                self.t3c3r4.configure(state=tk.DISABLED)
+                self.t3c3r8.configure(state=tk.DISABLED)
+                self.t3c3r12.configure(state=tk.DISABLED)
+                self.t3c3r14.configure(state=tk.DISABLED)
+                self.t3c3r19.configure(state=tk.DISABLED)
+                self.t3c3b1.configure(state=tk.DISABLED)
 
-                if pics > 3:
-                    query = self.interface.getCroppedImage(self.pendingList[self.t3_current_target-1][3].crop_id)
-                    self.t3c4i1_im = query[0]
-                    yaw_angle = self.getYawAngle(query[1])
-                    self.t3c4i1_im = self.t3c4i1_im.rotate(yaw_angle,expand=1)
-                    self.t3c4i1_org_width,self.t3c4i1_org_height = self.t3c4i1_im.size
-                    self.t3c4i1_tk = self.im2tk(self.t3c4i1_im)
-                    self.t3c4i1.configure(image=self.t3c4i1_tk)
-                    display_shape = self.pendingList[self.t3_current_target-1][3].shape
-                    if display_shape != None:
-                        self.t3c4br5.configure(text=display_shape)
-                    else:
-                        self.t3c4br5.configure(text="N/A")
-                    display_bg_color = self.pendingList[self.t3_current_target-1][3].background_color
-                    if display_bg_color != None:
-                        self.t3c4br7.configure(text=display_bg_color)
-                    else:
-                        self.t3c4br7.configure(text="N/A")
-                    display_alphanumeric = self.pendingList[self.t3_current_target-1][3].alphanumeric
-                    if display_alphanumeric != None:
-                        self.t3c4br9.configure(text=display_alphanumeric)
-                    else:
-                        self.t3c4br9.configure(text="N/A")
-                    display_alpha_color = self.pendingList[self.t3_current_target-1][3].alphanumeric_color
-                    if display_alpha_color != None:
-                        self.t3c4br11.configure(text=display_alpha_color)
-                    else:
-                        self.t3c4br11.configure(text="N/A")
-                    display_orientation = self.pendingList[self.t3_current_target-1][3].orientation
-                    if display_orientation != None:
-                        self.t3c4br13.configure(text=display_orientation)
-                    else:
-                        self.t3c4br13.configure(text="N/A")
-                    display_decription = self.pendingList[self.t3_current_target-1][3].description
-                    if display_decription != "":
-                        self.t3c4r18.configure(text=display_decription)
-                    else:
-                        self.t3c4r18.configure(text="N/A")
-                    self.t3c4br15.configure(text=self.pendingList[self.t3_current_target-1][3].type)
-                    self.pending_bg_color.append(self.pendingList[self.t3_current_target-1][3].background_color)
-                    self.pending_alpha_color.append(self.pendingList[self.t3_current_target-1][3].alphanumeric_color)
-                    self.pending_orientation.append(self.pendingList[self.t3_current_target-1][3].orientation)
-                    self.pending_description.append(self.pendingList[self.t3_current_target-1][3].description)
-                    self.t3c4r4.configure(state=tk.NORMAL)
-                    self.t3c4r8.configure(state=tk.NORMAL)
-                    self.t3c4r12.configure(state=tk.NORMAL)
-                    self.t3c4r14.configure(state=tk.NORMAL)
-                    self.t3c4r19.configure(state=tk.NORMAL)
-                    self.t3c4b1.configure(state=tk.NORMAL)
+            if pics > 3:
+                query = self.interface.getCroppedImage(self.pendingList[self.t3_current_target-1][3].crop_id)
+                self.t3c4i1_im = query[0]
+                yaw_angle = self.getYawAngle(query[1])
+                self.t3c4i1_im = self.t3c4i1_im.rotate(yaw_angle,expand=1)
+                self.t3c4i1_org_width,self.t3c4i1_org_height = self.t3c4i1_im.size
+                self.t3c4i1_tk = self.im2tk(self.t3c4i1_im)
+                self.t3c4i1.configure(image=self.t3c4i1_tk)
+                display_shape = self.pendingList[self.t3_current_target-1][3].shape
+                if display_shape != None:
+                    self.t3c4br5.configure(text=display_shape)
                 else:
-                    self.t3c4i1_im = self.t3_default_im.copy()
-                    self.t3c4i1_org_width,self.t3c4i1_org_height = self.t3c4i1_im.size
-                    self.t3c4i1_tk = self.im2tk(self.t3c4i1_im)
-                    self.t3c4i1.configure(image=self.t3c4i1_tk)
                     self.t3c4br5.configure(text="N/A")
-                    self.t3c4br7.configure(text="N/A")
-                    self.t3c4br9.configure(text="N/A")
-                    self.t3c4br11.configure(text="N/A")
-                    self.t3c4br13.configure(text="N/A")
-                    self.t3c4br15.configure(text="N/A")
-                    self.t3c4r18.configure(text="N/A")
-                    self.t3c4r4.configure(state=tk.DISABLED)
-                    self.t3c4r8.configure(state=tk.DISABLED)
-                    self.t3c4r12.configure(state=tk.DISABLED)
-                    self.t3c4r14.configure(state=tk.DISABLED)
-                    self.t3c4r19.configure(state=tk.DISABLED)
-                    self.t3c4b1.configure(state=tk.DISABLED)
-
-                if pics > 4:
-                    query = self.interface.getCroppedImage(self.pendingList[self.t3_current_target-1][4].crop_id)
-                    self.t3c5i1_im = query[0]
-                    yaw_angle = self.getYawAngle(query[1])
-                    self.t3c5i1_im = self.t3c5i1_im.rotate(yaw_angle,expand=1)
-                    self.t3c5i1_org_width,self.t3c5i1_org_height = self.t3c5i1_im.size
-                    self.t3c5i1_tk = self.im2tk(self.t3c5i1_im)
-                    self.t3c5i1.configure(image=self.t3c5i1_tk)
-                    display_shape = self.pendingList[self.t3_current_target-1][4].shape
-                    if display_shape != None:
-                        self.t3c5br5.configure(text=display_shape)
-                    else:
-                        self.t3c5br5.configure(text="N/A")
-                    display_bg_color = self.pendingList[self.t3_current_target-1][4].background_color
-                    if display_bg_color != None:
-                        self.t3c5br7.configure(text=display_bg_color)
-                    else:
-                        self.t3c5br7.configure(text="N/A")
-                    display_alphanumeric = self.pendingList[self.t3_current_target-1][4].alphanumeric
-                    if display_alphanumeric != None:
-                        self.t3c5br9.configure(text=display_alphanumeric)
-                    else:
-                        self.t3c5br9.configure(text="N/A")
-                    display_alpha_color = self.pendingList[self.t3_current_target-1][4].alphanumeric_color
-                    if display_alpha_color != None:
-                        self.t3c5br11.configure(text=display_alpha_color)
-                    else:
-                        self.t3c5br11.configure(text="N/A")
-                    display_orientation = self.pendingList[self.t3_current_target-1][4].orientation
-                    if display_orientation != None:
-                        self.t3c5br13.configure(text=display_orientation)
-                    else:
-                        self.t3c5br13.configure(text="N/A")
-                    display_decription = self.pendingList[self.t3_current_target-1][4].description
-                    if display_decription != "":
-                        self.t3c5r18.configure(text=display_decription)
-                    else:
-                        self.t3c5r18.configure(text="N/A")
-                    self.t3c5br15.configure(text=self.pendingList[self.t3_current_target-1][4].type)
-                    self.pending_bg_color.append(self.pendingList[self.t3_current_target-1][4].background_color)
-                    self.pending_alpha_color.append(self.pendingList[self.t3_current_target-1][4].alphanumeric_color)
-                    self.pending_orientation.append(self.pendingList[self.t3_current_target-1][4].orientation)
-                    self.pending_description.append(self.pendingList[self.t3_current_target-1][4].description)
-                    self.t3c5r4.configure(state=tk.NORMAL)
-                    self.t3c5r8.configure(state=tk.NORMAL)
-                    self.t3c5r12.configure(state=tk.NORMAL)
-                    self.t3c5r14.configure(state=tk.NORMAL)
-                    self.t3c5r19.configure(state=tk.NORMAL)
-                    self.t3c5b1.configure(state=tk.NORMAL)
+                display_bg_color = self.pendingList[self.t3_current_target-1][3].background_color
+                if display_bg_color != None:
+                    self.t3c4br7.configure(text=display_bg_color)
                 else:
-                    self.t3c5i1_im = self.t3_default_im.copy()
-                    self.t3c5i1_org_width,self.t3c5i1_org_height = self.t3c5i1_im.size
-                    self.t3c5i1_tk = self.im2tk(self.t3c5i1_im)
-                    self.t3c5i1.configure(image=self.t3c5i1_tk)
+                    self.t3c4br7.configure(text="N/A")
+                display_alphanumeric = self.pendingList[self.t3_current_target-1][3].alphanumeric
+                if display_alphanumeric != None:
+                    self.t3c4br9.configure(text=display_alphanumeric)
+                else:
+                    self.t3c4br9.configure(text="N/A")
+                display_alpha_color = self.pendingList[self.t3_current_target-1][3].alphanumeric_color
+                if display_alpha_color != None:
+                    self.t3c4br11.configure(text=display_alpha_color)
+                else:
+                    self.t3c4br11.configure(text="N/A")
+                display_orientation = self.pendingList[self.t3_current_target-1][3].orientation
+                if display_orientation != None:
+                    self.t3c4br13.configure(text=display_orientation)
+                else:
+                    self.t3c4br13.configure(text="N/A")
+                display_decription = self.pendingList[self.t3_current_target-1][3].description
+                if display_decription != "":
+                    self.t3c4r18.configure(text=display_decription)
+                else:
+                    self.t3c4r18.configure(text="N/A")
+                self.t3c4br15.configure(text=self.pendingList[self.t3_current_target-1][3].type)
+                self.pending_bg_color.append(self.pendingList[self.t3_current_target-1][3].background_color)
+                self.pending_alpha_color.append(self.pendingList[self.t3_current_target-1][3].alphanumeric_color)
+                self.pending_orientation.append(self.pendingList[self.t3_current_target-1][3].orientation)
+                self.pending_description.append(self.pendingList[self.t3_current_target-1][3].description)
+                self.t3c4r4.configure(state=tk.NORMAL)
+                self.t3c4r8.configure(state=tk.NORMAL)
+                self.t3c4r12.configure(state=tk.NORMAL)
+                self.t3c4r14.configure(state=tk.NORMAL)
+                self.t3c4r19.configure(state=tk.NORMAL)
+                self.t3c4b1.configure(state=tk.NORMAL)
+            else:
+                self.t3c4i1_im = self.t3_default_im.copy()
+                self.t3c4i1_org_width,self.t3c4i1_org_height = self.t3c4i1_im.size
+                self.t3c4i1_tk = self.im2tk(self.t3c4i1_im)
+                self.t3c4i1.configure(image=self.t3c4i1_tk)
+                self.t3c4br5.configure(text="N/A")
+                self.t3c4br7.configure(text="N/A")
+                self.t3c4br9.configure(text="N/A")
+                self.t3c4br11.configure(text="N/A")
+                self.t3c4br13.configure(text="N/A")
+                self.t3c4br15.configure(text="N/A")
+                self.t3c4r18.configure(text="N/A")
+                self.t3c4r4.configure(state=tk.DISABLED)
+                self.t3c4r8.configure(state=tk.DISABLED)
+                self.t3c4r12.configure(state=tk.DISABLED)
+                self.t3c4r14.configure(state=tk.DISABLED)
+                self.t3c4r19.configure(state=tk.DISABLED)
+                self.t3c4b1.configure(state=tk.DISABLED)
+
+            if pics > 4:
+                query = self.interface.getCroppedImage(self.pendingList[self.t3_current_target-1][4].crop_id)
+                self.t3c5i1_im = query[0]
+                yaw_angle = self.getYawAngle(query[1])
+                self.t3c5i1_im = self.t3c5i1_im.rotate(yaw_angle,expand=1)
+                self.t3c5i1_org_width,self.t3c5i1_org_height = self.t3c5i1_im.size
+                self.t3c5i1_tk = self.im2tk(self.t3c5i1_im)
+                self.t3c5i1.configure(image=self.t3c5i1_tk)
+                display_shape = self.pendingList[self.t3_current_target-1][4].shape
+                if display_shape != None:
+                    self.t3c5br5.configure(text=display_shape)
+                else:
                     self.t3c5br5.configure(text="N/A")
+                display_bg_color = self.pendingList[self.t3_current_target-1][4].background_color
+                if display_bg_color != None:
+                    self.t3c5br7.configure(text=display_bg_color)
+                else:
                     self.t3c5br7.configure(text="N/A")
+                display_alphanumeric = self.pendingList[self.t3_current_target-1][4].alphanumeric
+                if display_alphanumeric != None:
+                    self.t3c5br9.configure(text=display_alphanumeric)
+                else:
                     self.t3c5br9.configure(text="N/A")
+                display_alpha_color = self.pendingList[self.t3_current_target-1][4].alphanumeric_color
+                if display_alpha_color != None:
+                    self.t3c5br11.configure(text=display_alpha_color)
+                else:
                     self.t3c5br11.configure(text="N/A")
+                display_orientation = self.pendingList[self.t3_current_target-1][4].orientation
+                if display_orientation != None:
+                    self.t3c5br13.configure(text=display_orientation)
+                else:
                     self.t3c5br13.configure(text="N/A")
-                    self.t3c5br15.configure(text="N/A")
+                display_decription = self.pendingList[self.t3_current_target-1][4].description
+                if display_decription != "":
+                    self.t3c5r18.configure(text=display_decription)
+                else:
                     self.t3c5r18.configure(text="N/A")
-                    self.t3c5r4.configure(state=tk.DISABLED)
-                    self.t3c5r8.configure(state=tk.DISABLED)
-                    self.t3c5r12.configure(state=tk.DISABLED)
-                    self.t3c5r14.configure(state=tk.DISABLED)
-                    self.t3c5r19.configure(state=tk.DISABLED)
-                    self.t3c5b1.configure(state=tk.DISABLED)
+                self.t3c5br15.configure(text=self.pendingList[self.t3_current_target-1][4].type)
+                self.pending_bg_color.append(self.pendingList[self.t3_current_target-1][4].background_color)
+                self.pending_alpha_color.append(self.pendingList[self.t3_current_target-1][4].alphanumeric_color)
+                self.pending_orientation.append(self.pendingList[self.t3_current_target-1][4].orientation)
+                self.pending_description.append(self.pendingList[self.t3_current_target-1][4].description)
+                self.t3c5r4.configure(state=tk.NORMAL)
+                self.t3c5r8.configure(state=tk.NORMAL)
+                self.t3c5r12.configure(state=tk.NORMAL)
+                self.t3c5r14.configure(state=tk.NORMAL)
+                self.t3c5r19.configure(state=tk.NORMAL)
+                self.t3c5b1.configure(state=tk.NORMAL)
+            else:
+                self.t3c5i1_im = self.t3_default_im.copy()
+                self.t3c5i1_org_width,self.t3c5i1_org_height = self.t3c5i1_im.size
+                self.t3c5i1_tk = self.im2tk(self.t3c5i1_im)
+                self.t3c5i1.configure(image=self.t3c5i1_tk)
+                self.t3c5br5.configure(text="N/A")
+                self.t3c5br7.configure(text="N/A")
+                self.t3c5br9.configure(text="N/A")
+                self.t3c5br11.configure(text="N/A")
+                self.t3c5br13.configure(text="N/A")
+                self.t3c5br15.configure(text="N/A")
+                self.t3c5r18.configure(text="N/A")
+                self.t3c5r4.configure(state=tk.DISABLED)
+                self.t3c5r8.configure(state=tk.DISABLED)
+                self.t3c5r12.configure(state=tk.DISABLED)
+                self.t3c5r14.configure(state=tk.DISABLED)
+                self.t3c5r19.configure(state=tk.DISABLED)
+                self.t3c5b1.configure(state=tk.DISABLED)
+
+            if self.pendingList != None:
                 # Possible Submission
                 self.t3c6i1_im = self.t3c1i1_im.copy()
                 self.t3c6i1_org_width,self.t3c6i1_org_height = self.t3c6i1_im.size
@@ -1921,8 +1928,6 @@ class GuiClass(tk.Frame):
                     self.t3c6r18.configure(text="N/A")
                 for ii in range(5):
                     self.resizeEventTab3()
-
-
 
         else:
             error_np = self.get_image('assets/server_error.jpg')
@@ -1966,10 +1971,10 @@ class GuiClass(tk.Frame):
         #self.updateManualSubmissionTab()
         self.serverConnected = self.interface.ping()
         if self.serverConnected:
-            if self.t3_current_target < len(self.pendingList):
-                self.t3_current_target += 1
-            elif self.pendingList == None:
+            if self.pendingList == None:
                 self.t3_current_target = 0
+            elif self.t3_current_target < len(self.pendingList):
+                self.t3_current_target += 1
             else:
                 pass
 
