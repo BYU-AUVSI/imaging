@@ -21,6 +21,7 @@ Tab0:
     add error handling if entries aren't in the right format
     add error handling if not connected to correct wifi
 Tab1:
+    **fix panning scaling issue if not maximized
     Don't crop if you single click
     Add zooming feature
     Add panning feature
@@ -836,7 +837,41 @@ class GuiClass(tk.Frame):
             self.y0_hat = self.y0 + ydif
             self.x1_hat = self.x1 + xdif
             self.y1_hat = self.y1 + ydif
+
+            if self.x0_hat < self.x1_hat:
+                if self.x0_hat < 0:
+                    self.x0_hat = 0
+                    self.x1_hat = np.abs(self.x1-self.x0)
+                elif self.x1_hat > self.resized_im.size[0]:
+                    self.x0_hat = self.resized_im.size[0]-np.abs(self.x1-self.x0)
+                    self.x1_hat = self.resized_im.size[0]
+            else:
+                if self.x1_hat < 0:
+                    self.x1_hat = 0
+                    self.x0_hat = np.abs(self.x1-self.x0)
+                elif self.x0_hat > self.resized_im.size[0]:
+                    self.x1_hat = self.resized_im.size[0]-np.abs(self.x1-self.x0)
+                    self.x0_hat = self.resized_im.size[0]
+            if self.y0_hat < self.y1_hat:
+                if self.y0_hat < 0:
+                    self.y0_hat = 0
+                    self.y1_hat = np.abs(self.y1-self.y0)
+                elif self.y1_hat > self.resized_im.size[1]:
+                    self.y0_hat = self.resized_im.size[1]-np.abs(self.y1-self.y0)
+                    self.y1_hat = self.resized_im.size[1]
+            else:
+                if self.y1_hat < 0:
+                    self.y1_hat = 0
+                    self.y0_hat = np.abs(self.x1-self.x0)
+                elif self.y0_hat > self.resized_im.size[1]:
+                    self.y1_hat = self.resized_im.size[1]-np.abs(self.y1-self.y0)
+                    self.y0_hat = self.resized_im.size[1]
+
+
+
+
             cv2.rectangle(self.draw_np,(int(sr*self.x0_hat),int(sr*self.y0_hat)),(int(sr*self.x1_hat),int(sr*self.y1_hat)),(255,0,0),2)
+            cv2.line(self.draw_np,(int(sr*self.pan_x0),int(sr*self.pan_y0)),(int(sr*self.pan_x1),int(sr*self.pan_y1)),(45,255,255),2)
 
 
         self.img_im = self.np2im(self.draw_np)
@@ -874,8 +909,6 @@ class GuiClass(tk.Frame):
         if self.new_crop:
             self.x1 = x1
             self.y1 = y1
-            cv2.rectangle(self.draw_np,(int(sr*self.x0),int(sr*self.y0)),(int(sr*self.x1),int(sr*self.y1)),(255,0,0),2)
-            self.cropImage(int(sr*self.x0),int(sr*self.y0),int(sr*self.x1),int(sr*self.y1))
         else:
             self.pan_x1 = x1
             self.pan_y1 = y1
@@ -885,9 +918,44 @@ class GuiClass(tk.Frame):
             self.y0_hat = self.y0 + ydif
             self.x1_hat = self.x1 + xdif
             self.y1_hat = self.y1 + ydif
-            cv2.rectangle(self.draw_np,(int(sr*self.x0_hat),int(sr*self.y0_hat)),(int(sr*self.x1_hat),int(sr*self.y1_hat)),(255,0,0),2)
-            self.cropImage(int(sr*self.x0_hat),int(sr*self.y0_hat),int(sr*self.x1_hat),int(sr*self.y1_hat))
 
+            if self.x0_hat < self.x1_hat:
+                if self.x0_hat < 0:
+                    self.x0_hat = 0
+                    self.x1_hat = np.abs(self.x1-self.x0)
+                elif self.x1_hat > self.resized_im.size[0]:
+                    self.x0_hat = self.resized_im.size[0]-np.abs(self.x1-self.x0)
+                    self.x1_hat = self.resized_im.size[0]
+            else:
+                if self.x1_hat < 0:
+                    self.x1_hat = 0
+                    self.x0_hat = np.abs(self.x1-self.x0)
+                elif self.x0_hat > self.resized_im.size[0]:
+                    self.x1_hat = self.resized_im.size[0]-np.abs(self.x1-self.x0)
+                    self.x0_hat = self.resized_im.size[0]
+            if self.y0_hat < self.y1_hat:
+                if self.y0_hat < 0:
+                    self.y0_hat = 0
+                    self.y1_hat = np.abs(self.y1-self.y0)
+                elif self.y1_hat > self.resized_im.size[1]:
+                    self.y0_hat = self.resized_im.size[1]-np.abs(self.y1-self.y0)
+                    self.y1_hat = self.resized_im.size[1]
+            else:
+                if self.y1_hat < 0:
+                    self.y1_hat = 0
+                    self.y0_hat = np.abs(self.x1-self.x0)
+                elif self.y0_hat > self.resized_im.size[1]:
+                    self.y1_hat = self.resized_im.size[1]-np.abs(self.y1-self.y0)
+                    self.y0_hat = self.resized_im.size[1]
+
+            # save hat values as the new values
+            self.x0 = self.x0_hat
+            self.y0 = self.y0_hat
+            self.x1 = self.x1_hat
+            self.y1 = self.y1_hat
+
+        cv2.rectangle(self.draw_np,(int(sr*self.x0),int(sr*self.y0)),(int(sr*self.x1),int(sr*self.y1)),(255,0,0),2)
+        self.cropImage(int(sr*self.x0),int(sr*self.y0),int(sr*self.x1),int(sr*self.y1))
         self.img_im = self.np2im(self.draw_np)
         self.resized_im = self.resizeIm(self.img_im,self.org_width,self.org_height,self.t1c1i1_width,self.t1c1i1_height)
         self.img_tk = self.im2tk(self.resized_im)
@@ -1111,6 +1179,11 @@ class GuiClass(tk.Frame):
         @rtype:  None
         @return: None
         """
+        if event != None:
+            self.x0 = None
+            self.y0 = None
+            self.x1 = None
+            self.y1 = None
         self.draw_np = np.copy(self.org_np)
         self.img_im = self.np2im(self.draw_np)
         self.resized_im = self.resizeIm(self.img_im,self.org_width,self.org_height,self.t1c1i1_width,self.t1c1i1_height)
@@ -1122,6 +1195,7 @@ class GuiClass(tk.Frame):
         self.crop_preview_tk = self.im2tk(self.crop_preview_resized_im)
         self.t1c2i1.configure(image=self.crop_preview_tk)
         #self.t2c2i1.configure(image=self.crop_preview_tk)
+
 
     def nextRaw(self,event):
         """
@@ -1160,6 +1234,11 @@ class GuiClass(tk.Frame):
             time2 = time.time()
             print("server request = ",time1-time0,"gui = ",time2-time1)
             self.t1c2r1b.configure(text="unsubmitted",foreground="red")
+            # reset crop points to none
+            self.x0 = None
+            self.y0 = None
+            self.x1 = None
+            self.y1 = None
 
     def previousRaw(self,event):
         """
@@ -1199,6 +1278,11 @@ class GuiClass(tk.Frame):
             time2 = time.time()
             print("server request = ",time1-time0,"gui = ",time2-time1)
             self.t1c2r1b.configure(text="unsubmitted",foreground="red")
+            # reset crop points to none
+            self.x0 = None
+            self.y0 = None
+            self.x1 = None
+            self.y1 = None
 
 
     def submitCropped(self,event=None):
