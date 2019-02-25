@@ -33,7 +33,7 @@ Tab2
     Show past classifications on the left with autofill option
     Bug tabbing into emergent description and trying to leave w/o subbmitting
 Tab3:
-    **Disable description radiobutton if emergent and vice versa
+    **set pick to None if you delete what's been chosen or delete all...
     **Bug where it doesn't show that you deleted the last image
         this happened when target #1 was emergent and deleted target #2 standard
     Show in blue which target it's pulling the "to submit" classificaiton from
@@ -1759,16 +1759,24 @@ class GuiClass(tk.Frame):
                 else:
                     self.t3c1r18.configure(text="N/A")
                 self.t3c1br15.configure(text=self.pendingList[self.t3_current_target-1][0].type)
+                if self.pendingList[self.t3_current_target-1][0].type == "emergent":
+                    self.t3c1r4.configure(state=tk.NORMAL)
+                    self.t3c1r8.configure(state=tk.DISABLED)
+                    self.t3c1r12.configure(state=tk.DISABLED)
+                    self.t3c1r14.configure(state=tk.DISABLED)
+                    self.t3c1r19.configure(state=tk.NORMAL)
+                    self.t3c1b1.configure(state=tk.NORMAL)
+                else:
+                    self.t3c1r4.configure(state=tk.NORMAL)
+                    self.t3c1r8.configure(state=tk.NORMAL)
+                    self.t3c1r12.configure(state=tk.NORMAL)
+                    self.t3c1r14.configure(state=tk.NORMAL)
+                    self.t3c1r19.configure(state=tk.DISABLED)
+                    self.t3c1b1.configure(state=tk.NORMAL)
                 self.pending_bg_color = [self.pendingList[self.t3_current_target-1][0].background_color]
                 self.pending_alpha_color = [self.pendingList[self.t3_current_target-1][0].alphanumeric_color]
                 self.pending_orientation = [self.pendingList[self.t3_current_target-1][0].orientation]
                 self.pending_description = [self.pendingList[self.t3_current_target-1][0].description]
-                self.t3c1r4.configure(state=tk.NORMAL)
-                self.t3c1r8.configure(state=tk.NORMAL)
-                self.t3c1r12.configure(state=tk.NORMAL)
-                self.t3c1r14.configure(state=tk.NORMAL)
-                self.t3c1r19.configure(state=tk.NORMAL)
-                self.t3c1b1.configure(state=tk.NORMAL)
 
 
             if pics > 1:
@@ -1810,16 +1818,25 @@ class GuiClass(tk.Frame):
                 else:
                     self.t3c2r18.configure(text="N/A")
                 self.t3c2br15.configure(text=self.pendingList[self.t3_current_target-1][1].type)
+                if self.pendingList[self.t3_current_target-1][1].type == "emergent":
+                    self.t3c2r4.configure(state=tk.NORMAL)
+                    self.t3c2r8.configure(state=tk.DISABLED)
+                    self.t3c2r12.configure(state=tk.DISABLED)
+                    self.t3c2r14.configure(state=tk.DISABLED)
+                    self.t3c2r19.configure(state=tk.NORMAL)
+                    self.t3c2b1.configure(state=tk.NORMAL)
+                else:
+                    self.t3c2r4.configure(state=tk.NORMAL)
+                    self.t3c2r8.configure(state=tk.NORMAL)
+                    self.t3c2r12.configure(state=tk.NORMAL)
+                    self.t3c2r14.configure(state=tk.NORMAL)
+                    self.t3c2r19.configure(state=tk.DISABLED)
+                    self.t3c2b1.configure(state=tk.NORMAL)
                 self.pending_bg_color.append(self.pendingList[self.t3_current_target-1][1].background_color)
                 self.pending_alpha_color.append(self.pendingList[self.t3_current_target-1][1].alphanumeric_color)
                 self.pending_orientation.append(self.pendingList[self.t3_current_target-1][1].orientation)
                 self.pending_description.append(self.pendingList[self.t3_current_target-1][1].description)
-                self.t3c2r4.configure(state=tk.NORMAL)
-                self.t3c2r8.configure(state=tk.NORMAL)
-                self.t3c2r12.configure(state=tk.NORMAL)
-                self.t3c2r14.configure(state=tk.NORMAL)
-                self.t3c2r19.configure(state=tk.NORMAL)
-                self.t3c2b1.configure(state=tk.NORMAL)
+
             else:
                 self.t3c2i1_im = self.t3_default_im.copy()
                 self.t3c2i1_org_width,self.t3c2i1_org_height = self.t3c2i1_im.size
@@ -1878,16 +1895,25 @@ class GuiClass(tk.Frame):
                 else:
                     self.t3c3r18.configure(text="N/A")
                 self.t3c3br15.configure(text=self.pendingList[self.t3_current_target-1][2].type)
+                if self.pendingList[self.t3_current_target-1][2].type == "emergent":
+                    self.t3c3r4.configure(state=tk.NORMAL)
+                    self.t3c3r8.configure(state=tk.DISABLED)
+                    self.t3c3r12.configure(state=tk.DISABLED)
+                    self.t3c3r14.configure(state=tk.DISABLED)
+                    self.t3c3r19.configure(state=tk.NORMAL)
+                    self.t3c3b1.configure(state=tk.NORMAL)
+                else:
+                    self.t3c3r4.configure(state=tk.NORMAL)
+                    self.t3c3r8.configure(state=tk.NORMAL)
+                    self.t3c3r12.configure(state=tk.NORMAL)
+                    self.t3c3r14.configure(state=tk.NORMAL)
+                    self.t3c3r19.configure(state=tk.DISABLED)
+                    self.t3c3b1.configure(state=tk.NORMAL)
                 self.pending_bg_color.append(self.pendingList[self.t3_current_target-1][2].background_color)
                 self.pending_alpha_color.append(self.pendingList[self.t3_current_target-1][2].alphanumeric_color)
                 self.pending_orientation.append(self.pendingList[self.t3_current_target-1][2].orientation)
                 self.pending_description.append(self.pendingList[self.t3_current_target-1][2].description)
-                self.t3c3r4.configure(state=tk.NORMAL)
-                self.t3c3r8.configure(state=tk.NORMAL)
-                self.t3c3r12.configure(state=tk.NORMAL)
-                self.t3c3r14.configure(state=tk.NORMAL)
-                self.t3c3r19.configure(state=tk.NORMAL)
-                self.t3c3b1.configure(state=tk.NORMAL)
+
             else:
                 self.t3c3i1_im = self.t3_default_im.copy()
                 self.t3c3i1_org_width,self.t3c3i1_org_height = self.t3c3i1_im.size
@@ -1946,16 +1972,25 @@ class GuiClass(tk.Frame):
                 else:
                     self.t3c4r18.configure(text="N/A")
                 self.t3c4br15.configure(text=self.pendingList[self.t3_current_target-1][3].type)
+                if self.pendingList[self.t3_current_target-1][3].type == "emergent":
+                    self.t3c4r4.configure(state=tk.NORMAL)
+                    self.t3c4r8.configure(state=tk.DISABLED)
+                    self.t3c4r12.configure(state=tk.DISABLED)
+                    self.t3c4r14.configure(state=tk.DISABLED)
+                    self.t3c4r19.configure(state=tk.NORMAL)
+                    self.t3c4b1.configure(state=tk.NORMAL)
+                else:
+                    self.t3c4r4.configure(state=tk.NORMAL)
+                    self.t3c4r8.configure(state=tk.NORMAL)
+                    self.t3c4r12.configure(state=tk.NORMAL)
+                    self.t3c4r14.configure(state=tk.NORMAL)
+                    self.t3c4r19.configure(state=tk.DISABLED)
+                    self.t3c4b1.configure(state=tk.NORMAL)
                 self.pending_bg_color.append(self.pendingList[self.t3_current_target-1][3].background_color)
                 self.pending_alpha_color.append(self.pendingList[self.t3_current_target-1][3].alphanumeric_color)
                 self.pending_orientation.append(self.pendingList[self.t3_current_target-1][3].orientation)
                 self.pending_description.append(self.pendingList[self.t3_current_target-1][3].description)
-                self.t3c4r4.configure(state=tk.NORMAL)
-                self.t3c4r8.configure(state=tk.NORMAL)
-                self.t3c4r12.configure(state=tk.NORMAL)
-                self.t3c4r14.configure(state=tk.NORMAL)
-                self.t3c4r19.configure(state=tk.NORMAL)
-                self.t3c4b1.configure(state=tk.NORMAL)
+
             else:
                 self.t3c4i1_im = self.t3_default_im.copy()
                 self.t3c4i1_org_width,self.t3c4i1_org_height = self.t3c4i1_im.size
@@ -2014,16 +2049,25 @@ class GuiClass(tk.Frame):
                 else:
                     self.t3c5r18.configure(text="N/A")
                 self.t3c5br15.configure(text=self.pendingList[self.t3_current_target-1][4].type)
+                if self.pendingList[self.t3_current_target-1][4].type == "emergent":
+                    self.t3c5r4.configure(state=tk.NORMAL)
+                    self.t3c5r8.configure(state=tk.DISABLED)
+                    self.t3c5r12.configure(state=tk.DISABLED)
+                    self.t3c5r14.configure(state=tk.DISABLED)
+                    self.t3c5r19.configure(state=tk.NORMAL)
+                    self.t3c5b1.configure(state=tk.NORMAL)
+                else:
+                    self.t3c5r4.configure(state=tk.NORMAL)
+                    self.t3c5r8.configure(state=tk.NORMAL)
+                    self.t3c5r12.configure(state=tk.NORMAL)
+                    self.t3c5r14.configure(state=tk.NORMAL)
+                    self.t3c5r19.configure(state=tk.DISABLED)
+                    self.t3c5b1.configure(state=tk.NORMAL)
                 self.pending_bg_color.append(self.pendingList[self.t3_current_target-1][4].background_color)
                 self.pending_alpha_color.append(self.pendingList[self.t3_current_target-1][4].alphanumeric_color)
                 self.pending_orientation.append(self.pendingList[self.t3_current_target-1][4].orientation)
                 self.pending_description.append(self.pendingList[self.t3_current_target-1][4].description)
-                self.t3c5r4.configure(state=tk.NORMAL)
-                self.t3c5r8.configure(state=tk.NORMAL)
-                self.t3c5r12.configure(state=tk.NORMAL)
-                self.t3c5r14.configure(state=tk.NORMAL)
-                self.t3c5r19.configure(state=tk.NORMAL)
-                self.t3c5b1.configure(state=tk.NORMAL)
+
             else:
                 self.t3c5i1_im = self.t3_default_im.copy()
                 self.t3c5i1_org_width,self.t3c5i1_org_height = self.t3c5i1_im.size
