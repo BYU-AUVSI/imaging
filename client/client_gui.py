@@ -148,59 +148,55 @@ class GuiClass(tk.Frame):
             tk.Grid.columnconfigure(self.tab0,x,weight=1)
         for y in range(10):
             tk.Grid.rowconfigure(self.tab0,y,weight=1)
-        # Column One
-        self.t0c1l1 = ttk.Label(self.tab0, anchor=tk.CENTER, text='                               ')
-        self.t0c1l1.grid(row=0,column=0,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t0c1l2 = ttk.Label(self.tab0, anchor=tk.CENTER, text='                               ')
-        self.t0c1l2.grid(row=0,column=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        # Left Column
+        self.t0c0r0 = ttk.Label(self.tab0, anchor=tk.CENTER, text='                               ')
+        self.t0c0r0.grid(row=0,column=0,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t0c1r0 = ttk.Label(self.tab0, anchor=tk.CENTER, text='                               ')
+        self.t0c1r0.grid(row=0,column=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
 
-        # Column Two
-        #self.t0sep12 = ttk.Separator(self.tab0, orient=tk.VERTICAL)
-        #self.t0sep12.grid(row=0, column=2, rowspan=10,sticky=tk.N+tk.S+tk.E+tk.W, pady=5)
+        # Middle Column
         self.logo_np = self.get_image('assets/logo.png')
         self.logo_im = self.np2im(self.logo_np)
         self.logo_width,self.logo_height = self.logo_im.size
         self.logo_tk = self.im2tk(self.logo_im)
 
-        self.t0c2i1 = ttk.Label(self.tab0, anchor=tk.CENTER,image=self.logo_tk)
-        self.t0c2i1.image = self.logo_tk
-        self.t0c2i1.grid(row=0,column=2,rowspan=5,columnspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t0c2l1 = ttk.Label(self.tab0, anchor=tk.E, text='Host:')
-        self.t0c2l1.grid(row=5,column=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t0c2host = tk.StringVar()
-        self.t0c2host.set(self.default_host)
-        self.t0c2l2 = ttk.Entry(self.tab0,textvariable=self.t0c2host)
-        self.t0c2l2.grid(row=5,column=3,sticky=tk.N+tk.S+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t0c2l3 = ttk.Label(self.tab0, anchor=tk.E, text='Port:')
-        self.t0c2l3.grid(row=6,column=2,sticky=tk.N+tk.E+tk.S+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t0c2port = tk.StringVar()
-        self.t0c2port.set(self.default_port)
-        self.t0c2l4 = ttk.Entry(self.tab0,textvariable=self.t0c2port)
-        self.t0c2l4.grid(row=6,column=3,sticky=tk.N+tk.S+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t0c2l5 = ttk.Label(self.tab0, anchor=tk.E, text='Number of IDs Stored:')
-        self.t0c2l5.grid(row=7,column=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t0c2ids = tk.StringVar()
-        self.t0c2ids.set(self.default_idnum)
-        self.t0c2l6 = ttk.Entry(self.tab0,textvariable=self.t0c2ids)
-        self.t0c2l6.grid(row=7,column=3,sticky=tk.N+tk.S+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t0c2l7 = ttk.Label(self.tab0, anchor=tk.E, text='Debug Mode:')
-        self.t0c2l7.grid(row=8,column=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t0c2debug = tk.IntVar()
-        self.t0c2l8 = ttk.Radiobutton(self.tab0,text='True',value=0,variable=self.t0c2debug)
-        self.t0c2l8.grid(row=8,column=3,sticky=tk.N+tk.S+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t0c2l8b = ttk.Radiobutton(self.tab0,text='False',value=1,variable=self.t0c2debug)
-        self.t0c2l8b.grid(row=8,column=3,sticky=tk.N+tk.S,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t0c2r0 = ttk.Label(self.tab0, anchor=tk.CENTER,image=self.logo_tk)
+        self.t0c2r0.image = self.logo_tk
+        self.t0c2r0.grid(row=0,column=2,rowspan=5,columnspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t0c2r5 = ttk.Label(self.tab0, anchor=tk.E, text='Host:')
+        self.t0c2r5.grid(row=5,column=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t0c3host = tk.StringVar()
+        self.t0c3host.set(self.default_host)
+        self.t0c3r5 = ttk.Entry(self.tab0,textvariable=self.t0c3host)
+        self.t0c3r5.grid(row=5,column=3,sticky=tk.N+tk.S+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t0c2r6 = ttk.Label(self.tab0, anchor=tk.E, text='Port:')
+        self.t0c2r6.grid(row=6,column=2,sticky=tk.N+tk.E+tk.S+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t0c3port = tk.StringVar()
+        self.t0c3port.set(self.default_port)
+        self.t0c3r6 = ttk.Entry(self.tab0,textvariable=self.t0c3port)
+        self.t0c3r6.grid(row=6,column=3,sticky=tk.N+tk.S+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t0c2r7 = ttk.Label(self.tab0, anchor=tk.E, text='Number of IDs Stored:')
+        self.t0c2r7.grid(row=7,column=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t0c3ids = tk.StringVar()
+        self.t0c3ids.set(self.default_idnum)
+        self.t0c3r7 = ttk.Entry(self.tab0,textvariable=self.t0c3ids)
+        self.t0c3r7.grid(row=7,column=3,sticky=tk.N+tk.S+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t0c2r8 = ttk.Label(self.tab0, anchor=tk.E, text='Debug Mode:')
+        self.t0c2r8.grid(row=8,column=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t0c3debug = tk.IntVar()
+        self.t0c3r8 = ttk.Radiobutton(self.tab0,text='True',value=0,variable=self.t0c3debug)
+        self.t0c3r8.grid(row=8,column=3,sticky=tk.N+tk.S+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t0c3r8b = ttk.Radiobutton(self.tab0,text='False',value=1,variable=self.t0c3debug)
+        self.t0c3r8b.grid(row=8,column=3,sticky=tk.N+tk.S,padx=5,pady=5,ipadx=5,ipady=5)
         if not self.default_debug:
-            self.t0c2debug.set(1)
-        self.t0c2l9 = ttk.Button(self.tab0, text="Apply Settings",command=self.updateSettings)
-        self.t0c2l9.grid(row=9,column=2,columnspan=2,sticky=tk.N+tk.S,padx=5,pady=5,ipadx=5,ipady=5)
-        # Column Three
-        #self.t0sep23 = ttk.Separator(self.tab0, orient=tk.VERTICAL)
-        #self.t0sep23.grid(row=0, column=4, rowspan=10,sticky=tk.N+tk.S+tk.E+tk.W, pady=5)
-        self.t0c3l1 = ttk.Label(self.tab0, anchor=tk.CENTER, text='                                   ')
-        self.t0c3l1.grid(row=0,column=4,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t0c3l2 = ttk.Label(self.tab0, anchor=tk.CENTER, text='                                   ')
-        self.t0c3l2.grid(row=0,column=5,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+            self.t0c3debug.set(1)
+        self.t0c2r9 = ttk.Button(self.tab0, text="Apply Settings",command=self.updateSettings)
+        self.t0c2r9.grid(row=9,column=2,columnspan=2,sticky=tk.N+tk.S,padx=5,pady=5,ipadx=5,ipady=5)
+        # Right Column
+        self.t0c4r0 = ttk.Label(self.tab0, anchor=tk.CENTER, text='                                   ')
+        self.t0c4r0.grid(row=0,column=4,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t0c5r0 = ttk.Label(self.tab0, anchor=tk.CENTER, text='                                   ')
+        self.t0c5r0.grid(row=0,column=5,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
 
         # TAB 1: CROPPING ------------------------------------------------------
         self.tab1 = ttk.Frame(self.n)
@@ -979,15 +975,15 @@ class GuiClass(tk.Frame):
         @return: None
         """
         if self.initialized and (time.time()-self.resize_counter_tab0) > 0.050:
-            if self.t0c2i1.winfo_width() > 1:
+            if self.t0c2r0.winfo_width() > 1:
                 self.resize_counter_tab0 = time.time()
                 self.master.update()
-                t0c2i1_width = self.t0c2i1.winfo_width()
-                t0c2i1_height = self.t0c2i1.winfo_height()
+                t0c2i1_width = self.t0c2r0.winfo_width()
+                t0c2i1_height = self.t0c2r0.winfo_height()
                 logoW, logoH = self.logo_im.size
                 self.logo_resized_im = self.resizeIm(self.logo_im, logoW, logoH, t0c2i1_width, t0c2i1_height)
                 self.logo_tk = self.im2tk(self.logo_resized_im)
-                self.t0c2i1.configure(image=self.logo_tk)
+                self.t0c2r0.configure(image=self.logo_tk)
 
     def resizeEventTab1(self,event=None):
         """
@@ -1225,7 +1221,7 @@ class GuiClass(tk.Frame):
             self.crop_preview_tk = self.im2tk(self.crop_preview_resized_im)
             self.t1c2i1.configure(image=self.crop_preview_tk)
             time2 = time.time()
-            print("server request = ",time1-time0,"gui = ",time2-time1)
+            #print("server request = ",time1-time0,"gui = ",time2-time1)
             self.t1c2r1b.configure(text="unsubmitted",foreground="red")
             # reset crop points to none
             self.x0 = None
@@ -1269,7 +1265,7 @@ class GuiClass(tk.Frame):
             self.crop_preview_tk = self.im2tk(self.crop_preview_resized_im)
             self.t1c2i1.configure(image=self.crop_preview_tk)
             time2 = time.time()
-            print("server request = ",time1-time0,"gui = ",time2-time1)
+            #print("server request = ",time1-time0,"gui = ",time2-time1)
             self.t1c2r1b.configure(text="unsubmitted",foreground="red")
             # reset crop points to none
             self.x0 = None
@@ -1491,35 +1487,12 @@ class GuiClass(tk.Frame):
         @rtype:  None
         @return: None
         """
-        host_new = self.t0c2host.get()
-        port_new = self.t0c2port.get()
-        ids_new = int(self.t0c2ids.get())
-        debug_new = not(self.t0c2debug.get())
+        host_new = self.t0c3host.get()
+        port_new = self.t0c3port.get()
+        ids_new = int(self.t0c3ids.get())
+        debug_new = not(self.t0c3debug.get())
         self.interface = client_rest.ImagingInterface(host=host_new,port=port_new,numIdsStored=ids_new,isDebug=debug_new)
         self.pingServer()
-        # Tab 1
-        self.draw_np = np.copy(self.org_np)
-        self.img_im = self.np2im(self.draw_np)
-        self.cropped_im = self.np2im(self.cropped_np)
-        self.cropped_width,self.cropped_height = self.cropped_im.size
-        self.crop_preview_im = self.img_im.copy()
-        self.org_width,self.org_height = self.img_im.size
-        self.crop_preview_width,self.crop_preview_height = self.crop_preview_im.size
-        if self.initialized and self.t1c1i1.winfo_width() > 1:
-            self.resized_im = self.resizeIm(self.img_im,self.org_width,self.org_height,self.t1c1i1_width,self.t1c1i1_height)
-            self.img_tk = self.im2tk(self.resized_im)
-            self.crop_preview_resized_im = self.resizeIm(self.crop_preview_im,self.crop_preview_width,self.crop_preview_height,self.t1c1i1_width*self.crop_preview_img_ratio,self.t1c1i1_height*self.crop_preview_img_ratio)
-            self.crop_preview_tk = self.im2tk(self.crop_preview_resized_im)
-            self.cropped_resized_im = self.resizeIm(self.cropped_im,self.cropped_width,self.cropped_height,self.t2c2i1_width,self.t2c2i1_height)
-            self.cropped_tk = self.im2tk(self.cropped_resized_im)
-        else:
-            self.cropped_tk = self.im2tk(self.cropped_im)
-            self.img_tk = self.im2tk(self.img_im)
-            self.crop_preview_tk = self.im2tk(self.crop_preview_im)
-        self.t1c1i1.configure(image=self.img_tk)
-        self.t1c2i1.configure(image=self.crop_preview_tk)
-        self.t2c2i1.configure(image=self.cropped_tk)
-
 
     def pingServer(self):
         """
