@@ -21,7 +21,6 @@ Tab0:
     add error handling if entries aren't in the right format
     add error handling if not connected to correct wifi
 Tab1:
-    **fix panning scaling issue if not maximized
     Don't crop if you single click
     Add zooming feature
     Add panning feature
@@ -808,7 +807,6 @@ class GuiClass(tk.Frame):
         self.t1c1i1.bind("<ButtonRelease-1>",self.mouse_release)
         disp_width,disp_height = self.resized_im.size
         sr = (self.org_width/disp_width + self.org_height/disp_height)/2.0
-        print("sr =",sr)
         self.draw_np = np.copy(self.org_np)
 
         x1 = event.x - self.offset_x
@@ -828,8 +826,8 @@ class GuiClass(tk.Frame):
         else:
             self.pan_x1 = x1
             self.pan_y1 = y1
-            xdif = int((self.pan_x1 - self.pan_x0)/(sr/2.))
-            ydif = int((self.pan_y1 - self.pan_y0)/(sr/2.))
+            xdif = int((self.pan_x1 - self.pan_x0))
+            ydif = int((self.pan_y1 - self.pan_y0))
             self.x0_hat = self.x0 + xdif
             self.y0_hat = self.y0 + ydif
             self.x1_hat = self.x1 + xdif
@@ -909,8 +907,8 @@ class GuiClass(tk.Frame):
         else:
             self.pan_x1 = x1
             self.pan_y1 = y1
-            xdif = int((self.pan_x1 - self.pan_x0)/(sr/2.))
-            ydif = int((self.pan_y1 - self.pan_y0)/(sr/2.))
+            xdif = int((self.pan_x1 - self.pan_x0))
+            ydif = int((self.pan_y1 - self.pan_y0))
             self.x0_hat = self.x0 + xdif
             self.y0_hat = self.y0 + ydif
             self.x1_hat = self.x1 + xdif
