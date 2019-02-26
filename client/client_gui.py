@@ -33,9 +33,6 @@ Tab2
     Show past classifications on the left with autofill option
     Bug tabbing into emergent description and trying to leave w/o subbmitting
 Tab3:
-    **set pick to None if you delete what's been chosen or delete all...
-    **Bug where it doesn't show that you deleted the last image
-        this happened when target #1 was emergent and deleted target #2 standard
     Show in blue which target it's pulling the "to submit" classificaiton from
     Change radiobuttons to match ttktheme
     Fix resizing issues
@@ -1781,6 +1778,7 @@ class GuiClass(tk.Frame):
                 self.pending_description = [self.pendingList[self.t3_current_target-1][0].description]
 
 
+
             if pics > 1:
                 query = self.interface.getCroppedImage(self.pendingList[self.t3_current_target-1][1].crop_id)
                 self.t3c2i1_im = query[0]
@@ -2498,26 +2496,121 @@ class GuiClass(tk.Frame):
     def deleteClassification1(self):
         classification_id = self.pendingList[self.t3_current_target-1][0].class_id
         self.interface.deleteClass(classification_id)
+
+        #reset submission variables if they were the deleted classification
+        class_id = self.pendingList[self.t3_current_target-1][0].class_id
+        if self.submit_crop_id == class_id:
+            self.submissionImage.set(None)
+            self.selectImage()
+        if self.submit_orientation == class_id:
+            self.submissionOrientation.set(None)
+            self.selectOrientation()
+        if self.submit_bg_color == class_id:
+            self.submissionBackgroundColor.set(None)
+            self.selectBackgroundColor()
+        if self.submit_alpha_color == class_id:
+            self.submissionAlphanumericColor.set(None)
+            self.selectAlphanumericColor()
+        if self.submit_desc == class_id:
+            self.submissionDescription.set(None)
+            self.selectDescription()
+
         self.updateManualSubmissionTab()
 
     def deleteClassification2(self):
         classification_id = self.pendingList[self.t3_current_target-1][1].class_id
         self.interface.deleteClass(classification_id)
+
+        #reset submission variables if they were the deleted classification
+        class_id = self.pendingList[self.t3_current_target-1][1].class_id
+        if self.submit_crop_id == class_id:
+            self.submissionImage.set(None)
+            self.selectImage()
+        if self.submit_orientation == class_id:
+            self.submissionOrientation.set(None)
+            self.selectOrientation()
+        if self.submit_bg_color == class_id:
+            self.submissionBackgroundColor.set(None)
+            self.selectBackgroundColor()
+        if self.submit_alpha_color == class_id:
+            self.submissionAlphanumericColor.set(None)
+            self.selectAlphanumericColor()
+        if self.submit_desc == class_id:
+            self.submissionDescription.set(None)
+            self.selectDescription()
+
         self.updateManualSubmissionTab()
 
     def deleteClassification3(self):
         classification_id = self.pendingList[self.t3_current_target-1][2].class_id
         self.interface.deleteClass(classification_id)
+
+        #reset submission variables if they were the deleted classification
+        class_id = self.pendingList[self.t3_current_target-1][2].class_id
+        if self.submit_crop_id == class_id:
+            self.submissionImage.set(None)
+            self.selectImage()
+        if self.submit_orientation == class_id:
+            self.submissionOrientation.set(None)
+            self.selectOrientation()
+        if self.submit_bg_color == class_id:
+            self.submissionBackgroundColor.set(None)
+            self.selectBackgroundColor()
+        if self.submit_alpha_color == class_id:
+            self.submissionAlphanumericColor.set(None)
+            self.selectAlphanumericColor()
+        if self.submit_desc == class_id:
+            self.submissionDescription.set(None)
+            self.selectDescription()
+
         self.updateManualSubmissionTab()
 
     def deleteClassification4(self):
         classification_id = self.pendingList[self.t3_current_target-1][3].class_id
         self.interface.deleteClass(classification_id)
+
+        #reset submission variables if they were the deleted classification
+        class_id = self.pendingList[self.t3_current_target-1][3].class_id
+        if self.submit_crop_id == class_id:
+            self.submissionImage.set(None)
+            self.selectImage()
+        if self.submit_orientation == class_id:
+            self.submissionOrientation.set(None)
+            self.selectOrientation()
+        if self.submit_bg_color == class_id:
+            self.submissionBackgroundColor.set(None)
+            self.selectBackgroundColor()
+        if self.submit_alpha_color == class_id:
+            self.submissionAlphanumericColor.set(None)
+            self.selectAlphanumericColor()
+        if self.submit_desc == class_id:
+            self.submissionDescription.set(None)
+            self.selectDescription()
+
         self.updateManualSubmissionTab()
 
     def deleteClassification5(self):
         classification_id = self.pendingList[self.t3_current_target-1][4].class_id
         self.interface.deleteClass(classification_id)
+
+        #reset submission variables if they were the deleted classification
+        class_id = self.pendingList[self.t3_current_target-1][4].class_id
+        if self.submit_crop_id == class_id:
+            self.submissionImage.set(None)
+            self.selectImage()
+        if self.submit_orientation == class_id:
+            self.submissionOrientation.set(None)
+            self.selectOrientation()
+        if self.submit_bg_color == class_id:
+            self.submissionBackgroundColor.set(None)
+            self.selectBackgroundColor()
+        if self.submit_alpha_color == class_id:
+            self.submissionAlphanumericColor.set(None)
+            self.selectAlphanumericColor()
+        if self.submit_desc == class_id:
+            self.submissionDescription.set(None)
+            self.selectDescription()
+
         self.updateManualSubmissionTab()
 
     def entry_focus_in(self,event=None):
