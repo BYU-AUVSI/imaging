@@ -1711,9 +1711,11 @@ class GuiClass(tk.Frame):
                 self.t3c6r18.configure(text="N/A")
                 self.resizeEventTab3()
             else:
+                self.t3_total_targets = len(self.pendingList)
                 if self.t3_current_target == 0:
                     self.t3_current_target = 1
-                self.t3_total_targets = len(self.pendingList)
+                elif self.t3_current_target > self.t3_total_targets:
+                    self.t3_current_target = self.t3_total_targets
                 self.t3titleD.configure(text=self.t3_total_targets)
                 self.t3titleB.configure(text=self.t3_current_target)
                 pics = len(self.pendingList[self.t3_current_target-1])
