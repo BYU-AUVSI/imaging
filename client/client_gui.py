@@ -21,9 +21,7 @@ Tab0:
     add error handling if entries aren't in the right format
     add error handling if not connected to correct wifi
 Tab1:
-    Don't crop if you single click
     Add zooming feature
-    Add panning feature
     Fix resizing
 Tab2
     show not only submission status, but what you submitted??
@@ -42,7 +40,6 @@ Tab4:
 KNOWN BUGS:
     When you click on the 2nd tab right at the beginning, and then use the left/right
         buttons, it moves one tab, then unbinds like it's supposed to.
-    Going straight to tab3 when no submissions (handles 0 poorly...)
 '''
 
 import tkinter as tk
@@ -949,15 +946,16 @@ class GuiClass(tk.Frame):
             self.x1 = self.x1_hat
             self.y1 = self.y1_hat
 
-        cv2.rectangle(self.draw_np,(int(sr*self.x0),int(sr*self.y0)),(int(sr*self.x1),int(sr*self.y1)),(255,0,0),2)
-        self.cropImage(int(sr*self.x0),int(sr*self.y0),int(sr*self.x1),int(sr*self.y1))
-        self.img_im = self.np2im(self.draw_np)
-        self.resized_im = self.resizeIm(self.img_im,self.org_width,self.org_height,self.t1c1i1_width,self.t1c1i1_height)
-        self.img_tk = self.im2tk(self.resized_im)
-        self.t1c1i1.configure(image=self.img_tk)
-        # Crop Image
-        self.cropped = True
-        self.t1c2r1b.configure(text="unsubmitted",foreground="red")
+        if self.x0 != self.x1 or self.y0 != self.y1:
+            cv2.rectangle(self.draw_np,(int(sr*self.x0),int(sr*self.y0)),(int(sr*self.x1),int(sr*self.y1)),(255,0,0),2)
+            self.cropImage(int(sr*self.x0),int(sr*self.y0),int(sr*self.x1),int(sr*self.y1))
+            self.img_im = self.np2im(self.draw_np)
+            self.resized_im = self.resizeIm(self.img_im,self.org_width,self.org_height,self.t1c1i1_width,self.t1c1i1_height)
+            self.img_tk = self.im2tk(self.resized_im)
+            self.t1c1i1.configure(image=self.img_tk)
+            # Crop Image
+            self.cropped = True
+            self.t1c2r1b.configure(text="unsubmitted",foreground="red")
 
     def close_window(self,event):
         """
