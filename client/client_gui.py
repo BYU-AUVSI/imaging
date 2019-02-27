@@ -12,6 +12,7 @@ All:
     change gui into multiple tabs/classes
     change text font, size, color, etc.
     organize functions into a logical order
+    standardize import order
 Tab0:
     add error handling if entries aren't in the right format
     add error handling if not connected to correct wifi
@@ -45,17 +46,14 @@ import PIL
 import cv2
 import numpy as np
 import time
-from lib import client_rest
 import sys
 import imutils
-from lib import tab0
-from lib import tab_tools
+from lib import tab0, tab1, tab_tools, client_rest
 
 
 class GuiClass(tk.Frame):
     """
     Graphical User Interface for 2019 AUVSI competition
-    Tab 1: Pull raw images and submit cropped images
     Tab 2: Pull cropped iamges and submit classification for images
     Tab 3: Display results for manual classification
 
@@ -90,30 +88,20 @@ class GuiClass(tk.Frame):
         self.tab0 = tab0.Tab0(self.master,self.n)
         self.interface = self.tab0.interfaceCall()
 
-        self.imageID = 0
-        self.initialized = False
-        self.pingServer()
-        self.draw_np = np.copy(self.org_np)
-        self.img_im = tab_tools.np2im(self.draw_np)
-        self.crop_preview_im = self.img_im.copy()
-        self.crop_preview_tk = tab_tools.im2tk(self.crop_preview_im)
-        self.img_tk = tab_tools.im2tk(self.img_im)
-        self.org_width,self.org_height = self.img_im.size
-        self.crop_preview_width,self.crop_preview_height = self.img_im.size
+        # -----------------------  Tab 1: SETTINGS  ----------------------------
+        self.tab1 = tab1.Tab1(self.master,self.n,self.interface)
 
-        self.resize_counter_tab1 = time.time()
-        self.resize_counter_tab2 = time.time()
-        self.resize_counter_tab3 = time.time()
-        self.cropped = False
+
+        self.pingServerTab2()
         self.cropped_im = tab_tools.np2im(self.cropped_np)
         self.cropped_width,self.cropped_height = self.cropped_im.size
         self.cropped_tk = tab_tools.im2tk(self.cropped_im)
-        # Tab 1 variables
-        self.t1_functional = False
-        self.x0 = None
-        self.y0 = None
-        self.x1 = None
-        self.y1 = None
+
+
+        self.resize_counter_tab2 = time.time()
+        self.resize_counter_tab3 = time.time()
+
+
         # Tab 2 variables
         self.t2_functional = False # prevent
         self.t2_entry_focus = False
@@ -134,38 +122,6 @@ class GuiClass(tk.Frame):
         s.configure('Centered.TRadiobutton',justify=tk.CENTER)
         '''
 
-
-        # TAB 1: CROPPING ------------------------------------------------------
-        self.tab1 = ttk.Frame(self.n)
-        self.n.add(self.tab1, text='Cropping')
-        # Allows everthing to be resized
-        tk.Grid.rowconfigure(self.tab1,0,weight=7)
-        tk.Grid.rowconfigure(self.tab1,1,weight=1)
-        tk.Grid.columnconfigure(self.tab1,0,weight=14)
-        tk.Grid.columnconfigure(self.tab1,1,weight=1)
-        tk.Grid.columnconfigure(self.tab1,2,weight=1)
-
-        self.t1c1i1 = ttk.Label(self.tab1, anchor=tk.CENTER,image=self.img_tk)
-        self.t1c1i1.image = self.img_tk
-        self.t1c1i1.grid(row=0,column=0,rowspan=3,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t1c1i1.bind("<Button-1>",self.mouse_click)
-        self.t1c1i1_width = self.t1c1i1.winfo_width()
-        self.t1c1i1_height = self.t1c1i1.winfo_height()
-
-        self.crop_preview_img_ratio = 1/7.
-        self.t1c2i1 = ttk.Label(self.tab1, anchor=tk.CENTER,image=self.crop_preview_tk)
-        self.t1c2i1.image = self.crop_preview_tk
-        self.t1c2i1.grid(row=0,column=1,columnspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-        #self.t1c2i1_width = self.t1c2i1.winfo_width()
-        #self.t1c2i1_height = self.t1c2i1.winfo_height()
-
-        self.t1c2r1a = ttk.Label(self.tab1, anchor=tk.E, text='Submission Status: ')
-        self.t1c2r1a.grid(row=1,column=1,columnspan=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t1c2r1b = ttk.Label(self.tab1, anchor=tk.W, text='N/A')
-        self.t1c2r1b.grid(row=1,column=2,columnspan=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-
-        self.t1c2b1 = ttk.Button(self.tab1, text="Submit Crop",command=self.submitCropped)
-        self.t1c2b1.grid(row=2,column=1,columnspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
 
 
 
@@ -623,8 +579,6 @@ class GuiClass(tk.Frame):
         self.t3c6b1.grid(row=20,column=10,columnspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
 
 
-
-
         # TAB 4: AUTONOMOUS TARGET SUBMISSION ------------------------------------------------
         self.tab4 = ttk.Frame(self.n)
         self.n.add(self.tab4, text='Autonomous Target Submission')
@@ -636,269 +590,182 @@ class GuiClass(tk.Frame):
         self.master.bind("<<NotebookTabChanged>>",self.tabChanged)
 
 
-
-
-
-
-
-
-
-    def mouse_click(self,event):
+    def nextCropped(self,event=None):
         """
-        Saves pixel location of where on the image the mouse clicks
+        Requests and displays next cropped image
+
         @type  event: event
-        @param event: mouse event
+        @param event: Right arrow event
 
         @rtype:  None
         @return: None
         """
-        #print(event.x,event.y)
-        self.t1c1i1.bind("<ButtonRelease-1>",self.mouse_release)
-        self.t1c1i1.bind("<Motion>",self.mouse_move)
-        self.offset_x = int((self.t1c1i1_width - self.t1c1i1_img_width )/2.0)
-        self.offset_y = int((self.t1c1i1_height - self.t1c1i1_img_height)/2.0)
-        x0 = event.x - self.offset_x
-        y0 = event.y - self.offset_y
+        if not(self.t2_entry_focus):
+            self.serverConnected = self.interface.ping()
+            if self.serverConnected:
+                time0 = time.time()
+                query = self.interface.getNextCroppedImage()
+                if query == None:
+                    self.t2_functional = False
+                    self.noNextCropped()
+                else:
+                    self.t2_functional = True
+                    self.imageID = query[1]
+                    self.cropped_np = np.array(query[0])
+                    yaw_angle = self.getYawAngle(self.imageID)
+                    self.cropped_np = imutils.rotate_bound(self.cropped_np,yaw_angle)
+                    status = query[2]
+                    if status:
+                        self.t2c2lr48b.configure(text='submitted',foreground='green')
+                    else:
+                        self.t2c2lr48b.configure(text='unsubmitted',foreground='red')
+                time1 = time.time()
+                self.cropped_im = tab_tools.np2im(self.cropped_np)
+                self.cropped_width,self.cropped_height = self.cropped_im.size
+                self.cropped_resized_im = tab_tools.resizeIm(self.cropped_im,self.cropped_width,self.cropped_height,self.t2c2i1_width,self.t2c2i1_height)
+                self.cropped_tk = tab_tools.im2tk(self.cropped_resized_im)
+                self.t2c2i1.configure(image=self.cropped_tk)
 
-        self.new_crop = True
-        # check if there has been a rectangle drawn yet
-        if self.x0 != None and self.x1 != None:
-            # check if clicked inside the previous rectangle
-            if self.x0 < self.x1 and self.y0 < self.y1:
-                if x0 > self.x0 and x0 < self.x1 and y0 > self.y0 and y0 < self.y1:
-                    self.new_crop = False
-            if self.x0 < self.x1 and self.y0 > self.y1:
-                if x0 > self.x0 and x0 < self.x1 and y0 < self.y0 and y0 > self.y1:
-                    self.new_crop = False
-            if self.x0 > self.x1 and self.y0 < self.y1:
-                if x0 < self.x0 and x0 > self.x1 and y0 > self.y0 and y0 < self.y1:
-                    self.new_crop = False
-            if self.x0 > self.x1 and self.y0 > self.y1:
-                if x0 < self.x0 and x0 > self.x1 and y0 < self.y0 and y0 > self.y1:
-                    self.new_crop = False
+                time2 = time.time()
+                #print("server request = ",time1-time0,"gui = ",time2-time1)
 
-        if self.new_crop:
-            self.x0 = x0
-            self.y0 = y0
-            if self.x0 > self.resized_im.size[0]:
-                self.x0 = self.resized_im.size[0]
-            elif self.x0 < 0:
-                self.x0 = 0
-            if self.y0 > self.resized_im.size[1]:
-                self.y0 = self.resized_im.size[1]
-            elif self.y0 < 0:
-                self.y0 = 0
+    def previousCropped(self,event):
+        """
+        Requests and displays previous cropped image
+
+        @type  event: event
+        @param event: Left arrow event
+
+        @rtype:  None
+        @return: None
+        """
+        if not(self.t2_entry_focus):
+            focus = self.tab2.focus_get()
+            self.serverConnected = self.interface.ping()
+            if self.serverConnected:
+                time0 = time.time()
+                query = self.interface.getPrevCroppedImage()
+                if query == None:
+                    self.t2_functional = False
+                    self.noPreviousCropped()
+                else:
+                    self.t2_functional = True
+                    self.imageID = query[1]
+                    self.cropped_np = np.array(query[0])
+                    yaw_angle = self.getYawAngle(self.imageID)
+                    self.cropped_np = imutils.rotate_bound(self.cropped_np,yaw_angle)
+                    status = query[2]
+                    if status:
+                        self.t2c2lr48b.configure(text='submitted',foreground='green')
+                    else:
+                        self.t2c2lr48b.configure(text='unsubmitted',foreground='red')
+                time1 = time.time()
+                self.cropped_im = tab_tools.np2im(self.cropped_np)
+                self.cropped_width,self.cropped_height = self.cropped_im.size
+                self.cropped_resized_im = tab_tools.resizeIm(self.cropped_im,self.cropped_width,self.cropped_height,self.t2c2i1_width,self.t2c2i1_height)
+                self.cropped_tk = tab_tools.im2tk(self.cropped_resized_im)
+                self.t2c2i1.configure(image=self.cropped_tk)
+                time2 = time.time()
+                #print("server request = ",time1-time0,"gui = ",time2-time1)
+
+
+    def submitClassification(self,event=None):
+        """
+        Submits classification of image to server
+
+        @type  event: event
+        @param event: Enter press event
+
+        @rtype:  None
+        @return: None
+        """
+        if self.t2_functional:
+            type = self.t2c2l14_var.get()
+            if type == 'emergent':
+                description = self.t2c2l16_var.get()
+                classification = client_rest.Classification(self.imageID,type,desc = description)
+                self.interface.postClass(classification)
+                self.entry_focus_out()
+                self.nextCropped()
+            else:
+                alphanumeric = self.t2c2l4.get()
+                if alphanumeric != "":
+                    shape = self.t2c2l2_var.get()
+                    orientation = self.t2c2l6_var.get()
+                    background_color = self.t2c2l10_var.get()
+                    alpha_color = self.t2c2l12_var.get()
+                    classification = client_rest.Classification(self.imageID,type,orientation=orientation,shape=shape,bgColor=background_color,alpha=alphanumeric,alphaColor=alpha_color)
+                    self.interface.postClass(classification)
+                    self.entry_focus_out()
+                    self.nextCropped()
+
+    def tabChanged(self,event):
+        """
+        Performs the correct keybindings when you move to a new tab of the gui
+
+        @type  event: event
+        @param event: Tab changed event
+
+        @rtype:  None
+        @return: None
+        """
+        active_tab = self.n.index(self.n.select())
+        if active_tab == 0:
+            self.tab0.run()
         else:
-            self.pan_x0 = x0
-            self.pan_y0 = y0
+            self.interface = self.tab0.interfaceCall()
 
+        if active_tab == 1:
+            self.tab1.run(self.interface)
 
-    def mouse_move(self,event):
-        """
-        Gets pixel location of where the mouse is moving and show rectangle for crop preview
-        @type  event: event
-        @param event: mouse event
-
-        @rtype:  None
-        @return: None
-        """
-        self.t1c1i1.bind("<ButtonRelease-1>",self.mouse_release)
-        disp_width,disp_height = self.resized_im.size
-        sr = (self.org_width/disp_width + self.org_height/disp_height)/2.0
-        self.draw_np = np.copy(self.org_np)
-
-        x1 = event.x - self.offset_x
-        y1 = event.y - self.offset_y
-        if x1 > self.resized_im.size[0]:
-            x1 = self.resized_im.size[0]
-        elif x1 < 0:
-            x1 = 0
-        if y1 > self.resized_im.size[1]:
-            y1 = self.resized_im.size[1]
-        elif y1 < 0:
-            y1 = 0
-        if self.new_crop:
-            self.x1 = x1
-            self.y1 = y1
-            cv2.rectangle(self.draw_np,(int(sr*self.x0),int(sr*self.y0)),(int(sr*self.x1),int(sr*self.y1)),(255,0,0),2)
+        if active_tab == 2:
+            self.resizeEventTab2()
+            self.master.bind("<Right>",self.nextCropped)
+            self.master.bind("<Left>",self.previousCropped)
+            self.master.unbind("<d>")
+            self.master.unbind("<a>")
+            self.master.bind("<Configure>",self.resizeEventTab2)
+            self.master.unbind("<Control-z>")
+            self.master.bind("<Return>",self.submitClassification)
+            self.t2c2l16.bind("<FocusIn>",self.entry_focus_in)
+            self.t2c2l16.bind("<FocusOut>",self.entry_focus_out)
+            self.t2c2l16.bind("<Leave>",self.entry_focus_out)
         else:
-            self.pan_x1 = x1
-            self.pan_y1 = y1
-            xdif = int((self.pan_x1 - self.pan_x0))
-            ydif = int((self.pan_y1 - self.pan_y0))
-            self.x0_hat = self.x0 + xdif
-            self.y0_hat = self.y0 + ydif
-            self.x1_hat = self.x1 + xdif
-            self.y1_hat = self.y1 + ydif
+            self.t2c2l16.unbind("<FocusIn>")
+            self.t2c2l16.unbind("<FocusOut>")
+            self.t2c2l16.unbind("<Leave>")
+        if active_tab == 3:
+            self.resizeEventTab3()
+            self.master.bind("<Right>",self.nextClassified)
+            self.master.bind("<Left>",self.previousClassified)
+            self.master.unbind("<d>")
+            self.master.unbind("<a>")
+            self.master.bind("<Configure>",self.resizeEventTab3)
+            self.master.unbind("<Control-z>")
+            self.master.bind("<Return>",self.submitTarget)
+            self.updateManualSubmissionTab()
+        if active_tab == 4:
+            self.master.unbind("<Right>")
+            self.master.unbind("<Left>")
+            self.master.unbind("<d>")
+            self.master.unbind("<a>")
+            self.master.unbind("<Configure>")
+            self.master.unbind("<Control-z>")
+            self.master.unbind("<Return>")
+        self.master.focus_set()
 
-            if self.x0_hat < self.x1_hat:
-                if self.x0_hat < 0:
-                    self.x0_hat = 0
-                    self.x1_hat = np.abs(self.x1-self.x0)
-                elif self.x1_hat > self.resized_im.size[0]:
-                    self.x0_hat = self.resized_im.size[0]-np.abs(self.x1-self.x0)
-                    self.x1_hat = self.resized_im.size[0]
-            else:
-                if self.x1_hat < 0:
-                    self.x1_hat = 0
-                    self.x0_hat = np.abs(self.x1-self.x0)
-                elif self.x0_hat > self.resized_im.size[0]:
-                    self.x1_hat = self.resized_im.size[0]-np.abs(self.x1-self.x0)
-                    self.x0_hat = self.resized_im.size[0]
-            if self.y0_hat < self.y1_hat:
-                if self.y0_hat < 0:
-                    self.y0_hat = 0
-                    self.y1_hat = np.abs(self.y1-self.y0)
-                elif self.y1_hat > self.resized_im.size[1]:
-                    self.y0_hat = self.resized_im.size[1]-np.abs(self.y1-self.y0)
-                    self.y1_hat = self.resized_im.size[1]
-            else:
-                if self.y1_hat < 0:
-                    self.y1_hat = 0
-                    self.y0_hat = np.abs(self.x1-self.x0)
-                elif self.y0_hat > self.resized_im.size[1]:
-                    self.y1_hat = self.resized_im.size[1]-np.abs(self.y1-self.y0)
-                    self.y0_hat = self.resized_im.size[1]
-
-
-
-
-            cv2.rectangle(self.draw_np,(int(sr*self.x0_hat),int(sr*self.y0_hat)),(int(sr*self.x1_hat),int(sr*self.y1_hat)),(255,0,0),2)
-            cv2.line(self.draw_np,(int(sr*self.pan_x0),int(sr*self.pan_y0)),(int(sr*self.pan_x1),int(sr*self.pan_y1)),(45,255,255),2)
-
-
-        self.img_im = tab_tools.np2im(self.draw_np)
-        self.resized_im = tab_tools.resizeIm(self.img_im,self.org_width,self.org_height,self.t1c1i1_width,self.t1c1i1_height)
-        self.img_tk = tab_tools.im2tk(self.resized_im)
-        self.t1c1i1.configure(image=self.img_tk)
-
-    def mouse_release(self,event):
+    def pingServerTab2(self):
         """
-        Saves pixel location of where the mouse clicks and creates crop preview
-        @type  event: event
-        @param event: mouse event
+        Checks if server is correctly connected
 
         @rtype:  None
         @return: None
         """
-        if self.cropped:
-            self.undoCrop()
-        self.t1c1i1.unbind("<Motion>")
-        self.t1c1i1.unbind("<ButtonRelease-1>")
-        disp_width,disp_height = self.resized_im.size
-        sr = (self.org_width/disp_width + self.org_height/disp_height)/2.0
-        self.draw_np = np.copy(self.org_np)
-
-        x1 = event.x - self.offset_x
-        y1 = event.y - self.offset_y
-        if x1 > self.resized_im.size[0]:
-            x1 = self.resized_im.size[0]
-        elif x1 < 0:
-            x1 = 0
-        if y1 > self.resized_im.size[1]:
-            y1 = self.resized_im.size[1]
-        elif y1 < 0:
-            y1 = 0
-        if self.new_crop:
-            self.x1 = x1
-            self.y1 = y1
+        self.serverConnected = self.interface.ping()
+        if self.serverConnected:
+            self.cropped_np = tab_tools.get_image('assets/classify_instructions.jpg')
         else:
-            self.pan_x1 = x1
-            self.pan_y1 = y1
-            xdif = int((self.pan_x1 - self.pan_x0))
-            ydif = int((self.pan_y1 - self.pan_y0))
-            self.x0_hat = self.x0 + xdif
-            self.y0_hat = self.y0 + ydif
-            self.x1_hat = self.x1 + xdif
-            self.y1_hat = self.y1 + ydif
-
-            if self.x0_hat < self.x1_hat:
-                if self.x0_hat < 0:
-                    self.x0_hat = 0
-                    self.x1_hat = np.abs(self.x1-self.x0)
-                elif self.x1_hat > self.resized_im.size[0]:
-                    self.x0_hat = self.resized_im.size[0]-np.abs(self.x1-self.x0)
-                    self.x1_hat = self.resized_im.size[0]
-            else:
-                if self.x1_hat < 0:
-                    self.x1_hat = 0
-                    self.x0_hat = np.abs(self.x1-self.x0)
-                elif self.x0_hat > self.resized_im.size[0]:
-                    self.x1_hat = self.resized_im.size[0]-np.abs(self.x1-self.x0)
-                    self.x0_hat = self.resized_im.size[0]
-            if self.y0_hat < self.y1_hat:
-                if self.y0_hat < 0:
-                    self.y0_hat = 0
-                    self.y1_hat = np.abs(self.y1-self.y0)
-                elif self.y1_hat > self.resized_im.size[1]:
-                    self.y0_hat = self.resized_im.size[1]-np.abs(self.y1-self.y0)
-                    self.y1_hat = self.resized_im.size[1]
-            else:
-                if self.y1_hat < 0:
-                    self.y1_hat = 0
-                    self.y0_hat = np.abs(self.x1-self.x0)
-                elif self.y0_hat > self.resized_im.size[1]:
-                    self.y1_hat = self.resized_im.size[1]-np.abs(self.y1-self.y0)
-                    self.y0_hat = self.resized_im.size[1]
-
-            # save hat values as the new values
-            self.x0 = self.x0_hat
-            self.y0 = self.y0_hat
-            self.x1 = self.x1_hat
-            self.y1 = self.y1_hat
-
-        if self.x0 != self.x1 or self.y0 != self.y1:
-            cv2.rectangle(self.draw_np,(int(sr*self.x0),int(sr*self.y0)),(int(sr*self.x1),int(sr*self.y1)),(255,0,0),2)
-            self.cropImage(int(sr*self.x0),int(sr*self.y0),int(sr*self.x1),int(sr*self.y1))
-            self.img_im = tab_tools.np2im(self.draw_np)
-            self.resized_im = tab_tools.resizeIm(self.img_im,self.org_width,self.org_height,self.t1c1i1_width,self.t1c1i1_height)
-            self.img_tk = tab_tools.im2tk(self.resized_im)
-            self.t1c1i1.configure(image=self.img_tk)
-            # Crop Image
-            self.cropped = True
-            self.t1c2r1b.configure(text="unsubmitted",foreground="red")
-
-    def close_window(self,event):
-        """
-        Closes gui safely
-        @type  event: event
-        @param event: ESC event
-
-        @rtype:  None
-        @return: None
-        """
-        self.master.destroy()
-        sys.exit()
-
-
-
-    def resizeEventTab1(self,event=None):
-        """
-        Resizes pictures on Tab1
-        @type  event: event
-        @param event: resize window event
-
-        @rtype:  None
-        @return: None
-        """
-        if self.initialized and (time.time()-self.resize_counter_tab1) > 0.050:
-            if self.t1c1i1.winfo_width() > 1:
-                self.resize_counter_tab1 = time.time()
-                self.master.update()
-                # main image
-                self.t1c1i1_width = self.t1c1i1.winfo_width()
-                self.t1c1i1_height = self.t1c1i1.winfo_height()
-                self.resized_im = tab_tools.resizeIm(self.img_im,self.org_width,self.org_height,self.t1c1i1_width,self.t1c1i1_height)
-                self.t1c1i1_img_width,self.t1c1i1_img_height = self.resized_im.size
-                self.img_tk = tab_tools.im2tk(self.resized_im)
-                self.t1c1i1.configure(image=self.img_tk)
-                # cropped image
-                #self.t1c2i1_width = self.t1c2i1.winfo_width()
-                #self.t1c2i1_height = self.t1c2i1.winfo_height()
-                self.crop_preview_resized_im = tab_tools.resizeIm(self.crop_preview_im,self.crop_preview_width,self.crop_preview_height,self.t1c1i1_width*self.crop_preview_img_ratio,self.t1c1i1_height*self.crop_preview_img_ratio)
-                #self.t1c2i1_width,self.t1c2i1_height = self.crop_resized_im.size
-                self.crop_preview_tk = tab_tools.im2tk(self.crop_preview_resized_im)
-                self.t1c2i1.configure(image=self.crop_preview_tk)
+            self.cropped_np = tab_tools.get_image('assets/server_error.jpg')
 
     def resizeEventTab2(self,event=None):
         """
@@ -979,390 +846,19 @@ class GuiClass(tk.Frame):
 
 
 
-
-
-
-    def cropImage(self,x0,y0,x1,y1):
+    def close_window(self,event):
         """
-        Crops raw image
-        @type  x0: integer
-        @param x0: pixel x location of first click
-
-        @type  y0: integer
-        @param y0: pixel y location of first click
-
-        @type  x1: integer
-        @param x1: pixel x location of second click
-
-        @type  y1: integer
-        @param y1: pixel y location of second click
-
-        @rtype:  None
-        @return: None
-        """
-        if x0 < x1:
-            self.cx0 = x0
-            self.cx1 = x1
-        else:
-            self.cx0 = x1
-            self.cx1 = x0
-        if y0 < y1:
-            self.cy0 = y0
-            self.cy1 = y1
-        else:
-            self.cy0 = y1
-            self.cy1 = y0
-        self.crop_preview_im = self.crop_preview_im.crop((self.cx0,self.cy0,self.cx1,self.cy1))
-        self.crop_preview_width,self.crop_preview_height = self.crop_preview_im.size
-        self.crop_preview_resized_im = tab_tools.resizeIm(self.crop_preview_im,self.crop_preview_width,self.crop_preview_height,self.t1c1i1_width*self.crop_preview_img_ratio,self.t1c1i1_height*self.crop_preview_img_ratio)
-        self.crop_preview_tk = tab_tools.im2tk(self.crop_preview_resized_im)
-        self.t1c2i1.configure(image=self.crop_preview_tk)
-
-    def undoCrop(self,event=None):
-        """
-        Undoes crop and resets the raw image
-
+        Closes gui safely
         @type  event: event
-        @param event: Ctrl + Z event
+        @param event: ESC event
 
         @rtype:  None
         @return: None
         """
-        if event != None:
-            self.x0 = None
-            self.y0 = None
-            self.x1 = None
-            self.y1 = None
-        self.draw_np = np.copy(self.org_np)
-        self.img_im = tab_tools.np2im(self.draw_np)
-        self.resized_im = tab_tools.resizeIm(self.img_im,self.org_width,self.org_height,self.t1c1i1_width,self.t1c1i1_height)
-        self.img_tk = tab_tools.im2tk(self.resized_im)
-        self.t1c1i1.configure(image=self.img_tk)
-        self.crop_preview_im = self.img_im.copy()
-        self.crop_preview_width,self.crop_preview_height = self.crop_preview_im.size
-        self.crop_preview_resized_im = tab_tools.resizeIm(self.crop_preview_im,self.crop_preview_width,self.crop_preview_height,self.t1c1i1_width*self.crop_preview_img_ratio,self.t1c1i1_height*self.crop_preview_img_ratio)
-        self.crop_preview_tk = tab_tools.im2tk(self.crop_preview_resized_im)
-        self.t1c2i1.configure(image=self.crop_preview_tk)
-        #self.t2c2i1.configure(image=self.crop_preview_tk)
+        self.master.destroy()
+        sys.exit()
 
 
-    def nextRaw(self,event):
-        """
-        Requests and displays next raw image
-
-        @type  event: event
-        @param event: Right arrow event
-
-        @rtype:  None
-        @return: None
-        """
-        self.pingServer()
-        if self.serverConnected:
-            time0 = time.time()
-            query = self.interface.getNextRawImage()
-            if query == None:
-                self.t1_functional = False
-                self.noNextRaw()
-            else:
-                self.t1_functional = True
-                self.imageID = query[1]
-                self.org_np = np.array(query[0]) #tab_tools.get_image('frame0744.jpg')
-            time1 = time.time()
-            self.draw_np = np.copy(self.org_np)
-            self.img_im = tab_tools.np2im(self.draw_np)
-            self.crop_preview_im = self.img_im.copy()
-            self.org_width,self.org_height = self.img_im.size
-            self.crop_preview_width,self.crop_preview_height = self.crop_preview_im.size
-            self.cropped = False
-            self.resized_im = tab_tools.resizeIm(self.img_im,self.org_width,self.org_height,self.t1c1i1_width,self.t1c1i1_height)
-            self.img_tk = tab_tools.im2tk(self.resized_im)
-            self.t1c1i1.configure(image=self.img_tk)
-            self.crop_preview_resized_im = tab_tools.resizeIm(self.crop_preview_im,self.crop_preview_width,self.crop_preview_height,self.t1c1i1_width*self.crop_preview_img_ratio,self.t1c1i1_height*self.crop_preview_img_ratio)
-            self.crop_preview_tk = tab_tools.im2tk(self.crop_preview_resized_im)
-            self.t1c2i1.configure(image=self.crop_preview_tk)
-            time2 = time.time()
-            #print("server request = ",time1-time0,"gui = ",time2-time1)
-            self.t1c2r1b.configure(text="unsubmitted",foreground="red")
-            # reset crop points to none
-            self.x0 = None
-            self.y0 = None
-            self.x1 = None
-            self.y1 = None
-
-    def previousRaw(self,event):
-        """
-        Requests and displays previous raw image
-
-        @type  event: event
-        @param event: Left arrow event
-
-        @rtype:  None
-        @return: None
-        """
-        self.pingServer()
-        if self.serverConnected:
-            time0 = time.time()
-            query = self.interface.getPrevRawImage()
-            if query == None:
-                self.noPreviousRaw()
-                self.t1_functional = False
-            else:
-                self.t1_functional = True
-                self.imageID = query[1]
-                self.org_np = np.array(query[0]) #tab_tools.get_image('frame0744.jpg')
-            time1 = time.time()
-            self.draw_np = np.copy(self.org_np)
-            self.img_im = tab_tools.np2im(self.draw_np)
-            self.crop_preview_im = self.img_im.copy()
-            self.crop_preview_tk = tab_tools.im2tk(self.crop_preview_im)
-            self.org_width,self.org_height = self.img_im.size
-            self.crop_preview_width,self.crop_preview_height = self.img_im.size
-            self.cropped = False
-            self.resized_im = tab_tools.resizeIm(self.img_im,self.org_width,self.org_height,self.t1c1i1_width,self.t1c1i1_height)
-            self.img_tk = tab_tools.im2tk(self.resized_im)
-            self.t1c1i1.configure(image=self.img_tk)
-            self.crop_preview_resized_im = tab_tools.resizeIm(self.crop_preview_im,self.crop_preview_width,self.crop_preview_height,self.t1c1i1_width*self.crop_preview_img_ratio,self.t1c1i1_height*self.crop_preview_img_ratio)
-            self.crop_preview_tk = tab_tools.im2tk(self.crop_preview_resized_im)
-            self.t1c2i1.configure(image=self.crop_preview_tk)
-            time2 = time.time()
-            #print("server request = ",time1-time0,"gui = ",time2-time1)
-            self.t1c2r1b.configure(text="unsubmitted",foreground="red")
-            # reset crop points to none
-            self.x0 = None
-            self.y0 = None
-            self.x1 = None
-            self.y1 = None
-
-
-    def submitCropped(self,event=None):
-        """
-        Submits cropped image to server
-
-        @type  event: event
-        @param event: Enter press or button press event
-
-        @rtype:  None
-        @return: None
-        """
-        if self.t1_functional:
-            self.interface.postCroppedImage(self.imageID,self.crop_preview_im,[self.cx0,self.cy0],[self.cx1,self.cy1])
-            (self.cx0,self.cy0,self.cx1,self.cy1)
-            self.t1c2r1b.configure(text="submitted",foreground="green")
-
-
-    def nextCropped(self,event=None):
-        """
-        Requests and displays next cropped image
-
-        @type  event: event
-        @param event: Right arrow event
-
-        @rtype:  None
-        @return: None
-        """
-        if not(self.t2_entry_focus):
-            self.pingServer()
-            if self.serverConnected:
-                time0 = time.time()
-                query = self.interface.getNextCroppedImage()
-                if query == None:
-                    self.t2_functional = False
-                    self.noNextCropped()
-                else:
-                    self.t2_functional = True
-                    self.imageID = query[1]
-                    self.cropped_np = np.array(query[0])
-                    yaw_angle = self.getYawAngle(self.imageID)
-                    self.cropped_np = imutils.rotate_bound(self.cropped_np,yaw_angle)
-                    status = query[2]
-                    if status:
-                        self.t2c2lr48b.configure(text='submitted',foreground='green')
-                    else:
-                        self.t2c2lr48b.configure(text='unsubmitted',foreground='red')
-                time1 = time.time()
-                self.cropped_im = tab_tools.np2im(self.cropped_np)
-                self.cropped_width,self.cropped_height = self.cropped_im.size
-                self.cropped_resized_im = tab_tools.resizeIm(self.cropped_im,self.cropped_width,self.cropped_height,self.t2c2i1_width,self.t2c2i1_height)
-                self.cropped_tk = tab_tools.im2tk(self.cropped_resized_im)
-                self.t2c2i1.configure(image=self.cropped_tk)
-
-                time2 = time.time()
-                #print("server request = ",time1-time0,"gui = ",time2-time1)
-
-    def previousCropped(self,event):
-        """
-        Requests and displays previous cropped image
-
-        @type  event: event
-        @param event: Left arrow event
-
-        @rtype:  None
-        @return: None
-        """
-        if not(self.t2_entry_focus):
-            focus = self.tab2.focus_get()
-            self.pingServer()
-            if self.serverConnected:
-                time0 = time.time()
-                query = self.interface.getPrevCroppedImage()
-                if query == None:
-                    self.t2_functional = False
-                    self.noPreviousCropped()
-                else:
-                    self.t2_functional = True
-                    self.imageID = query[1]
-                    self.cropped_np = np.array(query[0])
-                    yaw_angle = self.getYawAngle(self.imageID)
-                    self.cropped_np = imutils.rotate_bound(self.cropped_np,yaw_angle)
-                    status = query[2]
-                    if status:
-                        self.t2c2lr48b.configure(text='submitted',foreground='green')
-                    else:
-                        self.t2c2lr48b.configure(text='unsubmitted',foreground='red')
-                time1 = time.time()
-                self.cropped_im = tab_tools.np2im(self.cropped_np)
-                self.cropped_width,self.cropped_height = self.cropped_im.size
-                self.cropped_resized_im = tab_tools.resizeIm(self.cropped_im,self.cropped_width,self.cropped_height,self.t2c2i1_width,self.t2c2i1_height)
-                self.cropped_tk = tab_tools.im2tk(self.cropped_resized_im)
-                self.t2c2i1.configure(image=self.cropped_tk)
-                time2 = time.time()
-                #print("server request = ",time1-time0,"gui = ",time2-time1)
-
-
-    def submitClassification(self,event=None):
-        """
-        Submits classification of image to server
-
-        @type  event: event
-        @param event: Enter press event
-
-        @rtype:  None
-        @return: None
-        """
-        if self.t2_functional:
-            type = self.t2c2l14_var.get()
-            if type == 'emergent':
-                description = self.t2c2l16_var.get()
-                classification = client_rest.Classification(self.imageID,type,desc = description)
-                self.interface.postClass(classification)
-                self.entry_focus_out()
-                self.nextCropped()
-            else:
-                alphanumeric = self.t2c2l4.get()
-                if alphanumeric != "":
-                    shape = self.t2c2l2_var.get()
-                    orientation = self.t2c2l6_var.get()
-                    background_color = self.t2c2l10_var.get()
-                    alpha_color = self.t2c2l12_var.get()
-                    classification = client_rest.Classification(self.imageID,type,orientation=orientation,shape=shape,bgColor=background_color,alpha=alphanumeric,alphaColor=alpha_color)
-                    self.interface.postClass(classification)
-                    self.entry_focus_out()
-                    self.nextCropped()
-
-    def tabChanged(self,event):
-        """
-        Performs the correct keybindings when you move to a new tab of the gui
-
-        @type  event: event
-        @param event: Tab changed event
-
-        @rtype:  None
-        @return: None
-        """
-        active_tab = self.n.index(self.n.select())
-        if active_tab == 0:
-            self.tab0.run()
-        else:
-            self.interface = self.tab0.interfaceCall()
-        if active_tab == 1:
-            self.resizeEventTab1()
-            self.master.bind("<Right>",self.nextRaw)
-            self.master.bind("<Left>",self.previousRaw)
-            self.master.unbind("<d>")
-            self.master.unbind("<a>")
-            self.master.bind("<Configure>",self.resizeEventTab1)
-            self.master.bind("<Control-z>",self.undoCrop)
-            self.master.bind("<Return>",self.submitCropped)
-        if active_tab == 2:
-            self.resizeEventTab2()
-            self.master.bind("<Right>",self.nextCropped)
-            self.master.bind("<Left>",self.previousCropped)
-            self.master.unbind("<d>")
-            self.master.unbind("<a>")
-            self.master.bind("<Configure>",self.resizeEventTab2)
-            self.master.unbind("<Control-z>")
-            self.master.bind("<Return>",self.submitClassification)
-            self.t2c2l16.bind("<FocusIn>",self.entry_focus_in)
-            self.t2c2l16.bind("<FocusOut>",self.entry_focus_out)
-            self.t2c2l16.bind("<Leave>",self.entry_focus_out)
-        else:
-            self.t2c2l16.unbind("<FocusIn>")
-            self.t2c2l16.unbind("<FocusOut>")
-            self.t2c2l16.unbind("<Leave>")
-        if active_tab == 3:
-            self.resizeEventTab3()
-            self.master.bind("<Right>",self.nextClassified)
-            self.master.bind("<Left>",self.previousClassified)
-            self.master.unbind("<d>")
-            self.master.unbind("<a>")
-            self.master.bind("<Configure>",self.resizeEventTab3)
-            self.master.unbind("<Control-z>")
-            self.master.bind("<Return>",self.submitTarget)
-            self.updateManualSubmissionTab()
-        if active_tab == 4:
-            self.master.unbind("<Right>")
-            self.master.unbind("<Left>")
-            self.master.unbind("<d>")
-            self.master.unbind("<a>")
-            self.master.unbind("<Configure>")
-            self.master.unbind("<Control-z>")
-            self.master.unbind("<Return>")
-        self.master.focus_set()
-
-
-
-    def pingServer(self):
-        """
-        Checks if server is correctly connected
-
-        @rtype:  None
-        @return: None
-        """
-        self.serverConnected = self.interface.ping()
-        if self.serverConnected:
-            self.org_np = tab_tools.get_image('assets/instructions.jpg')
-            self.cropped_np = tab_tools.get_image('assets/classify_instructions.jpg')
-        else:
-            self.org_np = tab_tools.get_image('assets/server_error.jpg')
-            self.cropped_np = tab_tools.get_image('assets/server_error.jpg')
-
-    def noNextRaw(self):
-        """
-        Checks if server is correctly connected
-
-        @rtype:  None
-        @return: None
-        """
-        self.serverConnected = self.interface.ping()
-        if self.serverConnected:
-            self.org_np = tab_tools.get_image('assets/noNextRaw.jpg')
-        else:
-            self.org_np = tab_tools.get_image('assets/server_error.jpg')
-        self.t1c2r1b.configure(text="N/A",foreground="#636363")
-
-    def noPreviousRaw(self):
-        """
-        Checks if server is correctly connected
-
-        @rtype:  None
-        @return: None
-        """
-        self.serverConnected = self.interface.ping()
-        if self.serverConnected:
-            self.org_np = tab_tools.get_image('assets/noPreviousRaw.jpg')
-        else:
-            self.org_np = tab_tools.get_image('assets/server_error.jpg')
-        self.t1c2r1b.configure(text="N/A",foreground="#636363")
 
     def noNextCropped(self):
         """

@@ -17,6 +17,7 @@ class Tab0():
         #self.default_host = '192.168.1.48'
         self.master = master
         self.n = notebook
+        self.initialized = False
         self.default_host = '127.0.0.1'
         self.default_port = '5000'
         self.default_idnum = 50
