@@ -1,10 +1,5 @@
 '''
 Authors: D. Knowles, B. McBride, T. Miller
-
-Prereqs:
-python 3
-sudo apt install python3-tk
-pip3 install Pillow, opencv-python, ttkthemes, imutils
 '''
 
 '''
@@ -62,7 +57,7 @@ class GuiClass(tk.Frame):
     Tab 0: Setting for setting up the server_error
     Tab 1: Pull raw images and submit cropped images
     Tab 2: Pull cropped iamges and submit classification for images
-    Tab 3: Display results for manual and autonomous classification
+    Tab 3: Display results for manual classification
 
     @type tk.Frame: nothing
     @param tk.Frame: nothing
