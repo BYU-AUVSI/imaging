@@ -13,7 +13,7 @@ from dao.submitted_target_dao import SubmittedTargetDAO
 # ROS messages:
 from inertial_sense.msg import GPS
 from rosplane_msgs.msg import State
-from sensor_msgs.msg import CompressedImage
+from sensor_msgs.msg import Image
 from std_msgs.msg import Float32
 # submit image service
 import rosservice
@@ -50,7 +50,7 @@ class RosImagingHandler:
 
         # imaging ingestion setup:
         self.img_dao_ = IncomingImageDAO(self.configPath)
-        self.img_subscriber_ = rospy.Subscriber("/a6000_ros_node/img/compressed", CompressedImage, self.imgCallback,  queue_size = 10)
+        self.img_subscriber_ = rospy.Subscriber("/a6000_ros_node/img", Image, self.imgCallback,  queue_size = 10)
         self.img_msg_ = incoming_image()
         self.img_msg_.focal_length = 16.0 # this is a safe starting assumption == fully zoomed out on a6000
         self.img_msg_.manual_tap = False
@@ -128,10 +128,10 @@ class RosImagingHandler:
         so that it can be inserted into the database
         """
         #get raw img data:
-        rawData = np.fromstring(msg.data, np.uint8)
+        rawData = np.fromstring(msg.data, np.uint8).reshape(msg.height, msg.width, 3)
         ts = msg.header.stamp.to_sec()
         fullPath = self.raw_path_ + str(ts) + ".jpg"
-        cv2.imwrite(fullPath, cv2.imdecode(rawData, 1))
+        cv2.imwrite(fullPath, rawData)
 
         self.img_msg_.time_stamp = ts 
         self.img_msg_.image_path = fullPath
