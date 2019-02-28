@@ -29,7 +29,7 @@ import cv2
 import numpy as np
 import time
 import sys
-from lib import tab0, tab1, tab2, tab3, tab_tools, client_rest
+from lib import tab0, tab1, tab2, tab3, tab4, tab_tools, client_rest
 
 
 class GuiClass(tk.Frame):
@@ -76,12 +76,11 @@ class GuiClass(tk.Frame):
         # -------------------  Tab 3: TARGET SUBMISSION  -----------------------
         self.tab3 = tab3.Tab3(self.master,self.n,self.interface)
 
+        # --------------  Tab 4: AUTONOMOUS TARGET SUBMISSION  -----------------
+        self.tab4 = tab4.Tab4(self.master,self.n,self.interface)
 
-        # TAB 4: AUTONOMOUS TARGET SUBMISSION ------------------------------------------------
-        self.tab4 = ttk.Frame(self.n)
-        self.n.add(self.tab4, text='Autonomous Target Submission')
 
-        # KEY BINDINGS ------------------------------------------------------------
+        # ----------------------------KEY BINDINGS -----------------------------
         self.master.bind("<<NotebookTabChanged>>",self.tabChanged)
         self.master.bind("<Escape>",self.close_window)
 
@@ -113,13 +112,8 @@ class GuiClass(tk.Frame):
             self.tab3.run(self.interface)
 
         if active_tab == 4:
-            self.master.unbind("<Right>")
-            self.master.unbind("<Left>")
-            self.master.unbind("<d>")
-            self.master.unbind("<a>")
-            self.master.unbind("<Configure>")
-            self.master.unbind("<Control-z>")
-            self.master.unbind("<Return>")
+            self.tab4.run(self.interface)
+
         self.master.focus_set()
 
     def close_window(self,event):
