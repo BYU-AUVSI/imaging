@@ -1,5 +1,6 @@
 import cv2
 from PIL import Image,ImageTk
+import numpy as np
 
 def get_image(path):
     """
@@ -67,3 +68,16 @@ def resizeIm(image,image_width,image_height,width_restrict,height_restrict):
     else:
         resized_im = image.resize((int(image_width*ratio_w), int(image_height*ratio_w)), Image.ANTIALIAS)
     return(resized_im)
+
+def getYawAngle(interface,imageID):
+    info = interface.getCroppedImageInfo(imageID)
+    image_state = None
+    if info is not None:
+        image_state = interface.getStateByTs(info.time_stamp)
+    if image_state == None:
+        #yaw_angle = 0.0
+        # todo: eventually remove this
+        yaw = np.random.uniform(0,360)
+    else:
+        yaw = image_state.yaw
+    return(yaw)
