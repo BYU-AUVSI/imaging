@@ -326,3 +326,78 @@ class TestManualSubmitPendingTargetWithClassSpecs(unittest.TestCase):
         self.assertEqual(submissionResult.background_color, 'orange')
         self.assertEqual(submissionResult.alphanumeric, 'Q')
 
+class TestManualGetUnlocatedClassifications(unittest.TestCase):
+    def test(self):
+        truncateTable('outgoing_manual')
+        dao = OutgoingManualDAO(defaultConfigPath())
+
+        # empty table
+        self.assertIsNone(dao.getUnlocatedClassifications())
+
+        # populate with two classifications that need geo, one that doesnt
+        testIns = outgoing_manual()
+        testIns.crop_id = 42
+        testIns.shape = 'circle'
+        testIns.background_color = 'white'
+        testIns.alphanumeric = 'A'
+        testIns.alphanumeric_color = 'black'
+
+        resultingId = dao.addClassification(testIns)
+        self.assertNotEqual(resultingId, -1)
+
+        testIns.crop_id = 43
+        testIns.background_color = 'orange'
+        resultingId2 = dao.addClassification(testIns)
+        self.assertNotEqual(resultingId2, -1)
+
+        testIns.crop_id = 44
+        testIns.latitude = 40.111
+        testIns.longitude = -111.222
+        resultingId3 = dao.addClassification(testIns)
+        self.assertNotEqual(resultingId3, -1)
+
+        unlocated = dao.getUnlocatedClassifications()
+        self.assertIsNotNone(unlocated)
+        self.assertEqual(len(unlocated), 2)
+        # the two models in the list should be our first two inserts and have
+        # crop ids 42 and 43
+        self.assertLess(unlocated[0].crop_id, 44) 
+        self.assertLess(unlocated[1].crop_id, 44)
+
+class TestAutonomousGetUnlocatedClassifications(unittest.TestCase):
+    def test(self):
+        truncateTable('outgoing_autonomous')
+        dao = OutgoingAutonomousDAO(defaultConfigPath())
+
+        # empty table
+        self.assertIsNone(dao.getUnlocatedClassifications())
+
+        # populate with two classifications that need geo, one that doesnt
+        testIns = outgoing_manual()
+        testIns.crop_id = 42
+        testIns.shape = 'circle'
+        testIns.background_color = 'white'
+        testIns.alphanumeric = 'A'
+        testIns.alphanumeric_color = 'black'
+
+        resultingId = dao.addClassification(testIns)
+        self.assertNotEqual(resultingId, -1)
+
+        testIns.crop_id = 43
+        testIns.background_color = 'orange'
+        resultingId2 = dao.addClassification(testIns)
+        self.assertNotEqual(resultingId2, -1)
+
+        testIns.crop_id = 44
+        testIns.latitude = 40.111
+        testIns.longitude = -111.222
+        resultingId3 = dao.addClassification(testIns)
+        self.assertNotEqual(resultingId3, -1)
+
+        unlocated = dao.getUnlocatedClassifications()
+        self.assertIsNotNone(unlocated)
+        self.assertEqual(len(unlocated), 2)
+        # the two models in the list should be our first two inserts and have
+        # crop ids 42 and 43
+        self.assertLess(unlocated[0].crop_id, 44) 
+        self.assertLess(unlocated[1].crop_id, 44)
