@@ -250,6 +250,17 @@ class ClassificationDAO(BaseDAO):
         else:
             return None
 
+    def getUnlocatedClassifications(self):
+        """
+        Get all classifications where latitude and longitude = NULL or 0
+        """
+        getClassifications = """SELECT *
+            FROM """ + self.outgoingTableName + """
+            WHERE (latitude IS NULL OR latitude = 0.0) 
+                AND (longitude IS NULL OR longitude = 0.0);"""
+
+        return super(ClassificationDAO, self).getResultsAsModelList(getClassifications, None)
+        
     def getAllTargets(self, whereClause=None):
         """
         Get all the unique classifications in the classification queue
