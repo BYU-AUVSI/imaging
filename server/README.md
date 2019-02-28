@@ -28,9 +28,13 @@ Once installed (see [installation](#installation) guide below), running the rest
 
 If you also want to run the ros ingestion code, place this repository in your workspace/src folder. once it's built, you can run the ingester with:
 
-`rosrun imaging_ros_ingester ros_ingest`
+`rosrun imaging_ros_handler ros_handler.py`
 
-(Notice that the server and ros_ingester and completely independent of each other. This is intentional)
+(Notice that the server and ros_handler are completely independent of each other. This is intentional)
+
+If you have a rosbag and want to load it into the database _fast_, use the rosbag_ingester script:
+
+`python rosbag_ingester.py [path to bag]`
 
 ## REST API
 
