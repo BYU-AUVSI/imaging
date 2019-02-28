@@ -28,4 +28,4 @@ This package relies on a few other BYU-Auvsi packages. Changes to them could hav
 
 - [BYU-AUVSI/inertial_sense_ros/GPS/GPS.msg](https://github.com/BYU-AUVSI/inertial_sense_ros)
 
-- [BYU-AUVSI/uav_msgs/msg/InteropImage.msg](https://github.com/BYU-AUVSI/uav_msgs)
+- [BYU-AUVSI/uav_msgs/srv/SubmitImage.srv](https://github.com/BYU-AUVSI/uav_msgs)

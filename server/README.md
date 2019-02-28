@@ -34,7 +34,7 @@ If you also want to run the ros handler code, place this repository in your work
 
 If you have a rosbag and want to load it into the database _[fast](https://youtu.be/VTHsOSGJHN0)_, use the rosbag_ingester script:
 
-`python rosbag_ingester.py [path to bag]`
+`python src/rosbag_ingester.py [path to bag]`
 
 ## REST API
 
