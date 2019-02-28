@@ -7,6 +7,11 @@ from tkinter import ttk
 import time
 import tkinter as tk
 
+"""
+# TODO: 
+    add error handling if entries aren't in the right format
+    add error handling if not connected to correct wifi
+"""
 
 class Tab0():
     """

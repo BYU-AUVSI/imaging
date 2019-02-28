@@ -8,6 +8,12 @@ from tkinter import ttk
 import numpy as np
 import cv2
 
+"""
+# TODO:
+    Add zooming feature
+    Fix resizing
+"""
+
 class Tab1():
     """
     Pull raw images and submit cropped images

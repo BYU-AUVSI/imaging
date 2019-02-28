@@ -8,6 +8,17 @@ from tkinter import ttk
 import numpy as np
 import imutils
 
+
+"""
+# TODO:
+    disable moving to next/prev when in the alphanumeric entry
+    show not only submission status, but what you submitted??
+    Change disable color
+    Verify rotating picture based on yaw angle
+    Show past classifications on the left with autofill option
+    Bug tabbing into emergent description and trying to leave w/o subbmitting
+"""
+
 class Tab2():
     """
     Pull cropped iamges and submit classification for images
