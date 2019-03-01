@@ -390,13 +390,72 @@ class Tab1():
         self.t1c1i1.unbind("<Motion>")
         self.t1c1i1.unbind("<ButtonRelease-1>")
 
-        if not(self.new_crop):
+        disp_width,disp_height = self.resized_im.size
+        # ratio between full-size image and displayed image
+        self.sr = (self.org_width/disp_width + self.org_height/disp_height)/2.0
+        self.draw_np = np.copy(self.org_np)
+
+        # prevent going out of bounds
+        x1 = event.x - self.offset_x
+        y1 = event.y - self.offset_y
+        if x1 > self.resized_im.size[0]:
+            x1 = self.resized_im.size[0]
+        elif x1 < 0:
+            x1 = 0
+        if y1 > self.resized_im.size[1]:
+            y1 = self.resized_im.size[1]
+        elif y1 < 0:
+            y1 = 0
+        if self.new_crop:
+            self.x1 = x1
+            self.y1 = y1
+        else:
+            self.pan_x1 = x1
+            self.pan_y1 = y1
+            xdif = int((self.pan_x1 - self.pan_x0))
+            ydif = int((self.pan_y1 - self.pan_y0))
+            self.x0_hat = self.x0 + xdif
+            self.y0_hat = self.y0 + ydif
+            self.x1_hat = self.x1 + xdif
+            self.y1_hat = self.y1 + ydif
+
+            # prevent panning out of bounds
+            if self.x0_hat < self.x1_hat:
+                if self.x0_hat < 0:
+                    self.x0_hat = 0
+                    self.x1_hat = np.abs(self.x1-self.x0)
+                elif self.x1_hat > self.resized_im.size[0]:
+                    self.x0_hat = self.resized_im.size[0]-np.abs(self.x1-self.x0)
+                    self.x1_hat = self.resized_im.size[0]
+            else:
+                if self.x1_hat < 0:
+                    self.x1_hat = 0
+                    self.x0_hat = np.abs(self.x1-self.x0)
+                elif self.x0_hat > self.resized_im.size[0]:
+                    self.x1_hat = self.resized_im.size[0]-np.abs(self.x1-self.x0)
+                    self.x0_hat = self.resized_im.size[0]
+            if self.y0_hat < self.y1_hat:
+                if self.y0_hat < 0:
+                    self.y0_hat = 0
+                    self.y1_hat = np.abs(self.y1-self.y0)
+                elif self.y1_hat > self.resized_im.size[1]:
+                    self.y0_hat = self.resized_im.size[1]-np.abs(self.y1-self.y0)
+                    self.y1_hat = self.resized_im.size[1]
+            else:
+                if self.y1_hat < 0:
+                    self.y1_hat = 0
+                    self.y0_hat = np.abs(self.x1-self.x0)
+                elif self.y0_hat > self.resized_im.size[1]:
+                    self.y1_hat = self.resized_im.size[1]-np.abs(self.y1-self.y0)
+                    self.y0_hat = self.resized_im.size[1]
+
             # save hat values as the new values
             self.x0 = self.x0_hat
             self.y0 = self.y0_hat
             self.x1 = self.x1_hat
             self.y1 = self.y1_hat
 
+        # do nothing if it was a single click
         if self.x0 != self.x1 or self.y0 != self.y1:
             cv2.rectangle(self.draw_np,(int(self.sr*self.x0),int(self.sr*self.y0)),(int(self.sr*self.x1),int(self.sr*self.y1)),(255,0,0),2)
             self.cropImage(int(self.sr*self.x0),int(self.sr*self.y0),int(self.sr*self.x1),int(self.sr*self.y1))
@@ -443,6 +502,7 @@ class Tab1():
         self.crop_preview_resized_im = tab_tools.resizeIm(self.crop_preview_im,self.crop_preview_width,self.crop_preview_height,self.t1c1i1_width*self.crop_preview_img_ratio,self.t1c1i1_height*self.crop_preview_img_ratio)
         self.crop_preview_tk = tab_tools.im2tk(self.crop_preview_resized_im)
         self.t1c2i1.configure(image=self.crop_preview_tk)
+
 
     def noNextRaw(self):
         """
