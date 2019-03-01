@@ -4,12 +4,11 @@ Authors: D. Knowles, B. McBride, T. Miller
 
 '''
 TODO:
-    possible threading behind the scenese to autosize other tabs
+    possible threading behind the scene to autosize other tabs
     use consistent naming patterns (camel case, snake case)
     use consistent commenting pattern and placement
     change text font, size, color, etc.
     organize functions into a logical order
-    standardize import order
 
 Tab4:
     create everything
