@@ -10,6 +10,7 @@ import cv2
 
 """
 # TODO:
+    remove code block in mouse_release by fixing single-click issue differently
     Add zooming feature
     Fix resizing
 """

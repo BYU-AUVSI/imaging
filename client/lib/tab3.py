@@ -8,6 +8,7 @@ import time
 
 """
 # TODO:
+    click on image to change image radio button
     add a display of how many classifications there are per target
     Show in blue which target it's pulling the "to submit" classificaiton from
     Change radiobuttons to match ttktheme
