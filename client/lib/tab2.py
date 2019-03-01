@@ -1,10 +1,10 @@
 import sys
 sys.path.append('..')
 
-from lib import tab_tools, client_rest
-import time
 import tkinter as tk
 from tkinter import ttk
+from lib import tab_tools, client_rest
+import time
 import numpy as np
 import imutils
 
@@ -57,11 +57,9 @@ class Tab2():
         self.t2sep12.grid(row=0, column=4, rowspan=50,sticky=tk.N+tk.S+tk.E+tk.W, pady=5)
         self.t2c2title = ttk.Label(self.tab2, anchor=tk.CENTER, text='Classification')
         self.t2c2title.grid(row=0,column=4,columnspan=8,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-
         self.t2c2i1 = ttk.Label(self.tab2, anchor=tk.CENTER,image=self.cropped_tk)
         self.t2c2i1.image = self.cropped_tk
         self.t2c2i1.grid(row=2,column=4,rowspan=38,columnspan=8,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-
         self.t2c2l1 = ttk.Label(self.tab2, anchor=tk.CENTER, text='Shape')
         self.t2c2l1.grid(row=40,column=4,columnspan=2,rowspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
         shape_options = ('circle','semicircle','quarter_circle','triangle','square','rectangle','trapezoid','pentagon','hexagon','heptagon','octagon','star','cross')
@@ -98,19 +96,16 @@ class Tab2():
         self.t2c2l14 = ttk.OptionMenu(self.tab2,self.t2c2l14_var,target_options[0],*target_options)
         self.t2c2l14.grid(row=46,column=8,columnspan=2,rowspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
         self.t2c2l14_var.trace("w",self.disableEmergentDescription)
-
         self.t2c2l15 = ttk.Label(self.tab2, anchor=tk.CENTER, text='Emergent Description')
         self.t2c2l15.grid(row=44,column=10,columnspan=2,rowspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
         self.t2c2l16_var = tk.StringVar()
         self.t2c2l16_var.set(None)
         self.t2c2l16 = ttk.Entry(self.tab2,textvariable=self.t2c2l16_var)
         self.t2c2l16.grid(row=46,column=10,columnspan=2,rowspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-
         self.t2c2r48a = ttk.Label(self.tab2, anchor=tk.E, text='Submission Status: ')
         self.t2c2r48a.grid(row=48,column=4,columnspan=2,rowspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
         self.t2c2lr48b = ttk.Label(self.tab2, anchor=tk.W, text='N/A')
         self.t2c2lr48b.grid(row=48,column=6,columnspan=2,rowspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-
         self.t2c2l17 = ttk.Button(self.tab2, text="Submit Classification",command=self.submitClassification)
         self.t2c2l17.grid(row=48,column=8,columnspan=4,rowspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
         self.disableEmergentDescription()
@@ -134,6 +129,7 @@ class Tab2():
     def run(self,interface):
         self.interface = interface
         self.resizeEventTab2()
+        # setup all keybindings
         self.master.bind("<Right>",self.nextCropped)
         self.master.bind("<Left>",self.previousCropped)
         self.master.unbind("<d>")
@@ -146,10 +142,10 @@ class Tab2():
         self.t2c2l16.bind("<Leave>",self.entry_focus_out)
 
     def stoprun(self):
+        # unbind when switching to a new tab
         self.t2c2l16.unbind("<FocusIn>")
         self.t2c2l16.unbind("<FocusOut>")
         self.t2c2l16.unbind("<Leave>")
-
 
     def pingServer(self):
         """
@@ -182,15 +178,6 @@ class Tab2():
                 self.cropped_resized_im = tab_tools.resizeIm(self.cropped_im,self.cropped_width,self.cropped_height,self.t2c2i1_width,self.t2c2i1_height)
                 self.cropped_tk = tab_tools.im2tk(self.cropped_resized_im)
                 self.t2c2i1.configure(image=self.cropped_tk)
-                # resize compass
-                '''
-                self.t2c3i1_width = self.t2c3i1.winfo_width()
-                self.t2c3i1_height = self.t2c3i1.winfo_height()
-                resized_im = tab_tools.resizeIm(self.t2c3i1_im,self.t2c3i1_default_width,self.t2c3i1_default_height,self.t2c3i1_width,self.t2c3i1_height)
-                self.t2c3i1_tk = tab_tools.im2tk(resized_im)
-                self.t2c3i1.configure(image=self.t2c3i1_tk)
-                '''
-
 
     def nextCropped(self,event=None):
         """
@@ -205,7 +192,6 @@ class Tab2():
         if not(self.t2_entry_focus):
             self.serverConnected = self.interface.ping()
             if self.serverConnected:
-                time0 = time.time()
                 query = self.interface.getNextCroppedImage()
                 if query == None:
                     self.t2_functional = False
@@ -221,15 +207,11 @@ class Tab2():
                         self.t2c2lr48b.configure(text='submitted',foreground='green')
                     else:
                         self.t2c2lr48b.configure(text='unsubmitted',foreground='red')
-                time1 = time.time()
                 self.cropped_im = tab_tools.np2im(self.cropped_np)
                 self.cropped_width,self.cropped_height = self.cropped_im.size
                 self.cropped_resized_im = tab_tools.resizeIm(self.cropped_im,self.cropped_width,self.cropped_height,self.t2c2i1_width,self.t2c2i1_height)
                 self.cropped_tk = tab_tools.im2tk(self.cropped_resized_im)
                 self.t2c2i1.configure(image=self.cropped_tk)
-
-                time2 = time.time()
-                #print("server request = ",time1-time0,"gui = ",time2-time1)
 
     def previousCropped(self,event):
         """
@@ -245,7 +227,6 @@ class Tab2():
             focus = self.tab2.focus_get()
             self.serverConnected = self.interface.ping()
             if self.serverConnected:
-                time0 = time.time()
                 query = self.interface.getPrevCroppedImage()
                 if query == None:
                     self.t2_functional = False
@@ -261,15 +242,11 @@ class Tab2():
                         self.t2c2lr48b.configure(text='submitted',foreground='green')
                     else:
                         self.t2c2lr48b.configure(text='unsubmitted',foreground='red')
-                time1 = time.time()
                 self.cropped_im = tab_tools.np2im(self.cropped_np)
                 self.cropped_width,self.cropped_height = self.cropped_im.size
                 self.cropped_resized_im = tab_tools.resizeIm(self.cropped_im,self.cropped_width,self.cropped_height,self.t2c2i1_width,self.t2c2i1_height)
                 self.cropped_tk = tab_tools.im2tk(self.cropped_resized_im)
                 self.t2c2i1.configure(image=self.cropped_tk)
-                time2 = time.time()
-                #print("server request = ",time1-time0,"gui = ",time2-time1)
-
 
     def noNextCropped(self):
         """
@@ -339,7 +316,7 @@ class Tab2():
 
     def alphanumericValidate(self,type, entry):
         """
-        Fixes alphanumeric if you entered something wrong
+        Fixes alphanumeric to be uppercase letter or digit
 
         @rtype:  None
         @return: None

@@ -1,14 +1,14 @@
 import sys
 sys.path.append('..')
 
-from lib import client_rest
-from lib import tab_tools
-from tkinter import ttk
-import time
 import tkinter as tk
+from tkinter import ttk
+from lib import client_rest, tab_tools
+import time
+
 
 """
-# TODO: 
+# TODO:
     add error handling if entries aren't in the right format
     add error handling if not connected to correct wifi
 """
@@ -19,11 +19,11 @@ class Tab0():
     """
     def __init__(self,master,notebook):
         # itialize variables
-        #self.default_host = '192.168.1.48'
         self.master = master
         self.n = notebook
         self.initialized = False
-        self.default_host = '127.0.0.1'
+        self.default_host = '127.0.0.1' # host if running on own machine
+        #self.default_host = '192.168.1.48'
         self.default_port = '5000'
         self.default_idnum = 50
         self.default_debug = False
@@ -34,6 +34,7 @@ class Tab0():
         # Tab 0: SETTINGS ------------------------------------------------------
         self.tab0 = ttk.Frame(self.n)
         self.n.add(self.tab0, text='Settings')
+        # makes resizing possible
         for x in range(6):
             tk.Grid.columnconfigure(self.tab0,x,weight=1)
         for y in range(10):
@@ -109,6 +110,7 @@ class Tab0():
 
     def run(self):
         self.resizeEventTab0()
+        # setup all keybindings
         self.master.unbind("<Right>")
         self.master.unbind("<Left>")
         self.master.unbind("<d>")
@@ -130,6 +132,7 @@ class Tab0():
             if self.t0c2r0.winfo_width() > 1:
                 self.resize_counter_tab0 = time.time()
                 self.master.update()
+                # get container label height and width
                 t0c2i1_width = self.t0c2r0.winfo_width()
                 t0c2i1_height = self.t0c2r0.winfo_height()
                 logoW, logoH = self.logo_im.size
@@ -138,4 +141,5 @@ class Tab0():
                 self.t0c2r0.configure(image=self.logo_tk)
 
     def interfaceCall(self):
+        # return interface according to current settings
         return self.interface

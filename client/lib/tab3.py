@@ -1,19 +1,19 @@
 import sys
 sys.path.append('..')
 
-from lib import tab_tools, client_rest
-import time
 import tkinter as tk
 from tkinter import ttk
+from lib import tab_tools, client_rest
+import time
 
 """
 # TODO:
+    add a display of how many classifications there are per target
     Show in blue which target it's pulling the "to submit" classificaiton from
     Change radiobuttons to match ttktheme
     Fix resizing issues
     Possibly auto updating? (if other people are pushing classifications)
 """
-
 
 class Tab3():
     """
@@ -24,7 +24,6 @@ class Tab3():
         self.n = notebook
         self.interface = interface
         self.initialized = False
-
 
         # Tab 3 variables
         self.resize_counter_tab3 = time.time()
@@ -408,6 +407,7 @@ class Tab3():
     def run(self,interface):
         self.interface = interface
         self.resizeEventTab3()
+        # setup all keybindings
         self.master.bind("<Right>",self.nextClassified)
         self.master.bind("<Left>",self.previousClassified)
         self.master.unbind("<d>")
@@ -469,6 +469,10 @@ class Tab3():
                 self.t3c6i1.configure(image=self.t3c6i1_tk)
 
     def updateManualSubmissionTab(self):
+        """
+        This function populates the images and characteristics when
+        you move between targets
+        """
         self.serverConnected = self.interface.ping()
         if self.serverConnected:
             self.pendingList = self.interface.getPendingSubmissions()
@@ -591,8 +595,6 @@ class Tab3():
                 self.pending_alpha_color = [self.pendingList[self.t3_current_target-1][0].alphanumeric_color]
                 self.pending_orientation = [self.pendingList[self.t3_current_target-1][0].orientation]
                 self.pending_description = [self.pendingList[self.t3_current_target-1][0].description]
-
-
 
             if pics > 1:
                 query = self.interface.getCroppedImage(self.pendingList[self.t3_current_target-1][1].crop_id)

@@ -24,6 +24,7 @@ class Tab4():
 
     def run(self,interface):
         self.interface = interface
+        # setup all keybindings
         self.master.unbind("<Right>")
         self.master.unbind("<Left>")
         self.master.unbind("<d>")

@@ -1,10 +1,10 @@
 import sys
 sys.path.append('..')
 
-from lib import tab_tools
-import time
 import tkinter as tk
 from tkinter import ttk
+from lib import tab_tools
+import time
 import numpy as np
 import cv2
 
@@ -20,13 +20,11 @@ class Tab1():
     """
     def __init__(self,master,notebook,interface):
         # itialize variables
-        #self.default_host = '192.168.1.48'
         self.master = master
         self.n = notebook
+        self.interface = interface
         self.initialized = False
         self.resize_counter_tab1 = time.time()
-        self.interface = interface
-
 
         self.t1_functional = False
         self.x0 = None
@@ -43,10 +41,7 @@ class Tab1():
         self.img_tk = tab_tools.im2tk(self.img_im)
         self.org_width,self.org_height = self.img_im.size
         self.crop_preview_width,self.crop_preview_height = self.img_im.size
-
         self.cropped = False
-
-
 
         # TAB 1: CROPPING ------------------------------------------------------
         self.tab1 = ttk.Frame(self.n)
@@ -64,19 +59,14 @@ class Tab1():
         self.t1c1i1.bind("<Button-1>",self.mouse_click)
         self.t1c1i1_width = self.t1c1i1.winfo_width()
         self.t1c1i1_height = self.t1c1i1.winfo_height()
-
-        self.crop_preview_img_ratio = 1/7.
+        self.crop_preview_img_ratio = 1/7. # ratio between image and crop preview
         self.t1c2i1 = ttk.Label(self.tab1, anchor=tk.CENTER,image=self.crop_preview_tk)
         self.t1c2i1.image = self.crop_preview_tk
         self.t1c2i1.grid(row=0,column=1,columnspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-        #self.t1c2i1_width = self.t1c2i1.winfo_width()
-        #self.t1c2i1_height = self.t1c2i1.winfo_height()
-
         self.t1c2r1a = ttk.Label(self.tab1, anchor=tk.E, text='Submission Status: ')
         self.t1c2r1a.grid(row=1,column=1,columnspan=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
         self.t1c2r1b = ttk.Label(self.tab1, anchor=tk.W, text='N/A')
         self.t1c2r1b.grid(row=1,column=2,columnspan=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-
         self.t1c2b1 = ttk.Button(self.tab1, text="Submit Crop",command=self.submitCropped)
         self.t1c2b1.grid(row=2,column=1,columnspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
 
@@ -85,6 +75,7 @@ class Tab1():
     def run(self,interface):
         self.interface = interface
         self.resizeEventTab1()
+        # setup all keybindings
         self.master.bind("<Right>",self.nextRaw)
         self.master.bind("<Left>",self.previousRaw)
         self.master.unbind("<d>")
@@ -129,10 +120,7 @@ class Tab1():
                 self.img_tk = tab_tools.im2tk(self.resized_im)
                 self.t1c1i1.configure(image=self.img_tk)
                 # cropped image
-                #self.t1c2i1_width = self.t1c2i1.winfo_width()
-                #self.t1c2i1_height = self.t1c2i1.winfo_height()
                 self.crop_preview_resized_im = tab_tools.resizeIm(self.crop_preview_im,self.crop_preview_width,self.crop_preview_height,self.t1c1i1_width*self.crop_preview_img_ratio,self.t1c1i1_height*self.crop_preview_img_ratio)
-                #self.t1c2i1_width,self.t1c2i1_height = self.crop_resized_im.size
                 self.crop_preview_tk = tab_tools.im2tk(self.crop_preview_resized_im)
                 self.t1c2i1.configure(image=self.crop_preview_tk)
 
@@ -148,7 +136,6 @@ class Tab1():
         """
         self.pingServer()
         if self.serverConnected:
-            time0 = time.time()
             query = self.interface.getNextRawImage()
             if query == None:
                 self.t1_functional = False
@@ -156,8 +143,7 @@ class Tab1():
             else:
                 self.t1_functional = True
                 self.imageID = query[1]
-                self.org_np = np.array(query[0]) #tab_tools.get_image('frame0744.jpg')
-            time1 = time.time()
+                self.org_np = np.array(query[0])
             self.draw_np = np.copy(self.org_np)
             self.img_im = tab_tools.np2im(self.draw_np)
             self.crop_preview_im = self.img_im.copy()
@@ -170,8 +156,6 @@ class Tab1():
             self.crop_preview_resized_im = tab_tools.resizeIm(self.crop_preview_im,self.crop_preview_width,self.crop_preview_height,self.t1c1i1_width*self.crop_preview_img_ratio,self.t1c1i1_height*self.crop_preview_img_ratio)
             self.crop_preview_tk = tab_tools.im2tk(self.crop_preview_resized_im)
             self.t1c2i1.configure(image=self.crop_preview_tk)
-            time2 = time.time()
-            #print("server request = ",time1-time0,"gui = ",time2-time1)
             self.t1c2r1b.configure(text="unsubmitted",foreground="red")
             # reset crop points to none
             self.x0 = None
@@ -192,7 +176,6 @@ class Tab1():
         """
         self.pingServer()
         if self.serverConnected:
-            time0 = time.time()
             query = self.interface.getPrevRawImage()
             if query == None:
                 self.noPreviousRaw()
@@ -201,7 +184,6 @@ class Tab1():
                 self.t1_functional = True
                 self.imageID = query[1]
                 self.org_np = np.array(query[0]) #tab_tools.get_image('frame0744.jpg')
-            time1 = time.time()
             self.draw_np = np.copy(self.org_np)
             self.img_im = tab_tools.np2im(self.draw_np)
             self.crop_preview_im = self.img_im.copy()
@@ -215,8 +197,6 @@ class Tab1():
             self.crop_preview_resized_im = tab_tools.resizeIm(self.crop_preview_im,self.crop_preview_width,self.crop_preview_height,self.t1c1i1_width*self.crop_preview_img_ratio,self.t1c1i1_height*self.crop_preview_img_ratio)
             self.crop_preview_tk = tab_tools.im2tk(self.crop_preview_resized_im)
             self.t1c2i1.configure(image=self.crop_preview_tk)
-            time2 = time.time()
-            #print("server request = ",time1-time0,"gui = ",time2-time1)
             self.t1c2r1b.configure(text="unsubmitted",foreground="red")
             # reset crop points to none
             self.x0 = None
@@ -237,7 +217,6 @@ class Tab1():
         """
         if self.t1_functional:
             self.interface.postCroppedImage(self.imageID,self.crop_preview_im,[self.cx0,self.cy0],[self.cx1,self.cy1])
-            (self.cx0,self.cy0,self.cx1,self.cy1)
             self.t1c2r1b.configure(text="submitted",foreground="green")
 
 
@@ -266,7 +245,6 @@ class Tab1():
         self.crop_preview_resized_im = tab_tools.resizeIm(self.crop_preview_im,self.crop_preview_width,self.crop_preview_height,self.t1c1i1_width*self.crop_preview_img_ratio,self.t1c1i1_height*self.crop_preview_img_ratio)
         self.crop_preview_tk = tab_tools.im2tk(self.crop_preview_resized_im)
         self.t1c2i1.configure(image=self.crop_preview_tk)
-        #self.t2c2i1.configure(image=self.crop_preview_tk)
 
 
     def mouse_click(self,event):
@@ -278,9 +256,9 @@ class Tab1():
         @rtype:  None
         @return: None
         """
-        #print(event.x,event.y)
         self.t1c1i1.bind("<ButtonRelease-1>",self.mouse_release)
         self.t1c1i1.bind("<Motion>",self.mouse_move)
+        # calculate offset between container size and image size
         self.offset_x = int((self.t1c1i1_width - self.t1c1i1_img_width )/2.0)
         self.offset_y = int((self.t1c1i1_height - self.t1c1i1_img_height)/2.0)
         x0 = event.x - self.offset_x
@@ -315,6 +293,7 @@ class Tab1():
             elif self.y0 < 0:
                 self.y0 = 0
         else:
+            # it's a pan, not a new crop
             self.pan_x0 = x0
             self.pan_y0 = y0
 
@@ -330,11 +309,13 @@ class Tab1():
         """
         self.t1c1i1.bind("<ButtonRelease-1>",self.mouse_release)
         disp_width,disp_height = self.resized_im.size
-        sr = (self.org_width/disp_width + self.org_height/disp_height)/2.0
+        # ratio between full-size image and displayed image
+        self.sr = (self.org_width/disp_width + self.org_height/disp_height)/2.0
         self.draw_np = np.copy(self.org_np)
 
         x1 = event.x - self.offset_x
         y1 = event.y - self.offset_y
+        # prevent from going out of bounds
         if x1 > self.resized_im.size[0]:
             x1 = self.resized_im.size[0]
         elif x1 < 0:
@@ -346,7 +327,7 @@ class Tab1():
         if self.new_crop:
             self.x1 = x1
             self.y1 = y1
-            cv2.rectangle(self.draw_np,(int(sr*self.x0),int(sr*self.y0)),(int(sr*self.x1),int(sr*self.y1)),(255,0,0),2)
+            cv2.rectangle(self.draw_np,(int(self.sr*self.x0),int(self.sr*self.y0)),(int(self.sr*self.x1),int(self.sr*self.y1)),(255,0,0),2)
         else:
             self.pan_x1 = x1
             self.pan_y1 = y1
@@ -357,6 +338,7 @@ class Tab1():
             self.x1_hat = self.x1 + xdif
             self.y1_hat = self.y1 + ydif
 
+            # prevent panning out of bounds
             if self.x0_hat < self.x1_hat:
                 if self.x0_hat < 0:
                     self.x0_hat = 0
@@ -386,12 +368,8 @@ class Tab1():
                     self.y1_hat = self.resized_im.size[1]-np.abs(self.y1-self.y0)
                     self.y0_hat = self.resized_im.size[1]
 
-
-
-
-            cv2.rectangle(self.draw_np,(int(sr*self.x0_hat),int(sr*self.y0_hat)),(int(sr*self.x1_hat),int(sr*self.y1_hat)),(255,0,0),2)
-            cv2.line(self.draw_np,(int(sr*self.pan_x0),int(sr*self.pan_y0)),(int(sr*self.pan_x1),int(sr*self.pan_y1)),(45,255,255),2)
-
+            cv2.rectangle(self.draw_np,(int(self.sr*self.x0_hat),int(self.sr*self.y0_hat)),(int(self.sr*self.x1_hat),int(self.sr*self.y1_hat)),(255,0,0),2)
+            cv2.line(self.draw_np,(int(self.sr*self.pan_x0),int(self.sr*self.pan_y0)),(int(self.sr*self.pan_x1),int(self.sr*self.pan_y1)),(45,255,255),2)
 
         self.img_im = tab_tools.np2im(self.draw_np)
         self.resized_im = tab_tools.resizeIm(self.img_im,self.org_width,self.org_height,self.t1c1i1_width,self.t1c1i1_height)
@@ -411,62 +389,8 @@ class Tab1():
             self.undoCrop()
         self.t1c1i1.unbind("<Motion>")
         self.t1c1i1.unbind("<ButtonRelease-1>")
-        disp_width,disp_height = self.resized_im.size
-        sr = (self.org_width/disp_width + self.org_height/disp_height)/2.0
-        self.draw_np = np.copy(self.org_np)
 
-        x1 = event.x - self.offset_x
-        y1 = event.y - self.offset_y
-        if x1 > self.resized_im.size[0]:
-            x1 = self.resized_im.size[0]
-        elif x1 < 0:
-            x1 = 0
-        if y1 > self.resized_im.size[1]:
-            y1 = self.resized_im.size[1]
-        elif y1 < 0:
-            y1 = 0
-        if self.new_crop:
-            self.x1 = x1
-            self.y1 = y1
-        else:
-            self.pan_x1 = x1
-            self.pan_y1 = y1
-            xdif = int((self.pan_x1 - self.pan_x0))
-            ydif = int((self.pan_y1 - self.pan_y0))
-            self.x0_hat = self.x0 + xdif
-            self.y0_hat = self.y0 + ydif
-            self.x1_hat = self.x1 + xdif
-            self.y1_hat = self.y1 + ydif
-
-            if self.x0_hat < self.x1_hat:
-                if self.x0_hat < 0:
-                    self.x0_hat = 0
-                    self.x1_hat = np.abs(self.x1-self.x0)
-                elif self.x1_hat > self.resized_im.size[0]:
-                    self.x0_hat = self.resized_im.size[0]-np.abs(self.x1-self.x0)
-                    self.x1_hat = self.resized_im.size[0]
-            else:
-                if self.x1_hat < 0:
-                    self.x1_hat = 0
-                    self.x0_hat = np.abs(self.x1-self.x0)
-                elif self.x0_hat > self.resized_im.size[0]:
-                    self.x1_hat = self.resized_im.size[0]-np.abs(self.x1-self.x0)
-                    self.x0_hat = self.resized_im.size[0]
-            if self.y0_hat < self.y1_hat:
-                if self.y0_hat < 0:
-                    self.y0_hat = 0
-                    self.y1_hat = np.abs(self.y1-self.y0)
-                elif self.y1_hat > self.resized_im.size[1]:
-                    self.y0_hat = self.resized_im.size[1]-np.abs(self.y1-self.y0)
-                    self.y1_hat = self.resized_im.size[1]
-            else:
-                if self.y1_hat < 0:
-                    self.y1_hat = 0
-                    self.y0_hat = np.abs(self.x1-self.x0)
-                elif self.y0_hat > self.resized_im.size[1]:
-                    self.y1_hat = self.resized_im.size[1]-np.abs(self.y1-self.y0)
-                    self.y0_hat = self.resized_im.size[1]
-
+        if not(self.new_crop):
             # save hat values as the new values
             self.x0 = self.x0_hat
             self.y0 = self.y0_hat
@@ -474,8 +398,8 @@ class Tab1():
             self.y1 = self.y1_hat
 
         if self.x0 != self.x1 or self.y0 != self.y1:
-            cv2.rectangle(self.draw_np,(int(sr*self.x0),int(sr*self.y0)),(int(sr*self.x1),int(sr*self.y1)),(255,0,0),2)
-            self.cropImage(int(sr*self.x0),int(sr*self.y0),int(sr*self.x1),int(sr*self.y1))
+            cv2.rectangle(self.draw_np,(int(self.sr*self.x0),int(self.sr*self.y0)),(int(self.sr*self.x1),int(self.sr*self.y1)),(255,0,0),2)
+            self.cropImage(int(self.sr*self.x0),int(self.sr*self.y0),int(self.sr*self.x1),int(self.sr*self.y1))
             self.img_im = tab_tools.np2im(self.draw_np)
             self.resized_im = tab_tools.resizeIm(self.img_im,self.org_width,self.org_height,self.t1c1i1_width,self.t1c1i1_height)
             self.img_tk = tab_tools.im2tk(self.resized_im)
@@ -483,8 +407,6 @@ class Tab1():
             # Crop Image
             self.cropped = True
             self.t1c2r1b.configure(text="unsubmitted",foreground="red")
-
-
 
     def cropImage(self,x0,y0,x1,y1):
         """
@@ -521,7 +443,6 @@ class Tab1():
         self.crop_preview_resized_im = tab_tools.resizeIm(self.crop_preview_im,self.crop_preview_width,self.crop_preview_height,self.t1c1i1_width*self.crop_preview_img_ratio,self.t1c1i1_height*self.crop_preview_img_ratio)
         self.crop_preview_tk = tab_tools.im2tk(self.crop_preview_resized_im)
         self.t1c2i1.configure(image=self.crop_preview_tk)
-
 
     def noNextRaw(self):
         """
