@@ -1,4 +1,5 @@
 from flask import Flask, json
+from geolocation.geolocation_service import GeolocationThread
 from werkzeug.serving import make_server
 from apis import api
 import argparse
@@ -16,6 +17,9 @@ class ServerThread(threading.Thread):
     """
 
     def __init__(self, app, hostname):
+        # 100% a stack overflow answer here. no idea what its doing, but it 
+        # successfully starts the server in a separate thread and we're able
+        # to control when/how it closes down
         super(ServerThread, self).__init__()
         self.srv = make_server(hostname, 5000, app)
         self.ctx = app.app_context()
@@ -27,14 +31,18 @@ class ServerThread(threading.Thread):
         self.srv.serve_forever()
 
     def shutdown(self):
-        self.srv.shutdown()
+        self.srv.shutdown() # deathhhhhhhhh
 
 
 def signal_handler(sig, frame):
     # shut the all our server processes down safely
+    # this code is run when a SIGINT aka ctrl+c is thrown
+    # probably a better way todo this than globals? 
     global server
+    global geolocation
     print('Shutting Down')
     server.shutdown()
+    geolocation.shutdown()
 
 def main():
     parser = argparse.ArgumentParser(description="Imaging Server Help")
@@ -53,12 +61,17 @@ def main():
     global server
     server = ServerThread(app, hostname)
 
+    global geolocation
+    geolocation = GeolocationThread()
+
     # now that our server thread is setup, we can configure sigint to properly close it
     signal.signal(signal.SIGINT, signal_handler)
 
     server.start()
     print("Server Started!")
-        
+    print("     Host:: {}:{}".format(hostname, 5000))
+    geolocation.start()
+    print("Geolocation Started!")
 
 if __name__ == '__main__':
     main()
