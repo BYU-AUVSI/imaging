@@ -93,6 +93,9 @@ class GuiClass(tk.Frame):
         # stop tab2 widget bindings if changed away from tab 2
         if active_tab != 2 and self.active_tab_prev == 2:
             self.tab2.stoprun()
+        # stop tab1 wiget bindings if changed away from tab 3
+        if active_tab != 3 and self.active_tab_prev == 3:
+            self.tab3.stoprun()
 
         if active_tab == 0:
             self.tab0.run()

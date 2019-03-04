@@ -416,7 +416,22 @@ class Tab3():
         self.master.bind("<Configure>",self.resizeEventTab3)
         self.master.unbind("<Control-z>")
         self.master.bind("<Return>",self.submitTarget)
+        # bind images to radiobuttons
+        self.t3c1i1.bind("<Button-1>",self.click_image1)
+        self.t3c2i1.bind("<Button-1>",self.click_image2)
+        self.t3c3i1.bind("<Button-1>",self.click_image3)
+        self.t3c4i1.bind("<Button-1>",self.click_image4)
+        self.t3c5i1.bind("<Button-1>",self.click_image5)
+
+
         self.updateManualSubmissionTab()
+
+    def stoprun(self):
+        self.t3c1i1.unbind("<Button-1>")
+        self.t3c2i1.unbind("<Button-1>")
+        self.t3c3i1.unbind("<Button-1>")
+        self.t3c4i1.unbind("<Button-1>")
+        self.t3c5i1.unbind("<Button-1>")
 
 
     def resizeEventTab3(self,event=None):
@@ -1418,3 +1433,23 @@ class Tab3():
             self.submissionDescription.set(None)
             self.selectDescription()
         self.updateManualSubmissionTab()
+
+    def click_image1(self,event=None):
+        self.submissionImage.set(1)
+        self.selectImage()
+
+    def click_image2(self,event=None):
+        self.submissionImage.set(2)
+        self.selectImage()
+
+    def click_image3(self,event=None):
+        self.submissionImage.set(3)
+        self.selectImage()
+
+    def click_image4(self,event=None):
+        self.submissionImage.set(4)
+        self.selectImage()
+
+    def click_image5(self,event=None):
+        self.submissionImage.set(5)
+        self.selectImage()
