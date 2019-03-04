@@ -29,7 +29,6 @@ class GeolocationThread(threading.Thread):
         # no we can run stuff
         # geo = Geolocation()
         while not self._should_shutdown:
-            print("chillin in gps loop")
             time.sleep(1)
 
     def shutdown(self):
