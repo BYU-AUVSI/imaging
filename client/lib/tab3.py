@@ -543,7 +543,7 @@ class Tab3():
                 query = self.interface.getCroppedImage(self.pendingList[self.t3_current_target-1][0].crop_id)
                 self.t3c1i1_im = query[0]
                 yaw_angle = tab_tools.getYawAngle(self.interface,query[1])
-                self.t3c1i1_im = self.t3c1i1_im.rotate(yaw_angle,expand=1)
+                self.t3c1i1_im = self.t3c1i1_im.rotate(-yaw_angle,expand=1)
                 self.t3c1i1_org_width,self.t3c1i1_org_height = self.t3c1i1_im.size
                 self.t3c1i1_tk = tab_tools.im2tk(self.t3c1i1_im)
                 self.t3c1i1.configure(image=self.t3c1i1_tk)
@@ -601,7 +601,7 @@ class Tab3():
                 query = self.interface.getCroppedImage(self.pendingList[self.t3_current_target-1][1].crop_id)
                 self.t3c2i1_im = query[0]
                 yaw_angle = tab_tools.getYawAngle(self.interface,query[1])
-                self.t3c2i1_im = self.t3c2i1_im.rotate(yaw_angle,expand=1)
+                self.t3c2i1_im = self.t3c2i1_im.rotate(-yaw_angle,expand=1)
                 self.t3c2i1_org_width,self.t3c2i1_org_height = self.t3c2i1_im.size
                 self.t3c2i1_tk = tab_tools.im2tk(self.t3c2i1_im)
                 self.t3c2i1.configure(image=self.t3c2i1_tk)
@@ -678,7 +678,7 @@ class Tab3():
                 query = self.interface.getCroppedImage(self.pendingList[self.t3_current_target-1][2].crop_id)
                 self.t3c3i1_im = query[0]
                 yaw_angle = tab_tools.getYawAngle(self.interface,query[1])
-                self.t3c3i1_im = self.t3c3i1_im.rotate(yaw_angle,expand=1)
+                self.t3c3i1_im = self.t3c3i1_im.rotate(-yaw_angle,expand=1)
                 self.t3c3i1_org_width,self.t3c3i1_org_height = self.t3c3i1_im.size
                 self.t3c3i1_tk = tab_tools.im2tk(self.t3c3i1_im)
                 self.t3c3i1.configure(image=self.t3c3i1_tk)
@@ -755,7 +755,7 @@ class Tab3():
                 query = self.interface.getCroppedImage(self.pendingList[self.t3_current_target-1][3].crop_id)
                 self.t3c4i1_im = query[0]
                 yaw_angle = tab_tools.getYawAngle(self.interface,query[1])
-                self.t3c4i1_im = self.t3c4i1_im.rotate(yaw_angle,expand=1)
+                self.t3c4i1_im = self.t3c4i1_im.rotate(-yaw_angle,expand=1)
                 self.t3c4i1_org_width,self.t3c4i1_org_height = self.t3c4i1_im.size
                 self.t3c4i1_tk = tab_tools.im2tk(self.t3c4i1_im)
                 self.t3c4i1.configure(image=self.t3c4i1_tk)
@@ -832,7 +832,7 @@ class Tab3():
                 query = self.interface.getCroppedImage(self.pendingList[self.t3_current_target-1][4].crop_id)
                 self.t3c5i1_im = query[0]
                 yaw_angle = tab_tools.getYawAngle(self.interface,query[1])
-                self.t3c5i1_im = self.t3c5i1_im.rotate(yaw_angle,expand=1)
+                self.t3c5i1_im = self.t3c5i1_im.rotate(-yaw_angle,expand=1)
                 self.t3c5i1_org_width,self.t3c5i1_org_height = self.t3c5i1_im.size
                 self.t3c5i1_tk = tab_tools.im2tk(self.t3c5i1_im)
                 self.t3c5i1.configure(image=self.t3c5i1_tk)
