@@ -7,68 +7,68 @@
 import numpy as np
 import math as math
 
-"""
-Calculates the meters between two GPS coordinates
-@type lat1: float
-@param lat1: The latitude of the first GPS coordinate
-
-@type lon1: float
-@param lon1: The longitude of the first GPS coordinate
-
-@type lat2: float
-@param lat2: The latitude of the second GPS coordinate
-
-@type lon2: float
-@param lon2: The longitude of the first GPS coordinate
-
-@rtype: array of floats(4)
-@return: Distance north (meters), distande east (meters), total distance (meters), angle (0 deg = East)
-"""
 def GPStoMeters(lat1, lon1, lat2, lon2):
-    d2r = 0.0174532925199433
-    dlong = (lon2 - lon1) * d2r
-    dlat = (lat2 - lat1) * d2r
-    a = (math.sin(dlat/2.0))**2 + math.cos(lat1*d2r) * math.cos(lat2*d2r) * (math.sin(dlong/2.0))**2
-    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
-    d = 6367 * c; #Distance between points in meters
-    d_meters = d * 1000
-    dy = lat2 - lat1
-    dx = math.cos(d2r * lat1) * (lon2 - lon1)
-    angle = math.atan2(dy, dx)
-    east_dis_meters = d_meters * math.cos(angle)
-    north_dis_meters = d_meters * math.sin(angle)
-    returnvalues = np.array([north_dis_meters, east_dis_meters, d_meters, angle])
-    return returnvalues
+   """
+   Calculates the meters between two GPS coordinates
+   @type lat1: float
+   @param lat1: The latitude of the first GPS coordinate
 
-"""
-Calculates GPS coordniates given a starting coordinate and meters north and east
-@type Lat: float
-@param Lat: The latitude of the GPS coordinate
+   @type lon1: float
+   @param lon1: The longitude of the first GPS coordinate
 
-@type Lon: float
-@param Lon: The longitude of the GPS coordinate
+   @type lat2: float
+   @param lat2: The latitude of the second GPS coordinate
 
-@type north_displacement: float
-@param north_displacement: The distance north of the given coordinates (meters)
+   @type lon2: float
+   @param lon2: The longitude of the first GPS coordinate
 
-@type east_displacement: float
-@param east_displacement: The distance east of the given coordinates (meters)
+   @rtype: array of floats(4)
+   @return: Distance north (meters), distance east (meters), total distance (meters), angle (0 deg = East)
+   """
+   d2r = 0.0174532925199433
+   dlong = (lon2 - lon1) * d2r
+   dlat = (lat2 - lat1) * d2r
+   a = (math.sin(dlat/2.0))**2 + math.cos(lat1*d2r) * math.cos(lat2*d2r) * (math.sin(dlong/2.0))**2
+   c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
+   d = 6367 * c; #Distance between points in meters
+   d_meters = d * 1000
+   dy = lat2 - lat1
+   dx = math.cos(d2r * lat1) * (lon2 - lon1)
+   angle = math.atan2(dy, dx)
+   east_dis_meters = d_meters * math.cos(angle)
+   north_dis_meters = d_meters * math.sin(angle)
+   returnvalues = np.array([north_dis_meters, east_dis_meters, d_meters, angle])
+   return returnvalues
 
-@rtype: array of floats(2)
-@return: latitude of new target, longitude of new target
-"""
+
 def MeterstoGPS(Lat, Lon, north_displacement, east_displacement):
-    # Earth’s radius, sphere
-    R = 6378137
-    # Coordinate offsets in radians
-    dLat = north_displacement/R
-    dLon = east_displacement/(R*math.cos(math.pi*Lat/180))
-    # OffsetPosition, decimal degrees
-    latO = Lat + dLat * 180/math.pi
-    lonO = Lon + dLon * 180/math.pi
-    returnvals = [latO, lonO];
-    return returnvals
+   """
+   Calculates GPS coordniates given a starting coordinate and meters north and east
+   @type Lat: float
+   @param Lat: The latitude of the GPS coordinate
 
+   @type Lon: float
+   @param Lon: The longitude of the GPS coordinate
+
+   @type north_displacement: float
+   @param north_displacement: The distance north of the given coordinates (meters)
+
+   @type east_displacement: float
+   @param east_displacement: The distance east of the given coordinates (meters)
+
+   @rtype: array of floats(2)
+   @return: latitude of new target, longitude of new target
+   """
+   # Earth’s radius, sphere
+   R = 6378137
+   # Coordinate offsets in radians
+   dLat = north_displacement/R
+   dLon = east_displacement/(R*math.cos(math.pi*Lat/180))
+   # OffsetPosition, decimal degrees
+   latO = Lat + dLat * 180/math.pi
+   lonO = Lon + dLon * 180/math.pi
+   returnvals = [latO, lonO]
+   return returnvals
 
 
 '''
