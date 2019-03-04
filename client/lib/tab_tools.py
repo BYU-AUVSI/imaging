@@ -70,14 +70,16 @@ def resizeIm(image,image_width,image_height,width_restrict,height_restrict):
     return(resized_im)
 
 def getYawAngle(interface,imageID):
+    """
+    Get yaw angle from image state with the imageID
+    """
     info = interface.getCroppedImageInfo(imageID)
-    image_state = None
-    if info is not None:
-        image_state = interface.getStateByTs(info.time_stamp)
-    if image_state == None:
+    image_state = interface.getStateByTs(info.time_stamp)
+    if image_state is not None:
+        yaw = image_state.yaw
+    else:
         #yaw_angle = 0.0
         # todo: eventually remove this
         yaw = np.random.uniform(0,360)
-    else:
-        yaw = image_state.yaw
+
     return(yaw)
