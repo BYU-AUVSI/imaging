@@ -9,7 +9,7 @@ class ClassificationDAO(BaseDAO):
 
     def __init__(self, configFilePath, outgoingTableName):
         super(ClassificationDAO, self).__init__(configFilePath)
-        self.outgoingTableName = outgoingTableName 
+        self.outgoingTableName = outgoingTableName
 
     def upsertClassification(self, classification):
         """
@@ -19,7 +19,7 @@ class ClassificationDAO(BaseDAO):
 
         @type classification: outgoing_manual
         @type classification: outgoing_autonomous
-        @param classification: The outgoing_autonomous or manual classification to upsert. 
+        @param classification: The outgoing_autonomous or manual classification to upsert.
                                 Note that these objects do not require all classification properties to
                                 be successfully upserted. At a minimum it must have image_id.
                                 ie: upsert could work if you provided a classification object with only
@@ -31,7 +31,7 @@ class ClassificationDAO(BaseDAO):
         insertCls = "INSERT INTO " + self.outgoingTableName
         updateCls = "UPDATE SET "
 
-        # this will dynamically build the upsert string based on 
+        # this will dynamically build the upsert string based on
         # only the values that were provided us in classification
         insertValues = []
         insertClmnNames = '('
@@ -45,7 +45,7 @@ class ClassificationDAO(BaseDAO):
         # if there were no values to insert...
         if not insertValues:
             return -1
-        else: 
+        else:
             insertClmnNames = insertClmnNames[:-2] + ')' # remove last comma/space
             insertClmnValues = insertClmnValues[:-2] + ') ON CONFLICT (crop_id) DO '
             updateCls = updateCls[:-2] + 'RETURNING class_id;'
@@ -80,7 +80,7 @@ class ClassificationDAO(BaseDAO):
         # if there were no values to insert...
         if not insertValues:
             return -1
-        else: 
+        else:
             insertClmnNames = insertClmnNames[:-2] + ')' # remove last comma/space
             insertClmnValues = insertClmnValues[:-2] + ') RETURNING class_id;'
 
@@ -99,10 +99,10 @@ class ClassificationDAO(BaseDAO):
         @param id: The id of the image to try and retrieve
         """
         # its best just to use * on these given the table differences between manual/autonomous
-        # for autonomous, getClassification and getClassificationByUID are identical since its 
+        # for autonomous, getClassification and getClassificationByUID are identical since its
         # UID column is just 'id'
         selectClsById = """SELECT *
-            FROM """ + self.outgoingTableName + """ 
+            FROM """ + self.outgoingTableName + """
             WHERE crop_id = %s
             LIMIT 1;"""
 
@@ -126,10 +126,10 @@ class ClassificationDAO(BaseDAO):
         """
 
         selectClsById = """SELECT *
-            FROM """ + self.outgoingTableName + """ 
+            FROM """ + self.outgoingTableName + """
             WHERE class_id = %s
             LIMIT 1;"""
-        
+
         selectedClass = super(ClassificationDAO, self).basicTopSelect(selectClsById, (id,))
         if selectedClass is None:
             return None
@@ -163,12 +163,12 @@ class ClassificationDAO(BaseDAO):
         """
 
         selectAllSql = """SELECT *
-            FROM """ + self.outgoingTableName + """ 
+            FROM """ + self.outgoingTableName + """
             ORDER BY class_id;"""
 
         cur = self.conn.cursor()
         cur.execute(selectAllSql)
-        
+
         results = []
         if cur is not None:
             for row in cur:
@@ -201,7 +201,7 @@ class ClassificationDAO(BaseDAO):
         # if someone tried to pass an empty update
         if not values:
             return None
-        
+
         updateStr = updateStr[:-2] # remove last space/comma
         updateStr += " WHERE class_id = %s RETURNING class_id;"
         values.append(id)
@@ -239,7 +239,7 @@ class ClassificationDAO(BaseDAO):
         # if someone tried to pass an empty update
         if not values:
             return None
-        
+
         updateStr = updateStr[:-2] # remove last space/comma
         updateStr += " WHERE crop_id = %s RETURNING class_id;"
         values.append(crop_id)
@@ -256,11 +256,11 @@ class ClassificationDAO(BaseDAO):
         """
         getClassifications = """SELECT *
             FROM """ + self.outgoingTableName + """
-            WHERE (latitude IS NULL OR latitude = 0.0) 
+            WHERE (latitude IS NULL OR latitude = 0.0)
                 AND (longitude IS NULL OR longitude = 0.0);"""
 
         return super(ClassificationDAO, self).getResultsAsModelList(getClassifications, None)
-        
+
     def getAllTargets(self, whereClause=None):
         """
         Get all the unique classifications in the classification queue
@@ -313,9 +313,9 @@ class ClassificationDAO(BaseDAO):
         @param whereClause: Specify a WHERE to select the targets on. Essentially apply a filter
             for what target ids are returned. ie: pass "submitted = 'unsubmitted'" for this method
             to return a list of target ids that have not been submitted yet.
-        
+
         @rtype: list of int
-        @return: A list of all target ids if no whereClause is provided and the query is 
+        @return: A list of all target ids if no whereClause is provided and the query is
             successful. Or a list of filtered ids if a whereClause is provided. If something fails,
             None
         """
@@ -359,7 +359,7 @@ class ClassificationDAO(BaseDAO):
             WHERE target = %s AND submitted = 'submitted' LIMIT 1;"""
 
         submittedTarget = super(ClassificationDAO, self).basicTopSelect(getSubmitted, (target,))
-        
+
         if submittedTarget is None or not submittedTarget:
             return False
         elif submittedTarget[0] == target:
@@ -383,14 +383,14 @@ class ClassificationDAO(BaseDAO):
         if unsubmittedTargetIds is None or not unsubmittedTargetIds:
             print('Either something went wrong, or there are no unsubmitted target ids.')
             return None
-        
+
         allSubmitted = []
 
         for targetId in  unsubmittedTargetIds:
             resultModel = self.submitPendingTarget(targetId)
             if resultModel is not None:
                 allSubmitted.append(resultModel)
-        
+
         if not allSubmitted:
             print('Failed to submit all the targets in this list: {}'.format(unsubmittedTargetIds))
             return None
@@ -400,7 +400,7 @@ class ClassificationDAO(BaseDAO):
     def submitPendingTarget(self, target, optionalSpecs=None):
         """
         Changes the status to the given target id to 'submitted'. All classifications
-        that are apart of the target bin will change status to 'submitted'. Any 
+        that are apart of the target bin will change status to 'submitted'. Any
         classifications added to this target after the fact will then receive an
         'inherited_submission' status
 
@@ -415,9 +415,9 @@ class ClassificationDAO(BaseDAO):
 
         # grab a classification for this target and set it as the one we're submitting
         claimClassificationToSubmit = 'UPDATE ' + self.outgoingTableName + """
-            SET submitted = 'submitted' 
+            SET submitted = 'submitted'
             WHERE class_id = (
-                SELECT class_id FROM """ + self.outgoingTableName + """ 
+                SELECT class_id FROM """ + self.outgoingTableName + """
                 WHERE target = %s AND submitted = 'unsubmitted' LIMIT 1)
             RETURNING class_id;"""
 
@@ -429,7 +429,7 @@ class ClassificationDAO(BaseDAO):
         claimedClassification = super(ClassificationDAO, self).getResultingId(claimClassificationToSubmit, (target,))
 
         if claimedClassification == -1:
-            # claiming a single classification failed. Likely indicating either 
+            # claiming a single classification failed. Likely indicating either
             # an sql error, or that the specified target doesn't exist
             return None
 
@@ -462,7 +462,7 @@ class ClassificationDAO(BaseDAO):
         if result is None:
             print('Failed to retrieve submitted classification for target {}'.format(target))
             return None
-        
+
         finalModel = self.newModelFromRow(result)
 
         cur = self.conn.cursor()
@@ -489,7 +489,7 @@ class ClassificationDAO(BaseDAO):
                 cropVal = self.getValueWithId(allClass, optionalSpecs['crop_id'], 1)
                 if cropVal is not None:
                     # NOTE: the use of crop_id. Since this section will only ever be run by
-                    # manual, it's safe todo this. If you for some reason use this block with 
+                    # manual, it's safe todo this. If you for some reason use this block with
                     # autonomous in the future, this would be unsafe (though i cant see a reason why)
                     finalModel.crop_id = cropVal
 
@@ -497,7 +497,7 @@ class ClassificationDAO(BaseDAO):
                 descVal = self.getValueWithId(allClass, optionalSpecs['description'], 7)
                 if descVal is not None:
                     finalModel.description = descVal
-                       
+
             keys = ['orientation', 'background_color', 'alphanumeric_color']
             for i in range(len(keys)):
                 sqlClmn = i + 4 # add offset so we know the clmn index for the all class list above
@@ -528,12 +528,12 @@ class ClassificationDAO(BaseDAO):
         """
 
         resetTargetSql = "UPDATE " + self.outgoingTableName + """
-            SET submitted = 'unsubmitted' 
+            SET submitted = 'unsubmitted'
             WHERE target = %s;"""
 
         cur = self.conn.cursor()
         cur.execute(resetTargetSql, (target,))
-        cur.close()      
+        cur.close()
 
     def calcClmnAvg(self, classifications, clmnNum):
         """
@@ -552,7 +552,7 @@ class ClassificationDAO(BaseDAO):
         for row in classifications:
             if row[clmnNum] is not None:
                 ttl += row[clmnNum]
-        
+
         if ttl == 0.0:
             return None
         return ttl / float(len(classifications))
@@ -594,7 +594,7 @@ class ClassificationDAO(BaseDAO):
         except (Exception) as error:
             print(error)
             return None
-    
+
         for classification in classifications:
             if classification[0] == classificationId:
                 if classification[clmnToRetrieve] is not None:
@@ -602,10 +602,10 @@ class ClassificationDAO(BaseDAO):
                 else:
                     return None
         return None
-            
+
     def assignTargetBin(self, id):
         """
-        Internal method used for determinging what target bin a particular 
+        Internal method used for determinging what target bin a particular
         classification/row (specified by the UID param) should belong to.
 
         A classification's alphanumeric, shape and type determine what target
@@ -617,7 +617,7 @@ class ClassificationDAO(BaseDAO):
         @return: None
         """
         #NOTE: This select needs to work for either 'outgoing_' table
-        getClassificationInfo = """SELECT class_id, alphanumeric, shape, type 
+        getClassificationInfo = """SELECT class_id, alphanumeric, shape, type
             FROM """ + self.outgoingTableName + """
             WHERE class_id = %s LIMIT 1;"""
 
@@ -628,17 +628,17 @@ class ClassificationDAO(BaseDAO):
             print("Failed to retrieve info for uid {}".format(id))
             return
 
-        # use the retrieved info to see if there are other targets 
+        # use the retrieved info to see if there are other targets
         # that match and what target bin they are
 
         # basically we'll assign to the first matching target (limit 1), since
-        # this whole setup assumes that other matching targets would have the 
+        # this whole setup assumes that other matching targets would have the
         # same target id
-        getPotentialTargetIds = """SELECT target, submitted 
-            FROM """ + self.outgoingTableName + """ 
-            WHERE (alphanumeric = %s OR (alphanumeric IS NULL AND %s IS NULL)) 
-                AND (shape = %s OR (shape IS NULL AND %s IS NULL)) 
-                AND (type  = %s OR (type  IS NULL AND %s IS NULL)) 
+        getPotentialTargetIds = """SELECT target, submitted
+            FROM """ + self.outgoingTableName + """
+            WHERE (alphanumeric = %s OR (alphanumeric IS NULL AND %s IS NULL))
+                AND (shape = %s OR (shape IS NULL AND %s IS NULL))
+                AND (type  = %s OR (type  IS NULL AND %s IS NULL))
                 AND class_id != %s LIMIT 1;"""
         # all this complicated WHERE clause stuff is for if one of these columns is NULL
 
@@ -676,7 +676,7 @@ class ClassificationDAO(BaseDAO):
             getLargestTargetId = "SELECT MAX(target) FROM " + self.outgoingTableName
 
             largestTargetId = super(ClassificationDAO, self).basicTopSelect(getLargestTargetId, None)
-            
+
             if largestTargetId is None or largestTargetId[0] is None:
                 # then there are currently no targets in the table.
                 # this likely indicates that the current uid is the very fist to be added
@@ -686,7 +686,7 @@ class ClassificationDAO(BaseDAO):
                 # if there are target ids, we know from the previous query's failure that the current uid
                 # represents a new target. reflect this by adding one to the current largest id
                 targetId = largestTargetId[0] + 1
-        
+
         updateTargetId = "UPDATE " + self.outgoingTableName + " SET target = %s, submitted = %s WHERE class_id = %s RETURNING class_id;"
 
         ret = super(ClassificationDAO, self).getResultingId(updateTargetId, (targetId, submissionState, id))
