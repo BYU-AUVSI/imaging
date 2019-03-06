@@ -199,6 +199,6 @@ class targetGeolocation:
         # print(str(self.lat_mav) + " " + str(self.lon_mav))
 
         TargetCoordinates = self._MeterstoGPS(P_i_tar[0], P_i_tar[1])
-        print("Target coordinates")
+        # print("Target coordinates")
         print(str(float(TargetCoordinates[0])) + " " + str(float(TargetCoordinates[1])))
         return float(TargetCoordinates[0]), float(TargetCoordinates[1])
