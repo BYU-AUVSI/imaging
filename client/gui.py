@@ -15,6 +15,19 @@ Tab4:
 KNOWN BUGS:
     When you click on the 2nd tab right at the beginning, and then use the left/right
         buttons, it moves one tab, then unbinds like it's supposed to.
+
+SERVER SETUP NOTES
+sudo su postgres
+cd auvsi/src/imaging/server/setup/internal
+psql -f setup_database.sql
+
+roscore
+cd auvsi
+source devel/setup.bash
+cd ausvsi/src/imaging/server/src
+
+ros_ingester.py
+
 '''
 
 import sys
