@@ -8,8 +8,6 @@ import time
 
 """
 # TODO:
-    click on image to change image radio button
-    add a display of how many classifications there are per target
     Show in blue which target it's pulling the "to submit" classificaiton from
     Change radiobuttons to match ttktheme
     Fix resizing issues
@@ -58,14 +56,11 @@ class Tab3():
         self.t3_default_tk = tab_tools.im2tk(self.t3_default_im)
 
         # Title
-        self.t3titleA = ttk.Label(self.tab3, anchor=tk.CENTER, text='Target #')
-        self.t3titleA.grid(row=0,column=4,columnspan=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t3titleB = ttk.Label(self.tab3, anchor=tk.CENTER, text=self.t3_current_target)
-        self.t3titleB.grid(row=0,column=5,columnspan=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t3titleC = ttk.Label(self.tab3, anchor=tk.CENTER, text='Out of')
-        self.t3titleC.grid(row=0,column=6,columnspan=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t3titleD = ttk.Label(self.tab3, anchor=tk.CENTER, text=self.t3_total_targets)
-        self.t3titleD.grid(row=0,column=7,columnspan=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t3titleA = ttk.Label(self.tab3, anchor=tk.CENTER, text='Target # %i out of %i'%(self.t3_current_target,self.t3_total_targets))
+        self.t3titleA.grid(row=0,column=2,columnspan=3,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+
+        self.t3titleB = ttk.Label(self.tab3, anchor=tk.CENTER, text='Showing %i images out of %i that exsist'%(0,0))
+        self.t3titleB.grid(row=0,column=5,columnspan=3,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
 
         # Column One
         self.t3c1title = ttk.Label(self.tab3, anchor=tk.CENTER, text='Pic 1')
@@ -495,8 +490,8 @@ class Tab3():
 
             if self.pendingList == None:
                 pics = 0
-                self.t3titleB.configure(text=0)
-                self.t3titleD.configure(text=0)
+                self.t3titleA.configure(text='Target # %i out of %i'%(0,0))
+                self.t3titleB.configure(text='Showing %i images out of %i that exsist'%(0,0))
                 self.t3c1i1_im = self.t3_default_im.copy()
                 self.t3c1i1_tk = tab_tools.im2tk(self.t3c1i1_im)
                 self.t3c1i1_org_width,self.t3c1i1_org_height = self.t3c1i1_im.size
@@ -548,12 +543,14 @@ class Tab3():
                     self.t3_current_target = 1
                 elif self.t3_current_target > self.t3_total_targets:
                     self.t3_current_target = self.t3_total_targets
-                self.t3titleD.configure(text=self.t3_total_targets)
-                self.t3titleB.configure(text=self.t3_current_target)
+                self.t3titleA.configure(text='Target # %i out of %i'%(self.t3_current_target,self.t3_total_targets))
                 pics = len(self.pendingList[self.t3_current_target-1])
                 self.target_id = self.pendingList[self.t3_current_target-1][0].target
+                pics_total = pics
                 if pics > 5:
                     pics = 5
+                pics_shown = pics
+                self.t3titleB.configure(text='Showing %i images out of %i that exsist'%(pics_shown,pics_total))
                 # Because of the preceeding if/else statement there will always be at least 1 pic
                 query = self.interface.getCroppedImage(self.pendingList[self.t3_current_target-1][0].crop_id)
                 self.t3c1i1_im = query[0]
