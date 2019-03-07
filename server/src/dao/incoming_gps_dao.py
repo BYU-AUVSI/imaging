@@ -85,7 +85,21 @@ class IncomingGpsDAO(BaseDAO):
             FROM incoming_gps;"""
 
         return super(IncomingGpsDAO, self).getResultsAsModelList(selectAllSql, None)
-        
+
+    def getFirst(self):
+        """
+        Get the first (aka oldest) GPS measurement in the table
+        """
+        selectOldest = """SELECT id, date_part('epoch', time_stamp), latitude, longitude, altitude
+            FROM incoming_gps
+            ORDER BY id ASC LIMIT 1;"""
+
+        selectedGps = super(IncomingGpsDAO, self).basicTopSelect(selectOldest, None)
+
+        if selectedGps is not None:
+            return incoming_gps(selectedGps)
+        return None
+
     def newModelFromRow(self, row, json=None):
         """
         Create a new incoming_gps model from the given info

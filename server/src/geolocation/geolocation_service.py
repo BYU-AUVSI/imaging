@@ -1,6 +1,9 @@
 import time # for sleeping between geolocation pulls
 import threading
+from geolocation import targetGeolocation
 from dao.incoming_gps_dao import IncomingGpsDAO
+from dao.model.incoming_gps import incoming_gps
+from dao.classification_dao import ClassificationDAO
 from config import defaultConfigPath
 
 class GeolocationThread(threading.Thread):
@@ -26,9 +29,24 @@ class GeolocationThread(threading.Thread):
 
         print("Have gps! Using the first coordinate as our ground station. Starting geolocation...")
         
-        # no we can run stuff
-        # geo = Geolocation()
+        # get the coordinates from the first recorded gps measurement
+        # this will be the coordinates we use for the groundstation
+        # in geolocation
+        dao = IncomingGpsDAO(defaultConfigPath())
+        groundstationGps = dao.getFirst()
+        dao.close()
+
+        # now we can run stuff
+        geo = targetGeolocation(groundstationGps.lat, groundstationGps.lon)
         while not self._should_shutdown:
+            dao = ClassificationDAO(defaultConfigPath())
+            classifications = dao.getUnlocatedClassifications()
+            dao.close()
+
+            if classifications is not None:
+                for classification in classifications:
+                    # now get all the info about gps, state and crop
+                    dao = IncomingGpsDAO(defaultConfigPath())
             time.sleep(1)
 
     def shutdown(self):
