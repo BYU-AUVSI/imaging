@@ -73,3 +73,21 @@ class IncomingGpsDAO(BaseDAO):
         if selectedGps is not None:
             return incoming_gps(selectedGps)
         return None
+
+    def getAll(self):
+        """
+        Get all GPS entries currently in the table
+
+        @rtype: [incoming_gps model object]
+        @return: A list of all incoming_gps entries in the table, otherwise None
+        """
+        selectAllSql = """SELECT id, date_part('epoch', time_stamp), latitude, longitude, altitude
+            FROM incoming_gps;"""
+
+        return super(IncomingGpsDAO, self).getResultsAsModelList(selectAllSql, None)
+        
+    def newModelFromRow(self, row, json=None):
+        """
+        Create a new incoming_gps model from the given info
+        """
+        return incoming_gps(row)

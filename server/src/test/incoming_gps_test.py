@@ -98,3 +98,53 @@ class TestGpsGetByTs(unittest.TestCase):
         resultModel = dao.getGpsByClosestTS(baseTs + 20000)
         self.assertIsNotNone(resultModel)
         self.assertEqual(resultModel.id, resultingId2)
+
+class TestGpsGetAll(unittest.TestCase):
+    def test(self):
+        truncateTable("incoming_gps")
+        dao = IncomingGpsDAO(defaultConfigPath())
+
+        # empty table
+        self.assertIsNone(dao.getAll())
+
+        # insert a couple rows
+        model = incoming_gps()
+        baseTs = 1547453775.2
+        model.time_stamp = baseTs
+        model.lat = 40.111
+        model.lon = -111.222
+        model.alt = 1234.5
+        resultingId1 = dao.addGps(model)
+        self.assertNotEqual(resultingId1, -1)
+
+        model.time_stamp = baseTs + 20000
+        model.lat = 40.222
+        model.lon = -111.333
+        model.alt = 5678.9
+        resultingId2 = dao.addGps(model)
+        self.assertNotEqual(resultingId2, -1)
+
+        results = dao.getAll()
+        self.assertIsNotNone(results) 
+        self.assertEqual(len(results), 2)
+
+        if results[0].id == resultingId1:
+            self.assertAlmostEqual(results[0].lat, 40.111)
+            self.assertAlmostEqual(results[0].lon, -111.222)
+            self.assertAlmostEqual(results[0].alt, 1234.5)
+
+            self.assertAlmostEqual(results[1].lat, 40.222)
+            self.assertAlmostEqual(results[1].lon, -111.333)
+            self.assertAlmostEqual(results[1].alt, 5678.9)
+        
+        elif results[0].id == resultingId2:
+            self.assertAlmostEqual(results[1].lat, 40.111)
+            self.assertAlmostEqual(results[1].lon, -111.222)
+            self.assertAlmostEqual(results[1].alt, 1234.5)
+
+            self.assertAlmostEqual(results[0].lat, 40.222)
+            self.assertAlmostEqual(results[0].lon, -111.333)
+            self.assertAlmostEqual(results[0].alt, 5678.9)
+        
+        else:
+            self.fail("dont recognize one of the ids returned by gps.getAll")

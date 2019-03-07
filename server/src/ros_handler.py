@@ -87,6 +87,7 @@ class RosImagingHandler:
         they can be inserted into the database
         """
         if msg.fix_type == GPS.GPS_STATUS_FIX_TYPE_NO_FIX or msg.num_sat == 0:
+            # dont insert if we dont have a gps fix yet
             return
 	    
         self.gps_msg_.time_stamp = msg.header.stamp.to_sec()

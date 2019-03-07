@@ -7,9 +7,6 @@
 import numpy as np
 import math as math
 
-
-
-
 class targetGeolocation:
     """docstring for targetGeolocation."""
     def __init__(self, gnd_lat, gnd_lon):
