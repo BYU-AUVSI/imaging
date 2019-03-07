@@ -1,9 +1,9 @@
 import time # for sleeping between geolocation pulls
 import threading
-from geolocation import targetGeolocation
+from geolocation.geolocation import targetGeolocation
 from dao.incoming_gps_dao import IncomingGpsDAO
 from dao.model.incoming_gps import incoming_gps
-from dao.classification_dao import ClassificationDAO
+from dao.outgoing_autonomous_dao import OutgoingAutonomousDAO
 from config import defaultConfigPath
 
 class GeolocationThread(threading.Thread):
@@ -39,7 +39,7 @@ class GeolocationThread(threading.Thread):
         # now we can run stuff
         geo = targetGeolocation(groundstationGps.lat, groundstationGps.lon)
         while not self._should_shutdown:
-            dao = ClassificationDAO(defaultConfigPath())
+            dao = OutgoingAutonomousDAO(defaultConfigPath())
             classifications = dao.getUnlocatedClassifications()
             dao.close()
 
