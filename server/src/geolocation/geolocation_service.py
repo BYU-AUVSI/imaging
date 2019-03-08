@@ -3,7 +3,10 @@ import threading
 from geolocation.geolocation import targetGeolocation
 from dao.incoming_gps_dao import IncomingGpsDAO
 from dao.model.incoming_gps import incoming_gps
+from dao.incoming_image_dao import IncomingImageDAO
+from dao.cropped_manual_dao import CroppedManualDAO
 from dao.outgoing_autonomous_dao import OutgoingAutonomousDAO
+from dao.outgoing_manual_dao import OutgoingManualDAO
 from config import defaultConfigPath
 
 class GeolocationThread(threading.Thread):
@@ -39,14 +42,33 @@ class GeolocationThread(threading.Thread):
         # now we can run stuff
         geo = targetGeolocation(groundstationGps.lat, groundstationGps.lon)
         while not self._should_shutdown:
-            dao = OutgoingAutonomousDAO(defaultConfigPath())
+
+            # lets deal with manual classifications in the queue
+            dao = OutgoingManualDAO(defaultConfigPath())
             classifications = dao.getUnlocatedClassifications()
             dao.close()
 
             if classifications is not None:
                 for classification in classifications:
                     # now get all the info about gps, state and crop
+                    dao = CroppedManualDAO(defaultConfigPath())
+                    croppedImg = dao.getImage(classification.crop_id)
+                    dao.close()
+                    if croppedImg is None:
+                        print("Failed to find manual cropped image {} for manual classification {}!".format(classification.crop_id, classification.class_id))
+                        continue
+
+                    dao = IncomingImageDAO(defaultConfigPath())
+                    rawImg = dao.getImage(croppedImg.image_id)
+                    dao.close()
+                    if rawImg is None:
+                        print("Failed to find raw image {} for manual cropped image {}!".format(croppedImg.image_id, croppedImg.crop_id))
+                        continue
+
                     dao = IncomingGpsDAO(defaultConfigPath())
+                    gpsRaw = dao.getGpsByClosestTS(rawImg.time_stamp)
+                    dao.close()
+
             time.sleep(1)
 
     def shutdown(self):
