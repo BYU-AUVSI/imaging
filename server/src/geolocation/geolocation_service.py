@@ -2,6 +2,7 @@ import time # for sleeping between geolocation pulls
 import threading
 from geolocation.geolocation import targetGeolocation
 from dao.incoming_gps_dao import IncomingGpsDAO
+from dao.incoming_state_dao import IncomingStateDAO
 from dao.model.incoming_gps import incoming_gps
 from dao.incoming_image_dao import IncomingImageDAO
 from dao.cropped_manual_dao import CroppedManualDAO
@@ -51,6 +52,9 @@ class GeolocationThread(threading.Thread):
             if classifications is not None:
                 for classification in classifications:
                     # now get all the info about gps, state and crop
+                    # as we do this we need to check that we actually get
+                    # data back from our queries. if we dont, then just
+                    # skip this classification
                     dao = CroppedManualDAO(defaultConfigPath())
                     croppedImg = dao.getImage(classification.crop_id)
                     dao.close()
@@ -67,6 +71,26 @@ class GeolocationThread(threading.Thread):
 
                     dao = IncomingGpsDAO(defaultConfigPath())
                     gpsRaw = dao.getGpsByClosestTS(rawImg.time_stamp)
+                    dao.close()
+
+                    if gpsRaw is None:
+                        print("Failed to find gps measurement close to raw timestamp {}!".format(rawImg.time_stamp))
+                        continue
+
+                    dao = IncomingStateDAO(defaultConfigPath())
+                    stateRaw = dao.getStateByClosestTS(rawImg.time_stamp)
+                    dao.close()
+
+                    if stateRaw is None:
+                        print("Failed to find state measurement close to raw timestamp {}!".format(rawImg.time_stamp))
+                        continue
+
+                    lat, lon = groundstationGps.calculate_geolocation(gpsRaw.lat, gpsRaw.lon, gpsRaw.alt, stateRaw.roll, stateRaw.pitch, stateRaw.yaw, croppedImg.crop_coordinate_tl.x, croppedImg.crop_coordinate_tl.y, croppedImg.crop_coordinate_br.x, croppedImg.crop_coordinate_br.y)
+
+                    updateDict = {'latitude': lat, 'longitude': lon}
+
+                    dao = OutgoingManualDAO(defaultConfigPath())
+                    dao.updateClassification(classification.updateJson, updateDict)
                     dao.close()
 
             time.sleep(1)
