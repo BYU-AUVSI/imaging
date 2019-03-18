@@ -33,26 +33,32 @@ class ServerThread(threading.Thread):
     def shutdown(self):
         self.srv.shutdown() # deathhhhhhhhh
 
-
 def signal_handler(sig, frame):
     # shut the all our server processes down safely
     # this code is run when a SIGINT aka ctrl+c is thrown
     # probably a better way todo this than globals? 
+    print('Shutting Down...')
     global server
-    global geolocation
-    print('Shutting Down')
     server.shutdown()
-    geolocation.shutdown()
+    try:
+        global geolocation
+        geolocation.shutdown()
+    except NameError:
+        return # geolocation is not defined, and probably not running
 
 def main():
     parser = argparse.ArgumentParser(description="Imaging Server Help")
     parser.add_argument('-H', '--host', metavar='hostname', help='The hostname to publish the server on. For Docker, this should be 0.0.0.0')
+    parser.add_argument('-g', action='store_true', help="By default geolocation will run in its own thread when the server starts. If you dont want that, you can turn it off with this parameter.")
 
     args = parser.parse_args()
 
     hostname = "0.0.0.0"
     if args.host is not None:
         hostname = args.host
+
+    if args.g is not None and args.g:
+        print("Starting with NO geolocation")
     
     app = Flask(__name__)
     api.init_app(app)
@@ -61,8 +67,9 @@ def main():
     global server
     server = ServerThread(app, hostname)
 
-    global geolocation
-    geolocation = GeolocationThread()
+    if not args.g:
+        global geolocation
+        geolocation = GeolocationThread()
 
     # now that our server thread is setup, we can configure sigint to properly close it
     signal.signal(signal.SIGINT, signal_handler)
@@ -70,8 +77,10 @@ def main():
     server.start()
     print("Server Started!")
     print("     Host:: {}:{}".format(hostname, 5000))
-    geolocation.start()
-    print("Geolocation Started!")
+
+    if not args.g:
+        geolocation.start()
+        print("Geolocation Started!")
 
 if __name__ == '__main__':
     main()
