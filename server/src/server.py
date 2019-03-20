@@ -49,7 +49,7 @@ def signal_handler(sig, frame):
 def main():
     parser = argparse.ArgumentParser(description="Imaging Server Help")
     parser.add_argument('-H', '--host', metavar='hostname', help='The hostname to publish the server on. For Docker, this should be 0.0.0.0')
-    parser.add_argument('-g', action='store_true', help="By default geolocation will run in its own thread when the server starts. If you dont want that, you can turn it off with this parameter.")
+    parser.add_argument('-g', action='store_true', help="By default geolocation will run in its own thread when the server starts. If you dont want that, you can turn it off with this flag.")
 
     args = parser.parse_args()
 

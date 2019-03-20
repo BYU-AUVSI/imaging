@@ -10,15 +10,27 @@ The server has 3 main jobs:
 
 ## Structure
 
-`conf/` Holds all configurable parameters for the server. Make sure to set these up properly (the default values should work if running on your local machine)
+`conf/` Holds all configurable parameters for the server. Make sure to set these up properly (the default values should work in most all cases)
 
 `docs/` Documentation stuff to help describe what the heck is happening
 
-`setup/` Contains scripts and helper files to setup the server on a fresh machine.
+`setup/` Contains scripts and helper files for setting up the server on a fresh machine.
 
 `src/` All source code for the server
 
 Any folder called `internal` is stuff you dont need to worry about, unless you're really digging into things.
+
+## Installation
+
+There are two main installation methods: production and development.
+
+### Development
+
+If you're looking to develop and actively test/use the server code on your own machine, run the `./setup/dev_setup.sh` script. It's **highly recommended** (especially if you're using ubuntu 16.04, which has python2 by default), to use a [conda environment](https://conda.io/docs/user-guide/install/index.html).
+
+### Production
+
+TODO: talk about docker img
 
 ## Running It
 
@@ -26,7 +38,7 @@ Once installed (see [installation](#installation) guide below), running the rest
 
 `python src/server.py`
 
-If you also want to run the ros handler code, place this repository in your workspace/src folder. once it's built, you can run it with:
+If you also want to run the ros handler code, place this repository in your catkin workspace/src folder. When built, you can run it with:
 
 `rosrun imaging_ros_handler ros_handler.py`
 
@@ -39,18 +51,6 @@ If you have a rosbag and want to load it into the database _[fast](https://youtu
 ## REST API
 
 All REST API documentation can be found on the homepage of the server, once you start it running (with `python src/server.py`). If the server is running on your machine for example, you can see the documentation at: http://localhost:5000
-
-## Installation
-
-There are two main installation methods: production and development.
-
-### Development
-
-If you're looking to develop and actively test/use the server code on your own machine, run the `./setup/dev_setup.sh` script. It's highly recommended (especially if you're using ubuntu 16.04, which has python2 by default), to use a [conda environment](https://conda.io/docs/user-guide/install/index.html).
-
-### Production
-
-TODO: talk about docker img
 
 ## Data Flow
 
