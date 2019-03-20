@@ -25,7 +25,7 @@ class TestGeolocationAlgorithm(unittest.TestCase):
         testBRCoorY = 400
         system = targetGeolocation(testLat, testLon)
         system.calculate_geolocation(testMavLat, testMavLon, testHeight, testRoll, testPitch, testYaw, testTLCoorX, testTLCoorY, testBRCoorX, testBRCoorY)
-        self.assertEqual(sysytem.lat_mav, testMavLat)
+        self.assertEqual(system.lat_mav, testMavLat)
         self.assertEqual(system.lon_mav, testMavLon)
         self.assertEqual(system.phi_deg, testRoll)
         self.assertEqual(system.theta_deg, testPitch)
@@ -49,11 +49,8 @@ class TestGeolocationAlgorithm(unittest.TestCase):
         testBRCoorY = 1001
         system = targetGeolocation(testGndLat, testGndLon)
         targetLocation = system.calculate_geolocation(testMavLat, testMavLon, testHeight, testRoll, testPitch, testYaw, testTLCoorX, testTLCoorY, testBRCoorX, testBRCoorY)
-        self.assertEqual(testMavLat, targetlocation[0])
-        self.assertEqual(testMavLon, targetLocation[1])
-        '''
-        If the assertions above fail, it might just be a tolerance issue.
-        '''
+        self.assertAlmostEqual(testMavLat, targetLocation[0], places=3)
+        self.assertAlmostEqual(testMavLon, targetLocation[1], places=3)
 
     def testRollvPitchYaw(self):
         testGndLat = 40.248471
@@ -74,11 +71,8 @@ class TestGeolocationAlgorithm(unittest.TestCase):
         testPitch = 45
         testYaw = 90
         targetLocationPitchYaw = system.calculate_geolocation(testMavLat, testMavLon, testHeight, testRoll, testPitch, testYaw, testTLCoorX, testTLCoorY, testBRCoorX, testBRCoorY)
-        self.assertEqual(targetLocationRoll[0], targetLocationPitchYaw[0])
-        self.assertEqual(targetLocationRoll[1], targetLocationPitchYaw[1])
-        '''
-        If the assertions above fail, it might just be a tolerance issue.
-        '''
+        self.assertAlmostEqual(targetLocationRoll[0], targetLocationPitchYaw[0], places=3)
+        self.assertAlmostEqual(targetLocationRoll[1], targetLocationPitchYaw[1], places=3)
 
     def generalTest(self):
         testGndLat = 40.248471
@@ -95,5 +89,5 @@ class TestGeolocationAlgorithm(unittest.TestCase):
         testBRCoorY = 971
         system = targetGeolocation(testGndLat, testGndLon)
         targetLocation = system.calculate_geolocation(testMavLat, testMavLon, testHeight, testRoll, testPitch, testYaw, testTLCoorX, testTLCoorY, testBRCoorX, testBRCoorY)
-        self.assertTrue(targetLocation[0] - 40.2465 < .0005)
-        self.assertTrue(targetLocation[1] - (-111.6483) < .0005)
+        self.assertAlmostEqual(testGndLat, targetLocation[0], places=3)
+        self.assertAlmostEqual(testGndLon, targetLocation[1], places=3)
