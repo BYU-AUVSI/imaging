@@ -88,9 +88,9 @@ class targetGeolocation:
         self.lon_mav =  mav_lon
         self.height = height
 
-        phi_deg = roll
-        theta_deg = pitch
-        psi_deg = yaw
+        self.phi_deg = roll
+        self.theta_deg = pitch
+        self.psi_deg = yaw
 
         self.TopLeftX = topLeftX
         self.TopLeftY = topLeftY
@@ -124,9 +124,9 @@ class targetGeolocation:
         '''
         Convert Roll, Pitch and Yaw to radians
         '''
-        phi = phi_deg * math.pi/180
-        theta = theta_deg * math.pi/180
-        psi = psi_deg * math.pi/180
+        phi   = self.phi_deg * math.pi/180
+        theta = self.theta_deg * math.pi/180
+        psi   = self.psi_deg * math.pi/180
 
         '''
         k unit vector in the inertial frame
