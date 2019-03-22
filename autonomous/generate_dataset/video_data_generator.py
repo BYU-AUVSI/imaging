@@ -8,9 +8,26 @@ from scipy.spatial import distance as dist
 import imutils
 import time
 
-name = "cross"
+name = "notarget"
 save_dir = 'shapes/' + name + '/'
 
+"""
+This generator takes an MOV file of a target and runs a basic detector on them
+before exporting individual frames as images. This allows quick and easy dataset
+generation from a minute or two of video. 
+
+To run change the 'name' variable above. This name is used to find the mov file
+and generate names for the final images. ie: 'square' would load 'square.mov'
+(in the same directory as this script) and export all the good dataset frames
+to shapes/square/squareX.jpg where x is some integer.
+
+If your video isnt generating frames. Make sure the shape is relatively centered
+in the video. We first crop and then run detection. You may also need to adjust
+the crop to better accommodate your input video.
+If you are still having issues, consider adjusting the canny thresholds (cv2.Canny)
+as well as the contourArea conditional (cv.contourArea). countour area checks that
+the detected/filled blob is big enough within the frame.
+"""
 currentPath = os.path.dirname(os.path.realpath(__file__))
 if not os.path.exists(currentPath + '/' + save_dir):
     os.makedirs(currentPath + '/' + save_dir)
@@ -37,10 +54,7 @@ while cap.isOpened(): # and count < 300 <-- if you want to limit the amount of r
     #Resize, crop, and resize again to obtain 200x200 image with target in center
     # probably need to adjust this a bit to get the  target properly in frame
     frame_crop = imutils.resize(frame, width = 750)
-    # print(frame_crop.shape)
     frame_crop = frame_crop[20:420, 200:600]
-    # print(frame_crop.shape)
-    # break
     frame_crop = imutils.resize(frame_crop, width = 200)
 
     #Blur and posterize. Can change parameters for random blur if desired
@@ -48,7 +62,7 @@ while cap.isOpened(): # and count < 300 <-- if you want to limit the amount of r
     blur = cv.pyrMeanShiftFiltering(blur, 10, 10, 3)
 
     #Extract edges
-    canny = cv.Canny(blur, 10, 300)
+    canny = cv.Canny(blur, 10, 100)
     canny = cv.dilate(canny, None, iterations=1)
 
     #Create filled mask using edges
@@ -70,7 +84,7 @@ while cap.isOpened(): # and count < 300 <-- if you want to limit the amount of r
         c = max(cnts, key=cv.contourArea)
         #Use print statement to determine size to filter out bad data
         #print(cv.contourArea(c))
-        if cv.contourArea(c) > 6000:    #Replace size
+        if cv.contourArea(c) > 4000:    #Replace size
             #remake the mask with only the biggest contour
             flood[:,:] = 0
             cv.drawContours(flood, [c], 0, 255, cv.FILLED)
