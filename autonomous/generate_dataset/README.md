@@ -3,7 +3,7 @@
 These scripts are used to generate datasets for the various CNN classifiers. The
 main objective is to generate lots of real-world data, without requiring hours
 of flight time and images. Generated data should also represent what comes out of
-the detector portion of the code.
+the autonomous detector.
 
 As you add scripts, please take 2 seconds to give a 1-2 sentence description of them below
 
@@ -17,6 +17,13 @@ class and put them into the validation set (ie: dataset/val/className/imageX.jpg
 all combinations of letter+shape in various colors. Unused for training at this time,
 but kept for historical value ;)
 
+`synthetic_letter_generator.py` Generates completely synthetic letter images using
+various fonts, font sizes, rotations and blurs.
+
 `video_data_generator.py` Generates shape images from videos of targets, see it 
 in action [here](https://youtu.be/fyoo3Zcpb-k). This is the currently used script
-as it allows quick data generation of real-world shapes in various orientations and angles
+as it allows quick data generation of real-world shapes in various orientations and angles.
+
+## Structure
+
+`assets` Holds the various fonts used by the dataset generators

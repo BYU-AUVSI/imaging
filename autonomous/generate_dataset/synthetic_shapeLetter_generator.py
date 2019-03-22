@@ -211,8 +211,7 @@ SHAPES_ = {
 }
 
 # intermediate helper variable calculation:
-# NOTE: you probably need to change font location depending on your OS
-fnt = ImageFont.truetype('/Library/Fonts/Arial Bold.ttf', FONT_PT_)
+fnt = ImageFont.truetype('assets/fonts/Arial Bold.ttf', FONT_PT_)
 rotateSection = int(360 / ROTATE_STEPS_) # degree range for each rotation. ie: if ROTATE_STEPS_ == 8, then rotate step 1 will be anything from 0-45 deg, step 2 will be a random angle between 45 and 90, etc, etc
 pasteLayerWidth =  int(WIDTH_/1.5)
 pasteLayerHeight = int(HEIGHT_/1.5)
