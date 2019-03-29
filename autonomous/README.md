@@ -14,3 +14,13 @@ must be able to connect to it.
  test images against the nets.
 
 `src` Actual source code that's run for the autonomous system.
+
+## Dependencies
+
+The autonomous system depends on a number of standard python packages
+(opencv, sklearn, scipy). Slightly more complicated is its dependency on
+[Pytorch](https://pytorch.org). Installation of pytorch and torchvision depends
+on your machine. For instance if you're looking to train new nets, you will
+definitely want to install it with CUDA (and run it on a machine with an NVidia
+card). As you can imagine, installation with CUDA is different than a CPU-only
+installation (which is all you need for running the classifier).

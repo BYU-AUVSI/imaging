@@ -16,7 +16,7 @@ function print_result() {
 }
 
 # run the dao unit tests first
-echo_blue "Test 1: Server DAO Unit Tests"
+echo_blue "Test 1: Server Internal Unit Tests"
 cd server/src
 python test.py
 print_result $? # check return value of last command
