@@ -12,6 +12,10 @@ import random
 #                    /class2/images.png
 #              /val/class1/images.png
 #              /val/class2/images.png
+#
+# You may experience problems running this script part-way through since it's 
+#   moving a lot of files. POSIX systems generally limit the number of files a 
+#   script can move, so you may need to change that (with `ulimit`)
 
 # TODO: make these arguments:
 DATASET_BASE_DIR_ = 'generated/'
