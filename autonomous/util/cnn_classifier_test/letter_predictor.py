@@ -6,23 +6,9 @@ import os
 from torchvision import transforms
 from torch.autograd import Variable
 
-classes = ['circle',
-    'cross',
-    'heptagon',
-    'hexagon',
-    'notarget',
-    'octagon',
-    'pentagon',
-    'quarterCircle',
-    'rectangle',
-    'semicircle',
-    'square',
-    'star',
-    'trapezoid',
-    'triangle']
+classes = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z']
 
 input_size = 224
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 loader = transforms.Compose([
     transforms.Resize(input_size),
     transforms.CenterCrop(input_size),
@@ -35,14 +21,14 @@ def loadImage(imgPath):
     img = loader(pilImg).float()
     img = Variable(torch.Tensor(img), requires_grad=False)
     img = img.unsqueeze(0)
-    img = img.to(device)
+    img = img.to('cpu')
     return img
 
-parser = argparse.ArgumentParser(description="Shape classifier predictor")
+parser = argparse.ArgumentParser(description="Letter Classifier Test")
 parser.add_argument("image_to_classify", help="Relative path to an image or folder of images to classify")
 args = parser.parse_args()
 
-model = torch.load('shape-imaging-squeezenet.pt', map_location='cpu')
+model = torch.load('letter-imaging-squeezenet.pt', map_location='cpu')
 
 model.eval()
 print("Model loaded and set to eval mode")

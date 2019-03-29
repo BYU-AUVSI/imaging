@@ -9,3 +9,4 @@ server/images/
 autonomous/generate_dataset/pics/*
 postman_import.json
 *.zip
+*.pt
