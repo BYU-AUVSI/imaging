@@ -20,9 +20,13 @@ but kept for historical value ;)
 `synthetic_letter_generator.py` Generates completely synthetic letter images using
 various fonts, font sizes, rotations and blurs.
 
-`video_data_generator.py` Generates shape images from videos of targets, see it 
+`shape_video_data_generator.py` Generates shape images from videos of targets, see it
 in action [here](https://youtu.be/fyoo3Zcpb-k). This is the currently used script
 as it allows quick data generation of real-world shapes in various orientations and angles.
+
+`letter_video_data_generator.py` Similar to the shape video data generator, but
+customized for letters. This script is currently used to augment the dataset
+provided by the synthetic_letter_generator.
 
 ## Structure
 
