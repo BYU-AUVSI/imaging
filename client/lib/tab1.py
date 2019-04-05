@@ -35,13 +35,13 @@ class Tab1():
 
         self.imageID = 0
         self.pingServer()
-        self.draw_np = np.copy(self.org_np)
-        self.img_im = tab_tools.np2im(self.draw_np)
-        self.crop_preview_im = self.img_im.copy()
-        self.crop_preview_tk = tab_tools.im2tk(self.crop_preview_im)
-        self.img_tk = tab_tools.im2tk(self.img_im)
-        self.org_width,self.org_height = self.img_im.size
-        self.crop_preview_width,self.crop_preview_height = self.img_im.size
+        self.draw_np = np.copy(self.org_np) # create numpy array that can be drawn on
+        self.img_im = tab_tools.np2im(self.draw_np) # create PIL image of raw image numpy array
+        self.crop_preview_im = self.img_im.copy()   # create PIL image of crop preview
+        self.crop_preview_tk = tab_tools.im2tk(self.crop_preview_im) # create TK image of crop preview
+        self.img_tk = tab_tools.im2tk(self.img_im) # create TK image of big image
+        self.org_width,self.org_height = self.img_im.size # original width/height of raw PIL image
+        self.crop_preview_width,self.crop_preview_height = self.img_im.size # crop width,height
         self.cropped = False
 
         # TAB 1: CROPPING ------------------------------------------------------
@@ -71,6 +71,12 @@ class Tab1():
         self.t1c2b1 = ttk.Button(self.tab1, text="Submit Crop",command=self.submitCropped)
         self.t1c2b1.grid(row=2,column=1,columnspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
 
+        # Zooming variables
+        #self.imageFocus = False # whether or not mouse is over image label
+        #self.zoomPercent = 1.0  # (0.1,1.0) --> (10%,100%) of image shown
+        #self.img_im_org = self.img_im.copy() # PIL raw image that won't be changed
+
+
         self.initialized = True
 
     def run(self,interface):
@@ -84,6 +90,10 @@ class Tab1():
         self.master.bind("<Configure>",self.resizeEventTab1)
         self.master.bind("<Control-z>",self.undoCrop)
         self.master.bind("<Return>",self.submitCropped)
+        #self.master.bind("<Up>",self.zoomIn)
+        #self.master.bind("<Down>",self.zoomOut)
+        #self.t1c1i1.bind("<Enter>",self.imageFocusIn)
+        #self.t1c1i1.bind("<Leave>",self.imageFocusOut)
 
     def pingServer(self):
         """
@@ -114,8 +124,8 @@ class Tab1():
                 self.resize_counter_tab1 = time.time()
                 self.master.update()
                 # main image
-                self.t1c1i1_width = self.t1c1i1.winfo_width()
-                self.t1c1i1_height = self.t1c1i1.winfo_height()
+                self.t1c1i1_width = self.t1c1i1.winfo_width() #widget width
+                self.t1c1i1_height = self.t1c1i1.winfo_height() # widget height
                 self.resized_im = tab_tools.resizeIm(self.img_im,self.org_width,self.org_height,self.t1c1i1_width,self.t1c1i1_height)
                 self.t1c1i1_img_width,self.t1c1i1_img_height = self.resized_im.size
                 self.img_tk = tab_tools.im2tk(self.resized_im)
@@ -163,6 +173,9 @@ class Tab1():
             self.y0 = None
             self.x1 = None
             self.y1 = None
+            # zooming variables
+            #self.zoomPercent = 1.0  # (0.1,1.0) --> (10%,100%) of image shown
+            #self.img_im_org = self.img_im.copy() # PIL raw image that won't be changed
 
 
     def previousRaw(self,event):
@@ -204,6 +217,9 @@ class Tab1():
             self.y0 = None
             self.x1 = None
             self.y1 = None
+            # zooming variables
+            #self.zoomPercent = 1.0  # (0.1,1.0) --> (10%,100%) of image shown
+            #self.img_im_org = self.img_im.copy() # PIL raw image that won't be changed
 
 
     def submitCropped(self,event=None):
@@ -257,6 +273,7 @@ class Tab1():
         @rtype:  None
         @return: None
         """
+        #print("click=",event.x,event.y)
         self.t1c1i1.bind("<ButtonRelease-1>",self.mouse_release)
         self.t1c1i1.bind("<Motion>",self.mouse_move)
         # calculate offset between container size and image size
@@ -532,3 +549,51 @@ class Tab1():
         else:
             self.org_np = tab_tools.get_image('assets/server_error.jpg')
         self.t1c2r1b.configure(text="N/A",foreground="#636363")
+
+    """
+    def zoomIn(self,event=None):
+        print("Zoom In")
+        if self.imageFocus:
+            if self.zoomPercent > 0.1:
+                self.zoomPercent -= 0.1
+            widgetx = self.t1c1i1.winfo_pointerx()-self.t1c1i1.winfo_rootx()
+            widgety = self.t1c1i1.winfo_pointery()-self.t1c1i1.winfo_rooty()
+            img_width,img_height = self.img_im.size
+            x0 = int(widgetx - (0.5-(1.0-self.zoomPercent)/2.)*img_width)
+            if x0 < 0:
+                x0 = 0
+            y0 = int(widgety - (0.5-(1.0-self.zoomPercent)/2.)*img_height)
+            if y0 < 0:
+                y0 = 0
+            x1 = int(widgetx + (0.5-(1.0-self.zoomPercent)/2.)*img_width)
+            if x1 > img_width:
+                x1 = img_width
+            y1 = int(widgety + (0.5-(1.0-self.zoomPercent)/2.)*img_height)
+            if y1 > img_height:
+                y1 = img_height
+
+            #self.cropImage(int(),int(self.sr*self.y0),int(self.sr*self.x1),int(self.sr*self.y1))
+            self.img_im = self.img_im_org.crop((x0,y0,x1,y1))
+            self.resized_im = tab_tools.resizeIm(self.img_im,self.org_width,self.org_height,self.t1c1i1_width,self.t1c1i1_height)
+            self.img_tk = tab_tools.im2tk(self.resized_im)
+            self.t1c1i1.configure(image=self.img_tk)
+            print("widget = ",widgetx,widgety)
+
+
+    def zoomOut(self,event=None):
+        print("Zoom Out")
+        if self.imageFocus:
+            widgetx = self.t1c1i1.winfo_pointerx()-self.t1c1i1.winfo_rootx()
+            widgety = self.t1c1i1.winfo_pointery()-self.t1c1i1.winfo_rooty()
+            print("widget = ",widgetx,widgety)
+
+    def imageFocusIn(self,event=None):
+        #mouse enters image widget
+        self.imageFocus = True
+        print(self.imageFocus)
+
+    def imageFocusOut(self,event=None):
+        # mouse leaves image widget
+        self.imageFocus = False
+        print(self.imageFocus)
+    """
