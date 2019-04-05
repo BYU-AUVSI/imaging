@@ -1,5 +1,16 @@
-# Most of this is a port of @BrandonMcbride 's generate_dataset.jsx photoshop
-# script to work with PIL. He did all the hard math here
+
+"""
+Most of this is a port of @BrandonMcbride 's generate_dataset.jsx photoshop
+    script to work with PIL. He did all the hard math here
+
+This was the original dataset generator, which we ended up not using. Images are
+generated entirely synthetically, meaning you can get a whole lot really fast.
+The main issue is that the shapes are too perfect and are only seen from a top-down
+perspective. Training with this dataset lead to a net that performed great on
+this type of data, but utterly failed on real-world results. However,
+some of the code/principles from this are still useful, which is why it's still
+included in the repo. You may find a need to use some or part of this code in the future
+"""
 
 from PIL import Image, ImageFont, ImageDraw, ImageFilter
 from tqdm import tqdm
@@ -9,8 +20,6 @@ import math
 import os
 from random import randint
 
-# srry fam, atm, there some crappy directory stuff that probably makes this incompatible with windows
-# PARAMETERS FOR YOU!!
 DIM_ = 200
 HEIGHT_ = DIM_ # things will probably break if it isnt a square img??
 WIDTH_  = DIM_
@@ -202,8 +211,7 @@ SHAPES_ = {
 }
 
 # intermediate helper variable calculation:
-# NOTE: you probably need to change font location depending on your OS
-fnt = ImageFont.truetype('/Library/Fonts/Arial Bold.ttf', FONT_PT_)
+fnt = ImageFont.truetype('assets/fonts/Arial Bold.ttf', FONT_PT_)
 rotateSection = int(360 / ROTATE_STEPS_) # degree range for each rotation. ie: if ROTATE_STEPS_ == 8, then rotate step 1 will be anything from 0-45 deg, step 2 will be a random angle between 45 and 90, etc, etc
 pasteLayerWidth =  int(WIDTH_/1.5)
 pasteLayerHeight = int(HEIGHT_/1.5)

@@ -36,7 +36,7 @@ class RandomGaussianBlur(object):
         except Exception:
             print('Invalid image passed into Pytorch blur function')
 
-        randomRadius = random.randint(0,3)
+        randomRadius = random.randint(0,2)
         return img.filter(ImageFilter.GaussianBlur(randomRadius))
 
     def __repr__(self):
@@ -47,13 +47,13 @@ class RandomGaussianBlur(object):
 data_dir = "./dataset"
 
 # Number of classes in the dataset
-num_classes = 339 # 13 shapes * 26 letters + 1 no target class
+num_classes = 26 # 26 letters + 1 not a letter class
 
 # Batch size for training (change depending on how much memory you have)
 batch_size = 8
 
 # Number of epochs to train for 
-num_epochs = 25
+num_epochs = 15
 
 # Flag for feature extracting. When False, we finetune the whole model, 
 #   when True we only update the reshaped layer params
@@ -223,5 +223,5 @@ criterion = nn.CrossEntropyLoss()
 # Train and evaluate
 model_ft, hist = train_model(model_ft, dataloaders_dict, criterion, optimizer_ft, num_epochs=num_epochs)
 dt = datetime.datetime.now().strftime('%Y-%m-%d_%H%M')
-torch.save(model_ft, 'imaging-squeezenet-' + dt + '.pt')
+torch.save(model_ft, 'letter-squeezenet-' + dt + '.pt')
 

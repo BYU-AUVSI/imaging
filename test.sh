@@ -16,7 +16,7 @@ function print_result() {
 }
 
 # run the dao unit tests first
-echo_blue "Test 1: Server DAO Unit Tests"
+echo_blue "Test 1: Server Internal Unit Tests"
 cd server/src
 python test.py
 print_result $? # check return value of last command
@@ -24,7 +24,7 @@ print_result $? # check return value of last command
 
 echo "Setup db for client_rest tests"
 python setup_db_for_client_tests.py
-python server.py &
+python server.py -g &
 serverPID=$! # get PID for last executed command
 sleep 5
 

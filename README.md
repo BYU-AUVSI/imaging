@@ -2,11 +2,11 @@
 
 This package contains (most) all the code used by the imaging subsystem.
 
-`server/` Contains code that is run on the ground station server
+`server/` Contains server code that is run on the ground station
 
 `client/` Client code runs the manual classification client and autonomous monitor. This code is run on personal machines.
 
-`autonomous/` Code used by the autonomous classifier
+`autonomous/` Code used by the autonomous detector/classifier - generally run on a ground station machine
 
 **What isn't included?**
 
