@@ -7,6 +7,7 @@ from lib import tab_tools
 import time
 import numpy as np
 import cv2
+import datetime
 
 """
 # TODO:
@@ -26,12 +27,15 @@ class Tab1():
         self.interface = interface
         self.initialized = False
         self.resize_counter_tab1 = time.time()
+        self.hourtime = datetime.datetime.now()
+
 
         self.t1_functional = False
         self.x0 = None
         self.y0 = None
         self.x1 = None
         self.y1 = None
+
 
         self.imageID = 0
         self.pingServer()
@@ -48,28 +52,39 @@ class Tab1():
         self.tab1 = ttk.Frame(self.n)
         self.n.add(self.tab1, text='Cropping')
         # Allows everthing to be resized
-        tk.Grid.rowconfigure(self.tab1,0,weight=7)
-        tk.Grid.rowconfigure(self.tab1,1,weight=1)
+        for ii in range(8):
+            tk.Grid.rowconfigure(self.tab1,ii,weight=1)
+
         tk.Grid.columnconfigure(self.tab1,0,weight=14)
         tk.Grid.columnconfigure(self.tab1,1,weight=1)
         tk.Grid.columnconfigure(self.tab1,2,weight=1)
 
         self.t1c1i1 = ttk.Label(self.tab1, anchor=tk.CENTER,image=self.img_tk)
         self.t1c1i1.image = self.img_tk
-        self.t1c1i1.grid(row=0,column=0,rowspan=3,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t1c1i1.grid(row=0,column=0,rowspan=8,columnspan=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
         self.t1c1i1.bind("<Button-1>",self.mouse_click)
         self.t1c1i1_width = self.t1c1i1.winfo_width()
         self.t1c1i1_height = self.t1c1i1.winfo_height()
         self.crop_preview_img_ratio = 1/7. # ratio between image and crop preview
         self.t1c2i1 = ttk.Label(self.tab1, anchor=tk.CENTER,image=self.crop_preview_tk)
         self.t1c2i1.image = self.crop_preview_tk
-        self.t1c2i1.grid(row=0,column=1,columnspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t1c2r1a = ttk.Label(self.tab1, anchor=tk.E, text='Submission Status: ')
+        self.t1c2i1.grid(row=3,column=1,columnspan=2,rowspan=3,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t1c2r0a = ttk.Label(self.tab1, anchor=tk.E, text='Current Time: ')
+        self.t1c2r0a.grid(row=0,column=1,columnspan=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t1c2r0b = ttk.Label(self.tab1, anchor=tk.W, text="%d : %d : %d" % (self.hourtime.hour,self.hourtime.minute,self.hourtime.second))
+        self.t1c2r0b.grid(row=0,column=2,columnspan=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t1c2r1a = ttk.Label(self.tab1, anchor=tk.E, text='Image Time: ')
         self.t1c2r1a.grid(row=1,column=1,columnspan=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
         self.t1c2r1b = ttk.Label(self.tab1, anchor=tk.W, text='N/A')
         self.t1c2r1b.grid(row=1,column=2,columnspan=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t1c2b1 = ttk.Button(self.tab1, text="Submit Crop",command=self.submitCropped)
-        self.t1c2b1.grid(row=2,column=1,columnspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t1c2r2 = ttk.Label(self.tab1, anchor=tk.S, text='Loaded',foreground='green')
+        self.t1c2r2.grid(row=2,column=1,columnspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t1c2r6a = ttk.Label(self.tab1, anchor=tk.E, text='Submission Status: ')
+        self.t1c2r6a.grid(row=6,column=1,columnspan=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t1c2r6b = ttk.Label(self.tab1, anchor=tk.W, text='N/A')
+        self.t1c2r6b.grid(row=6,column=2,columnspan=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+        self.t1c2r7 = ttk.Button(self.tab1, text="Submit Crop",command=self.submitCropped)
+        self.t1c2r7.grid(row=7,column=1,columnspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
 
         # Zooming variables
         #self.imageFocus = False # whether or not mouse is over image label
@@ -145,6 +160,8 @@ class Tab1():
         @rtype:  None
         @return: None
         """
+        self.t1c2r2.configure(text="loading",foreground="red") # display that it's loading
+        self.master.update() # update loading setting
         self.pingServer()
         if self.serverConnected:
             query = self.interface.getNextRawImage()
@@ -167,7 +184,7 @@ class Tab1():
             self.crop_preview_resized_im = tab_tools.resizeIm(self.crop_preview_im,self.crop_preview_width,self.crop_preview_height,self.t1c1i1_width*self.crop_preview_img_ratio,self.t1c1i1_height*self.crop_preview_img_ratio)
             self.crop_preview_tk = tab_tools.im2tk(self.crop_preview_resized_im)
             self.t1c2i1.configure(image=self.crop_preview_tk)
-            self.t1c2r1b.configure(text="unsubmitted",foreground="red")
+            self.t1c2r6b.configure(text="unsubmitted",foreground="red")
             # reset crop points to none
             self.x0 = None
             self.y0 = None
@@ -176,6 +193,9 @@ class Tab1():
             # zooming variables
             #self.zoomPercent = 1.0  # (0.1,1.0) --> (10%,100%) of image shown
             #self.img_im_org = self.img_im.copy() # PIL raw image that won't be changed
+            self.hourtime = datetime.datetime.now()
+            self.t1c2r0b.configure(text="%d : %d : %d" % (self.hourtime.hour,self.hourtime.minute,self.hourtime.second))
+            self.t1c2r2.configure(text="loaded",foreground="green")
 
 
     def previousRaw(self,event):
@@ -188,6 +208,8 @@ class Tab1():
         @rtype:  None
         @return: None
         """
+        self.t1c2r2.configure(text="loading",foreground="red") # display that it's loading
+        self.master.update() # update loading setting
         self.pingServer()
         if self.serverConnected:
             query = self.interface.getPrevRawImage()
@@ -211,7 +233,7 @@ class Tab1():
             self.crop_preview_resized_im = tab_tools.resizeIm(self.crop_preview_im,self.crop_preview_width,self.crop_preview_height,self.t1c1i1_width*self.crop_preview_img_ratio,self.t1c1i1_height*self.crop_preview_img_ratio)
             self.crop_preview_tk = tab_tools.im2tk(self.crop_preview_resized_im)
             self.t1c2i1.configure(image=self.crop_preview_tk)
-            self.t1c2r1b.configure(text="unsubmitted",foreground="red")
+            self.t1c2r6b.configure(text="unsubmitted",foreground="red")
             # reset crop points to none
             self.x0 = None
             self.y0 = None
@@ -220,6 +242,9 @@ class Tab1():
             # zooming variables
             #self.zoomPercent = 1.0  # (0.1,1.0) --> (10%,100%) of image shown
             #self.img_im_org = self.img_im.copy() # PIL raw image that won't be changed
+            self.hourtime = datetime.datetime.now()
+            self.t1c2r0b.configure(text="%d : %d : %d" % (self.hourtime.hour,self.hourtime.minute,self.hourtime.second))
+            self.t1c2r2.configure(text="loaded",foreground="green") # display done loading
 
 
     def submitCropped(self,event=None):
@@ -234,7 +259,7 @@ class Tab1():
         """
         if self.t1_functional:
             self.interface.postCroppedImage(self.imageID,self.crop_preview_im,[self.cx0,self.cy0],[self.cx1,self.cy1])
-            self.t1c2r1b.configure(text="submitted",foreground="green")
+            self.t1c2r6b.configure(text="submitted",foreground="green")
 
 
     def undoCrop(self,event=None):
@@ -483,7 +508,7 @@ class Tab1():
             self.t1c1i1.configure(image=self.img_tk)
             # Crop Image
             self.cropped = True
-            self.t1c2r1b.configure(text="unsubmitted",foreground="red")
+            self.t1c2r6b.configure(text="unsubmitted",foreground="red")
 
     def cropImage(self,x0,y0,x1,y1):
         """
@@ -534,7 +559,7 @@ class Tab1():
             self.org_np = tab_tools.get_image('assets/noNextRaw.jpg')
         else:
             self.org_np = tab_tools.get_image('assets/server_error.jpg')
-        self.t1c2r1b.configure(text="N/A",foreground="#636363")
+        self.t1c2r6b.configure(text="N/A",foreground="#636363")
 
     def noPreviousRaw(self):
         """
@@ -548,7 +573,7 @@ class Tab1():
             self.org_np = tab_tools.get_image('assets/noPreviousRaw.jpg')
         else:
             self.org_np = tab_tools.get_image('assets/server_error.jpg')
-        self.t1c2r1b.configure(text="N/A",foreground="#636363")
+        self.t1c2r6b.configure(text="N/A",foreground="#636363")
 
     """
     def zoomIn(self,event=None):
