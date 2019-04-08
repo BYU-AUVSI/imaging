@@ -29,9 +29,14 @@ If you are still having issues, consider adjusting the canny thresholds (cv2.Can
 as well as the contourArea conditional (cv.contourArea). countour area checks that
 the detected/filled blob is big enough within the frame.
 """
-def generateImages(videoFile, className):
-
-
+def generateImages(videoFile, className, cutoff):
+    """
+    @param videoFile: relative path from this script to the video file to run. 
+        Video files should be named after the class they represent (ie: E.MOV for the E class)
+    @param className: the name of the class we're exporting from the video (ie: E for a video of the letter E)
+    @param cutoff: stop saving images and close the video after this many images have been saved
+    """
+    print("START:: {}".format(name))
     currentPath = os.path.dirname(os.path.realpath(__file__))
     save_dir = os.path.join(currentPath, BASE_SAVE_DIR, className)
     if not os.path.exists(save_dir):
@@ -110,25 +115,38 @@ def generateImages(videoFile, className):
 
                 # sum along rows and columns, really we're only interested in the
                 # first and last row and column (ie: a box around the image of the last pixels)
-                rowSum = np.sum(flood, axis=1)
-                colSum = np.sum(flood, axis=0)
-                maxDim = len(rowSum) - 1 # should be square
+                gray_crop = cv.cvtColor(frame_crop, cv.COLOR_BGR2GRAY)
+                letter_only = cv.bitwise_and(flood, gray_crop)
+                letter_only[np.where((letter_only.astype(int)==0))] = 255
+                _,letter_only = cv.threshold(letter_only, 100, 255, cv.THRESH_BINARY)
+                kernel = np.ones((5,5),np.uint8)
+                letter_only = cv.bitwise_not(cv.morphologyEx(cv.bitwise_not(letter_only), cv.MORPH_CLOSE, kernel))
+
+                imageSum = np.sum(letter_only)
+                allWhiteImage = 255 * letter_only.shape[0] * letter_only.shape[1]
+                if imageSum > (allWhiteImage * 0.985):
+                    # if the letter only image is > 98.5% white, we dont have a letter,
+                    # skip to the next..
+                    continue
+
+                rowSum = np.sum(letter_only, axis=1)
+                colSum = np.sum(letter_only, axis=0) 
+                whiteBorder = 255 * len(rowSum) # and entirely white border is what we're expecting (assuming square img)
 
                 # dont write if the shape its against the edge of the image
                 #   shapes absorbed by the edge wont happen irl, and it screws with
                 #   the target shape, such that we shouldnt be able to id it anyways
-                if rowSum[0] < 1 and rowSum[maxDim] < 1 and colSum[0] < 1 and colSum[maxDim] < 1:
+                if rowSum[0] == whiteBorder and rowSum[-1] == whiteBorder and colSum[0] == whiteBorder and colSum[-1] == whiteBorder:
                     #Write the mask to a file
-                    gray_crop = cv.cvtColor(frame_crop, cv.COLOR_BGR2GRAY)
-                    letter_only = cv.bitwise_and(flood, gray_crop)
-                    letter_only[np.where((letter_only.astype(int)==0))] = 255
-                    _,letter_only = cv.threshold(letter_only, 90, 255, cv.THRESH_BINARY)
-                    kernel = np.ones((5,5),np.uint8)
-                    letter_only = cv.bitwise_not(cv.morphologyEx(cv.bitwise_not(letter_only), cv.MORPH_CLOSE, kernel))
-
                     saveName = os.path.join(save_dir, "{}{}.jpg".format(className, write_count))
                     cv.imwrite(saveName, letter_only)
                     write_count += 1
+
+                    if cutoff is not None and write_count >= cutoff:
+                        cap.release()
+                        #out.release()
+                        cv.destroyAllWindows()
+                        return
 
                     #Show crop and mask
                     cv.imshow('frame',frame_crop)
@@ -148,22 +166,32 @@ def generateImages(videoFile, className):
     cv.destroyAllWindows()
 
 
+# parse required input argument
 parser = argparse.ArgumentParser(description="Letter Video Dataset Generator")
 parser.add_argument("video", help="Relative path to a video or folder of video to use for dataset generation (videos should be named after the class they represent ie: E.MOV -> letters/E/imgs.jpg)")
+parser.add_argument('-C', '--cutoff', metavar='cutoff', help="Stop exporting images from a video after [cutoff] images has been reached for that class. Must be an int.")
 args = parser.parse_args()
+
+cutoff = None
+if args.cutoff is not None:
+    temp = int(args.cutoff)
+    if temp > 0:
+        cutoff = temp
+    else:
+        print("WARN:: Invalid value for cutoff specified (did you use an integer?), proceeding with not cutoff value")
 
 print("Setting up...")
 if os.path.isdir(args.video):
+    # if its a folder of videos go through each one
     for vidFile in sorted(os.listdir(args.video)):
         if vidFile.endswith(".MOV") or vidFile.endswith(".mov"):
             name = vidFile.split(".")[0]
-            print("START:: {}".format(name))
-            generateImages(os.path.join(args.video, vidFile), name)
+            generateImages(os.path.join(args.video, vidFile), name, cutoff)
     exit(1)
 else:
+    # we're working with a single video file
     if args.video.endswith(".MOV") or args.video.endswith(".mov"):
-        name = args.video.split(".")[-2].split("/")[-1]
-        print("START:: {}".format(name))
-        generateImages(args.video, name)
+        name = args.video.split(".")[-2].split("/")[-1] # extract the letter name from the video
+        generateImages(args.video, name, cutoff)
     else:
         print("Unrecognized video file format!")
