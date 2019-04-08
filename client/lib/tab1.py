@@ -172,6 +172,8 @@ class Tab1():
                 self.t1_functional = True
                 self.imageID = query[1]
                 self.org_np = np.array(query[0])
+                timestamp = datetime.datetime.fromtimestamp(self.interface.getImageInfo(self.imageID).time_stamp)
+                self.t1c2r1b.configure(text=timestamp.strftime('%H : %M : %S'))
             self.draw_np = np.copy(self.org_np)
             self.img_im = tab_tools.np2im(self.draw_np)
             self.crop_preview_im = self.img_im.copy()
@@ -220,6 +222,8 @@ class Tab1():
                 self.t1_functional = True
                 self.imageID = query[1]
                 self.org_np = np.array(query[0]) #tab_tools.get_image('frame0744.jpg')
+                timestamp = datetime.datetime.fromtimestamp(self.interface.getImageInfo(self.imageID).time_stamp)
+                self.t1c2r1b.configure(text=timestamp.strftime('%H : %M : %S'))
             self.draw_np = np.copy(self.org_np)
             self.img_im = tab_tools.np2im(self.draw_np)
             self.crop_preview_im = self.img_im.copy()
@@ -560,6 +564,7 @@ class Tab1():
         else:
             self.org_np = tab_tools.get_image('assets/server_error.jpg')
         self.t1c2r6b.configure(text="N/A",foreground="#636363")
+        self.t1c2r1b.configure(text="N/A")
 
     def noPreviousRaw(self):
         """
@@ -574,6 +579,7 @@ class Tab1():
         else:
             self.org_np = tab_tools.get_image('assets/server_error.jpg')
         self.t1c2r6b.configure(text="N/A",foreground="#636363")
+        self.t1c2r1b.configure(text="N/A")
 
     """
     def zoomIn(self,event=None):
