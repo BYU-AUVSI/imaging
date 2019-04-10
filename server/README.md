@@ -30,15 +30,17 @@ If you're looking to develop and actively test/use the server code on your own m
 
 ### Production
 
+To ensure easy setup, repeatability and transferability; we've created a [Docker](https://www.docker.com) image for the server to be run in a production environment.
+
 TODO: talk about docker img
 
 ## Running It
 
-Once installed (see [installation](#installation) guide below), running the rest server is easy. From this folder:
+Once installed, running the rest server is easy. From this folder:
 
 `python src/server.py`
 
-If you also want to run the ros handler code, place this repository in your catkin workspace/src folder. When built, you can run it with:
+If you also want to run the ros handler code, place this repository in your catkin workspace/src folder. When built (Note the message dependencies mentioned), you can run it with:
 
 `rosrun imaging_ros_handler ros_handler.py`
 
