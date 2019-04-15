@@ -1,7 +1,17 @@
 import cv2 as cv
 import numpy as np
 import imutils
-import time
+
+class DetectedCrop():
+    """
+    Holds information on an autonomously cropped image. Namely the cropped image itself,
+    and the coordinates where the crop took place relative to the original raw image
+    """
+
+    def __init__(self, cropped, topLeft, bottomRight):
+        self.crop        = cropped
+        self.topLeft     = topLeft
+        self.bottomRight = bottomRight
 
 #Pass in cv image
 class AutonomousDetection():
@@ -33,7 +43,21 @@ class AutonomousDetection():
 
         self.img_crop = []
 
-    def detect(self, img, show=0):
+    def detect(self, img, show=False):
+        """
+            Given a raw image, run detection algorithm to try and find targets.
+
+            @type img: Opencv image
+            @param img: An original uncropped image as an opencv image. Detection 
+                will be run against this image
+
+            @type show: boolean
+            @param show: Specify if you want to show the output of detection in a window.
+                Should be turned off in production
+
+            @rtype: list of opencv images
+            @returns: A list of cropped regions of interest (ROIs) from the original image
+        """
         self.original_image = img
         self.resized_image = imutils.resize(img, width=600) #bassler images
         #self.resized_image = imutils.resize(img, width=1200) #sony images
@@ -57,7 +81,7 @@ class AutonomousDetection():
             cv.imshow('Flood', self.flood)
             cv.imshow('Detection', self.keypoints_image)
             for i in range(len(self.img_crop)):
-                cv.imshow('Cropped Image %i' % (i), self.img_crop[i])
+                cv.imshow('Cropped Image %i' % (i), self.img_crop[i].crop)
             # cv.waitKey(0)
             # cv.destroyAllWindows()
 
@@ -118,5 +142,13 @@ class AutonomousDetection():
 
                 #crop the potential target from the orignal image
                 #crop = img[y_new-30:y_new+40, x_new-30:x_new+40]
-                crop = self.original_image[max(1,y_new-90):min(y_new+120,self.y_orig), max(1,x_new-90):min(x_new+120,self.x_orig)] #sony image
-                self.img_crop.append(crop)
+
+                topY    = max(1,y_new-90)
+                bottomY = min(y_new+120,self.y_orig)
+                leftX   = max(1,x_new-90)
+                rightX  = min(x_new+120,self.x_orig)
+
+                crop = self.original_image[topY:bottomY, leftX:rightX] #sony image
+
+                detected = DetectedCrop(crop, (topY, leftX), (bottomY, rightX))
+                self.img_crop.append(detected)

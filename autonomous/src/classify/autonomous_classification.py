@@ -6,7 +6,7 @@ from collections import OrderedDict
 from scipy.spatial import distance as dist
 import imutils
 import time
-from autonomous_detection import AutonomousDetection
+from detect.autonomous_detection import AutonomousDetection
 
 #TODO: Methods for rejecting false positives to implement:
 #       Compare how much of edge of "letter" matches with edge of
