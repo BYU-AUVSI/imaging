@@ -4,6 +4,7 @@ import cv2
 import numpy as np
 import os, time # for img saving
 from cv_bridge import CvBridge, CvBridgeError # for publishing images saved on server
+import cv2
 from config import defaultConfigPath, config
 # database access objects
 from dao.incoming_image_dao import IncomingImageDAO
@@ -13,7 +14,7 @@ from dao.submitted_target_dao import SubmittedTargetDAO
 # ROS messages:
 from inertial_sense.msg import GPS
 from rosplane_msgs.msg import State
-from sensor_msgs.msg import Image
+from sensor_msgs.msg import CompressedImage
 from std_msgs.msg import Float32
 # submit image service
 import rosservice
@@ -50,7 +51,7 @@ class RosImagingHandler:
 
         # imaging ingestion setup:
         self.img_dao_ = IncomingImageDAO(self.configPath)
-        self.img_subscriber_ = rospy.Subscriber("/a6000_ros_node/img", Image, self.imgCallback,  queue_size = 10)
+        self.img_subscriber_ = rospy.Subscriber("/a6000_ros_node/img/compressed", CompressedImage, self.imgCallback,  queue_size = 10)
         self.img_msg_ = incoming_image()
         self.img_msg_.focal_length = 16.0 # this is a safe starting assumption == fully zoomed out on a6000
         self.img_msg_.manual_tap = False
@@ -128,11 +129,14 @@ class RosImagingHandler:
         the image file, and passes the corresponding filename and TS to the DAO
         so that it can be inserted into the database
         """
-        #get raw img data:
-        rawData = np.fromstring(msg.data, np.uint8).reshape(msg.height, msg.width, 3)
+        # setup file name
         ts = msg.header.stamp.to_sec()
         fullPath = self.raw_path_ + str(ts) + ".jpg"
-        cv2.imwrite(fullPath, rawData)
+
+        # setup the actual file data
+        np_arr = np.fromstring(msg.data, np.uint8)
+        image_np = cv2.imdecode(np_arr, cv2.IMREAD_COLOR) # if its opencv < 3.0 then use cv2.CV_LOAD_IMAGE_COLOR
+        cv2.imwrite(fullPath, image_np)
 
         self.img_msg_.time_stamp = ts 
         self.img_msg_.image_path = fullPath
@@ -175,7 +179,7 @@ class RosImagingHandler:
     def submitPendingTargets(self):
         # if there are people actually subscribed to this topic
         if '/imaging/target' not in rosservice.get_service_list():
-            print("Submission service not yet published")
+            # print(Submission service not yet published")
             return
 
         # if the service exists on the network
