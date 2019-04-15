@@ -1,4 +1,4 @@
-
+from classify.predictor import Predictor
 
 classes = ['circle',
     'cross',
@@ -15,3 +15,8 @@ classes = ['circle',
     'trapezoid',
     'triangle']
 
+class ShapePredictor(Predictor):
+
+
+    def __init__(self):
+        super(ShapePredictor, self).__init__(classes, 'assets/shape-imaging-squeezenet.pt')
