@@ -1,5 +1,6 @@
 import PIL# import Image
 import torch
+import cv2
 import torch.nn as nn
 from torchvision import transforms
 from torch.autograd import Variable
@@ -21,25 +22,35 @@ class Predictor():
         self.model.eval()
 
 
-    def predict(self, imgPath):
-        truth = imgPath.split(".")[-2].split("/")[-1] # we get the truth letter from the file name
-        truth = ''.join([i for i in truth if not i.isdigit()])
-        loadedImg = loadImage(imgPath)
-        with torch.set_grad_enabled(False):
-            outputs = model(loadedImg)
+    def predict(self, cvImg, verbose=False):
+        """
+            @ptype cvImg: openCV image
+            @param cvImg: 200x200px openCV image
 
-            if args.v:
+            @rtype: string
+            @returns: String of the classification it found after running the given image through the net
+        """
+        loadedImg = self.loadImage(cvImg)
+        with torch.set_grad_enabled(False):
+            outputs = self.model(loadedImg)
+
+            if verbose:
                 print(outputs)
 
+            # whichever output class has the highest confidence is our answer
+            #   this is a pretty simple way todo it for now. could do more 
+            #   based on how far above the confidence is from other classes
             _, preds = torch.max(outputs, 1)
-            ans = classes[preds[0]].lower()
-            result = truth.lower() == ans
-            if (args.f and not result) or not args.f:
-                print('{:30} == {:<15}'.format(imgPath, ans))
-            return result
+            answer = self.classes[preds[0]].lower()
+            return answer
 
-    def loadImage(self, imgPath):
-        pilImg = PIL.Image.open(imgPath)
+    def loadImage(self, cvImg):
+        """
+        Takes a CV image, applies necessary transforms, returns an image ready
+        to go through the predictor
+        """
+        cvImg = cv2.cvtColor(cvImg, cv2.COLOR_BGR2RGB)
+        pilImg = PIL.Image.fromarray(cvImg)
         pilImg = pilImg.convert('RGB')
         img = loader(pilImg).float()
         img = Variable(torch.Tensor(img), requires_grad=False)
