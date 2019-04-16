@@ -304,9 +304,6 @@ class ImagingInterface:
         """
         Retrieves the next available raw image from the server.
 
-        @type  isManual: boolean
-        @param isManual: specify whether this is a manual imaging request (True) or an autonomous one (False)
-
         @rtype:  (Image, int)
         @return: a tuple of a pillow Image and the image id if there are any images available for processing,
             otherwise None

@@ -1,4 +1,4 @@
-import argparse, time
+import argparse, time, threading
 import numpy as np
 import cv2
 from PIL import Image
@@ -22,7 +22,7 @@ class AutonomousManager():
 
             @param classification: Whether the classifiers should be run by this manager. Default: False 
         """
-        
+        self._should_shutdown = False
         self.client = ImagingInterface(serverHost, serverPort, isManual=False)
 
         # we give the option of having a machine thats running this Manager run
@@ -31,20 +31,34 @@ class AutonomousManager():
         self.doDetection = detection
         if detection: 
             self.detector = AutonomousDetection()
+        else:
+            print("Turning off detection for this autonomous process")
 
         self.doClassification = classification
         if classification:
             self.classifier = AutonomousClassification()
+        else:
+            print("Turning off classification for this autonomous process")
 
+        if not classification and not detection:
+            print("ERROR:: Cant disable both detection and classification!")
+            exit(1)
+
+    def runClassification(self):
+        """
+            If this autonomous manager is set todo so, run classification on an available
+            cropped image, if any.
+        """
+        return
 
     def runDetection(self):
         """
-        If this autonomous manager is set todo so, run detection on an available
-        raw image, if any.
+            If this autonomous manager is set todo so, run detection on an available
+            raw image, if any.
 
-        One issue here is client_rest expects a PIL image and the 
-        detector expects an opencv image (aka numpy array). So this method has to 
-        deal with converting between the two 
+            One issue here is client_rest expects/returns a PIL image and the 
+            detector expects/returns an opencv image (aka numpy array). So 
+            this method has to deal with converting between the two 
         """
         toDetect = self.client.getNextRawImage() # returns tuple of (image, image_id)
 
@@ -64,7 +78,7 @@ class AutonomousManager():
 
     def run(self):
         """
-        Sit and spin, checking for new images
+        Sit and spin, checking for new images and processing them as necessary
         """
 
         while 1:
@@ -76,6 +90,11 @@ class AutonomousManager():
             if self.doDetection:
                 self.runDetection()
 
+            if self.doClassification:
+                self.runClassification()
+
+    def shutdown(self):
+        self._should_shutdown = True
 
 def main():
     parser = argparse.ArgumentParser(description="Autonomous Manager Help")
@@ -94,7 +113,7 @@ def main():
         port = args.port
     
     
-    auto = AutonomousManager(hostname, port)
+    auto = AutonomousManager(hostname, port, args.d, args.c)
     auto.run()
 
 if __name__ == '__main__':
