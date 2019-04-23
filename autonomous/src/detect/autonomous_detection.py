@@ -43,12 +43,13 @@ class AutonomousDetection():
 
         self.img_crop = []
 
+
     def detect(self, img, show=False):
         """
             Given a raw image, run detection algorithm to try and find targets.
 
             @type img: Opencv image
-            @param img: An original uncropped image as an opencv image. Detection 
+            @param img: An original uncropped image as an opencv image. Detection
                 will be run against this image
 
             @type show: boolean
@@ -58,6 +59,7 @@ class AutonomousDetection():
             @rtype: list of opencv images
             @returns: A list of cropped regions of interest (ROIs) from the original image
         """
+
         self.original_image = img
         self.resized_image = imutils.resize(img, width=600) #bassler images
         #self.resized_image = imutils.resize(img, width=1200) #sony images
@@ -70,6 +72,12 @@ class AutonomousDetection():
         self.preprocess()
         self.detect_ROIs(500)
         self.crop_ROIs()
+
+        # refined_crops = self.img_crop.copy()
+        # self.img_crop.clear()
+        # for i in range(len(refined_crops)):
+        #     if refined_crops[i] is not None:
+        #         self.img_crop.append(refined_crops[i])
 
 
         if show:
@@ -143,6 +151,7 @@ class AutonomousDetection():
                 #crop the potential target from the orignal image
                 #crop = img[y_new-30:y_new+40, x_new-30:x_new+40]
 
+
                 topY    = max(1,y_new-90)
                 bottomY = min(y_new+120,self.y_orig)
                 leftX   = max(1,x_new-90)
@@ -150,5 +159,76 @@ class AutonomousDetection():
 
                 crop = self.original_image[topY:bottomY, leftX:rightX] #sony image
 
-                detected = DetectedCrop(crop, (topY, leftX), (bottomY, rightX))
-                self.img_crop.append(detected)
+                ref_crop,bounds = self.refine_crop(crop)
+
+                if ref_crop is not None:
+
+                    bottomY = topY + bounds[1]
+                    rightX = leftX + bounds[3]
+                    topY += bounds[0]
+                    leftX += bounds[2]
+
+                    detected = DetectedCrop(ref_crop, (topY, leftX), (bottomY, rightX))
+                    self.img_crop.append(detected)
+
+
+    def refine_crop(self, crop):
+
+        blur_crop = cv.GaussianBlur(crop, (5, 5), 0)     #**IS THIS NECESSARY?**
+        blur_crop = cv.pyrMeanShiftFiltering(blur_crop, 30, 30, 3)
+        #cv.imshow('Blur %i' % (i), self.blur_crop[i])
+
+        #detect edges and show
+        canny_crop = cv.Canny(blur_crop,10,200)
+        #dilating the edges often closes edges that were originally not connected
+        canny_crop = cv.dilate(canny_crop, None, iterations=1)
+        #self.canny_crop[i] = cv.erode(self.canny_crop[i], None, iterations=1)
+        #cv.imshow('Canny %i' % (i), self.canny_crop[i])
+
+        #fill the enclosed edges to create a mask and show
+        h, w = canny_crop.shape[:2]
+        canny_crop[0,:] = 0
+        canny_crop[h-1,:] = 0
+        canny_crop[:,0] = 0
+        canny_crop[:,w-1] = 0
+        mask = np.zeros((h+2, w+2), np.uint8)
+        edges = canny_crop.copy()
+        cv.floodFill(edges, mask, (0,0), 255)
+        edges = cv.bitwise_not(edges)
+        flood_crop = canny_crop | edges
+        flood_crop = cv.erode(flood_crop, None, iterations=2)
+
+        #find the contours in the filled mask
+        cnts = cv.findContours(flood_crop.copy(), cv.RETR_EXTERNAL,
+            cv.CHAIN_APPROX_SIMPLE)
+        cnts = cnts[1]
+
+        #if there is at least one countour,
+        if len(cnts) > 0:
+            #find the biggest contour
+            c = max(cnts, key=cv.contourArea)
+            #remake the mask with only the biggest contour and show
+            flood_crop[:,:] = 0
+
+            cv.drawContours(flood_crop, [c], 0, 255, cv.FILLED)
+            #erode the mask to eliminate any leftover background
+            #self.flood_crop[i] = cv.erode(self.flood_crop[i], None, iterations=2)
+
+            M = cv.moments(c)
+            cX = int(M["m10"] / M["m00"])
+            cY = int(M["m01"] / M["m00"])
+
+            _,_,w,h = cv.boundingRect(c)
+
+            buf = 20
+            crp = max([w,h])//2+buf
+
+            top = max(1,cY-crp)
+            bottom = cY+crp
+            left = max(1,cX-crp)
+            right = cX+crp
+
+            return crop[top:bottom, left:right], [top,bottom,left,right]
+
+        else:
+            return None, None
