@@ -96,6 +96,10 @@ class AutonomousManager():
     def shutdown(self):
         self._should_shutdown = True
 
+def startAutonomousManagerThread(serverHost, serverPort, detection, classification):
+    auto = AutonomousManager(serverHost, serverPort, detection, classification)
+    auto.run()
+
 def main():
     parser = argparse.ArgumentParser(description="Autonomous Manager Help")
     parser.add_argument('-H', '--host', metavar='hostname', help='The hostname IP address of where the server is. Default: 127.0.0.1')
@@ -111,7 +115,6 @@ def main():
         hostname = args.host
     if args.port is not None:
         port = args.port
-    
     
     auto = AutonomousManager(hostname, port, args.d, args.c)
     auto.run()
