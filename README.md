@@ -20,6 +20,12 @@ Want to quickly see the imaging code in action? We have a convenient demo for th
 
 This will install a barebones docker image on your machine that reads in a demo data set so that the server is populated with good test data. Note for convenience, this image does not use any of the server's ROS components, making it _unsuitable_ for running in a production environment.
 
+## Running
+
+Here's an overview of everything that needs to be running in a competition setting
+
+![what to run](server/docs/img/codeLayout.png)
+
 ## Dependencies
 
 This package relies on a few other BYU-Auvsi packages. Changes to them could have effects here.
