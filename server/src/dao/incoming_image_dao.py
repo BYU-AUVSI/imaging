@@ -95,3 +95,11 @@ class IncomingImageDAO(BaseDAO):
         cur.close()
         # return none if we failed to claim an image
         return None
+
+    def getAll(self):
+        """
+        Get info on all images currently in the table. Currently just used
+        for testing
+        """
+        selectImgById = """SELECT image_id, date_part('epoch', time_stamp), focal_length, image_path, manual_tap, autonomous_tap 
+            FROM incoming_image;"""

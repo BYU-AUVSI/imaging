@@ -112,3 +112,98 @@ class TestResetAutonomousDB(unittest.TestCase):
 
         dao = OutgoingAutonomousDAO(defaultConfigPath())
         self.assertEqual(len(dao.getAll()), 0)
+
+
+class TestResetAll(unittest.TestCase):
+    def test(self):
+        """
+        basically just a combo of the last two tests
+        """
+        truncateTable('incoming_image')
+        truncateTable('cropped_autonomous')
+        truncateTable('outgoing_autonomous')
+        truncateTable('cropped_manual')
+        truncateTable('outgoing_manual')
+        dao = OutgoingManualDAO(defaultConfigPath())
+
+        testIns = outgoing_manual()
+        testIns.crop_id = 42
+        testIns.shape = 'circle'
+        testIns.background_color = 'white'
+        testIns.alphanumeric = 'A'
+        testIns.alphanumeric_color = 'black'
+        self.assertNotEqual(dao.addClassification(testIns), -1)
+
+        dao = CroppedManualDAO(defaultConfigPath())
+        model = cropped_manual()
+        model.image_id   = 123
+        model.time_stamp = 1547453775.2
+        model.cropped_path = '/im/a/totally/real/cropped/path/i/swear.jpg'
+        model.crop_coordinate_br = "(12, 34)"
+        model.crop_coordinate_tl = "(56, 78)"
+        self.assertNotEqual(dao.addImage(model), -1)
+
+        dao = IncomingImageDAO(defaultConfigPath())
+        model = incoming_image()
+        model.time_stamp = 1547453775.2
+        model.focal_length = 16.0
+        model.image_path = '/im/a/totally/real/path/i/swear.jpg'
+        model.manual_tap = True
+        model.autonomous_tap = False
+        resultingId = dao.addImage(model)
+        self.assertNotEqual(resultingId, -1)
+
+        util = UtilDAO(defaultConfigPath())
+        util.resetManualDB()
+
+        dao = OutgoingAutonomousDAO(defaultConfigPath())
+        testIns = outgoing_autonomous()
+        testIns.crop_id = 42
+        testIns.shape = 'circle'
+        testIns.background_color = 'white'
+        testIns.alphanumeric = 'A'
+        testIns.alphanumeric_color = 'black'
+        self.assertNotEqual(dao.addClassification(testIns), -1)
+
+        dao = CroppedAutonomousDAO(defaultConfigPath())
+        model = cropped_autonomous()
+        model.image_id   = 123
+        model.time_stamp = 1547453775.2
+        model.cropped_path = '/im/a/totally/real/cropped/path/i/swear.jpg'
+        model.crop_coordinate_br = "(12, 34)"
+        model.crop_coordinate_tl = "(56, 78)"
+        self.assertNotEqual(dao.addImage(model), -1)
+
+        dao = IncomingImageDAO(defaultConfigPath())
+        model = incoming_image()
+        model.time_stamp = 1547453775.2
+        model.focal_length = 16.0
+        model.image_path = '/im/a/totally/real/path/i/swear.jpg'
+        model.manual_tap = True
+        model.autonomous_tap = True
+        resultingId = dao.addImage(model)
+        self.assertNotEqual(resultingId, -1)
+
+        util = UtilDAO(defaultConfigPath())
+        util.resetAutonomousDB()
+
+        resultingModel = dao.getImage(resultingId)
+        self.assertIsNotNone(resultingModel)
+        self.assertFalse(resultingModel.autonomous_tap)
+        self.assertTrue(resultingModel.manual_tap)
+        self.assertEqual(resultingModel.image_path, model.image_path)
+        self.assertEqual(resultingModel.focal_length, model.focal_length)
+        
+        dao = CroppedManualDAO(defaultConfigPath())
+        self.assertEqual(len(dao.getAll()), 0)
+
+        dao = OutgoingManualDAO(defaultConfigPath())
+        self.assertEqual(len(dao.getAll()), 0)
+
+        
+
+        dao = CroppedAutonomousDAO(defaultConfigPath())
+        self.assertEqual(len(dao.getAll()), 0)
+
+        dao = OutgoingAutonomousDAO(defaultConfigPath())
+        self.assertEqual(len(dao.getAll()), 0)

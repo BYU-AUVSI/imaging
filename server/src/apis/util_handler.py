@@ -35,3 +35,34 @@ class UtilAutoResetHandler(Resource):
 
         return {'message': 'Success!'}
 
+@api.route('/reset')
+class UtilResetHandler(Resource):
+    @api.doc(description="""
+        WARNING! README!! This resets the database. EVERYTHING. This will reset 
+        the entire database to its clean, unused form. Note: this 
+        will NOT delete the actual images themselves, only their references in the
+        database. Removing an old image folder is left up to the user.""")
+    @api.doc(responses={200:'OK', 500:'Reset failed'})
+    def get(self):
+        dao = UtilDAO(defaultConfigPath())
+        dao.resetAll()
+
+        return {'message': 'Success!'}
+
+@api.route('/reset/save')
+class UtilResetSaveHandler(Resource):
+    @api.doc(description="""
+        WARNING! README!! This endpoint will first save the current database into
+        a set of csv files within the current server image directory (the directory
+        where all the images currently held by the server are saved). This gives
+        you the option of recovering the database at some later point (assuming
+        you're able to get the image paths in the database to work properly).
+
+        After saving, this will wipe the ENTIRE database. You will start with a 
+        clean slate as if the server was just initialized.""")
+    @api.doc(responses={200:'OK', 500:'Reset failed'})
+    def get(self):
+        dao = UtilDAO(defaultConfigPath())
+        dao.saveAndResetAll()
+
+        return {'message': 'Success!'}
