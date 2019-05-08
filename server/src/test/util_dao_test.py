@@ -113,7 +113,6 @@ class TestResetAutonomousDB(unittest.TestCase):
         dao = OutgoingAutonomousDAO(defaultConfigPath())
         self.assertEqual(len(dao.getAll()), 0)
 
-
 class TestResetAll(unittest.TestCase):
     def test(self):
         """
@@ -124,8 +123,8 @@ class TestResetAll(unittest.TestCase):
         truncateTable('outgoing_autonomous')
         truncateTable('cropped_manual')
         truncateTable('outgoing_manual')
-        dao = OutgoingManualDAO(defaultConfigPath())
 
+        dao = OutgoingManualDAO(defaultConfigPath())
         testIns = outgoing_manual()
         testIns.crop_id = 42
         testIns.shape = 'circle'
@@ -142,19 +141,6 @@ class TestResetAll(unittest.TestCase):
         model.crop_coordinate_br = "(12, 34)"
         model.crop_coordinate_tl = "(56, 78)"
         self.assertNotEqual(dao.addImage(model), -1)
-
-        dao = IncomingImageDAO(defaultConfigPath())
-        model = incoming_image()
-        model.time_stamp = 1547453775.2
-        model.focal_length = 16.0
-        model.image_path = '/im/a/totally/real/path/i/swear.jpg'
-        model.manual_tap = True
-        model.autonomous_tap = False
-        resultingId = dao.addImage(model)
-        self.assertNotEqual(resultingId, -1)
-
-        util = UtilDAO(defaultConfigPath())
-        util.resetManualDB()
 
         dao = OutgoingAutonomousDAO(defaultConfigPath())
         testIns = outgoing_autonomous()
@@ -185,22 +171,15 @@ class TestResetAll(unittest.TestCase):
         self.assertNotEqual(resultingId, -1)
 
         util = UtilDAO(defaultConfigPath())
-        util.resetAutonomousDB()
+        util.resetAll()
 
-        resultingModel = dao.getImage(resultingId)
-        self.assertIsNotNone(resultingModel)
-        self.assertFalse(resultingModel.autonomous_tap)
-        self.assertTrue(resultingModel.manual_tap)
-        self.assertEqual(resultingModel.image_path, model.image_path)
-        self.assertEqual(resultingModel.focal_length, model.focal_length)
+        self.assertEqual(len(dao.getAll()), 0) # asset incoming image empty
         
         dao = CroppedManualDAO(defaultConfigPath())
         self.assertEqual(len(dao.getAll()), 0)
 
         dao = OutgoingManualDAO(defaultConfigPath())
         self.assertEqual(len(dao.getAll()), 0)
-
-        
 
         dao = CroppedAutonomousDAO(defaultConfigPath())
         self.assertEqual(len(dao.getAll()), 0)

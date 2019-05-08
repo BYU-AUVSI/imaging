@@ -101,5 +101,14 @@ class IncomingImageDAO(BaseDAO):
         Get info on all images currently in the table. Currently just used
         for testing
         """
-        selectImgById = """SELECT image_id, date_part('epoch', time_stamp), focal_length, image_path, manual_tap, autonomous_tap 
+        selectAllSql = """SELECT image_id, date_part('epoch', time_stamp), focal_length, image_path, manual_tap, autonomous_tap 
             FROM incoming_image;"""
+
+        cur = self.conn.cursor()
+        cur.execute(selectAllSql)
+        results = []
+        for row in cur:
+            incomingImg = incoming_image(row)
+            results.append(incomingImg)
+
+        return results
