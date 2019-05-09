@@ -110,6 +110,8 @@ class GeolocationThread(threading.Thread):
     def run(self):
 
         # wait until we get our first gps coordinate
+        # remember - the ros_handler code does not insert a gps record
+        #           into the table until the gps has a fix
         haveGps = False
         print("waiting for gps")
         while not haveGps and not self._should_shutdown:

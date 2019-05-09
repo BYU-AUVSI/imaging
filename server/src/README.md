@@ -18,7 +18,10 @@ There are two main scripts that are run here:
 
 `dao` Contains all the database access objects and their corresponding model classes. We could have used SqlAlchemy, but we were going for something lean, hence just the base postgres python connector (psycopg2) was used.
 
-`test` Contains the test code run by test.py. None of this code is used in a production environment
+`geolocation` Contains all code used to run the geolocation algorithm automatically
+on both autonomous and manually cropped images.
+
+`test` Contains the test code run by test.py. None of this code is used in a production environment, but is used by the CI platform.
 
 ## Database
 
@@ -28,7 +31,7 @@ Here's the basic database setup
 
 Arrows represent hard relations to the corresponding (ie: an image_id in the cropped_manual will match an image_id in the incoming_image table).
 
-Quick description of the tables:
+### - Table Description
 
 **incoming_gps** Raw gps data from the plane. Used by the geolocation service to approximate target locations.
 

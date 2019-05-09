@@ -12,17 +12,10 @@ This package contains (most) all the code used by the imaging subsystem.
 
 The driver for the camera, currently the [Sony a6000](https://github.com/BYU-AUVSI/a6000_ros.git) is in its own repository. This is because it is the only piece of code that needs to be run onboard the actual plane, thus we want to make it small and easy to clone onto the planes workspace.
 
-## Quick Start
-
-Want to quickly see the imaging code in action? We have a convenient demo for this very purpose. With docker installed on your machine run:
-
-`./server/setup/start-demo.sh`
-
-This will install a barebones docker image on your machine that reads in a demo data set so that the server is populated with good test data. Note for convenience, this image does not use any of the server's ROS components, making it _unsuitable_ for running in a production environment.
-
 ## Running
 
-Here's an overview of everything that needs to be running in a competition setting
+Here's an overview of everything that needs to be running in a competition setting.
+Additional details on each of these pieces can be found in their respective locations.
 
 ![what to run](server/docs/img/codeLayout.png)
 
