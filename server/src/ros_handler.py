@@ -5,7 +5,7 @@ import numpy as np
 import os, time # for img saving
 from cv_bridge import CvBridge, CvBridgeError # for publishing images saved on server
 import cv2
-from config import defaultConfigPath, config
+from config import defaultConfigPath, config, createNewBaseImgDir, getLatestBaseImgDir
 # database access objects
 from dao.incoming_image_dao import IncomingImageDAO
 from dao.incoming_gps_dao import IncomingGpsDAO
@@ -40,7 +40,6 @@ class RosImagingHandler:
         print("Startup ros imaging handler...")
         currentPath = os.path.dirname(os.path.realpath(__file__))
         self.configPath = rospy.get_param('~config_path', defaultConfigPath())
-        startTs = str(int(time.time()))
 
         self.bridge = CvBridge()
 
@@ -68,18 +67,13 @@ class RosImagingHandler:
         self.state_msg_ = incoming_state()
         self.state_interval_ = 0
 
-        basePath = os.path.abspath(currentPath + '/../images/' + startTs)
+        basePath = createNewBaseImgDir()
         print("Base dir for images:: {}".format(basePath))
-
-        self.raw_path_  = basePath + "/raw/"
-        # create paths for where raw images will be dumped
-        if not os.path.exists(self.raw_path_):
-            os.makedirs(self.raw_path_)
-        print("ROS subscribers are all setup!")
 
         # service for completed targets. Once a target has gone through the entire
         # system, the server puts the finished target in a table and marks it ready for submission
         self.submit_image_ = None
+        print("ROS subscribers are all setup!")
 
     def gpsCallback(self, msg):
         """
@@ -129,9 +123,14 @@ class RosImagingHandler:
         the image file, and passes the corresponding filename and TS to the DAO
         so that it can be inserted into the database
         """
+        # create paths for where raw images will be dumped if necessary
+        raw_path_ = os.path.join(getLatestBaseImgDir(), 'raw')
+        if not os.path.exists(raw_path_):
+            os.makedirs(raw_path_)
         # setup file name
         ts = msg.header.stamp.to_sec()
-        fullPath = self.raw_path_ + str(ts) + ".jpg"
+        filename = str(ts) + ".jpg"
+        fullPath = os.path.join(raw_path_, filename)
 
         # setup the actual file data
         np_arr = np.fromstring(msg.data, np.uint8)

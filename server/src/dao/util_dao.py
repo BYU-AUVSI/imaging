@@ -1,5 +1,5 @@
 from dao.base_dao import BaseDAO
-from config import getLatestBaseImgDir
+from config import getLatestBaseImgDir, createNewBaseImgDir
 import os
 
 class UtilDAO(BaseDAO):
@@ -50,6 +50,10 @@ class UtilDAO(BaseDAO):
         are referencing on your filesystem
         """
         super(UtilDAO, self).executeStatements([self.deleteSQL.format(table) for table in self.tables])
+        # after truncating all the tables create a new directory for any future images
+        #   to go into as part of the new database. the ros_handler will pick up on 
+        #   this new directory and use it
+        createNewBaseImgDir()
 
     def saveAll(self):
         """

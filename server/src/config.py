@@ -20,6 +20,20 @@ def getFileExtension(filename):
 def defaultConfigPath():
     return os.path.abspath(os.path.dirname(os.path.realpath(__file__)) + '/../conf/config.ini')
 
+def createNewBaseImgDir():
+    """
+    Creates a new base image directory.
+    This is the directory in the server that has a timestamp, and then all the 
+    image folders in it.
+    ie: 
+        server/image/123456768/....
+    this method will create the timestamp folder and return the resulting path
+    """
+    rootImgDir = os.path.abspath(os.path.dirname(os.path.realpath(__file__)) + '/../images/')
+    ts = str(int(time.time())) + '/'
+    os.makedirs(os.path.join(rootImgDir, ts))
+    return os.path.join(rootImgDir, ts)
+
 def getLatestBaseImgDir():
     # root image dir:
     rootImgDir = os.path.abspath(os.path.dirname(os.path.realpath(__file__)) + '/../images/')
@@ -31,9 +45,7 @@ def getLatestBaseImgDir():
     imgDirs = [os.path.join(rootImgDir, dirname) for dirname in imgDirs]
     if not imgDirs:
         # if the directory is empty, create a folder with the current timestamp
-        ts = str(int(time.time())) + '/'
-        os.makedirs(os.path.join(rootImgDir, ts))
-        latestSubDir = os.path.join(latestSubDir, ts)
+        latestSubDir = createNewBaseImgDir()
     else:
         # get the newest (aka largest unix time) folder
         latestSubDir = max(imgDirs, key=os.path.getmtime)

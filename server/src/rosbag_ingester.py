@@ -2,6 +2,9 @@ import rosbag
 import argparse
 from ros_handler import RosImagingHandler
 
+"""
+This will read a rosbag into the imaging database as fast as possible
+"""
 
 def parse():
     # parse arguments. Require user to specify a bag name
