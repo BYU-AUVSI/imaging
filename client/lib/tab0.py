@@ -162,10 +162,14 @@ class Tab0():
 		return self.interface
 
 	def saveDatabase(self):
-		print("save database")
+		result = self.interface.postSaveDatabase()
+		if result:
+			print("successfully saved database")
 
 	def loadDatabase(self):
-		print("load database")
+		print("load database (currently un-implemented server side)")
 
 	def deleteDatabase(self):
-		print("delete databse")
+		result = self.interface.postDeleteDatabase()
+		if result:
+			print("successfully deleted database")

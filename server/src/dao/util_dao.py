@@ -51,7 +51,7 @@ class UtilDAO(BaseDAO):
         """
         super(UtilDAO, self).executeStatements([self.deleteSQL.format(table) for table in self.tables])
 
-    def saveAndResetAll(self):
+    def saveAll(self):
         """
         Saves the current database state to a set of csv files located in the base
         image path folder (ie: the root directory where all the image currently)
@@ -61,6 +61,3 @@ class UtilDAO(BaseDAO):
         """
         # save all the tables:
         super(UtilDAO, self).executeStatements([self.csvExportSQL.format(table, os.path.join(getLatestBaseImgDir(), table)) for table in self.tables])
-
-        # truncate all the tables
-        self.resetAll()

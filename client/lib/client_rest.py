@@ -866,6 +866,35 @@ class ImagingInterface:
         return pendingList
 
 
+    ####### util/ endpoints #######
+    def postSaveDatabase(self):
+        """
+        Saves the current state of the database on the server. Does not reset anything.
+
+        @rtype: boolean
+        @returns: boolean as to whether the database was successfully saved
+        """
+        self.debug("postDeleteDatabase()")
+        url = self.url + '/util/save'
+        resp = requests.post(url)
+        self.debug('   response code:: {}'.format(resp.status_code))
+        return resp.status_code == 200
+
+    def postDeleteDatabase(self):
+        """
+        Wipes the entire server-side database. And starts off with a clean slate.
+        With great power comes great responsibility - you should usually save
+        the database first.
+
+        @rtype: boolean
+        @returns: boolean as to whether the database was successfully saved
+        """
+        self.debug("postDeleteDatabase()")
+        url = self.url + '/util/reset'
+        resp = requests.post(url)
+        self.debug('   response code:: {}'.format(resp.status_code))
+        return resp.status_code == 200
+
 def testNextAndPrevRawImage(interface):
     interface.numIdsStored = 4
 
