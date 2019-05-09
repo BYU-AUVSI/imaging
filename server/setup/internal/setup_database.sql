@@ -18,7 +18,8 @@ CREATE USER imaging_server WITH ENCRYPTED PASSWORD 'Byuauvs1';
 CREATE DATABASE auvsi;-- WITH OWNER imaging_server;
 GRANT CONNECT ON DATABASE auvsi TO imaging_server;
 GRANT USAGE ON SCHEMA public TO imaging_server;
-GRANT pg_write_server_files TO imaging_server; # so we can write csv files
+-- so we can write csv files
+GRANT pg_write_server_files TO imaging_server; 
 
 -- connect to the new database
 \c auvsi;
