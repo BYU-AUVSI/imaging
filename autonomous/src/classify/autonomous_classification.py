@@ -12,7 +12,11 @@ from shape_predictor import ShapePredictor
 
 
 #TODO: Add orientation function
-#      Pack into dict for submission
+#      Pack into dict for submission (see how GUI does it)
+#      Yaw angle from server
+#      Import template letters
+#      Get meanshiftfiltering to run on GPU (in c++?) if available
+#      Neural net for color classification?
 
 class AutonomousClassification():
 
@@ -48,7 +52,9 @@ class AutonomousClassification():
         self.letter_classifier = LetterPredictor()
 
 
-    def classify(self, cropped_img, show=False):
+    def classify(self, cropped_img, show=False, yaw=0):
+
+        self.aircraft_yaw = yaw
 
         try:
             self.img_crop = imutils.resize(cropped_img, width=200)
@@ -58,8 +64,7 @@ class AutonomousClassification():
             self.get_colors()
             self.get_shape()
             self.get_letter()
-            #self.get_orientation()
-            self.orientation = 'N'
+            self.get_orientation()
 
             if self.letter_contour is None:
                 return None
@@ -67,6 +72,18 @@ class AutonomousClassification():
             print(self.colors)
             print(self.shape)
             print(self.letter)
+            print(self.orientation)
+
+            self.dict = {
+                "img" : self.img_crop
+                "shape" : self.shape
+                "letter" : self.letter
+                "shapeColor" : self.colors[0]
+                "letterColor" : self.colors[1]
+                "orientation" : self.orientation
+            }
+
+            return self.dict
 
         except Exception:
             return None
@@ -320,3 +337,71 @@ class AutonomousClassification():
 
         else:
             self.letter = None
+
+
+    def get_orientation(self):
+
+        if self.letter is not None:
+
+            temp = cv.imread("assets/img/%s.jpg" % (self.letter), cv.IMREAD_GRAYSCALE)
+
+            minHessian = 400#400
+            detector = cv.xfeatures2d_SURF.create(hessianThreshold=minHessian)
+
+            keypoints_obj, descriptors_obj = detector.detectAndCompute(temp, None)
+            keypoints_scene, descriptors_scene = detector.detectAndCompute(img, None)
+
+            matcher = cv.BFMatcher()
+            matches1 = matcher.match(descriptors_obj,descriptors_scene)
+            matches2 = matcher.match(descriptors_scene,descriptors_obj)
+
+            good_matches = []
+            result1 = []
+
+            # get putative matches
+            for match in matches2:
+                result1.append([keypoints_scene[match.queryIdx].pt, keypoints_obj[match.trainIdx].pt])
+            for match2 in matches1:
+                candidate = [keypoints_scene[match2.trainIdx].pt, keypoints_obj[match2.queryIdx].pt]
+                if candidate in result1:
+                    good_matches.append(match2)
+
+            good_matches = sorted(good_matches, key = lambda x:x.distance)
+
+            obj = np.empty((len(good_matches),2), dtype=np.float32)
+            scene = np.empty((len(good_matches),2), dtype=np.float32)
+            for i in range(len(good_matches)):
+                #-- Get the keypoints from the good matches
+                obj[i,0] = keypoints_obj[good_matches[i].queryIdx].pt[0]
+                obj[i,1] = keypoints_obj[good_matches[i].queryIdx].pt[1]
+                scene[i,0] = keypoints_scene[good_matches[i].trainIdx].pt[0]
+                scene[i,1] = keypoints_scene[good_matches[i].trainIdx].pt[1]
+            #H, _ =  cv.findHomography(scene, obj, cv.LMEDS)
+            H = cv.estimateRigidTransform(scene,obj,True)
+
+            theta = math.atan2(H[1,0], H[1,1]) + self.aircraft_yaw #rads
+
+            self.orientation = self.find_NWES(theta*180/pi % 360)
+
+
+    def find_NWES(self, angle):
+
+        if (angle >= 337.5 and angle <= 360.0) or (angle >= 0.0 and angle < 22.5):
+            return "N"
+        elif angle >= 22.5 and angle < 67.5:
+            return "NE"
+        elif angle >= 67.5 and angle < 112.5:
+            return "E"
+        elif angle >= 112.5 and angle < 157.5:
+            return "SE"
+        elif angle >= 157.5 and angle < 202.5:
+            return "S"
+        elif angle >= 202.5 and angle < 247.5:
+            return "SW"
+        elif angle >= 247.5 and angle < 292.5:
+            return "W"
+        elif angle >= 292.5 and angle < 337.5:
+            return "NW"
+        else:
+            print("Orientation Error: Angle not wrapped properly!")
+            return None

@@ -1,5 +1,5 @@
 from autonomous_detection import AutonomousDetection
-from new_classifier import AutonomousClassification
+#from new_classifier import AutonomousClassification
 import cv2 as cv
 import time
 from os import listdir
@@ -8,7 +8,7 @@ from os import listdir
 def main():
     detector = AutonomousDetection()
     classifier = AutonomousClassification()
-    pic_names = listdir('../dji-targets-Mar20')
+    pic_names = listdir('dji-targets-Mar20')
 
     count = 0
 
