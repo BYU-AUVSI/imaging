@@ -6,6 +6,7 @@ from collections import OrderedDict
 from scipy.spatial import distance as dist
 import imutils
 import time
+import math
 from detect.autonomous_detection import AutonomousDetection
 from classify.letter_predictor import LetterPredictor
 from classify.shape_predictor import ShapePredictor
@@ -64,9 +65,7 @@ class AutonomousClassification():
             self.get_colors()
             self.get_shape()
             self.get_letter()
-            print('here')
             self.get_orientation()
-            print('not here')
 
             if self.letter_contour is None:
                 return None
@@ -345,23 +344,17 @@ class AutonomousClassification():
 
         if self.letter is not None:
 
-            print(self.letter)
-            #WHY IS THIS NOT READING CORRECTLY!!!!????
-            temp = cv.imread('assets/img/%c.jpg' % (str(self.letter)), cv.IMREAD_GRAYSCALE)
-            cv.imshow("Temp",temp)
-            print('b')
+            temp = cv.imread('classify/assets/img/%c.jpg' % (str(self.letter)), cv.IMREAD_GRAYSCALE)
+
             minHessian = 400#400
             detector = cv.xfeatures2d_SURF.create(hessianThreshold=minHessian)
-            print('c')
 
             keypoints_obj, descriptors_obj = detector.detectAndCompute(temp, None)
             keypoints_scene, descriptors_scene = detector.detectAndCompute(self.letter_contour, None)
-            print('d')
 
             matcher = cv.BFMatcher()
             matches1 = matcher.match(descriptors_obj,descriptors_scene)
             matches2 = matcher.match(descriptors_scene,descriptors_obj)
-            print('e')
 
             good_matches = []
             result1 = []
@@ -373,7 +366,6 @@ class AutonomousClassification():
                 candidate = [keypoints_scene[match2.trainIdx].pt, keypoints_obj[match2.queryIdx].pt]
                 if candidate in result1:
                     good_matches.append(match2)
-            print('f')
 
             good_matches = sorted(good_matches, key = lambda x:x.distance)
 
@@ -386,11 +378,16 @@ class AutonomousClassification():
                 scene[i,0] = keypoints_scene[good_matches[i].trainIdx].pt[0]
                 scene[i,1] = keypoints_scene[good_matches[i].trainIdx].pt[1]
             #H, _ =  cv.findHomography(scene, obj, cv.LMEDS)
-            H = cv.estimateRigidTransform(scene,obj,True)
+            try:
+                H = cv.estimateRigidTransform(obj,scene,True)
+                theta = math.atan2(H[1,0], H[1,1]) + self.aircraft_yaw #rads
+                print(theta*180/math.pi)
 
-            theta = math.atan2(H[1,0], H[1,1]) + self.aircraft_yaw #rads
+            except Exception:
+                print('Affine Transform didn\'t work. Using yaw angle instead.')
+                theta = self.aircraft_yaw
 
-            self.orientation = self.find_NWES(theta*180/pi % 360)
+            self.orientation = self.find_NWES(theta*180/math.pi % 360)
 
 
     def find_NWES(self, angle):
