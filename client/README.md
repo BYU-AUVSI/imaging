@@ -1,14 +1,31 @@
 # Client Graphical User Interface
 
-## Dependencies
+## Setup
+This gui was built with tkinter in python3 and relies on a few packages 
+  
+Clone the following [BYU-AUVSI](https://github.com/BYU-AUVSI) repos (if you haven't already) into a [catkin workspace](http://wiki.ros.org/catkin/Tutorials/create_a_workspace)
+```
+cd ~/<catkin_ws location>/src
+git clone https://github.com/BYU-AUVSI/imaging.git
+git clone https://github.com/BYU-AUVSI/inertial_sense_ros.git
+git clone https://github.com/BYU-AUVSI/uav_msgs.git
+```
+Build the workspace:  
+```
+cd ~/<catkin_ws location>/
+catkin_make
+```
+Install the following python modules:  
+```
+pip install ttkthemes
+```
 
-This gui was built with tkinter in python3 and relies on a few packages. Changes to them could have effects here.
 
 ```
 sudo apt install python3-tk
-pip3 install Pillow, opencv-python, ttkthemes, imutils
+pip install Pillow, opencv-python, ttkthemes, imutils
 ```
-
+## 
 ## Functionality
 To run the gui:
 `python3 gui.py`
