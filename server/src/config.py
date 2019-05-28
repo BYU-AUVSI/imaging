@@ -31,7 +31,9 @@ def createNewBaseImgDir():
     """
     rootImgDir = os.path.abspath(os.path.dirname(os.path.realpath(__file__)) + '/../images/')
     ts = str(int(time.time())) + '/'
-    os.makedirs(os.path.join(rootImgDir, ts))
+    if not os.path.exists(os.path.join(rootImgDir, ts)):
+        # in test mode, it will create and delete these dirs too quickly
+        os.makedirs(os.path.join(rootImgDir, ts))
     return os.path.join(rootImgDir, ts)
 
 def getLatestBaseImgDir():
