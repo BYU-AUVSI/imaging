@@ -28,6 +28,19 @@ There are two main installation methods: production and development.
 
 If you're looking to develop and actively test/use the server code on your own machine, run the `./setup/dev_setup.sh` script. It's **highly recommended** (especially if you're using ubuntu 16.04, which has python2 by default), to use a [conda environment](https://conda.io/docs/user-guide/install/index.html).
 
+Clone the following [BYU-AUVSI](https://github.com/BYU-AUVSI) repos (if you haven't already) into a [catkin workspace](http://wiki.ros.org/catkin/Tutorials/create_a_workspace)
+```
+cd ~/<catkin_ws location>/src
+git clone https://github.com/BYU-AUVSI/imaging.git
+git clone https://github.com/BYU-AUVSI/inertial_sense_ros.git
+git clone https://github.com/BYU-AUVSI/uav_msgs.git
+```
+Build the workspace:  
+```
+cd ~/<catkin_ws location>/
+catkin_make
+```
+
 ### Production
 
 To ensure easy setup, repeatability and transferability; we've created a [Docker](https://www.docker.com) image for the server to be run in a production environment.

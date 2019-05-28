@@ -86,12 +86,16 @@ class submitted_target:
         if hasattr(self, 'type') and self.type == 'emergent':
             # generate an emergent target output
             for attr, value in self.__dict__.items():
+                if isinstance(value, str):
+                    value = value.upper()
                 if attr in self.EMERGENT_KEYS_TO_INCLUDE:
                     dict[attr] = value
                 elif attr not in self.HELPER_VALUES:
                     dict[attr] = None
         else:
             for attr, value in self.__dict__.items():
+                if isinstance(value, str):
+                        value = value.upper()
                 if attr not in self.KEYS_TO_EXCLUDE:
                     dict[attr] = value
                 elif attr not in self.HELPER_VALUES:

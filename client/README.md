@@ -1,20 +1,8 @@
 # Client Graphical User Interface
 
 ## Setup
-This gui was built with tkinter in python3 and relies on a few packages 
-  
-Clone the following [BYU-AUVSI](https://github.com/BYU-AUVSI) repos (if you haven't already) into a [catkin workspace](http://wiki.ros.org/catkin/Tutorials/create_a_workspace)
-```
-cd ~/<catkin_ws location>/src
-git clone https://github.com/BYU-AUVSI/imaging.git
-git clone https://github.com/BYU-AUVSI/inertial_sense_ros.git
-git clone https://github.com/BYU-AUVSI/uav_msgs.git
-```
-Build the workspace:  
-```
-cd ~/<catkin_ws location>/
-catkin_make
-```
+This gui was built with tkinter in python3 and relies on a few packages
+
 Install the following python modules:  
 ```
 pip install ttkthemes
