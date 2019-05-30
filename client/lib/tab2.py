@@ -1,8 +1,12 @@
 import sys
 sys.path.append('..')
 
-import tkinter as tk
-from tkinter import ttk
+if sys.version_info[0] < 3:
+    import Tkinter as tk
+    import ttk
+else:
+    import tkinter as tk
+    from tkinter import ttk
 from lib import tab_tools, client_rest
 import time
 import numpy as np

@@ -31,8 +31,12 @@ ros_ingester.py
 '''
 
 import sys
-import tkinter as tk
-from tkinter import ttk
+if sys.version_info[0] < 3:
+    import Tkinter as tk
+    import ttk
+else:
+    import tkinter as tk
+    from tkinter import ttk
 from ttkthemes import ThemedStyle
 from lib import tab0, tab1, tab2, tab3, tab4
 

@@ -61,8 +61,8 @@ def resizeIm(image,image_width,image_height,width_restrict,height_restrict):
     @rtype:  PIL image
     @return: Resized PIL image
     """
-    ratio_h = height_restrict/image_height
-    ratio_w = width_restrict/image_width
+    ratio_h = height_restrict/float(image_height)
+    ratio_w = width_restrict/float(image_width)
     if ratio_h <= ratio_w:
         resized_im = image.resize((int(image_width*ratio_h), int(image_height*ratio_h)), Image.ANTIALIAS)
     else:

@@ -1,4 +1,10 @@
-from tkinter import ttk
+import sys
+if sys.version_info[0] < 3:
+    import Tkinter as tk
+    import ttk
+else:
+    import tkinter as tk
+    from tkinter import ttk
 
 """
 TODO:
