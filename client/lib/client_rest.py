@@ -297,15 +297,12 @@ class ImagingInterface:
         if img.status_code == 200:
             return Image.open(BytesIO(img.content)), imageId
         else:
-            print("In getRawImage(), server returned status code {}".format(img.status_code))
+            self.debug("In getRawImage(), server returned status code {}".format(img.status_code))
             return None
 
     def getNextRawImage(self):
         """
         Retrieves the next available raw image from the server.
-
-        @type  isManual: boolean
-        @param isManual: specify whether this is a manual imaging request (True) or an autonomous one (False)
 
         @rtype:  (Image, int)
         @return: a tuple of a pillow Image and the image id if there are any images available for processing,
@@ -319,7 +316,7 @@ class ImagingInterface:
             if img.status_code != 200:
                 # if we didnt get a good status code
                 self.rawIdIndex = len(self.rawIds)
-                print("In getNextRawImage(), server returned status code {}".format(img.status_code))
+                self.debug("In getNextRawImage(), server returned status code {}".format(img.status_code))
                 return None
 
             imageId = int(img.headers['X-Image-Id'])
@@ -416,7 +413,7 @@ class ImagingInterface:
             if img.status_code != 200:
                 # if we didnt get a good status code
                 self.cropIdIndex = len(self.cropIds)
-                print("In getNextCroppedImage() server returned status code {}".format(img.status_code))
+                self.debug("In getNextCroppedImage() server returned status code {}".format(img.status_code))
                 return None
 
             cropId = int(img.headers['X-Crop-Id'])
@@ -591,7 +588,7 @@ class ImagingInterface:
                                 info_j['longitude'],
                                 info_j['time_stamp'])
         else:
-            print("In getGPSById(), server returned status code {}".format(gps.status_code))
+            self.debug("In getGPSById(), server returned status code {}".format(gps.status_code))
             return None
 
     ####### state/ endpoints #######
