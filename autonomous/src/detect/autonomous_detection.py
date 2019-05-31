@@ -83,13 +83,13 @@ class AutonomousDetection():
         if show:
             self.keypoints_image = cv.drawKeypoints(self.resized_image, self.keypoints,
                 np.array([]), (0,0,255), cv.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
-            cv.imshow('Resized', self.resized_image)
-            cv.imshow('Preprocess', self.preprocessed)
-            cv.imshow('Canny', self.canny)
-            cv.imshow('Flood', self.flood)
+            # cv.imshow('Resized', self.resized_image)
+            # cv.imshow('Preprocess', self.preprocessed)
+            # cv.imshow('Canny', self.canny)
+            # cv.imshow('Flood', self.flood)
             cv.imshow('Detection', self.keypoints_image)
-            for i in range(len(self.img_crop)):
-                cv.imshow('Cropped Image %i' % (i), self.img_crop[i].crop)
+            # for i in range(len(self.img_crop)):
+            #     cv.imshow('Cropped Image %i' % (i), self.img_crop[i].crop)
             # cv.waitKey(0)
             # cv.destroyAllWindows()
 
