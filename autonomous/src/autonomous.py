@@ -10,7 +10,7 @@ from classify.autonomous_classification import AutonomousClassification
 
 class AutonomousManager():
 
-    def __init__(self, serverHost, serverPort, detection=True, classification=True, submit_interval=120):
+    def __init__(self, serverHost, serverPort, detection=True, classification=True, submit_interval=120, show=False):
         """
             Initialize a top-level autonomous manager
 
@@ -27,21 +27,26 @@ class AutonomousManager():
         self.client = ImagingInterface(serverHost, serverPort, isDebug=False, isManual=False)
 
         self.submit_interval = submit_interval
+        self.show = show
 
         # we give the option of having a machine thats running this Manager run
         #   ONLY the detection algorithm, or ONLY the classification algorithm,
         #   or both
-        self.doDetection = detection
-        if detection: 
-            self.detector = AutonomousDetection()
-        else:
-            print("Turning off detection for this autonomous process")
-
+        self.doDetection      = detection
         self.doClassification = classification
-        if classification:
+        if detection and classification: 
+            self.detector = AutonomousDetection()
             self.classifier = AutonomousClassification()
-        else:
+        elif not detection:
             print("Turning off classification for this autonomous process")
+            self.detector = AutonomousDetection()
+            self.doClassification = False
+            self.doDetection = True
+        elif not classification:
+            print("Turning off detection for this autonomous process")
+            self.classifier = AutonomousClassification()
+            self.doDetection      = False
+            self.doClassification = True
 
         if not classification and not detection:
             print("ERROR:: Cant disable both detection and classification!")
@@ -82,10 +87,10 @@ class AutonomousManager():
             classified = None
             if stateMeas is not None:
                 # if we were able to get a state measurement close to our raw img timestamp use it to try and decide orientation
-                classified = self.classifier.classify(imgToClassify, yaw=stateMeas.yaw)
+                classified = self.classifier.classify(imgToClassify, show=self.show, yaw=stateMeas.yaw)
             else:
                 # attempt to classify without orientation data
-                classified = self.classifier.classify(imgToClassify)
+                classified = self.classifier.classify(imgToClassify, show=self.show)
 
             if classified is not None:
                 print("Successfully classified crop {}!".format(cropId))
@@ -119,7 +124,7 @@ class AutonomousManager():
         if toDetect is not None:
             imgToDetect = np.array(toDetect[0])[:,:,::-1]
             imgId = toDetect[1]
-            results = self.detector.detect(imgToDetect)
+            results = self.detector.detect(imgToDetect, show=self.show)
 
             # if the detector actually returned something that's not an empty list
             if results is not None and results:
@@ -167,10 +172,13 @@ def main():
     parser.add_argument("-d", action='store_false', help="Detector only - only run the detector in this process")
     parser.add_argument("-c", action='store_false', help="Classifier only - only run the classifier in the process")
     parser.add_argument('-s', '--submit_interval', metavar='interval', type=int, help="If classifier is turned on, how often autonomously classified targets should be submitted to the judges, in seconds.")
+    parser.add_argument('--show', action='store_true', help="Turn on to show intermediate image state and debug logging")
     args = parser.parse_args()
 
     hostname = '127.0.0.1'
     port = '5000'
+
+    print("{} {}".format(args.d, args.c))
 
     if args.host is not None:
         hostname = args.host
@@ -181,7 +189,7 @@ def main():
     if args.submit_interval is not None and args.submit_interval > 0:
         interval = args.submit_interval
     
-    auto = AutonomousManager(hostname, port, args.d, args.c, interval)
+    auto = AutonomousManager(hostname, port, args.d, args.c, interval, args.show)
     auto.run()
 
 if __name__ == '__main__':
