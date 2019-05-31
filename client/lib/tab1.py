@@ -361,7 +361,7 @@ class Tab1():
         self.t1c1i1.bind("<ButtonRelease-1>",self.mouse_release)
         disp_width,disp_height = self.resized_im.size
         # ratio between full-size image and displayed image
-        self.sr = (self.org_width/disp_width + self.org_height/disp_height)/2.0
+        self.sr = (self.org_width/float(disp_width) + self.org_height/float(disp_height))/2.0
         self.draw_np = np.copy(self.org_np)
 
         x1 = event.x - self.offset_x
@@ -443,7 +443,7 @@ class Tab1():
 
         disp_width,disp_height = self.resized_im.size
         # ratio between full-size image and displayed image
-        self.sr = (self.org_width/disp_width + self.org_height/disp_height)/2.0
+        self.sr = (self.org_width/float(disp_width) + self.org_height/float(disp_height))/2.0
         self.draw_np = np.copy(self.org_np)
 
         # prevent going out of bounds
