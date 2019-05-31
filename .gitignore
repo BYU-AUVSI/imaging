@@ -11,3 +11,6 @@ postman_import.json
 *.zip
 *.pt
 *.pyo
+client/dist/
+client/build/
+client/byu_auvsi_imaging_client.egg-info/

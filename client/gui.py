@@ -60,8 +60,8 @@ class GuiClass(tk.Frame):
         try:
             self.master.attributes('-zoomed', True) # maximizes screen for linux
         except (Exception) as e:
-            w, h = root.winfo_screenwidth(), root.winfo_screenheight()
-            root.geometry("%dx%d+0+0" % (w, h)) # maximizes screen for mac
+            w, h = master.winfo_screenwidth(), master.winfo_screenheight()
+            master.geometry("%dx%d+0+0" % (w, h)) # maximizes screen for mac
         self.master.title("BYU AUVSI COMPETITION 2019")
 
         self.n = ttk.Notebook(self.master) # create tabs
@@ -139,7 +139,7 @@ class GuiClass(tk.Frame):
         self.master.destroy()
         sys.exit()
 
-if __name__ == "__main__":
+def main():
     root = tk.Tk()
     # change ttk style to something that looks decent
     style = ThemedStyle(root)
@@ -150,3 +150,6 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         root.destroy()
         sys.exit()
+
+if __name__ == "__main__":
+    main()

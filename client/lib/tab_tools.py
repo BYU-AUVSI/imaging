@@ -1,6 +1,7 @@
 import cv2
 from PIL import Image,ImageTk
 import numpy as np
+import os
 
 def get_image(path):
     """
@@ -12,7 +13,8 @@ def get_image(path):
     @rtype:  Numpy image array
     @return: Numpy array of selected image
     """
-    image_np = cv2.imread(path)
+    absPath = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../', path)
+    image_np = cv2.imread(absPath)
     image_np = cv2.cvtColor(image_np,cv2.COLOR_BGR2RGB)
     return image_np
 
