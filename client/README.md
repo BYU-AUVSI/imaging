@@ -65,12 +65,13 @@ This gui is built with with a tkinter tab framework. Each tab is initialized at 
 
 ## Releasing on Pypi
 
-Talk to @len0rd for detail on how to publish (for now until we come up with a better release system). But the basic idea is, from this client directory, run:
+Travis takes care of most of the heavy lifting when you want to release a new version
+of the gui onto pip/Pypi. In order to release a new version, you need to do two things:
 
-```bash
-python setup.py bdist_wheel sdist
-python -m twine upload dist/*
-```
+1. Update the `VERSION` variable in client/setup.py to whatever the new version is going to be called. If you dont do this, the new code will NOT be uploaded onto Pypi!
+
+2. Create a release tag on github. (Goto Releases->Create a new Release). Once a commit
+is tagged as a release, Travis will kick off and build deploy the current code to PyPi and thus to pip.
 
 ## Future Updates
 
