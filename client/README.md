@@ -5,7 +5,7 @@ imaging server.
 
 ## Setup
 
-## End-user
+### End-user
 
 If you just want to use the client to classify images, and don't plan on doing
 any development with it, here's how you can set it up.
@@ -29,7 +29,7 @@ You may also consider adding `~/.local/bin/` to your PATH:
 export PATH="$HOME/.local/bin:$PATH"
 ```
 
-## Development
+### Development
 
 To develop and contribute to this gui, clone the imaging repository.
 
@@ -61,7 +61,16 @@ This gui is built with with a tkinter tab framework. Each tab is initialized at 
 
 `lib/client_rest.py` contains all functions that interact with the server  
 `lib/tabX.py` contains the functions for tab X  
-`lib/tab_tools.py` contains helper functions used by multiple tabs  
+`lib/tab_tools.py` contains helper functions used by multiple tabs
+
+## Releasing on Pypi
+
+Talk to @len0rd for detail on how to publish (for now until we come up with a better release system). But the basic idea is, from this client directory, run:
+
+```bash
+python setup.py bdist_wheel sdist
+python -m twine upload dist/*
+```
 
 ## Future Updates
 

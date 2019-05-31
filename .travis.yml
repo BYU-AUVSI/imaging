@@ -2,16 +2,26 @@ language: python
 sudo: required
 dist: xenial
 services: postgresql
-before_script: # setup postgres db
-  - psql -f server/setup/internal/setup_database.sql -U postgres
+before_script:
+- psql -f server/setup/internal/setup_database.sql -U postgres
 python:
-  - "3.5"
-  - "3.6"
-  - "3.7"
-# command to install dependencies
+- '3.5'
+- '3.6'
+- '3.7'
 install:
-  - pip install -r server/setup/internal/server-pip-requirements.txt
-  - pip install -r client/setup/internal/minimum-test-pip-requirements.txt
-# command to run tests
+- pip install -r server/setup/internal/server-pip-requirements.txt
+- pip install -r client/setup/internal/minimum-test-pip-requirements.txt
 script:
-  - ./test.sh
+- "./test.sh"
+
+# deploy client GUI to pip repo whenever we create a release tag
+before_deploy: "mv server/setup.py server/setup_ros.py" # move server's setup.py which is used by ros to prevent travis from getting confused
+deploy:
+  provider: pypi
+  user: len0rd
+  password:
+    secure: lJHb0qO8UUbK1kCiqXM6oSTDuf9lRremrB+xDdOyc6KomOBGGtsMLavx9J7a/kD8W3RVp492i5b56kn/ujatQHSNpIcjZPldsrloMbQj8JuKD5Nbl7MpLm+nFBFx0Yv6Ag6sT5TyAHlNY/6VElKOx85SXyGso7aEvR5VY5H8pV9wD124qQ+bVuL12N1Lv30E55+U9MpoCwKBr1G9J7UQeGxfhaD7WLflOoOvvBZ4Sq2l9R+yWZTRZn2WhehxtGLWpaapXE5e3tEHhgDnjViFveQp+AWczRuRQetLVj45fDX96ZcvI3wOnDpK8waomVTA3Ha51I24fVLedPk0pYF5D1mq2jFuJEexroCc5xu0d+I89g2Gud4/CNbvSagy80I8W3H/S2lQdRvmweKo9ogqAwnmVpyh8wbAvul144zyAJVbLg365dOJ+TCDUmHRHyFK5h3L03WSBiVdLax4oCXsf5CxgNnRYiINp6e1cyRcmHf8XdTRofTTkPNJHqrHrD9NeYs4EiQbJ2dXgGob/Gb71n8Oqz2ioE2FGm3UnStYXzloX5ylcn5J12sLh5NU7hm4dtoxBW3r5ZGF6nPQzoPGRaUb0gdXycd84p4ABGhTRlQSDsbd/rngLVJ/QS1/PzmiXjLULEgxtLQjBhfeHTsBwGLdlb2WO4w38rd+JqFBYKY=
+  on:
+    tags: true
+  distributions: "bdist_wheel sdist" # travis only does sdist by default for some reason
+  skip_existing: true
