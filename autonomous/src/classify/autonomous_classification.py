@@ -70,10 +70,17 @@ class AutonomousClassification():
             if self.letter_contour is None:
                 return None
 
-            print(self.colors)
-            print(self.shape)
-            print(self.letter)
-            print(self.orientation)
+            #If we reach this point, we have found a letter and are
+            #   confident we have found a target. We don't want to
+            #   submit a "notarget" shape to the judges, so we set
+            #   it to an empty string
+            if self.shape == "notarget":
+                self.shape = ""
+
+            # print(self.colors)
+            # print(self.shape)
+            # print(self.letter)
+            # print(self.orientation)
 
             self.dict = {
                 "img": self.img_crop,
@@ -96,16 +103,16 @@ class AutonomousClassification():
         self.blur_crop = cv.GaussianBlur(self.img_crop, (5, 5), 0)     #**IS THIS NECESSARY?**
         self.blur_crop = cv.pyrMeanShiftFiltering(self.blur_crop, 30, 30, 3)
 
-        if show:
-            cv.imshow('Blur', self.blur_crop)
+        # if show:
+        #     cv.imshow('Blur', self.blur_crop)
 
         #detect edges and show
         self.canny_crop = cv.Canny(self.blur_crop,10,300)
         #dilating the edges often closes edges that were originally not connected
         self.canny_crop = cv.dilate(self.canny_crop, None, iterations=1)
         #self.canny_crop[i] = cv.erode(self.canny_crop[i], None, iterations=1)
-        if show:
-            cv.imshow('Canny', self.canny_crop)
+        # if show:
+        #     cv.imshow('Canny', self.canny_crop)
 
         #fill the enclosed edges to create a mask and show
         h, w = self.canny_crop.shape[:2]
@@ -136,7 +143,7 @@ class AutonomousClassification():
             shape_img = cv.cvtColor(self.flood_crop, cv.COLOR_GRAY2BGR)
             self.shape = self.shape_classifier.predict(shape_img)
 
-            print('Shape Guess: %s' % (self.shape))
+            # print('Shape Guess: %s' % (self.shape))
             #erode the mask to eliminate any leftover background
             #self.flood_crop[i] = cv.erode(self.flood_crop[i], None, iterations=2)
 
@@ -148,8 +155,8 @@ class AutonomousClassification():
             #self.blur_crop = self.blur_crop[max(1,cY-70):cY+70, max(1,cX-70):cX+70]
             #self.flood_crop = self.flood_crop[max(1,cY-70):cY+70, max(1,cX-70):cX+70]
 
-            if show:
-                cv.imshow('Flood', self.flood_crop)
+            # if show:
+            #     cv.imshow('Flood', self.flood_crop)
 
         else:
             #print('Flood %i failed: no significant contours in crop' % (i))

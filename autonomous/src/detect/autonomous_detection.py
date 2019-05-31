@@ -25,7 +25,7 @@ class AutonomousDetection():
         #filter by Area
         params.filterByColor = False
         params.filterByArea = True
-        params.minArea = 50#200
+        params.minArea = 20#200
         params.maxArea = 1000#2500
         #filter by Circularity
         params.filterByCircularity = False
@@ -59,6 +59,9 @@ class AutonomousDetection():
             @rtype: list of opencv images
             @returns: A list of cropped regions of interest (ROIs) from the original image
         """
+        img_y, img_x, _ = img.shape
+        if img_y > img_x:
+            img = imutils.rotate_bound(img,90)
 
         self.original_image = img
         self.resized_image = imutils.resize(img, width=600) #bassler images
@@ -70,7 +73,7 @@ class AutonomousDetection():
         self.img_crop.clear()
 
         self.preprocess()
-        self.detect_ROIs(500)
+        self.detect_ROIs(300)
         self.crop_ROIs()
 
         # refined_crops = self.img_crop.copy()
@@ -88,6 +91,7 @@ class AutonomousDetection():
             # cv.imshow('Canny', self.canny)
             # cv.imshow('Flood', self.flood)
             cv.imshow('Detection', self.keypoints_image)
+            key = cv.waitKey(1) & 0xFF
             # for i in range(len(self.img_crop)):
             #     cv.imshow('Cropped Image %i' % (i), self.img_crop[i].crop)
             # cv.waitKey(0)
@@ -130,7 +134,7 @@ class AutonomousDetection():
                 for j in range(len(self.keypoints)):
                     if i != j and j not in to_delete:
                         dist = ((self.keypoints[j].pt[0]-self.keypoints[i].pt[0])**2+(self.keypoints[j].pt[1]-self.keypoints[i].pt[1])**2)**(1/2)
-                        if dist < 100:#100
+                        if dist < 50:#100
                             to_delete.append(j)
         for n in to_delete:
             self.keypoints[n] = None

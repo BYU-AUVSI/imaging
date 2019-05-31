@@ -20,7 +20,7 @@ class AutonomousManager():
 
             @param detection: Whether the detector should be run by this manager. Default: True
 
-            @param classification: Whether the classifiers should be run by this manager. Default: False 
+            @param classification: Whether the classifiers should be run by this manager. Default: False
         """
         print("Autonomous Startup")
         self._should_shutdown = False
@@ -34,7 +34,7 @@ class AutonomousManager():
         #   or both
         self.doDetection      = detection
         self.doClassification = classification
-        if detection and classification: 
+        if detection and classification:
             self.detector = AutonomousDetection()
             self.classifier = AutonomousClassification()
         elif not detection:
@@ -69,7 +69,7 @@ class AutonomousManager():
         if toClassify is not None:
             imgToClassify = np.array(toClassify[0])[:,:,::-1]
             cropId = toClassify[1]
-            
+
             cropInfo = self.client.getCroppedImageInfo(cropId)
             if cropInfo is None:
                 print("Failed to get cropped image info!")
@@ -96,12 +96,12 @@ class AutonomousManager():
                 print("Successfully classified crop {}!".format(cropId))
                 print("\tshape={},letter={},shapeClr={}letterClr={},orientation={}".format(
                     classified['shape'],
-                    classified['letter'], 
+                    classified['letter'],
                     classified['shapeColor'],
-                    classified['letterColor'], 
+                    classified['letterColor'],
                     classified['orientation']))
                 # TODO: Always assuming standard target for now..
-                toPost = Classification(cropId, "standard", 
+                toPost = Classification(cropId, "standard",
                     orientation=classified['orientation'],
                     shape=classified['shape'],
                     bgColor=classified['shapeColor'],
@@ -114,9 +114,9 @@ class AutonomousManager():
             If this autonomous manager is set todo so, run detection on an available
             raw image, if any.
 
-            One issue here is client_rest expects/returns a PIL image and the 
-            detector expects/returns an opencv image (aka numpy array). So 
-            this method has to deal with converting between the two 
+            One issue here is client_rest expects/returns a PIL image and the
+            detector expects/returns an opencv image (aka numpy array). So
+            this method has to deal with converting between the two
         """
         toDetect = self.client.getNextRawImage() # returns tuple of (image, image_id)
 
@@ -124,7 +124,10 @@ class AutonomousManager():
         if toDetect is not None:
             imgToDetect = np.array(toDetect[0])[:,:,::-1]
             imgId = toDetect[1]
+            print(imgId)
+            
             results = self.detector.detect(imgToDetect, show=self.show)
+            print('Results: %i' % (len(results)))
 
             # if the detector actually returned something that's not an empty list
             if results is not None and results:
@@ -151,11 +154,11 @@ class AutonomousManager():
 
             if self.doClassification:
                 self.runClassification()
-                
+
                 if (time.time() - last_submit) > self.submit_interval:
                     self.submitTargets()
                     last_submit = time.time()
-            
+
             time.sleep(0.1)
 
     def shutdown(self):
@@ -188,7 +191,7 @@ def main():
     interval = 120
     if args.submit_interval is not None and args.submit_interval > 0:
         interval = args.submit_interval
-    
+
     auto = AutonomousManager(hostname, port, args.d, args.c, interval, args.show)
     auto.run()
 
