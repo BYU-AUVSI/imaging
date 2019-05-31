@@ -13,16 +13,14 @@ install:
 - pip install -r client/setup/internal/minimum-test-pip-requirements.txt
 script:
 - "./test.sh"
-
-# deploy client GUI to pip repo whenever we create a release tag
-before_deploy: 
-  - "cd client/"
+before_deploy:
+- cd client/
 deploy:
   provider: pypi
-  user: len0rd
-  password: #encrypt my password
-    secure: lJHb0qO8UUbK1kCiqXM6oSTDuf9lRremrB+xDdOyc6KomOBGGtsMLavx9J7a/kD8W3RVp492i5b56kn/ujatQHSNpIcjZPldsrloMbQj8JuKD5Nbl7MpLm+nFBFx0Yv6Ag6sT5TyAHlNY/6VElKOx85SXyGso7aEvR5VY5H8pV9wD124qQ+bVuL12N1Lv30E55+U9MpoCwKBr1G9J7UQeGxfhaD7WLflOoOvvBZ4Sq2l9R+yWZTRZn2WhehxtGLWpaapXE5e3tEHhgDnjViFveQp+AWczRuRQetLVj45fDX96ZcvI3wOnDpK8waomVTA3Ha51I24fVLedPk0pYF5D1mq2jFuJEexroCc5xu0d+I89g2Gud4/CNbvSagy80I8W3H/S2lQdRvmweKo9ogqAwnmVpyh8wbAvul144zyAJVbLg365dOJ+TCDUmHRHyFK5h3L03WSBiVdLax4oCXsf5CxgNnRYiINp6e1cyRcmHf8XdTRofTTkPNJHqrHrD9NeYs4EiQbJ2dXgGob/Gb71n8Oqz2ioE2FGm3UnStYXzloX5ylcn5J12sLh5NU7hm4dtoxBW3r5ZGF6nPQzoPGRaUb0gdXycd84p4ABGhTRlQSDsbd/rngLVJ/QS1/PzmiXjLULEgxtLQjBhfeHTsBwGLdlb2WO4w38rd+JqFBYKY=
+  user: "len0rd"
+  password:
+    secure: "diySio+ynR1uogdya6yts29Mm+oUGy0o8paIUjKr4qESMdMqVZ3mOrJP4kAL2/rmnR/Iv9wNRz4TYEdT6veH5kZlcZeGkaFROyiGMv1zpeqh3aHTkIpriz9a7/sq4PRnOfNDEWVNsgn9Op+DIbtTKrRp7Qg23AC3lyS7c/e/Aln0NS/b2McaLuMTIziE59bLrpY96+Jr4IBsnMGQSUQ2wUhB6cHoE6RTFKwVeZDxdZ8EFLf9AYoi8fH7WtTM7li9kDpQhkcjuIgDQTC5HIiG1k4wPs5PSzXwefGomKRoncIvzQi2W/bVOA59WRM2sHrZUslwwNguK9CwacKhkh4Bmdoeam3XlUahR8V0+fVLweLvS1KcPNxjBVGOMHCY+kREXw2J28OLKTLcIFZrwUouUyCUK2gB6KuRxg6K999irZcPdw1TJr/m57ciZfODrDrYeFyyidFclXmB+fa8hSe7LF37ZPeh1cqrISQTCdABOdooU3Qdg3YJaBkhVQV9hbaXJnNblyn2BRo6JiU8JkGMds2ePQhuF36dL33ue1GSt5CDRN8M4JjDv+wn5aCmDYKyW5wKEXLrjn7X/SFhh7StLk+TOArq0DhNKSTYww65oFO2i8AsHKD7yjL4ZwWLM4Mdf3XeLLIEo4fsWqVRem8qynG7Y6wTiTmf7fyr4P8vcm4="
   on:
-    tags: true # push our client pip package to pypi whenever we tag a release on github
-  distributions: "bdist_wheel sdist" # travis only does sdist by default for some reason
-  skip_existing: true # only try and push it once please
+    tags: true
+  distributions: "bdist_wheel sdist"
+  skip_existing: true
