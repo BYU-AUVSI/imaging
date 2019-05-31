@@ -10,7 +10,7 @@ from classify.autonomous_classification import AutonomousClassification
 
 class AutonomousManager():
 
-    def __init__(self, serverHost, serverPort, detection=True, classification=True):
+    def __init__(self, serverHost, serverPort, detection=True, classification=True, submit_interval=120):
         """
             Initialize a top-level autonomous manager
 
@@ -25,6 +25,8 @@ class AutonomousManager():
         print("Autonomous Startup")
         self._should_shutdown = False
         self.client = ImagingInterface(serverHost, serverPort, isDebug=False, isManual=False)
+
+        self.submit_interval = submit_interval
 
         # we give the option of having a machine thats running this Manager run
         #   ONLY the detection algorithm, or ONLY the classification algorithm,
@@ -44,6 +46,13 @@ class AutonomousManager():
         if not classification and not detection:
             print("ERROR:: Cant disable both detection and classification!")
             exit(1)
+
+    def submitTargets(self):
+        """
+            submit all pending autonomous targets
+        """
+        print("Submitting all pending targets...")
+        self.client.postSubmitAllTargets()
 
     def runClassification(self):
         """
@@ -125,6 +134,7 @@ class AutonomousManager():
         Sit and spin, checking for new images and processing them as necessary
         """
 
+        last_submit = time.time()
         while 1:
 
             if not self.client.ping(): # confirm we can still connect to the server
@@ -136,6 +146,10 @@ class AutonomousManager():
 
             if self.doClassification:
                 self.runClassification()
+                
+                if (time.time() - last_submit) > self.submit_interval:
+                    self.submitTargets()
+                    last_submit = time.time()
             
             time.sleep(0.1)
 
@@ -152,6 +166,7 @@ def main():
     parser.add_argument('-P', '--port', metavar='port', help='The hostname port for the server. Default: 5000')
     parser.add_argument("-d", action='store_false', help="Detector only - only run the detector in this process")
     parser.add_argument("-c", action='store_false', help="Classifier only - only run the classifier in the process")
+    parser.add_argument('-s', '--submit_interval', metavar='interval', type=int, help="If classifier is turned on, how often autonomously classified targets should be submitted to the judges, in seconds.")
     args = parser.parse_args()
 
     hostname = '127.0.0.1'
@@ -161,8 +176,12 @@ def main():
         hostname = args.host
     if args.port is not None:
         port = args.port
+
+    interval = 120
+    if args.submit_interval is not None and args.submit_interval > 0:
+        interval = args.submit_interval
     
-    auto = AutonomousManager(hostname, port, args.d, args.c)
+    auto = AutonomousManager(hostname, port, args.d, args.c, interval)
     auto.run()
 
 if __name__ == '__main__':
