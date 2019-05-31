@@ -15,7 +15,8 @@ script:
 - "./test.sh"
 
 # deploy client GUI to pip repo whenever we create a release tag
-before_deploy: "mv server/setup.py server/setup_ros.py" # move server's setup.py which is used by ros to prevent travis from getting confused
+before_deploy: 
+  - "cd client/"
 deploy:
   provider: pypi
   user: len0rd
