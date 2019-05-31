@@ -2,7 +2,7 @@ import argparse, time, threading
 import numpy as np
 import cv2
 from PIL import Image
-from client_rest import ImagingInterface
+from client_rest import ImagingInterface, Classification
 # from classify.letter_predictor import LetterPredictor
 from detect.autonomous_detection import AutonomousDetection, DetectedCrop
 from classify.autonomous_classification import AutonomousClassification
@@ -22,8 +22,9 @@ class AutonomousManager():
 
             @param classification: Whether the classifiers should be run by this manager. Default: False 
         """
+        print("Autonomous Startup")
         self._should_shutdown = False
-        self.client = ImagingInterface(serverHost, serverPort, isManual=False)
+        self.client = ImagingInterface(serverHost, serverPort, isDebug=False, isManual=False)
 
         # we give the option of having a machine thats running this Manager run
         #   ONLY the detection algorithm, or ONLY the classification algorithm,
@@ -49,7 +50,50 @@ class AutonomousManager():
             If this autonomous manager is set todo so, run classification on an available
             cropped image, if any.
         """
-        return
+        toClassify = self.client.getNextCroppedImage()
+
+        if toClassify is not None:
+            imgToClassify = np.array(toClassify[0])[:,:,::-1]
+            cropId = toClassify[1]
+            
+            cropInfo = self.client.getCroppedImageInfo(cropId)
+            if cropInfo is None:
+                print("Failed to get cropped image info!")
+                return # couldnt get info on the cropped image? weird..
+
+            rawInfo = self.client.getImageInfo(cropInfo.imgId)
+            stateMeas = None
+
+            if rawInfo is None:
+                print("Failed to get raw image info while attempting to classify!")
+            else:
+                # get the state measurement closest to the raw image timestamp
+                stateMeas = self.client.getStateByTs(rawInfo.time_stamp)
+
+            classified = None
+            if stateMeas is not None:
+                # if we were able to get a state measurement close to our raw img timestamp use it to try and decide orientation
+                classified = self.classifier.classify(imgToClassify, yaw=stateMeas.yaw)
+            else:
+                # attempt to classify without orientation data
+                classified = self.classifier.classify(imgToClassify)
+
+            if classified is not None:
+                print("Successfully classified crop {}!".format(cropId))
+                print("\tshape={},letter={},shapeClr={}letterClr={},orientation={}".format(
+                    classified['shape'],
+                    classified['letter'], 
+                    classified['shapeColor'],
+                    classified['letterColor'], 
+                    classified['orientation']))
+                # TODO: Always assuming standard target for now..
+                toPost = Classification(cropId, "standard", 
+                    orientation=classified['orientation'],
+                    shape=classified['shape'],
+                    bgColor=classified['shapeColor'],
+                    alpha=classified['letter'],
+                    alphaColor=classified['letterColor'])
+                self.client.postClass(toPost)
 
     def runDetection(self):
         """
@@ -92,6 +136,8 @@ class AutonomousManager():
 
             if self.doClassification:
                 self.runClassification()
+            
+            time.sleep(0.1)
 
     def shutdown(self):
         self._should_shutdown = True
