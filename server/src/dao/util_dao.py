@@ -68,6 +68,7 @@ class UtilDAO(BaseDAO):
         for table in self.tables:
             cur = self.conn.cursor()
             filename = os.path.join(getLatestBaseImgDir(), table)
+            filename = filename + '.csv'
             with open(filename, "w") as file:
                 cur.copy_expert(self.csvExportSQL.format(table), file)
             cur.close()
