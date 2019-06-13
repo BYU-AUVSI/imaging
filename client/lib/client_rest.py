@@ -231,7 +231,7 @@ class ImagingInterface:
         self.rawIds = []
         self.cropIds = []
         self.isCropSubmitted = {} # state of whether a cropped image has a classification submitted (True/False)
-        self.rawIdIndex = 0
+        self.rawIdIndex = -1
         self.cropIdIndex = -1
         self.numIdsStored = numIdsStored
         self.isDebug = isDebug
