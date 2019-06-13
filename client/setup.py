@@ -1,6 +1,6 @@
 import setuptools
 
-VERSION = '0.1.2'
+VERSION = '0.1.3'
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
@@ -10,7 +10,7 @@ pkgs.remove('lib.test')
 pkgs.append('assets')
 
 setuptools.setup(
-     name='byu-auvsi-imaging-client',  
+     name='byu-auvsi-imaging-client',
      version=VERSION,
      scripts=['gui.py'],
      entry_points={
