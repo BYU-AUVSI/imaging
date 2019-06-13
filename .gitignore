@@ -1,7 +1,7 @@
 *.vscode
 *__pycache__
 *.pyc
-.DS_Store
+*.DS_Store*
 build/
 server/images/
 .DS_Store
