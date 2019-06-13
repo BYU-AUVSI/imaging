@@ -14,8 +14,7 @@ from dao.submitted_target_dao import SubmittedTargetDAO
 # ROS messages:
 from inertial_sense.msg import GPS
 from rosplane_msgs.msg import State
-from sensor_msgs.msg import CompressedImage
-from std_msgs.msg import Float32
+from uav_msgs.msg import CompressedImgWithMeta
 # submit image service
 import rosservice
 from uav_msgs.srv import SubmitImage, SubmitImageResponse
@@ -50,16 +49,11 @@ class RosImagingHandler:
 
         # imaging ingestion setup:
         self.img_dao_ = IncomingImageDAO(self.configPath)
-        self.img_subscriber_ = rospy.Subscriber("/a6000_ros_node/img/compressed", CompressedImage, self.imgCallback,  queue_size = 10)
+        self.img_subscriber_ = rospy.Subscriber("/a6000_ros_node/img/compressed", CompressedImgWithMeta, self.imgCallback,  queue_size = 10)
         self.img_msg_ = incoming_image()
         self.img_msg_.focal_length = 16.0 # this is a safe starting assumption == fully zoomed out on a6000
         self.img_msg_.manual_tap = False
         self.img_msg_.autonomous_tap = False
-
-        # focal length ingestion setup (we could roll with a custom msg to 
-        # include it with the image msg, but IMO it's better to stick to standard msg types)
-        # to reduce dependency tracking.... But you may feel otherwise. Really there's no perfect solution here
-        self.fl_subscriber = rospy.Subscriber("/a6000_ros_node/img/focal_length", Float32, self.flCallback,  queue_size = 10)
 
         # state ingestion setup:
         self.state_dao_ = IncomingStateDAO(self.configPath)
@@ -117,6 +111,24 @@ class RosImagingHandler:
             print("FAILED to insert state measurement:")
             print("ts: {}, roll: {}, pitch: {}, yaw: {}".format(*self.state_msg_.insertValues()))
 
+    def rotate_about_center(self, src, angle, scale=1.):
+        w = src.shape[1]
+        h = src.shape[0]
+        rangle = np.deg2rad(angle)  # angle in radians
+        # now calculate new image width and height
+        nw = (abs(np.sin(rangle)*h) + abs(np.cos(rangle)*w))*scale
+        nh = (abs(np.cos(rangle)*h) + abs(np.sin(rangle)*w))*scale
+        # ask OpenCV for the rotation matrix
+        rot_mat = cv2.getRotationMatrix2D((nw*0.5, nh*0.5), angle, scale)
+        # calculate the move from the old center to the new center combined
+        # with the rotation
+        rot_move = np.dot(rot_mat, np.array([(nw-w)*0.5, (nh-h)*0.5,0]))
+        # the move only affects the translation, so update the translation
+        # part of the transform
+        rot_mat[0,2] += rot_move[0]
+        rot_mat[1,2] += rot_move[1]
+        return cv2.warpAffine(src, rot_mat, (int(np.ceil(nw)), int(np.ceil(nh))))
+
     def imgCallback(self, msg):
         """
         Ros subscriber callback. Subscribes to the cameras image topic. Saves
@@ -128,28 +140,39 @@ class RosImagingHandler:
         if not os.path.exists(raw_path_):
             os.makedirs(raw_path_)
         # setup file name
-        ts = msg.header.stamp.to_sec()
+        ts = msg.img.header.stamp.to_sec()
         filename = str(ts) + ".jpg"
         fullPath = os.path.join(raw_path_, filename)
 
         # setup the actual file data
-        np_arr = np.fromstring(msg.data, np.uint8)
+        np_arr = np.fromstring(msg.img.data, np.uint8)
         image_np = cv2.imdecode(np_arr, cv2.IMREAD_COLOR) # if its opencv < 3.0 then use cv2.CV_LOAD_IMAGE_COLOR
-        cv2.imwrite(fullPath, image_np)
 
         self.img_msg_.time_stamp = ts 
         self.img_msg_.image_path = fullPath
+        self.img_msg_.focal_length = msg.focal_length
+
+        orientation = msg.orientation
+        # uint8 ORIENTATION_TYPE_ROTATE_180    = 3 # image is rotated 180 degrees
+        # uint8 ORIENTATION_TYPE_ROTATE_90_CW  = 6 # image is rotated 90 dec CW
+        # uint8 ORIENTATION_TYPE_ROTATE_90_CCW = 8 # image is rotated 90 deg CCW
+        if orientation == 3: # Rotated 180
+            properlyRotated = self.rotate_about_center(image_np, 180)
+        elif orientation == 6: # rotated 90 CW
+            properlyRotated = self.rotate_about_center(image_np, 90)
+        elif orientation == 8: # rotated 90 CCW
+            properlyRotated = self.rotate_about_center(image_np, 270)
+        else:
+            properlyRotated = image_np
+
+        # write out the image
+        cv2.imwrite(fullPath, properlyRotated)
 
         # insert into the db - returns db id of inserted image
         resultingId = self.img_dao_.addImage(self.img_msg_)
         if resultingId == -1:
             print("FAILED to insert image:")
             print("ts: {}, path: {}, manual_tap: {}, autonomous_tap: {}".format(*self.img_msg_.insertValues()))
-
-    def flCallback(self, msg):
-        # take the focal length published on the message and set it to our 
-        # incoming_image model
-        self.img_msg_.focal_length = msg.data
 
     def targetToInteropMsg(self, target):
         """
