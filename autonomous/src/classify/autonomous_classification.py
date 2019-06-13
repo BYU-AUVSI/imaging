@@ -11,29 +11,25 @@ from detect.autonomous_detection import AutonomousDetection
 from classify.letter_predictor import LetterPredictor
 from classify.shape_predictor import ShapePredictor
 
-
-#TODO: Add orientation function
-#      Pack into dict for submission (see how GUI does it)
-#      Yaw angle from server
-#      Import template letters
-#      Get meanshiftfiltering to run on GPU (in c++?) if available
-#      Neural net for color classification?
+#Params to tune:
+#   Predicted color RGB values
+#
 
 class AutonomousClassification():
 
     def __init__(self):
         #create a library for color determination in RGB
         colors = OrderedDict({
-        	"red": (215,150,150),#255,0,0
-        	"green": (100,255,200),#0,255,0
-        	"blue": (80,200,200),#0,0,255
-            "white": (255,255,255),#255,255,255
-            "black": (0,0,0),
-            "orange": (250,200,100),
-            "yellow": (250,250,190),
-            "purple": (170,165,250),
-            "gray": (200,200,200),
-            "brown": (220,210,220)})
+        	"red": (250,160,160),#(230,200,200),#255,0,0
+        	"green": (145,225,210),#(0,200,150),#0,255,0
+        	"blue": (160,200,250),#(80,200,200),#0,0,255
+            "white": (240,240,240),#(255,255,255),#255,255,255
+            "black": (100,100,110),#(110,130,160),
+            "orange": (255,220,165),#(250,200,100),
+            "yellow": (255,255,220),#(250,250,190),
+            "purple": (230,220,250),#(250,100,250),
+            "gray": (220,230,230),#(240,240,240),
+            "brown": (205,165,150)})#(220,210,220)})
 
         # allocate memory for the L*a*b* image, then initialize
         # the color names list
@@ -59,23 +55,31 @@ class AutonomousClassification():
 
         try:
             self.img_crop = imutils.resize(cropped_img, width=200)
-            self.get_mask(show)
-            self.get_black_back(show)
-            self.color_cluster(show)
+            self.get_mask()
+            self.get_black_back()
+            self.color_cluster()
             self.get_colors()
             self.get_shape()
             self.get_letter()
             self.get_orientation()
 
+            if show:
+
+                cv.imshow('Canny', self.canny_crop)
+                cv.imshow('Blur', self.blur_crop)
+                if self.flood_crop is not None:
+                    cv.imshow('Flood', self.flood_crop)
+                if self.black_back is not None:
+                    cv.imshow('Black Background', self.black_back)
+                if self.letter_contour is not None:
+                    cv.imshow('Letter Contour', self.letter_contour)
+                # key = cv.waitKey(0) #& 0xFF
+
             if self.letter_contour is None:
                 return None
 
-            #If we reach this point, we have found a letter and are
-            #   confident we have found a target. We don't want to
-            #   submit a "notarget" shape to the judges, so we set
-            #   it to an empty string
             if self.shape == "notarget":
-                self.shape = ""
+                return None
 
             # print(self.colors)
             # print(self.shape)
@@ -98,21 +102,17 @@ class AutonomousClassification():
             return None
 
 
-    def get_mask(self, show=False):
+    def get_mask(self):
 
         self.blur_crop = cv.GaussianBlur(self.img_crop, (5, 5), 0)     #**IS THIS NECESSARY?**
         self.blur_crop = cv.pyrMeanShiftFiltering(self.blur_crop, 30, 30, 3)
 
-        # if show:
-        #     cv.imshow('Blur', self.blur_crop)
 
         #detect edges and show
         self.canny_crop = cv.Canny(self.blur_crop,10,300)
         #dilating the edges often closes edges that were originally not connected
         self.canny_crop = cv.dilate(self.canny_crop, None, iterations=1)
         #self.canny_crop[i] = cv.erode(self.canny_crop[i], None, iterations=1)
-        # if show:
-        #     cv.imshow('Canny', self.canny_crop)
 
         #fill the enclosed edges to create a mask and show
         h, w = self.canny_crop.shape[:2]
@@ -140,8 +140,8 @@ class AutonomousClassification():
 
             cv.drawContours(self.flood_crop, [self.c], 0, 255, cv.FILLED)
 
-            shape_img = cv.cvtColor(self.flood_crop, cv.COLOR_GRAY2BGR)
-            self.shape = self.shape_classifier.predict(shape_img)
+            # shape_img = cv.cvtColor(self.flood_crop, cv.COLOR_GRAY2BGR)
+            # self.shape = self.shape_classifier.predict(shape_img)
 
             # print('Shape Guess: %s' % (self.shape))
             #erode the mask to eliminate any leftover background
@@ -155,8 +155,6 @@ class AutonomousClassification():
             #self.blur_crop = self.blur_crop[max(1,cY-70):cY+70, max(1,cX-70):cX+70]
             #self.flood_crop = self.flood_crop[max(1,cY-70):cY+70, max(1,cX-70):cX+70]
 
-            # if show:
-            #     cv.imshow('Flood', self.flood_crop)
 
         else:
             #print('Flood %i failed: no significant contours in crop' % (i))
@@ -164,20 +162,17 @@ class AutonomousClassification():
             self.c = None
 
 
-    def get_black_back(self, show=False):
+    def get_black_back(self):
         #NOTE: Changing color to black
         if self.flood_crop is not None:
             self.black_back = cv.bitwise_and(self.blur_crop,self.blur_crop,mask=self.flood_crop)
             #self.white_back[i][np.where((self.white_back[i]==[0,0,0]).all(axis=2))] = [255,255,255]
 
-            if show:
-                cv.imshow('Black Background', self.black_back)
-
         else:
             self.black_back = None
 
 
-    def color_cluster(self, show=False):
+    def color_cluster(self):
 
         if self.black_back is not None:
             #convert to lab for color identification
@@ -276,9 +271,6 @@ class AutonomousClassification():
 
                     self.letter_contour = self.cluster.copy()
 
-
-                if show and self.letter_contour is not None:
-                    cv.imshow('Letter Contour', self.letter_contour)
 
                 #Deterimine colors
                 # for count in range(2):

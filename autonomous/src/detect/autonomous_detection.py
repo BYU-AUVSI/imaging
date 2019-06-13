@@ -2,6 +2,13 @@ import cv2 as cv
 import numpy as np
 import imutils
 
+#Params to tune:
+#   Size of blobs: params.minArea/params.maxArea    35-36
+#   Size of image: resized_image width              74
+#   Canny threshold                                 83
+#   Mean shift iterations                           111
+#   Min distance between keypoints                  144
+
 class DetectedCrop():
     """
     Holds information on an autonomously cropped image. Namely the cropped image itself,
@@ -73,7 +80,11 @@ class AutonomousDetection():
         self.img_crop.clear()
 
         self.preprocess()
-        self.detect_ROIs(300)
+        self.detect_ROIs(edge_limit=500)
+
+        if len(self.keypoints) > 5:
+            return []
+
         self.crop_ROIs()
 
         # refined_crops = self.img_crop.copy()
@@ -219,6 +230,10 @@ class AutonomousDetection():
             #self.flood_crop[i] = cv.erode(self.flood_crop[i], None, iterations=2)
 
             M = cv.moments(c)
+            if M["m00"] == 0:
+                print('Divide by zero error in detector')
+                return None, None
+
             cX = int(M["m10"] / M["m00"])
             cY = int(M["m01"] / M["m00"])
 
