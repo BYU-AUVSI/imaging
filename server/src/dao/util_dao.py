@@ -14,7 +14,7 @@ class UtilDAO(BaseDAO):
         'cropped_manual', 'cropped_autonomous', 'outgoing_manual', 
         'outgoing_autonomous', 'submitted_target']
     deleteSQL = "DELETE FROM {};"
-    csvExportSQL = "COPY {} TO '{}.csv' DELIMITER ',' CSV HEADER;"
+    csvExportSQL = "COPY (SELECT * FROM {}) TO STDOUT WITH CSV DELIMITER ';';"
     # csvExportSQL = "\copy (SELECT * FROM {}) TO '{}' WITH CSV;"
     truncateIncomingManual = "DELETE FROM incoming_image;"
     truncateCroppedManual = "DELETE FROM cropped_manual;"
@@ -64,4 +64,11 @@ class UtilDAO(BaseDAO):
         and you're left with a clean database
         """
         # save all the tables:
-        super(UtilDAO, self).executeStatements([self.csvExportSQL.format(table, os.path.join(getLatestBaseImgDir(), table)) for table in self.tables])
+
+        for table in self.tables:
+            cur = self.conn.cursor()
+            filename = os.path.join(getLatestBaseImgDir(), table)
+            filename = filename + '.csv'
+            with open(filename, "w") as file:
+                cur.copy_expert(self.csvExportSQL.format(table), file)
+            cur.close()
