@@ -235,7 +235,7 @@ def writeTargetToODLCFile(target, manual):
         return None
     imagePath = croppedInfo.cropped_path
 
-    prettyTargetOut = submitted_target(outgoingManualOrAutonomous=target, autonomous=(not manual))
+    prettyTargetOut = submitted_target(outgoingManualOrAutonomous=target, autonomous_in=(not manual))
     prettyTargetOut.crop_path = imagePath
 
     auvsiDao = AuvsiOdlcDao()
