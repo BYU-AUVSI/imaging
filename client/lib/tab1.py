@@ -32,6 +32,7 @@ class Tab1():
         self.initialized = False
         self.resize_counter_tab1 = time.time()
         self.hourtime = datetime.datetime.now()
+        self.loading = False
 
 
         self.t1_functional = False
@@ -164,45 +165,47 @@ class Tab1():
         @rtype:  None
         @return: None
         """
-        self.t1c2r2.configure(text="loading",foreground="red") # display that it's loading
-        self.master.update() # update loading setting
-        self.pingServer()
-        if self.serverConnected:
-            query = self.interface.getNextRawImage()
-            if query == None:
-                self.t1_functional = False
-                self.noNextRaw()
-            else:
-                self.t1_functional = True
-                self.imageID = query[1]
-                self.org_np = np.array(query[0])
-                timestamp = datetime.datetime.fromtimestamp(self.interface.getImageInfo(self.imageID).time_stamp)
-                self.t1c2r1b.configure(text=timestamp.strftime('%H : %M : %S'))
-            self.draw_np = np.copy(self.org_np)
-            self.img_im = tab_tools.np2im(self.draw_np)
-            self.crop_preview_im = self.img_im.copy()
-            self.org_width,self.org_height = self.img_im.size
-            self.crop_preview_width,self.crop_preview_height = self.crop_preview_im.size
-            self.cropped = False
-            self.resized_im = tab_tools.resizeIm(self.img_im,self.org_width,self.org_height,self.t1c1i1_width,self.t1c1i1_height)
-            self.img_tk = tab_tools.im2tk(self.resized_im)
-            self.t1c1i1.configure(image=self.img_tk)
-            self.crop_preview_resized_im = tab_tools.resizeIm(self.crop_preview_im,self.crop_preview_width,self.crop_preview_height,self.t1c1i1_width*self.crop_preview_img_ratio,self.t1c1i1_height*self.crop_preview_img_ratio)
-            self.crop_preview_tk = tab_tools.im2tk(self.crop_preview_resized_im)
-            self.t1c2i1.configure(image=self.crop_preview_tk)
-            self.t1c2r6b.configure(text="unsubmitted",foreground="red")
-            # reset crop points to none
-            self.x0 = None
-            self.y0 = None
-            self.x1 = None
-            self.y1 = None
-            # zooming variables
-            #self.zoomPercent = 1.0  # (0.1,1.0) --> (10%,100%) of image shown
-            #self.img_im_org = self.img_im.copy() # PIL raw image that won't be changed
-            self.hourtime = datetime.datetime.now()
-            self.t1c2r0b.configure(text="%d : %d : %d" % (self.hourtime.hour,self.hourtime.minute,self.hourtime.second))
-            self.t1c2r2.configure(text="loaded",foreground="green")
-
+        if not(self.loading):
+            self.loading = True
+            self.t1c2r2.configure(text="loading",foreground="red") # display that it's loading
+            self.master.update() # update loading setting
+            self.pingServer()
+            if self.serverConnected:
+                query = self.interface.getNextRawImage()
+                if query == None:
+                    self.t1_functional = False
+                    self.noNextRaw()
+                else:
+                    self.t1_functional = True
+                    self.imageID = query[1]
+                    self.org_np = np.array(query[0])
+                    timestamp = datetime.datetime.fromtimestamp(self.interface.getImageInfo(self.imageID).time_stamp)
+                    self.t1c2r1b.configure(text=timestamp.strftime('%H : %M : %S'))
+                self.draw_np = np.copy(self.org_np)
+                self.img_im = tab_tools.np2im(self.draw_np)
+                self.crop_preview_im = self.img_im.copy()
+                self.org_width,self.org_height = self.img_im.size
+                self.crop_preview_width,self.crop_preview_height = self.crop_preview_im.size
+                self.cropped = False
+                self.resized_im = tab_tools.resizeIm(self.img_im,self.org_width,self.org_height,self.t1c1i1_width,self.t1c1i1_height)
+                self.img_tk = tab_tools.im2tk(self.resized_im)
+                self.t1c1i1.configure(image=self.img_tk)
+                self.crop_preview_resized_im = tab_tools.resizeIm(self.crop_preview_im,self.crop_preview_width,self.crop_preview_height,self.t1c1i1_width*self.crop_preview_img_ratio,self.t1c1i1_height*self.crop_preview_img_ratio)
+                self.crop_preview_tk = tab_tools.im2tk(self.crop_preview_resized_im)
+                self.t1c2i1.configure(image=self.crop_preview_tk)
+                self.t1c2r6b.configure(text="unsubmitted",foreground="red")
+                # reset crop points to none
+                self.x0 = None
+                self.y0 = None
+                self.x1 = None
+                self.y1 = None
+                # zooming variables
+                #self.zoomPercent = 1.0  # (0.1,1.0) --> (10%,100%) of image shown
+                #self.img_im_org = self.img_im.copy() # PIL raw image that won't be changed
+                self.hourtime = datetime.datetime.now()
+                self.t1c2r0b.configure(text="%d : %d : %d" % (self.hourtime.hour,self.hourtime.minute,self.hourtime.second))
+                self.t1c2r2.configure(text="loaded",foreground="green")
+                self.loading = False
 
     def previousRaw(self,event):
         """
@@ -214,46 +217,48 @@ class Tab1():
         @rtype:  None
         @return: None
         """
-        self.t1c2r2.configure(text="loading",foreground="red") # display that it's loading
-        self.master.update() # update loading setting
-        self.pingServer()
-        if self.serverConnected:
-            query = self.interface.getPrevRawImage()
-            if query == None:
-                self.noPreviousRaw()
-                self.t1_functional = False
-            else:
-                self.t1_functional = True
-                self.imageID = query[1]
-                self.org_np = np.array(query[0]) #tab_tools.get_image('frame0744.jpg')
-                timestamp = datetime.datetime.fromtimestamp(self.interface.getImageInfo(self.imageID).time_stamp)
-                self.t1c2r1b.configure(text=timestamp.strftime('%H : %M : %S'))
-            self.draw_np = np.copy(self.org_np)
-            self.img_im = tab_tools.np2im(self.draw_np)
-            self.crop_preview_im = self.img_im.copy()
-            self.crop_preview_tk = tab_tools.im2tk(self.crop_preview_im)
-            self.org_width,self.org_height = self.img_im.size
-            self.crop_preview_width,self.crop_preview_height = self.img_im.size
-            self.cropped = False
-            self.resized_im = tab_tools.resizeIm(self.img_im,self.org_width,self.org_height,self.t1c1i1_width,self.t1c1i1_height)
-            self.img_tk = tab_tools.im2tk(self.resized_im)
-            self.t1c1i1.configure(image=self.img_tk)
-            self.crop_preview_resized_im = tab_tools.resizeIm(self.crop_preview_im,self.crop_preview_width,self.crop_preview_height,self.t1c1i1_width*self.crop_preview_img_ratio,self.t1c1i1_height*self.crop_preview_img_ratio)
-            self.crop_preview_tk = tab_tools.im2tk(self.crop_preview_resized_im)
-            self.t1c2i1.configure(image=self.crop_preview_tk)
-            self.t1c2r6b.configure(text="unsubmitted",foreground="red")
-            # reset crop points to none
-            self.x0 = None
-            self.y0 = None
-            self.x1 = None
-            self.y1 = None
-            # zooming variables
-            #self.zoomPercent = 1.0  # (0.1,1.0) --> (10%,100%) of image shown
-            #self.img_im_org = self.img_im.copy() # PIL raw image that won't be changed
-            self.hourtime = datetime.datetime.now()
-            self.t1c2r0b.configure(text="%d : %d : %d" % (self.hourtime.hour,self.hourtime.minute,self.hourtime.second))
-            self.t1c2r2.configure(text="loaded",foreground="green") # display done loading
-
+        if not(self.loading):
+            self.loading = True
+            self.t1c2r2.configure(text="loading",foreground="red") # display that it's loading
+            self.master.update() # update loading setting
+            self.pingServer()
+            if self.serverConnected:
+                query = self.interface.getPrevRawImage()
+                if query == None:
+                    self.noPreviousRaw()
+                    self.t1_functional = False
+                else:
+                    self.t1_functional = True
+                    self.imageID = query[1]
+                    self.org_np = np.array(query[0]) #tab_tools.get_image('frame0744.jpg')
+                    timestamp = datetime.datetime.fromtimestamp(self.interface.getImageInfo(self.imageID).time_stamp)
+                    self.t1c2r1b.configure(text=timestamp.strftime('%H : %M : %S'))
+                self.draw_np = np.copy(self.org_np)
+                self.img_im = tab_tools.np2im(self.draw_np)
+                self.crop_preview_im = self.img_im.copy()
+                self.crop_preview_tk = tab_tools.im2tk(self.crop_preview_im)
+                self.org_width,self.org_height = self.img_im.size
+                self.crop_preview_width,self.crop_preview_height = self.img_im.size
+                self.cropped = False
+                self.resized_im = tab_tools.resizeIm(self.img_im,self.org_width,self.org_height,self.t1c1i1_width,self.t1c1i1_height)
+                self.img_tk = tab_tools.im2tk(self.resized_im)
+                self.t1c1i1.configure(image=self.img_tk)
+                self.crop_preview_resized_im = tab_tools.resizeIm(self.crop_preview_im,self.crop_preview_width,self.crop_preview_height,self.t1c1i1_width*self.crop_preview_img_ratio,self.t1c1i1_height*self.crop_preview_img_ratio)
+                self.crop_preview_tk = tab_tools.im2tk(self.crop_preview_resized_im)
+                self.t1c2i1.configure(image=self.crop_preview_tk)
+                self.t1c2r6b.configure(text="unsubmitted",foreground="red")
+                # reset crop points to none
+                self.x0 = None
+                self.y0 = None
+                self.x1 = None
+                self.y1 = None
+                # zooming variables
+                #self.zoomPercent = 1.0  # (0.1,1.0) --> (10%,100%) of image shown
+                #self.img_im_org = self.img_im.copy() # PIL raw image that won't be changed
+                self.hourtime = datetime.datetime.now()
+                self.t1c2r0b.configure(text="%d : %d : %d" % (self.hourtime.hour,self.hourtime.minute,self.hourtime.second))
+                self.t1c2r2.configure(text="loaded",foreground="green") # display done loading
+                self.loading = False
 
     def submitCropped(self,event=None):
         """
