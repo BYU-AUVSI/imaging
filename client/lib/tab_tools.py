@@ -82,7 +82,6 @@ def getYawAngle(interface,imageID):
     if image_state is not None:
         yaw = image_state.yaw
         yaw = np.degrees(yaw)
-        print("yaw=",yaw)
     else:
         #yaw_angle = 0.0
         # todo: eventually remove this

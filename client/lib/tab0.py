@@ -2,11 +2,11 @@ import sys
 sys.path.append('..')
 
 if sys.version_info[0] < 3:
-    import Tkinter as tk
-    import ttk
+	import Tkinter as tk
+	import ttk
 else:
-    import tkinter as tk
-    from tkinter import ttk
+	import tkinter as tk
+	from tkinter import ttk
 from lib import client_rest, tab_tools
 import time
 
@@ -26,10 +26,10 @@ class Tab0():
 		self.master = master
 		self.n = notebook
 		self.initialized = False
-		self.default_host = '127.0.0.1' # host if running on own machine
-		#self.default_host = '192.168.1.48'
+		#self.default_host = '127.0.0.1' # host if running on own machine
+		self.default_host = '192.168.1.10'
 		self.default_port = '5000'
-		self.default_idnum = 50
+		self.default_idnum = 9999
 		self.default_debug = False
 		self.interface = client_rest.ImagingInterface(host=self.default_host,port=self.default_port,numIdsStored=self.default_idnum,isDebug=self.default_debug)
 		self.resize_counter_tab0 = time.time()
@@ -92,6 +92,8 @@ class Tab0():
 		self.t0c4r0.grid(row=0,column=4,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
 		self.t0c5r0 = ttk.Label(self.tab0, anchor=tk.CENTER, text='                                   ')
 		self.t0c5r0.grid(row=0,column=5,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
+		self.t0c4r6 = ttk.Label(self.tab0, anchor=tk.S, text='Version 0.1.4')
+		self.t0c4r6.grid(row=6,column=4,columnspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
 		self.t0c4r7 = ttk.Button(self.tab0, text="  Save Database  ",command=self.saveDatabase)
 		self.t0c4r7.grid(row=7,column=4,columnspan=2,sticky=tk.N+tk.S,padx=5,pady=5,ipadx=5,ipady=5)
 		self.t0c4r8 = ttk.Button(self.tab0, text="  Load Database  ",command=self.loadDatabase)
