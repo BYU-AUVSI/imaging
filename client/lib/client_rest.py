@@ -322,6 +322,7 @@ class ImagingInterface:
             imageId = int(img.headers['X-Image-Id'])
             if len(self.rawIds) >= self.numIdsStored:
                 self.rawIds.pop(0)
+                self.rawIdIndex = self.numIdsStored - 1
 
             self.rawIds.append(imageId)
             self.debug("Image ID:: {}".format(imageId))
@@ -418,8 +419,11 @@ class ImagingInterface:
 
             cropId = int(img.headers['X-Crop-Id'])
             if len(self.cropIds) >= self.numIdsStored:
-                self.isCropSubmitted.pop(0)
+                self.cropIds.pop(0)
+                self.cropIdIndex = self.numIdsStored - 1
+                self.isCropSubmitted.pop(self.cropIds[0])
                 del self.isCropSubmitted[self.cropIds[0]]
+
 
             self.cropIds.append(cropId)
             self.isCropSubmitted[cropId] = False
