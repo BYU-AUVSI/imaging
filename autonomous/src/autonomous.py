@@ -10,7 +10,7 @@ from classify.autonomous_classification import AutonomousClassification
 
 class AutonomousManager():
 
-    def __init__(self, serverHost, serverPort, detection=True, classification=True, submit_interval=120, show=False):
+    def __init__(self, serverHost, serverPort, detection=True, classification=True, img_start=None, submit_interval=120, show=False):
         """
             Initialize a top-level autonomous manager
 
@@ -28,6 +28,10 @@ class AutonomousManager():
 
         self.submit_interval = submit_interval
         self.show = show
+
+        # for manually specifying which image in the server to start detection on
+        self.img_start = img_start
+        self.img_num = img_start
 
         # we give the option of having a machine thats running this Manager run
         #   ONLY the detection algorithm, or ONLY the classification algorithm,
@@ -87,10 +91,17 @@ class AutonomousManager():
             classified = None
             if stateMeas is not None:
                 # if we were able to get a state measurement close to our raw img timestamp use it to try and decide orientation
-                classified = self.classifier.classify(imgToClassify, show=self.show, yaw=stateMeas.yaw)
+                classified = self.classifier.classify(imgToClassify, show=False, yaw=stateMeas.yaw)
             else:
                 # attempt to classify without orientation data
-                classified = self.classifier.classify(imgToClassify, show=self.show)
+                classified = self.classifier.classify(imgToClassify, show=False)
+
+            # print("Crop #: %i" % (cropId))
+            if self.show:
+                to_display = self.classifier.blur_crop.copy()
+                cv2.putText(to_display,str(cropId),(5,50), cv2.FONT_HERSHEY_SIMPLEX,1,(0,0,255),1,cv2.LINE_AA)
+                cv2.imshow('Crop', to_display)
+                key = cv2.waitKey(1) & 0xFF
 
             if classified is not None:
                 print("Successfully classified crop {}!".format(cropId))
@@ -109,6 +120,9 @@ class AutonomousManager():
                     alphaColor=classified['letterColor'])
                 self.client.postClass(toPost)
 
+            else:
+                print("Crop # %i rejected as false positive" % (cropId))
+
     def runDetection(self):
         """
             If this autonomous manager is set todo so, run detection on an available
@@ -118,16 +132,26 @@ class AutonomousManager():
             detector expects/returns an opencv image (aka numpy array). So
             this method has to deal with converting between the two
         """
-        toDetect = self.client.getNextRawImage() # returns tuple of (image, image_id)
+        if self.img_start is not None:
+            toDetect = self.client.getRawImage(self.img_num) #returns None if the image id doesn't exist
+            if toDetect is not None:
+                self.img_num += 1
+        else:
+            toDetect = self.client.getNextRawImage() # returns tuple of (image, image_id)
 
         # if there are new raw images to process
         if toDetect is not None:
             imgToDetect = np.array(toDetect[0])[:,:,::-1]
             imgId = toDetect[1]
-            print(imgId)
-            
-            results = self.detector.detect(imgToDetect, show=self.show)
-            print('Results: %i' % (len(results)))
+
+            results = self.detector.detect(imgToDetect, 0)
+            print('Img #: %i' % (imgId), ' Results: %i' % (len(results)))
+            print(hasattr(self.detector,'keypoints_image'))
+            if self.show:# and hasattr(self.detector, 'keypoints_image'):
+                to_display = self.detector.keypoints_image.copy()
+                cv2.putText(to_display,str(imgId),(10,50), cv2.FONT_HERSHEY_SIMPLEX, 1,(0,0,255),1,cv2.LINE_AA)
+                cv2.imshow('Detected', to_display)
+                key = cv2.waitKey(1) & 0xFF
 
             # if the detector actually returned something that's not an empty list
             if results is not None and results:
@@ -174,12 +198,14 @@ def main():
     parser.add_argument('-P', '--port', metavar='port', help='The hostname port for the server. Default: 5000')
     parser.add_argument("-d", action='store_false', help="Detector only - only run the detector in this process")
     parser.add_argument("-c", action='store_false', help="Classifier only - only run the classifier in the process")
+    parser.add_argument('-i', '--img', metavar='img_start', type=int, help="Manually specify image number for detection to start on")
     parser.add_argument('-s', '--submit_interval', metavar='interval', type=int, help="If classifier is turned on, how often autonomously classified targets should be submitted to the judges, in seconds.")
     parser.add_argument('--show', action='store_true', help="Turn on to show intermediate image state and debug logging")
     args = parser.parse_args()
 
     hostname = '127.0.0.1'
     port = '5000'
+    img_start = None
 
     print("{} {}".format(args.d, args.c))
 
@@ -187,12 +213,14 @@ def main():
         hostname = args.host
     if args.port is not None:
         port = args.port
+    if args.img is not None:
+        img_start = args.img
 
     interval = 120
     if args.submit_interval is not None and args.submit_interval > 0:
         interval = args.submit_interval
 
-    auto = AutonomousManager(hostname, port, args.d, args.c, interval, args.show)
+    auto = AutonomousManager(hostname, port, args.d, args.c, img_start, interval, args.show)
     auto.run()
 
 if __name__ == '__main__':

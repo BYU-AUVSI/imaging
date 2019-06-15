@@ -83,6 +83,7 @@ class AutonomousDetection():
         self.detect_ROIs(edge_limit=500)
 
         if len(self.keypoints) > 5:
+            self.keypoints_image = self.resized_image
             return []
 
         self.crop_ROIs()
@@ -94,9 +95,10 @@ class AutonomousDetection():
         #         self.img_crop.append(refined_crops[i])
 
 
+        self.keypoints_image = cv.drawKeypoints(self.resized_image, self.keypoints,
+            np.array([]), (0,0,255), cv.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+
         if show:
-            self.keypoints_image = cv.drawKeypoints(self.resized_image, self.keypoints,
-                np.array([]), (0,0,255), cv.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
             # cv.imshow('Resized', self.resized_image)
             # cv.imshow('Preprocess', self.preprocessed)
             # cv.imshow('Canny', self.canny)

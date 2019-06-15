@@ -380,10 +380,10 @@ class AutonomousClassification():
             try:
                 H = cv.estimateRigidTransform(obj,scene,True)
                 theta = math.atan2(H[1,0], H[1,1]) + self.aircraft_yaw #rads
-                print(theta*180/math.pi)
+                # print(theta*180/math.pi)
 
             except Exception:
-                print('Affine Transform didn\'t work. Using yaw angle instead.')
+                # print('Affine Transform didn\'t work. Using yaw angle instead.')
                 theta = self.aircraft_yaw
 
             self.orientation = self.find_NWES(theta*180/math.pi % 360)
@@ -408,5 +408,5 @@ class AutonomousClassification():
         elif angle >= 292.5 and angle < 337.5:
             return "NW"
         else:
-            print("Orientation Error: Angle not wrapped properly!")
+            # print("Orientation Error: Angle not wrapped properly!")
             return None
