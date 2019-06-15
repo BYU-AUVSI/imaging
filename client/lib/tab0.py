@@ -23,6 +23,7 @@ class Tab0():
 	"""
 	def __init__(self,master,notebook):
 		# itialize variables
+		self.version_num = "Version 0.1.5"
 		self.master = master
 		self.n = notebook
 		self.initialized = False
@@ -92,7 +93,7 @@ class Tab0():
 		self.t0c4r0.grid(row=0,column=4,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
 		self.t0c5r0 = ttk.Label(self.tab0, anchor=tk.CENTER, text='                                   ')
 		self.t0c5r0.grid(row=0,column=5,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-		self.t0c4r6 = ttk.Label(self.tab0, anchor=tk.S, text='Version 0.1.4')
+		self.t0c4r6 = ttk.Label(self.tab0, anchor=tk.S, text=self.version_num)
 		self.t0c4r6.grid(row=6,column=4,columnspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
 		self.t0c4r7 = ttk.Button(self.tab0, text="  Save Database  ",command=self.saveDatabase)
 		self.t0c4r7.grid(row=7,column=4,columnspan=2,sticky=tk.N+tk.S,padx=5,pady=5,ipadx=5,ipady=5)

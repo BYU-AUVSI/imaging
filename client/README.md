@@ -70,7 +70,10 @@ of the gui onto pip/Pypi. In order to release a new version, you need to do two 
 
 1. Update the `VERSION` variable in client/setup.py to whatever the new version is going to be called. If you dont do this, the new code will NOT be uploaded onto Pypi!
 
-2. Create a release tag on github. (Goto Releases->Create a new Release). Once a commit
+2. Update the `self.version_num` at the top of the file `client/lib/tab0.py` to
+display on the gui the correct current version number.
+
+3. Create a release tag on github that matches the `VERSION`. (Goto Releases->Create a new Release). Once a commit
 is tagged as a release, Travis will kick off and build deploy the current code to PyPi and thus to pip.
 
 ## Future Updates
