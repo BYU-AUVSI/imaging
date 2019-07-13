@@ -22,10 +22,6 @@ Any folder called `internal` is stuff you dont need to worry about, unless you'r
 
 ## Installation
 
-There are two main installation methods: production and development.
-
-### Development
-
 If you're looking to develop and actively test/use the server code on your own machine, run the `./setup/dev_setup.sh` script. It's **highly recommended** (especially if you're using ubuntu 16.04, which has python2 by default), to use a [conda environment](https://conda.io/docs/user-guide/install/index.html).
 
 Clone the following [BYU-AUVSI](https://github.com/BYU-AUVSI) repos (if you haven't already) into a [catkin workspace](http://wiki.ros.org/catkin/Tutorials/create_a_workspace)
@@ -41,19 +37,13 @@ cd ~/<catkin_ws location>/
 catkin_make
 ```
 
-### Production
-
-To ensure easy setup, repeatability and transferability; we've created a [Docker](https://www.docker.com) image for the server to be run in a production environment.
-
-TODO: talk about docker img
-
 ## Running It
 
 Once installed, running the rest server is easy. From this folder:
 
 `python src/server.py`
 
-If you also want to run the ros handler code, place this repository in your catkin workspace/src folder. When built (Note the message dependencies mentioned), you can run it with:
+If you also want to run the ros handler code, place this repository in your catkin workspace/src folder. When built (Note the message dependencies mentioned on the [root README](https://github.com/BYU-AUVSI/imaging#dependencies)), you can run it with:
 
 `rosrun imaging_ros_handler ros_handler.py`
 

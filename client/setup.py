@@ -1,13 +1,20 @@
+"""
+    BYU-AUVSI 2019
+This file describes how the pip package is bundled and setup, as well as its entry
+point (allowing you to call it like a program from anywhere).
+When travis kicks off a deploy step, it runs this.
+"""
 import setuptools
 
 VERSION = '0.1.5'
 
+# use the readme here as a long description for the package
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
 pkgs = setuptools.find_packages()
-pkgs.remove('lib.test')
-pkgs.append('assets')
+pkgs.remove('lib.test') # dont include test code in the distribution
+pkgs.append('assets') # include the gui images
 
 setuptools.setup(
      name='byu-auvsi-imaging-client',

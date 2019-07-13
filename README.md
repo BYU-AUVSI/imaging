@@ -4,9 +4,9 @@ This package contains (most) all the code used by the imaging subsystem.
 
 `server/` Contains server code that is run on the ground station
 
-`client/` Client code runs the manual classification client and autonomous monitor. This code is run on personal machines.
+`client/` Runs the manual classification client. This code is run on personal machines (and can be installed [via pip](https://pypi.org/project/byu-auvsi-imaging-client)!)
 
-`autonomous/` Code used by the autonomous detector/classifier - generally run on a ground station machine
+`autonomous/` Code used by the autonomous detector/classifier - generally run on a laptop or ground station
 
 **What isn't included?**
 
@@ -28,3 +28,5 @@ This package relies on a few other BYU-Auvsi packages. Changes to them could hav
 - [BYU-AUVSI/inertial_sense_ros/GPS/GPS.msg](https://github.com/BYU-AUVSI/inertial_sense_ros)
 
 - [BYU-AUVSI/uav_msgs/srv/SubmitImage.srv](https://github.com/BYU-AUVSI/uav_msgs)
+
+- - [BYU-AUVSI/uav_msgs/msg/CompressedImageWithMeta.srv](https://github.com/BYU-AUVSI/uav_msgs)

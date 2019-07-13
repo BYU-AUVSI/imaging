@@ -74,7 +74,7 @@ of the gui onto pip/Pypi. In order to release a new version, you need to do two 
 display on the gui the correct current version number.
 
 3. Create a release tag on github that matches the `VERSION`. (Goto Releases->Create a new Release). Once a commit
-is tagged as a release, Travis will kick off and build deploy the current code to PyPi and thus to pip.
+is tagged as a release, Travis will kick off a 'deploy' build for the current code, sending it to PyPi and thus to pip.
 
 ## Future Updates
 
