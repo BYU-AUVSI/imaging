@@ -62,3 +62,46 @@ on your machine. For instance if you're looking to train new nets, you will
 definitely want to install it with CUDA (and run it on a machine with an NVidia
 card). As you can imagine, installation with CUDA is different than a CPU-only
 installation (which is all you need for running the classifier).
+
+## Known Shortcomings
+
+Miraculously, we were the only team to submit an autonomously detected target last year, 
+even though we just copied what other teams did. It is by no means perfect, and
+needs a lot of work. Here are a few of the known shortcomings, and some things that
+can be done to overcome them.
+
+First, the detection algorithm is FREAKING slow! It takes around 3 seconds to run
+the pyrmeanshiftfilter algorithm on a CPU, which is no bueno. To overcome this,
+we built functionality to run multiple detectors and classifiers at the same time
+so that the system can keep up with the camera (there is a problem with running 
+multiple detectors too, which I'll explain). We hightly recommend that you find
+a faster algorithm that works just as well. We experimented with several detectors
+but couldn't find anything that worked as well. Also, try getting this to run on
+a GPU using CUDA (you may need to switch the system to C++ for this). I don't think
+there is a pyrmeanshiftfilter CUDA implementation in OpenCV, so you may need to 
+write your own, or you can experiment with other CUDA algorithms.
+
+Which brings me to the next point. Today, traditional detection algorithms use deep
+learning. If you don't know what that is or how it works, read up about it, a lot! 
+Switching the whole autonomous system to run on CNNs would be ideal, but you'll 
+need to collect a ton of data to get it to work. We tried to keep a lot of target
+and no target images for this, but it won't be enough. If you want to get a detector
+working with a CNN, you'll need to generate realistic looking synthetic data on real
+image field backgrounds. This will take a lot of time. You should look into using 
+generative adversarial networks (GANs) to do this, altough I'm not totally sure
+how that would work. 
+
+For determining the orientation of a letter, you'll want to add an output to the letter
+classifier that gives it a continuous orientation, label all of the training data with
+orientation angles, and retrain. The way we tried to do orientation classification
+sucked and didn't work at all. Also, try to do color classification with deep learning.
+We spent a little bit of time trying this but couldn't get it to work very well.
+
+Running multiple detectors and classifiers is really nice, but there is one issue with
+it. Right before the competition, we made it so you can tell the server which image you
+want to start on. This is nice because if it gets behind, you can tell it to start farther
+up, or if the plane is flying over an area where there are no targets, you can stop it 
+and restart it where you want. However, when you do this, the server will just give you
+new images sequentially without checking whether the image has already been examined by
+a different autonomous client, so you can't run multiple detectors at once when you do
+this. A slight modification to the server will need to be made to compensate for this. 
