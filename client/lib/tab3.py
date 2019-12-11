@@ -396,7 +396,7 @@ class Tab3():
         self.t3c6br15.grid(row=15,column=11,columnspan=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
         self.t3c6r17 = ttk.Label(self.tab3, anchor=tk.CENTER, text="Description:")
         self.t3c6r17.grid(row=17,column=10,columnspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t3c6r18 = ttk.Label(self.tab3, anchor=tk.CENTER, text="N/A")
+        self.t3c6r18 = ttk.Label(self.tab3, anchor=tk.CENTER, text="Worked-399")
         self.t3c6r18.grid(row=18,column=10,columnspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
         # Submit button
         self.t3c6b1 = ttk.Button(self.tab3, text="Submit Target",command=self.submitTarget)
@@ -598,7 +598,6 @@ class Tab3():
 
                 display_decription = "Lat: " + display_decription + "Long: " + temp
 
-                x = 5
 
                 ### to here
 
