@@ -588,7 +588,20 @@ class Tab3():
                     self.t3c1br13.configure(text=display_orientation)
                 else:
                     self.t3c1br13.configure(text="N/A")
+
+                """
+                TODO: undo this change...         
                 display_decription = self.pendingList[self.t3_current_target-1][0].description
+                """
+                display_decription = self.pendingList[self.t3_current_target - 1][0].latitude
+                temp = self.pendingList[self.t3_current_target - 1][0].longitude
+
+                display_decription = "Lat: " + display_decription + "Long: " + temp
+
+                x = 5
+
+                ### to here
+
                 if display_decription != "":
                     self.t3c1r18.configure(text=display_decription)
                 else:
