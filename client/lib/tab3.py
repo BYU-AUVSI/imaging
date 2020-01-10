@@ -23,6 +23,7 @@ class Tab3():
     Display results for manual classification
     """
     def __init__(self,master,notebook,interface):
+        print("Initializing Tab 3")
         self.master = master
         self.n = notebook
         self.interface = interface
@@ -63,7 +64,7 @@ class Tab3():
         self.t3titleA = ttk.Label(self.tab3, anchor=tk.CENTER, text='Target # %i out of %i'%(self.t3_current_target,self.t3_total_targets))
         self.t3titleA.grid(row=0,column=2,columnspan=3,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
 
-        self.t3titleB = ttk.Label(self.tab3, anchor=tk.CENTER, text='Showing %i images out of %i that exsist'%(0,0))
+        self.t3titleB = ttk.Label(self.tab3, anchor=tk.CENTER, text='Showing %i images out of %i that exist'%(0,0))
         self.t3titleB.grid(row=0,column=5,columnspan=3,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
 
         # Column One
@@ -116,7 +117,7 @@ class Tab3():
         self.t3c1ar15.grid(row=15,column=0,columnspan=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
         self.t3c1br15 = ttk.Label(self.tab3, anchor=tk.CENTER, text="N/A")
         self.t3c1br15.grid(row=15,column=1,columnspan=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t3c1r17 = ttk.Label(self.tab3, anchor=tk.CENTER, text="Description:")
+        self.t3c1r17 = ttk.Label(self.tab3, anchor=tk.CENTER, text="Description: **")
         self.t3c1r17.grid(row=17,column=0,columnspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
         self.t3c1r18 = ttk.Label(self.tab3, anchor=tk.CENTER, text="N/A")
         self.t3c1r18.grid(row=18,column=0,columnspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
@@ -495,7 +496,7 @@ class Tab3():
             if self.pendingList == None:
                 pics = 0
                 self.t3titleA.configure(text='Target # %i out of %i'%(0,0))
-                self.t3titleB.configure(text='Showing %i images out of %i that exsist'%(0,0))
+                self.t3titleB.configure(text='Showing %i images out of %i that exist'%(0,0))
                 self.t3c1i1_im = self.t3_default_im.copy()
                 self.t3c1i1_tk = tab_tools.im2tk(self.t3c1i1_im)
                 self.t3c1i1_org_width,self.t3c1i1_org_height = self.t3c1i1_im.size
@@ -554,7 +555,7 @@ class Tab3():
                 if pics > 5:
                     pics = 5
                 pics_shown = pics
-                self.t3titleB.configure(text='Showing %i images out of %i that exsist'%(pics_shown,pics_total))
+                self.t3titleB.configure(text='Showing %i images out of %i that exist'%(pics_shown,pics_total))
                 # Because of the preceeding if/else statement there will always be at least 1 pic
                 query = self.interface.getCroppedImage(self.pendingList[self.t3_current_target-1][0].crop_id)
                 self.t3c1i1_im = query[0]
@@ -596,7 +597,8 @@ class Tab3():
                 display_decription = self.pendingList[self.t3_current_target - 1][0].latitude
                 temp = self.pendingList[self.t3_current_target - 1][0].longitude
 
-                display_decription = "Lat: " + display_decription + "Long: " + temp
+                display_decription = "Lat: " + str(display_decription) + " Long: " + str(temp)
+                self.pendingList[self.t3_current_target - 1][0].description = display_decription
 
 
                 ### to here
@@ -658,7 +660,22 @@ class Tab3():
                     self.t3c2br13.configure(text=display_orientation)
                 else:
                     self.t3c2br13.configure(text="N/A")
+
+                """
+                TODO: undo this change...         
                 display_decription = self.pendingList[self.t3_current_target-1][1].description
+                """
+                display_decription = self.pendingList[self.t3_current_target - 1][1].latitude
+                temp = self.pendingList[self.t3_current_target - 1][1].longitude
+
+                display_decription = "Lat: " + str(display_decription) + " Long: " + str(temp)
+                self.pendingList[self.t3_current_target - 1][1].description = display_decription
+
+
+                ### to here
+
+
+
                 if display_decription != "":
                     self.t3c2r18.configure(text=display_decription)
                 else:
@@ -735,7 +752,26 @@ class Tab3():
                     self.t3c3br13.configure(text=display_orientation)
                 else:
                     self.t3c3br13.configure(text="N/A")
+
+
+                """
+                TODO: undo this change...         
                 display_decription = self.pendingList[self.t3_current_target-1][2].description
+                """
+                display_decription = self.pendingList[self.t3_current_target - 1][2].latitude
+                temp = self.pendingList[self.t3_current_target - 1][2].longitude
+
+                display_decription = "Lat: " + str(display_decription) + " Long: " + str(temp)
+                self.pendingList[self.t3_current_target - 1][2].description = display_decription
+
+
+                ### to here
+
+
+
+
+
+
                 if display_decription != "":
                     self.t3c3r18.configure(text=display_decription)
                 else:
@@ -812,7 +848,21 @@ class Tab3():
                     self.t3c4br13.configure(text=display_orientation)
                 else:
                     self.t3c4br13.configure(text="N/A")
+
+                """
+                TODO: undo this change...         
                 display_decription = self.pendingList[self.t3_current_target-1][3].description
+                """
+                display_decription = self.pendingList[self.t3_current_target - 1][3].latitude
+                temp = self.pendingList[self.t3_current_target - 1][3].longitude
+
+                display_decription = "Lat: " + str(display_decription) + " Long: " + str(temp)
+                self.pendingList[self.t3_current_target - 1][3].description = display_decription
+
+
+                ### to here
+
+
                 if display_decription != "":
                     self.t3c4r18.configure(text=display_decription)
                 else:
