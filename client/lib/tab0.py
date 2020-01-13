@@ -23,7 +23,7 @@ class Tab0():
 	"""
 	def __init__(self,master,notebook):
 		# itialize variables
-		self.version_num = "Version 0.1.7.1"
+		self.version_num = "Version 0.1.8"
 		self.master = master
 		self.n = notebook
 		self.initialized = False

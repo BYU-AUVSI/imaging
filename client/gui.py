@@ -62,7 +62,7 @@ class GuiClass(tk.Frame):
         except (Exception) as e:
             w, h = master.winfo_screenwidth(), master.winfo_screenheight()
             master.geometry("%dx%d+0+0" % (w, h)) # maximizes screen for mac
-        self.master.title("BYU AUVSI COMPETITION 2019")
+        self.master.title("BYU AUVSI COMPETITION 2020")
 
         self.n = ttk.Notebook(self.master) # create tabs
         self.n.pack(fill=tk.BOTH, expand=1) # expand across space
