@@ -6,7 +6,7 @@ When travis kicks off a deploy step, it runs this.
 """
 import setuptools
 
-VERSION = '0.1.8'
+VERSION = '0.1.8.1'
 
 # use the readme here as a long description for the package
 with open("README.md", "r") as fh:
