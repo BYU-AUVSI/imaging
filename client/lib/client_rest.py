@@ -202,7 +202,8 @@ class ImagingInterface:
     in order to feed the GUI what it needs such as images and measurements taken by the imaging system on the aircraft.
     """
     def __init__(self,
-                 host="127.0.0.1",
+                 #host="127.0.0.1",
+                 host = "192.168.1.48",
                  port="5000",
                  numIdsStored=250,
                  isDebug=False,
@@ -984,8 +985,9 @@ def postManClass(interface, cid, o, s, sc, a, ac):
 
 
 if __name__ == "__main__":
-    interface = ImagingInterface(host="127.0.0.1", isDebug=True)
-    # interface = ImagingInterface(host="192.168.1.48", isDebug=True)
+    # interface = ImagingInterface(host="127.0.0.1", isDebug=True)
+    # interface = ImagingInterface(host="192.168.1.10")
+    interface = ImagingInterface(host="192.168.1.48", isDebug=True)
     # imgId = 1
 
     # testCropPost(interface, imgId)
