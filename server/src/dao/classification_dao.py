@@ -549,13 +549,16 @@ class ClassificationDAO(BaseDAO):
         """
 
         ttl = 0.0
+        count = 0
         for row in classifications:
             if row[clmnNum] is not None:
-                ttl += row[clmnNum]
+                if row[clmnNum] != 0.0:
+                    ttl += row[clmnNum]
+                    count += 1      
 
         if ttl == 0.0:
             return None
-        return ttl / float(len(classifications))
+        return ttl / float(count)
 
     def findMostCommonValue(self, classifications, clmnNum):
         """
