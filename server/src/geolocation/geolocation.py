@@ -14,7 +14,7 @@ class targetGeolocation:
         self.lon_gnd = gnd_lon
 
     """
-    Calculates the meters between two GPS coordinates
+    Calculates the meters between two GPS coordinates using the Haversine Formula
     @type lat1: float
     @param lat1: The latitude of the first GPS coordinate
 
@@ -31,15 +31,15 @@ class targetGeolocation:
     @return: Distance north (meters), distande east (meters), total distance (meters), angle (0 deg = East)
     """
     def _GPStoMeters(self, lat1, lon1, lat2, lon2):
-        d2r = 0.0174532925199433
-        dlong = (lon2 - lon1) * d2r
-        dlat = (lat2 - lat1) * d2r
-        a = (math.sin(dlat/2.0))**2 + math.cos(lat1*d2r) * math.cos(lat2*d2r) * (math.sin(dlong/2.0))**2
+        # d2r = 0.0174532925199433       # Scale factor for degrees 
+        dlong = math.radians(lon2 - lon1)
+        dlat = math.radians(lat2 - lat1) 
+        a = (math.sin(dlat/2.0))**2 + math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)) * (math.sin(dlong/2.0))**2
         c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
-        d = 6367 * c; #Distance between points in meters
-        d_meters = d * 1000
+        radius = 6378.137 * c #Distance between points in kilometers
+        d_meters = radius * 1000
         dy = lat2 - lat1
-        dx = math.cos(d2r * lat1) * (lon2 - lon1)
+        dx = math.cos(math.radians(lat1)) * (lon2 - lon1)
         angle = math.atan2(dy, dx)
         east_dis_meters = d_meters * math.cos(angle)
         north_dis_meters = d_meters * math.sin(angle)
@@ -47,7 +47,7 @@ class targetGeolocation:
         return returnvalues
 
     """
-    Calculates GPS coordniates given a starting coordinate and meters north and east
+    Calculates GPS coordinates given a starting coordinate and meters north and east
     @type Lat: float
     @param Lat: The latitude of the GPS coordinate
 
@@ -67,12 +67,12 @@ class targetGeolocation:
         # Earth’s radius, sphere
         R = 6378137
         # Coordinate offsets in radians
-        dLat = north_displacement/R
-        dLon = east_displacement/(R*math.cos(math.pi*self.lat_gnd/180))
+        dLat = north_displacement/R    # Latitude has a relatively constant difference
+        dLon = east_displacement/(R*math.cos(math.radians(self.lat_gnd)))  # Longitudinal difference varies by distance from poles
         # OffsetPosition, decimal degrees
         latO = self.lat_gnd + dLat * 180/math.pi
         lonO = self.lon_gnd + dLon * 180/math.pi
-        returnvals = [latO, lonO];
+        returnvals = [latO, lonO]
         return returnvals
 
     def calculate_geolocation(self, mav_lat, mav_lon, height, roll, pitch, yaw, topLeftX, topLeftY, bottomRightX, bottomRightY):
@@ -113,20 +113,22 @@ class targetGeolocation:
         self.AdjustedCenterX = CenterX-(MaxX/2)
         self.AdjustedCenterY = (-1)*(CenterY-(MaxY/2))
 
-        M = 4000
-        Ex = -15 #AdjustedCenterX
-        Ey = -1028 #-AdjustedCenterY
+        M = 4000     # Width of square pixel array (in pixels)
+        Ex = self.AdjustedCenterX #-15 # Pixel location of object   (AdjustedCenterX)
+        Ey = -self.AdjustedCenterY #-1028 # Pixel location of object (-AdjustedCenterY)
 
         fov_ang = 0.872665 #field of View angle --> A6000 83* - 32* (in radians)
-        f = M/(2*math.tan(fov_ang/2))
+        f = M/(2*math.tan(fov_ang/2))   # Focal length in pixels (Textbook Eq. 13.5)
 
+        # Unit direction vector to target (l^c / L), Textbook eq 13.9 (pg 229)
+        #       Also listed as l^c_d later on 
         l_cusp_c = 1/math.sqrt(Ex**2 + Ey**2 + f**2) * np.array([[Ex],[Ey],[f]])
         '''
         Convert Roll, Pitch and Yaw to radians
         '''
-        phi   = self.phi_deg * math.pi/180
-        theta = self.theta_deg * math.pi/180
-        psi   = self.psi_deg * math.pi/180
+        phi   = self.phi_deg * math.pi/180.0
+        theta = self.theta_deg * math.pi/180.0
+        psi   = self.psi_deg * math.pi/180.0
 
         '''
         k unit vector in the inertial frame
@@ -158,9 +160,9 @@ class targetGeolocation:
         Rotation from body to inertial frame
         Found on page 15 of Small Unmanned Aircraft
         '''
-        R_v2b = np.array([[ctheta*cpsi, ctheta*spsi, -stheta],\
-        [sphi*stheta*cpsi-cphi*spsi, sphi*stheta*spsi+cphi*cpsi, sphi*ctheta],\
-        [cphi*stheta*cpsi+sphi*spsi, cphi*stheta*spsi-sphi*cpsi, cphi*ctheta]])
+        R_v2b = np.array([ [ctheta*cpsi,      ctheta*spsi,     -1*stheta],
+                           [(sphi*stheta*cpsi)-(cphi*spsi), (sphi*stheta*spsi)+(cphi*cpsi), sphi*ctheta],
+                           [cphi*stheta*cpsi+sphi*spsi, cphi*stheta*spsi-sphi*cpsi, cphi*ctheta]])
         R_b2v = np.transpose(R_v2b)
         R_b2i = R_b2v
 
@@ -182,7 +184,7 @@ class targetGeolocation:
 
         '''
         % For simplicity, the three Rotation matrices are combined into one below
-        RbiRbgRcg = R_b_to_i * R_g_to_b * R_c_to_g;
+        RbiRbgRcg = R_b_to_i * R_g_to_b * R_c_to_g, forming Rc2i
         '''
         RbiRbgRcg = np.matmul(np.matmul(R_b2i, R_g2b), R_c2g)
 
