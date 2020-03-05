@@ -596,7 +596,7 @@ class Tab3():
                 display_decription = self.pendingList[self.t3_current_target - 1][0].latitude
                 temp = self.pendingList[self.t3_current_target - 1][0].longitude
 
-                display_decription = "Lat: " + str(display_decription) + " Long: " + str(temp)
+                display_decription = "Lat: " + str(display_decription) + " Lo: " + str(temp)
                 self.pendingList[self.t3_current_target - 1][0].description = display_decription
 
 
@@ -667,7 +667,7 @@ class Tab3():
                 display_decription = self.pendingList[self.t3_current_target - 1][1].latitude
                 temp = self.pendingList[self.t3_current_target - 1][1].longitude
 
-                display_decription = "Lat: " + str(display_decription) + " Long: " + str(temp)
+                display_decription = "Lat: " + str(display_decription) + " Lo: " + str(temp)
                 self.pendingList[self.t3_current_target - 1][1].description = display_decription
 
 
@@ -760,7 +760,7 @@ class Tab3():
                 display_decription = self.pendingList[self.t3_current_target - 1][2].latitude
                 temp = self.pendingList[self.t3_current_target - 1][2].longitude
 
-                display_decription = "Lat: " + str(display_decription) + " Long: " + str(temp)
+                display_decription = "Lat: " + str(display_decription) + " Lo: " + str(temp)
                 self.pendingList[self.t3_current_target - 1][2].description = display_decription
 
 
@@ -855,7 +855,7 @@ class Tab3():
                 display_decription = self.pendingList[self.t3_current_target - 1][3].latitude
                 temp = self.pendingList[self.t3_current_target - 1][3].longitude
 
-                display_decription = "Lat: " + str(display_decription) + " Long: " + str(temp)
+                display_decription = "Lat: " + str(display_decription) + " Lo: " + str(temp)
                 self.pendingList[self.t3_current_target - 1][3].description = display_decription
 
 

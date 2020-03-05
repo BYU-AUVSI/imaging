@@ -28,7 +28,7 @@ class targetGeolocation:
         self.b = (1-self.f) * self.radiusOfEarth                  
         self.maxIterations = 250
         self.maxChange = 10**(-12)
-        self.geod = Geodesic.WGS84
+        self.geod = Geodesic.WGS84  #TODO: Get rid of these selfs and be consistent with Geodesic
 
     """
     Calculates the meters between two GPS coordinates using the Haversine Formula
@@ -142,7 +142,6 @@ class targetGeolocation:
         s = self.b * A * (sigma - delta_sig)   
 
         return alpha_1, alpha_2, s
-
     ''' Given One point, a distance, and an angle, find the second ponit '''
     def vincenty_direct(self, lat_1, lon_1, alpha_1, s):
 
@@ -190,7 +189,6 @@ class targetGeolocation:
 
         return math.degrees(phi_2), math.degrees(lambda_2), alpha_2 
 
-
     def calculate_geolocation(self, mav_lat, mav_lon, height, roll, pitch, yaw, topLeftX, topLeftY, bottomRightX, bottomRightY):
 
         '''
@@ -200,21 +198,17 @@ class targetGeolocation:
         Pixel Coordinates of Target
         '''
         # For now, we will use dummy data
-        self.lat_mav = mav_lat
-        self.lon_mav = mav_lon
-        self.height  = height
-
-        self.phi_deg   = roll
-        self.theta_deg = pitch
-        self.psi_deg   = yaw
+        self.lat_mav, self.lon_mav, self.height = mav_lat, mav_lon, height
+        self.phi_deg, self.theta_deg, self.psi_deg = roll, pitch, yaw
 
         self.TopLeftX = topLeftX
         self.TopLeftY = topLeftY
         self.BottomRightX = bottomRightX
         self.BottomRightY = bottomRightY
 
+        # TODO: 1) Verify, 2) Add in angles due to bias?
         alpha_az = 0 # Assuming the camera is angled with the top facing out the nose
-        alpha_el = -math.pi/2
+        alpha_el = math.radians(self.theta_deg) - math.pi/2 # Camera is always (theoretically) -90* in BODY frame, but needs to be in inertial frame
 
         MaxX = 2000 # Max x pixels
         MaxY = 2000 # Max y pixels
@@ -228,22 +222,24 @@ class targetGeolocation:
         self.AdjustedCenterX = CenterX-(MaxX/2)
         self.AdjustedCenterY = (-1)*(CenterY-(MaxY/2))
 
-        M = 4000     # Width of square pixel array (in pixels)
-        Ex = self.AdjustedCenterX #-15 # Pixel location of object   (AdjustedCenterX)
-        Ey = -self.AdjustedCenterY #-1028 # Pixel location of object (-AdjustedCenterY)
+        # TODO: I dont understand M. Should it just be MaxX or MaxY * 2 (square)?
+        M = 4000                   # Width of square pixel array (in pixels)
+        Ex = self.AdjustedCenterX  # Pixel location of object   
+        Ey = -self.AdjustedCenterY # Pixel location of object 
 
-        fov_ang = 0.872665 #field of View angle --> A6000 83* - 32* (in radians)
-        f = M/(2*math.tan(fov_ang/2))   # Focal length in pixels (Textbook Eq. 13.5)
+        # TODO: Verify these numbers
+        fov_ang =0.8901179185171081         #field of View angle --> A6000 83* - 32* (in radians)
+        f = M/(2.0*math.tan(fov_ang/2.0))   # Focal length in pixels (Textbook Eq. 13.5, pg 231)
 
         # Unit direction vector to target (l^c / L), Textbook eq 13.9 (pg 229)
         #       Also listed as l^c_d later on 
-        l_cusp_c = 1/math.sqrt(Ex**2 + Ey**2 + f**2) * np.array([[Ex],[Ey],[f]])
+        l_cusp_c = (1.0/math.sqrt(Ex**2 + Ey**2 + f**2)) * np.array([[Ex],[Ey],[f]])
         '''
         Convert Roll, Pitch and Yaw to radians
         '''
-        phi   = self.phi_deg * math.pi/180.0
-        theta = self.theta_deg * math.pi/180.0
-        psi   = self.psi_deg * math.pi/180.0
+        phi   = math.radians(self.phi_deg)
+        theta = math.radians(self.theta_deg) 
+        psi   = math.radians(self.psi_deg) 
 
         '''
         k unit vector in the inertial frame
@@ -255,37 +251,18 @@ class targetGeolocation:
         relative location. Then creates the position vector [Pn Pe Pd]^T
         '''
 
-        '''
-        ###TODO: Verify ##############################
-        # positionData = self._GPStoMeters(self.lat_gnd, self.lon_gnd, self.lat_mav, self.lon_mav)
-        ###    
-        latDifference = self.lat_mav - self.lat_gnd # N
-        lonDifference = self.lon_mav - self.lon_gnd # E
-        aveLat = self.lat_gnd + 0.5 * latDifference 
-        aveLon = self.lon_gnd + 0.5 * lonDifference
-
-        _, _, latDistanceEstimate = self.vincenty_inverse(self.lat_gnd, aveLon, self.lat_mav, aveLon)
-        _, _, lonDistanceEstimate = self.vincenty_inverse(aveLat, self.lat_gnd, aveLat, self.lat_mav)
-        theta = atan2(lonDistanceEstimate, latDistanceEstimate)
-        _, _, estimatedDistance = self.vincenty_inverse(self.lat_gnd, self.lon_gnd, self.lat_mav, self.lon_mav)
-        estimatedDistance = sqrt( (latDistanceEstimate**2) + (lonDistanceEstimate**2))
-
-        positionData = np.array([latDistanceEstimate, lonDistanceEstimate, estimatedDistance, theta])
-        # alpha_1, alpha_2, s = self.vincenty_inverse(self.lat_gnd, self.lon_gnd, self.lat_mav, self.lon_mav)
-
-        ###
-        P_i_mav = np.array([[positionData[0]], [positionData[1]], [-height]])
-        ##############################################
-        '''
         # Feb 19, 2020 - Implementing geodesic
+        ''' Get the distance between groundstation and mav in meters '''
         average_lat = (self.lat_gnd + self.lat_mav) / 2.0
         average_lon = (self.lon_gnd + self.lon_mav) / 2.0
-        estimated_distance_north = self.geod.Direct(self.lat_gnd, average_lon, self.lat_mav, average_lon, Geodesic.STANDARD)
-        estimated_distance_east = self.geod.Direct(average_lat, self.lon_gnd, average_lat, self.lon_mav, Geodesic.STANDARD)
-        g_inverse = self.geod.Direct(self.lat_gnd, self.lon_gnd, self.lat_mav, self.lon_mav, Geodesic.STANDARD)
+        estimated_distance_north = self.geod.Inverse(self.lat_gnd, average_lon, self.lat_mav, average_lon, Geodesic.STANDARD)
+        estimated_distance_east = self.geod.Inverse(average_lat, self.lon_gnd, average_lat, self.lon_mav, Geodesic.STANDARD)
 
+        # P_i_mav = [Pn, Pe, Pd]
         P_i_mav = np.array([ [estimated_distance_north['s12']], [estimated_distance_east['s12']], [-height]])
 
+
+        ''' Get the distance from MAV to target in meters'''
 
         '''
         Trigonometry calculated one time to decrease run time
@@ -298,31 +275,33 @@ class targetGeolocation:
         spsi = math.sin(psi)
         caz = math.cos(alpha_az)
         saz= math.sin(alpha_az)
-        cel = math.cos(alpha_el) #Rreturns 6.123234e-17 instead of 0
+        cel = math.cos(alpha_el) # when alpha_el = 0, this returns 6.123234e-17 instead of 0
         sel = math.sin(alpha_el)
 
         '''
         Rotation from body to inertial frame
-        Found on page 15 of Small Unmanned Aircraft
+        Found on page 16 of Small Unmanned Aircraft
         '''
-        R_v2b = np.array([ [ctheta*cpsi,      ctheta*spsi,     -1*stheta],
-                           [(sphi*stheta*cpsi)-(cphi*spsi), (sphi*stheta*spsi)+(cphi*cpsi), sphi*ctheta],
-                           [cphi*stheta*cpsi+sphi*spsi, cphi*stheta*spsi-sphi*cpsi, cphi*ctheta]])
+        R_v2b = np.array([  [ctheta*cpsi,      ctheta*spsi,     -1*stheta],
+                            [(sphi*stheta*cpsi)-(cphi*spsi), (sphi*stheta*spsi)+(cphi*cpsi), sphi*ctheta],
+                            [cphi*stheta*cpsi+sphi*spsi, cphi*stheta*spsi-sphi*cpsi, cphi*ctheta]])
         R_b2v = np.transpose(R_v2b)
         R_b2i = R_b2v
 
         '''
         R_g_to_b
-        Found on page 227 of Small Unmanned Aircraft
+        Found on page 230 of Small Unmanned Aircraft
         '''
-        R_b2g1 = np.array([[caz, saz, 0],[-saz, caz, 0],[0, 0, 1]])
-        R_g12g = np.array([[cel, 0, -sel],[0, 1, 0],[sel, 0, cel]])
+        R_b2g1 = np.array([[caz, saz, 0.],[-saz, caz, 0.],[0., 0., 1.]])
+        # TODO: The book + paper disagree about this... RH vs LH?
+        R_g12g = np.array([[cel, 0., -sel],[0., 1., 0.],[sel, 0., cel]]) # Looks like the transpose of the paper
+        # R_g12g = np.transpose(R_g12g)  #
         R_b2g = np.matmul(R_g12g, R_b2g1)
         R_g2b = np.transpose(R_b2g)
 
         '''
         R_c_to_g
-        % Found on page 227 of Small Unmanned Aircraft
+        % Found on page 231 of Small Unmanned Aircraft
         '''
         R_g2c = np.array([[0, 1, 0],[0, 0, 1],[1, 0, 0]])
         R_c2g = np.transpose(R_g2c)
@@ -335,27 +314,22 @@ class targetGeolocation:
 
 
         l_cusp_i = np.matmul(RbiRbgRcg, l_cusp_c)
-        P_i_tar = P_i_mav + height*l_cusp_i/l_cusp_i[2]
-        # print("Groundstation coordinates")
-        # print(str(lat_gnd) + " " + str(lon_gnd))
-
-        # print("MAV coordinates")
-        # print(str(self.lat_mav) + " " + str(self.lon_mav))
+        P_i_tar = P_i_mav + height*l_cusp_i/((k_i * l_cusp_i)[2])  # Index because k_i * l_cusp will be [0, 0, something]
 
         #### TODO: Determine if this is good
-        # TargetCoordinates = self._MeterstoGPS(P_i_tar[0], P_i_tar[1])
-        ## Returned lat0, lon0
-        ## Need to get angle and estimatedDist from  P
-        # angle = atan2(P_i_tar[0], P_i_tar[1])
-        # totalDist = ((P_i_tar[0]**2) + (P_i_tar[1]**2))
-        # targetLat, targetLon, _ = self.vincenty_direct(self.lat_gnd, self.lat_mav, angle, totalDist)
-        # TargetCoordinates = np.array([targetLat, targetLon])
-        ###
         ''' Feb 20 2020 - Geographic.lib '''
-        geod_direct = self.geod.Direct(self.lat_gnd, self.lon_gnd, g_inverse['azi1'], g_inverse['s12'], Geodesic.STANDARD)
+        ''' Use distance from groundstation to target to get target GPS'''
+        eastDist, northDist = P_i_tar[1], P_i_tar[0]
+        totalDist = math.sqrt( (eastDist**2) + (northDist**2) )
+        aziEst = math.degrees(math.atan2(eastDist, northDist))
+
+        geod_direct = self.geod.Direct(self.lat_gnd, self.lon_gnd, aziEst, totalDist, Geodesic.STANDARD)
         TargetCoordinates = np.array([geod_direct['lat2'], geod_direct['lon2']])
         #####################################
 
         # print("Target coordinates")
         print(str(float(TargetCoordinates[0])) + " " + str(float(TargetCoordinates[1])))
-        return float(TargetCoordinates[0]), float(TargetCoordinates[1])
+
+        # TODO: See if this works better... (Just returning the MAV location)
+        return float(self.lat_mav), float(self.lon_mav)
+        # return float(TargetCoordinates[0]), float(TargetCoordinates[1])
