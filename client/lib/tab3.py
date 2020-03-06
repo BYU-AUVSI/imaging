@@ -116,7 +116,7 @@ class Tab3():
         self.t3c1ar15.grid(row=15,column=0,columnspan=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
         self.t3c1br15 = ttk.Label(self.tab3, anchor=tk.CENTER, text="N/A")
         self.t3c1br15.grid(row=15,column=1,columnspan=1,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
-        self.t3c1r17 = ttk.Label(self.tab3, anchor=tk.CENTER, text="Description: **")
+        self.t3c1r17 = ttk.Label(self.tab3, anchor=tk.CENTER, text="Description: *^*")
         self.t3c1r17.grid(row=17,column=0,columnspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
         self.t3c1r18 = ttk.Label(self.tab3, anchor=tk.CENTER, text="N/A")
         self.t3c1r18.grid(row=18,column=0,columnspan=2,sticky=tk.N+tk.S+tk.E+tk.W,padx=5,pady=5,ipadx=5,ipady=5)
@@ -432,7 +432,6 @@ class Tab3():
         self.t3c4i1.unbind("<Button-1>")
         self.t3c5i1.unbind("<Button-1>")
 
-
     def resizeEventTab3(self,event=None):
         """
         Resizes picture on Tab3
@@ -596,10 +595,8 @@ class Tab3():
                 display_decription = self.pendingList[self.t3_current_target - 1][0].latitude
                 temp = self.pendingList[self.t3_current_target - 1][0].longitude
 
-                display_decription = "Lat: " + str(display_decription) + " Lo: " + str(temp)
+                display_decription = "La: " + str(display_decription) + " Lo: " + str(temp)
                 self.pendingList[self.t3_current_target - 1][0].description = display_decription
-
-
                 ### to here
 
                 if display_decription != "":
@@ -760,7 +757,7 @@ class Tab3():
                 display_decription = self.pendingList[self.t3_current_target - 1][2].latitude
                 temp = self.pendingList[self.t3_current_target - 1][2].longitude
 
-                display_decription = "Lat: " + str(display_decription) + " Lo: " + str(temp)
+                display_decription = "La: " + str(display_decription) + " Lo: " + str(temp)
                 self.pendingList[self.t3_current_target - 1][2].description = display_decription
 
 
@@ -855,7 +852,7 @@ class Tab3():
                 display_decription = self.pendingList[self.t3_current_target - 1][3].latitude
                 temp = self.pendingList[self.t3_current_target - 1][3].longitude
 
-                display_decription = "Lat: " + str(display_decription) + " Lo: " + str(temp)
+                display_decription = "La: " + str(display_decription) + " Lo: " + str(temp)
                 self.pendingList[self.t3_current_target - 1][3].description = display_decription
 
 
@@ -1090,7 +1087,6 @@ class Tab3():
         self.selectImage()
         self.updateManualSubmissionTab()
 
-
     def previousClassified(self,event):
         """
         Goes to previous classified target group
@@ -1129,7 +1125,6 @@ class Tab3():
         self.submissionImage.set(None)
         self.selectImage()
         self.updateManualSubmissionTab()
-
 
     def submitTarget(self,event=None):
         """
@@ -1185,8 +1180,6 @@ class Tab3():
             mostCommon = max(valueCounts, key=valueCounts.get)
             return mostCommon
         return None # if there are no values for this particular field, return None
-
-
 
     def selectBackgroundColor(self):
         try:

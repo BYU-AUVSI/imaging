@@ -140,6 +140,7 @@ class GuiClass(tk.Frame):
         sys.exit()
 
 def main():
+    print("Starting GUI - Feb 2020 Version")
     root = tk.Tk()
     # change ttk style to something that looks decent
     style = ThemedStyle(root)

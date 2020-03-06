@@ -112,7 +112,7 @@ class RosImagingHandler:
         estimated_azimuth = math.degrees(math.atan2(east_dist, north_dist))
         estimated_total_distance = math.sqrt( (north_dist**2) + (east_dist**2) )
             # Assumes we resolved the state initial lat/lon problem 
-        estimated_mav_location = self.geod.Direct(stateMsg.initial_lat, stateMsg.initial_lon, estimated_azimuth, estimated_total_distance, Geodesic.Standard)
+        estimated_mav_location = self.geod.Direct(stateMsg.initial_lat, stateMsg.initial_lon, estimated_azimuth, estimated_total_distance, Geodesic.STANDARD)
 
         self.gps_msg_.time_stamp = stateMsg.header.stamp.to_sec()
         self.gps_msg_.lat = estimated_mav_location['lat2']
