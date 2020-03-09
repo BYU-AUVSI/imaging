@@ -49,8 +49,8 @@ class RosImagingHandler:
 
         # gps ingestion setup:
         self.gps_dao_ = IncomingGpsDAO(self.configPath)
-        # self.gps_subscriber_ = rospy.Subscriber('/gps', GPS, self.gpsCallback, queue_size=10)
-        self.gps_subscriber_ = rospy.Subscriber('/state', State, self.gpsCallback, queue_size=10)
+        self.gps_subscriber_ = rospy.Subscriber('/gps', GPS, self.gpsCallback, queue_size=10)
+        # self.gps_subscriber_ = rospy.Subscriber('/state', State, self.gpsCallback, queue_size=10)
         self.gps_msg_ = incoming_gps()
 
         # imaging ingestion setup:
@@ -77,24 +77,24 @@ class RosImagingHandler:
 
         self.geod = Geodesic.WGS84
 
-    def gpsCallback(self, stateMsg): # originally had 'msg', see lines 52, 92
+    def gpsCallback(self, msg): # changed to  had 'stateMsg', see lines 52, 92
         """
         Ros subscriber callback. Subscribes to the inertial_sense GPS msg.
         Get the lla values from the GPS message and then pass them to the DAO so 
         they can be inserted into the database
         """
-        # if msg.fix_type == GPS.GPS_STATUS_FIX_TYPE_NO_FIX or msg.num_sat == 0:
-        #     # dont insert if we dont have a gps fix yet
-        #     return
+        if msg.fix_type == GPS.GPS_STATUS_FIX_TYPE_NO_FIX or msg.num_sat == 0:
+            # dont insert if we dont have a gps fix yet
+            return
         '''TODO Figure out how to replicate the above ^'''
 
-        '''
-        TODO: Evaluate and Update
+        
+        # TODO: Evaluate and Update
         self.gps_msg_.time_stamp = msg.header.stamp.to_sec()
         self.gps_msg_.lat  = msg.latitude
         self.gps_msg_.lon  = msg.longitude
         self.gps_msg_.alt  = msg.altitude
-        '''
+        
         '''
             Testing - Feb 2020:
             Goal:       Pull GPS data from state, rather than GPS, as state is more accurate due to filtering
@@ -107,17 +107,17 @@ class RosImagingHandler:
                         it did fluctuate (never surpassing 0.1 %). Overall, we believe the benefits will outweigh the error
         '''
         ### New stuff starts here
-        north_dist = stateMsg.position[0]
-        east_dist = stateMsg.position[1]
-        estimated_azimuth = math.degrees(math.atan2(east_dist, north_dist))
-        estimated_total_distance = math.sqrt( (north_dist**2) + (east_dist**2) )
-            # Assumes we resolved the state initial lat/lon problem 
-        estimated_mav_location = self.geod.Direct(stateMsg.initial_lat, stateMsg.initial_lon, estimated_azimuth, estimated_total_distance, Geodesic.STANDARD)
+        # north_dist = stateMsg.position[0]
+        # east_dist = stateMsg.position[1]
+        # estimated_azimuth = math.degrees(math.atan2(east_dist, north_dist))
+        # estimated_total_distance = math.sqrt( (north_dist**2) + (east_dist**2) )
+        #     # Assumes we resolved the state initial lat/lon problem 
+        # estimated_mav_location = self.geod.Direct(stateMsg.initial_lat, stateMsg.initial_lon, estimated_azimuth, estimated_total_distance, Geodesic.STANDARD)
 
-        self.gps_msg_.time_stamp = stateMsg.header.stamp.to_sec()
-        self.gps_msg_.lat = estimated_mav_location['lat2']
-        self.gps_msg_.lon = estimated_mav_location['lon2']
-        self.gps_msg_.alt = stateMsg.initial_alt - stateMsg.position[2]
+        # self.gps_msg_.time_stamp = stateMsg.header.stamp.to_sec()
+        # self.gps_msg_.lat = estimated_mav_location['lat2']
+        # self.gps_msg_.lon = estimated_mav_location['lon2']
+        # self.gps_msg_.alt = stateMsg.initial_alt - stateMsg.position[2]
 	    ### ... and it ends here
 
 
