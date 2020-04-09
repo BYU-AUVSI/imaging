@@ -46,7 +46,8 @@ class GeolocationThread(threading.Thread):
             print("Failed to find state measurement close to raw timestamp {}!".format(rawImg.time_stamp))
             return None
 
-        lat, lon = geolocator.calculate_geolocation(gpsRaw.lat, gpsRaw.lon, gpsRaw.alt, stateRaw.roll, stateRaw.pitch, stateRaw.yaw, croppedImg.crop_coordinate_tl.x, croppedImg.crop_coordinate_tl.y, croppedImg.crop_coordinate_br.x, croppedImg.crop_coordinate_br.y)
+        # lat, lon = geolocator.calculate_geolocation(gpsRaw.lat, gpsRaw.lon, gpsRaw.alt, stateRaw.roll, stateRaw.pitch, stateRaw.yaw, croppedImg.crop_coordinate_tl.x, croppedImg.crop_coordinate_tl.y, croppedImg.crop_coordinate_br.x, croppedImg.crop_coordinate_br.y)
+        lat, lon = geolocator.calculate_geolocation(gpsRaw.lat, gpsRaw.lon, -stateRaw.position[2], stateRaw.roll, stateRaw.pitch, stateRaw.yaw, croppedImg.crop_coordinate_tl.x, croppedImg.crop_coordinate_tl.y, croppedImg.crop_coordinate_br.x, croppedImg.crop_coordinate_br.y)
 
         return {'latitude': lat, 'longitude': lon}
 
