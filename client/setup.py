@@ -28,7 +28,7 @@ setuptools.setup(
      author="BYU AUVSI Team",
      author_email="tylerm15@gmail.com",
      description="Imaging Client GUI for manual classification",
-     install_requires=['requests==2.20.1', 'pillow==5.3.0', 'opencv-python==3.4.2.*', 'ttkthemes==2.2.0', 'imutils==0.5.2'],
+     install_requires=['requests==2.20.1', 'pillow==9.3.0', 'opencv-python==3.4.2.*', 'ttkthemes==2.2.0', 'imutils==0.5.2'],
      long_description=long_description,
      long_description_content_type="text/markdown",
      packages=pkgs,
